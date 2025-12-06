@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { openai, OPENAI_MODELS } from "@/lib/openai/client";
 import { ConnectionInsight } from "@/types";
+import { getCache, setCache, getDayKey } from "@/lib/cache";
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,7 +21,7 @@ export async function POST(req: NextRequest) {
 
     // Parse request body
     const body = await req.json();
-    const { connectionId } = body;
+    const { connectionId, timeframe } = body;
 
     if (!connectionId) {
       return NextResponse.json(
@@ -28,6 +29,9 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Default timeframe to "today" if not specified
+    const requestTimeframe = timeframe || "today";
 
     // Load user's profile
     const { data: profile, error: profileError } = await supabase
@@ -103,6 +107,23 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // ========================================
+    // CACHING LAYER
+    // ========================================
+
+    // Connection insights refresh at the viewer's (profile's) midnight
+    const periodKey = getDayKey(profile.timezone);
+    const cacheKey = `connectionInsight:v1:${user.id}:${connectionId}:${requestTimeframe}:${periodKey}`;
+
+    // Check cache
+    const cachedInsight = await getCache<ConnectionInsight>(cacheKey);
+    if (cachedInsight) {
+      console.log(`[ConnectionInsight] Cache hit for ${cacheKey}`);
+      return NextResponse.json(cachedInsight);
+    }
+
+    console.log(`[ConnectionInsight] Cache miss for ${cacheKey}, generating fresh insight...`);
+
     // Construct OpenAI prompt
     const systemPrompt = `You are a compassionate relationship and connection guide for Solara Insights, a sanctuary of calm, emotionally intelligent guidance.
 
@@ -166,6 +187,9 @@ Write in a warm, gentle tone. Focus on meaning and practical insight, not techni
       console.error("Failed to parse OpenAI response:", responseContent);
       throw new Error("Invalid response format from AI");
     }
+
+    // Cache the connection insight (TTL: 24 hours)
+    await setCache(cacheKey, insight, 86400);
 
     // Return the connection insight
     return NextResponse.json(insight);

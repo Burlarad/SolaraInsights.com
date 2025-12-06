@@ -70,6 +70,26 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         timezone,
         zodiac_sign: null,
         language: "en",
+
+        // Onboarding defaults
+        is_onboarded: false,
+        onboarding_started_at: null,
+        onboarding_completed_at: null,
+
+        // Membership defaults
+        membership_plan: "none",
+        is_comped: false,
+        role: "user",
+        stripe_customer_id: null,
+        stripe_subscription_id: null,
+        subscription_status: null,
+        subscription_start_date: null,
+        subscription_end_date: null,
+
+        // Charity tracking defaults
+        location_for_charity: null,
+        latitude: null,
+        longitude: null,
       };
 
       const { data: createdProfile, error: createError } = await supabase

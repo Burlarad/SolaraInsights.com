@@ -22,10 +22,13 @@ export function ZodiacGrid() {
     setError(null);
 
     try {
+      // Get user's timezone for cache key
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
       const response = await fetch("/api/public-horoscope", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sign, timeframe: timeframeValue }),
+        body: JSON.stringify({ sign, timeframe: timeframeValue, timezone }),
       });
 
       if (!response.ok) {

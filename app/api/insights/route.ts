@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { openai, OPENAI_MODELS } from "@/lib/openai/client";
 import { InsightsRequest, SanctuaryInsight } from "@/types";
+import { getTarotCardNames } from "@/lib/tarot";
+import { getRuneNames } from "@/lib/runes";
+import { getCache, setCache, getDayKey, getWeekKey, getMonthKey, getYearKey } from "@/lib/cache";
 
 export async function POST(req: NextRequest) {
   try {
@@ -60,6 +63,45 @@ export async function POST(req: NextRequest) {
       .limit(1)
       .maybeSingle();
 
+    // ========================================
+    // CACHING LAYER
+    // ========================================
+
+    // Compute period key based on user's local timezone
+    let periodKey: string;
+    switch (timeframe) {
+      case "today":
+        periodKey = getDayKey(profile.timezone);
+        break;
+      case "week":
+        periodKey = getWeekKey(profile.timezone);
+        break;
+      case "month":
+        periodKey = getMonthKey(profile.timezone);
+        break;
+      case "year":
+        periodKey = getYearKey(profile.timezone);
+        break;
+      default:
+        periodKey = getDayKey(profile.timezone);
+    }
+
+    // Build cache key
+    const cacheKey = `insight:v1:${user.id}:${timeframe}:${periodKey}`;
+
+    // Check cache
+    const cachedInsight = await getCache<SanctuaryInsight>(cacheKey);
+    if (cachedInsight) {
+      console.log(`[Insights] Cache hit for ${cacheKey}`);
+      return NextResponse.json(cachedInsight);
+    }
+
+    console.log(`[Insights] Cache miss for ${cacheKey}, generating fresh insight...`);
+
+    // TODO: Future enhancement - load recent journal entries for this user
+    // and summarize "themes" with OpenAI to feed into the insights prompt
+    // for Ayren-style emotional intelligence coaching.
+
     // Construct the OpenAI prompt
     const systemPrompt = `You are a compassionate astrology guide for Solara Insights, a sanctuary of calm, emotionally intelligent guidance.
 
@@ -71,6 +113,10 @@ Core principles:
 - Focus on emotional intelligence and practical wisdom
 
 You must respond with ONLY valid JSON matching this exact structure. No additional text, no markdown, no explanations—just the JSON object.`;
+
+    // Get tarot card and rune names for prompt constraints
+    const tarotCardNames = getTarotCardNames();
+    const runeNames = getRuneNames();
 
     const userPrompt = `Generate ${timeframe} insights for ${profile.preferred_name || profile.full_name || "this person"}.
 
@@ -90,6 +136,20 @@ ${socialSummary?.summary ? `Social context (optional, do not mention platforms d
 ${socialSummary.summary}
 
 If this block is empty or missing, ignore it. Use it subtly to enhance your understanding of their emotional tone and expression patterns.` : ""}
+
+IMPORTANT CONSTRAINTS:
+
+For the tarot card:
+- You MUST choose exactly one cardName from this list: ${tarotCardNames.join(", ")}.
+- Do NOT invent card names outside this list.
+- Do NOT claim you are literally drawing from a physical deck.
+- Treat the card as a symbolic archetype that fits this person's current energy.
+
+For the rune:
+- You MUST choose exactly one name from this list: ${runeNames.join(", ")}.
+- Do NOT invent new rune names.
+- Do NOT claim you are physically pulling a rune.
+- Present it as a symbolic archetype.
 
 Return a JSON object with this structure:
 {
@@ -151,6 +211,9 @@ Return a JSON object with this structure:
       console.error("Failed to parse OpenAI response:", responseContent);
       throw new Error("Invalid response format from AI");
     }
+
+    // Cache the fresh insight (TTL: 24 hours)
+    await setCache(cacheKey, insight, 86400);
 
     // Return the insight
     return NextResponse.json(insight);

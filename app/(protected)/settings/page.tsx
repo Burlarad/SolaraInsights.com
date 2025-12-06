@@ -404,25 +404,26 @@ export default function SettingsPage() {
             </div>
           </section>
 
-          {/* Social Personalization */}
+          {/* Social Insights / Social Personalization */}
           <section className="space-y-4 pt-8 border-t border-border-subtle">
             <h2 className="text-2xl font-semibold text-accent-gold">
-              Social personalization
+              Social Insights
             </h2>
             <p className="text-sm text-accent-ink/60 leading-relaxed">
-              If you choose, Solara can gently read patterns from your connected social
-              accounts (starting with Facebook) to better understand your emotional tone
-              and daily rhythms. We will never post for you.
+              Social insights can use your connected accounts to improve personalization
+              in your Sanctuary. If you choose, Solara can gently read patterns from your
+              connected social accounts to better understand your emotional tone and daily
+              rhythms. We will never post for you.
             </p>
 
             <div className="space-y-4">
               {/* Facebook connection */}
               <Card className="border-border-subtle">
-                <CardContent className="p-4">
+                <CardContent className="p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-xl">
-                        f
+                      <div className="w-10 h-10 rounded-full bg-[#1877F2] flex items-center justify-center text-white font-semibold">
+                        F
                       </div>
                       <div>
                         <p className="text-sm font-medium">Facebook</p>
@@ -440,7 +441,80 @@ export default function SettingsPage() {
                       size="sm"
                       onClick={handleConnectFacebook}
                     >
-                      {facebookIdentity ? "Reconnect" : "Connect Facebook"}
+                      {facebookIdentity ? "Reconnect" : "Connect"}
+                    </Button>
+                  </div>
+
+                  {facebookIdentity && (
+                    <div className="flex items-center justify-between pl-13">
+                      <span className="text-sm text-accent-ink/80">
+                        Use to improve experience
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-accent-ink/60">ON</span>
+                        {/* TODO: Wire this to actual preference in profile */}
+                        <div className="w-10 h-6 bg-accent-gold rounded-full flex items-center px-1">
+                          <div className="w-4 h-4 bg-white rounded-full ml-auto"></div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Placeholder for other social providers */}
+              <Card className="border-border-subtle opacity-50">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white font-semibold">
+                        T
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">TikTok</p>
+                        <p className="text-xs text-accent-ink/60">Coming soon</p>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm" disabled>
+                      Coming Soon
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-border-subtle opacity-50">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white font-semibold">
+                        X
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">X (Twitter)</p>
+                        <p className="text-xs text-accent-ink/60">Coming soon</p>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm" disabled>
+                      Coming Soon
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-border-subtle opacity-50">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-[#FF4500] flex items-center justify-center text-white font-semibold">
+                        R
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Reddit</p>
+                        <p className="text-xs text-accent-ink/60">Coming soon</p>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm" disabled>
+                      Coming Soon
                     </Button>
                   </div>
                 </CardContent>

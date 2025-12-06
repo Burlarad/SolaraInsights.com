@@ -71,17 +71,72 @@ export default function SignInPage() {
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl text-center">Welcome back</CardTitle>
         <p className="text-center text-sm text-accent-ink/60">
-          Enter your email to access your sanctuary
+          Sign in to access your sanctuary
         </p>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="p-3 rounded-lg bg-danger-soft/20 border border-danger-soft text-sm text-accent-ink">
-              {error}
-            </div>
-          )}
+        {error && (
+          <div className="mb-4 p-3 rounded-lg bg-danger-soft/20 border border-danger-soft text-sm text-accent-ink">
+            {error}
+          </div>
+        )}
 
+        {/* Social sign-in options */}
+        <div className="space-y-3 mb-6">
+          <p className="text-center text-sm text-accent-ink/60">Sign in with</p>
+          <div className="flex items-center justify-center gap-3">
+            {/* Facebook - Wired */}
+            <button
+              type="button"
+              onClick={handleFacebookSignIn}
+              className="w-12 h-12 rounded-full bg-[#1877F2] hover:bg-[#166FE5] transition-colors flex items-center justify-center text-white font-semibold"
+              title="Sign in with Facebook"
+            >
+              F
+            </button>
+
+            {/* TikTok - Stub (TODO) */}
+            <button
+              type="button"
+              onClick={() => setError("TikTok sign-in coming soon")}
+              className="w-12 h-12 rounded-full bg-black hover:bg-gray-800 transition-colors flex items-center justify-center text-white font-semibold"
+              title="Sign in with TikTok (Coming Soon)"
+            >
+              T
+            </button>
+
+            {/* X/Twitter - Stub (TODO) */}
+            <button
+              type="button"
+              onClick={() => setError("X sign-in coming soon")}
+              className="w-12 h-12 rounded-full bg-black hover:bg-gray-800 transition-colors flex items-center justify-center text-white font-semibold"
+              title="Sign in with X (Coming Soon)"
+            >
+              X
+            </button>
+
+            {/* Reddit - Stub (TODO) */}
+            <button
+              type="button"
+              onClick={() => setError("Reddit sign-in coming soon")}
+              className="w-12 h-12 rounded-full bg-[#FF4500] hover:bg-[#E63E00] transition-colors flex items-center justify-center text-white font-semibold"
+              title="Sign in with Reddit (Coming Soon)"
+            >
+              R
+            </button>
+          </div>
+        </div>
+
+        <div className="my-6 flex items-center">
+          <div className="flex-1 border-t border-border-subtle"></div>
+          <span className="px-4 text-xs text-accent-ink/40 uppercase">
+            Or sign in with email
+          </span>
+          <div className="flex-1 border-t border-border-subtle"></div>
+        </div>
+
+        {/* Email/password form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -123,25 +178,10 @@ export default function SignInPage() {
           </Button>
         </form>
 
-        <div className="my-6 flex items-center">
-          <div className="flex-1 border-t border-border-subtle"></div>
-          <span className="px-4 text-xs text-accent-ink/40 uppercase">or</span>
-          <div className="flex-1 border-t border-border-subtle"></div>
-        </div>
-
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full"
-          onClick={handleFacebookSignIn}
-        >
-          Continue with Facebook
-        </Button>
-
         <div className="mt-6 text-center text-sm">
           <span className="text-accent-ink/60">Don&apos;t have an account? </span>
-          <Link href="/sign-up" className="text-accent-gold hover:underline">
-            Sign up
+          <Link href="/join" className="text-accent-gold hover:underline">
+            Create account
           </Link>
         </div>
       </CardContent>

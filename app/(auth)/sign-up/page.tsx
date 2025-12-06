@@ -51,9 +51,8 @@ export default function SignUpPage() {
       }
 
       if (data.user) {
-        // On success, redirect to sanctuary
-        // Email verification is handled separately via Supabase settings
-        router.push("/sanctuary");
+        // On success, redirect to join to select a plan
+        router.push("/join");
         router.refresh();
       }
     } catch (err) {
@@ -69,7 +68,7 @@ export default function SignUpPage() {
       await supabase.auth.signInWithOAuth({
         provider: "facebook",
         options: {
-          redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/sanctuary`,
+          redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/join`,
         },
       });
     } catch (err) {

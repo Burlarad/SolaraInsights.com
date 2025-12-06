@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { openai, OPENAI_MODELS } from "@/lib/openai/client";
 import { FullBirthChartInsight } from "@/types";
+import { getCache, setCache } from "@/lib/cache";
+import { createHash } from "crypto";
 
 export async function POST(req: NextRequest) {
   try {
@@ -63,6 +65,24 @@ export async function POST(req: NextRequest) {
 
     // Build location string
     const locationString = `${profile.birth_city}, ${profile.birth_region}, ${profile.birth_country}`;
+
+    // ========================================
+    // CACHING LAYER
+    // ========================================
+
+    // Create a signature of birth details to use as cache key
+    const birthSignature = `${profile.birth_date}|${profile.birth_time || "unknown"}|${profile.birth_city}|${profile.birth_region}|${profile.birth_country}|${profile.timezone}`;
+    const hash = createHash("sha256").update(birthSignature).digest("hex").slice(0, 16);
+    const cacheKey = `birthChart:v1:${user.id}:${hash}`;
+
+    // Check cache
+    const cachedChart = await getCache<FullBirthChartInsight>(cacheKey);
+    if (cachedChart) {
+      console.log(`[BirthChart] Cache hit for ${cacheKey}`);
+      return NextResponse.json(cachedChart);
+    }
+
+    console.log(`[BirthChart] Cache miss for ${cacheKey}, generating fresh birth chart...`);
 
     // Construct the OpenAI prompt for a full birth chart
     const systemPrompt = `You are a compassionate astrologer for Solara Insights.
@@ -175,6 +195,9 @@ Focus on:
       console.error("Failed to parse OpenAI response:", responseContent);
       throw new Error("Invalid response format from AI");
     }
+
+    // Cache the birth chart (TTL: 30 days - birth charts are stable unless birth data changes)
+    await setCache(cacheKey, birthChart, 60 * 60 * 24 * 30);
 
     // Return the full birth chart insight
     return NextResponse.json(birthChart);

@@ -17,6 +17,26 @@ export interface Profile {
   language: string;
   created_at: string;
   updated_at: string;
+
+  // Onboarding
+  is_onboarded: boolean;
+  onboarding_started_at: string | null;
+  onboarding_completed_at: string | null;
+
+  // Stripe / Membership
+  membership_plan: "none" | "individual" | "family";
+  is_comped: boolean;
+  role: "user" | "admin";
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  subscription_status: "active" | "canceled" | "past_due" | "trialing" | null;
+  subscription_start_date: string | null;
+  subscription_end_date: string | null;
+
+  // Charity tracking (for future)
+  location_for_charity: string | null;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 export interface ProfileUpdate {
@@ -46,6 +66,7 @@ export interface InsightsRequest {
 export interface PublicHoroscopeRequest {
   sign: string; // "Aries", "Taurus", etc.
   timeframe: "today" | "week" | "month";
+  timezone: string; // IANA timezone, e.g., "America/New_York"
 }
 
 // ============================================================================

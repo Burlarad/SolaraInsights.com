@@ -10,6 +10,8 @@ import { TimeframeToggle } from "@/components/sanctuary/TimeframeToggle";
 import { GreetingCard } from "@/components/sanctuary/GreetingCard";
 import { useSettings } from "@/providers/SettingsProvider";
 import { SanctuaryInsight, Timeframe } from "@/types";
+import { findTarotCard } from "@/lib/tarot";
+import { findRune } from "@/lib/runes";
 
 export default function SanctuaryInsightsPage() {
   const router = useRouter();
@@ -302,6 +304,22 @@ export default function SanctuaryInsightsPage() {
                 <p className="text-sm text-accent-ink/60">{insight.tarot.arcanaType}</p>
               </CardHeader>
               <CardContent className="space-y-3">
+                {(() => {
+                  const tarotCard = findTarotCard(insight.tarot.cardName);
+                  return tarotCard ? (
+                    <div className="mb-4 flex justify-center">
+                      <img
+                        src={tarotCard.imageUrl}
+                        alt={tarotCard.name}
+                        className="h-48 w-auto rounded-xl object-contain shadow-md"
+                      />
+                    </div>
+                  ) : (
+                    <p className="text-xs text-accent-ink/50 text-center mb-4">
+                      We had trouble matching this tarot card to our deck.
+                    </p>
+                  );
+                })()}
                 <p className="text-sm text-accent-ink/70 leading-relaxed">
                   {insight.tarot.summary}
                 </p>
@@ -321,6 +339,22 @@ export default function SanctuaryInsightsPage() {
                 <CardTitle>{insight.rune.name} • {insight.rune.keyword}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
+                {(() => {
+                  const rune = findRune(insight.rune.name);
+                  return rune ? (
+                    <div className="mb-4 flex justify-center">
+                      <img
+                        src={rune.imageUrl}
+                        alt={rune.name}
+                        className="h-32 w-auto object-contain"
+                      />
+                    </div>
+                  ) : (
+                    <p className="text-xs text-accent-ink/50 text-center mb-4">
+                      We had trouble matching this rune to our collection.
+                    </p>
+                  );
+                })()}
                 <p className="text-sm text-accent-ink/70 leading-relaxed">
                   {insight.rune.meaning}
                 </p>
