@@ -87,27 +87,53 @@ export async function POST(req: NextRequest) {
     // Construct the OpenAI prompt for a full birth chart
     const systemPrompt = `You are a compassionate astrologer for Solara Insights.
 
+ASTROLOGICAL SYSTEM TO USE (THIS IS REQUIRED, DO NOT IGNORE):
+
+- Zodiac: Western tropical (NOT sidereal). Aries begins at 0° on the March equinox.
+- House system: Placidus (time-sensitive, quadrant-based).
+- Aspects: Use major aspects only:
+  - conjunction, opposition, trine, square, sextile.
+- Aspect orbs (approximate):
+  - conjunction: up to ~8°
+  - opposition: up to ~8°
+  - trine: up to ~6°
+  - square: up to ~7°
+  - sextile: up to ~6°.
+- Birthplace matters: City, region/state, and country are ALL critically important and must be used together to locate the correct place on Earth for house and rising sign calculations. Do not ignore any part of the location.
+- Rising sign (Ascendant):
+  - When birth time is known, you MUST compute the Ascendant from the local birth time, birthplace (city + region/state + country), and timezone using Western tropical + Placidus.
+  - The Ascendant's sign is the Rising sign and must be consistent with the chart's time and location.
+  - The Rising sign is one of the three most important placements (Sun, Moon, Rising) and must be accurate.
+- Unknown birth time:
+  - Use a solar chart approach (Sun on the Ascendant, equal houses from the Sun).
+  - Be explicit that houses and angles are approximate/less precise when time is unknown.
+
 Core principles:
-- Always uplifting, never deterministic or fear-based
-- Emphasize free will, growth, and agency
-- Use plain, dyslexia-friendly language with short paragraphs (2-4 sentences max per description)
-- Do NOT give medical, legal, or financial advice
-- Do NOT output technical degrees or ephemeris numbers—just conceptual, meaningful placements
-- Focus on emotional intelligence and practical wisdom
+- Always uplifting, never deterministic or fear-based.
+- Emphasize free will, growth, and agency.
+- Use plain, dyslexia-friendly language with short paragraphs (2–4 sentences max per description).
+- Do NOT give medical, legal, or financial advice.
+- Do NOT output technical degrees or ephemeris numbers—just conceptual, meaningful placements.
+- Focus on emotional intelligence and practical wisdom.
 
 You must respond with ONLY valid JSON matching the FullBirthChartInsight structure. No additional text, no markdown, no explanations—just the JSON object.`;
 
     const userPrompt = `Generate a complete natal birth chart for ${profile.preferred_name || profile.full_name || "this person"}.
 
-Birth details:
-- Date: ${profile.birth_date}
-- Time: ${profile.birth_time || "unknown birth time; use solar chart approach"}
-- Location: ${locationString}
-- Timezone: ${profile.timezone}
+Birth details (ALL of these are critical for accurate Sun, Moon, and Rising calculations):
+- Birth date: ${profile.birth_date} (YYYY-MM-DD format)
+- Local birth time: ${profile.birth_time || "unknown birth time; use solar chart approach"} (this is the time at the birthplace in the local timezone, NOT UTC)
+- Birthplace city: ${profile.birth_city}
+- Birthplace region/state: ${profile.birth_region}
+- Birthplace country: ${profile.birth_country}
+- Full location string: ${locationString}
+- Timezone at birth: ${profile.timezone} (IANA timezone for the birthplace at the time of birth)
+
+IMPORTANT: You must use the COMPLETE birthplace (city + region/state + country) to determine the correct geographic location on Earth. This is essential for calculating the Rising sign (Ascendant) and house cusps accurately using the Placidus system.
 
 ${
   !profile.birth_time
-    ? "NOTE: Birth time is unknown, so use a solar chart approach (houses and angles will be less precise)."
+    ? "NOTE: Birth time is unknown, so use a solar chart approach (Sun on the Ascendant, equal houses from the Sun). Houses and angles will be approximate/less precise. Omit house placements for planets and note the limitation in angle descriptions."
     : ""
 }
 
@@ -122,8 +148,11 @@ Return a JSON object with this EXACT structure:
   },
   "planets": [
     // Array of 12 objects for: Sun, Moon, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto, North Node, Chiron
+    // Sun and Moon MUST always be included with accurate signs calculated using Western tropical zodiac from the birth date.
     // Each object: { "name": "Sun", "sign": "Taurus", "house": "10th house", "description": "2-4 sentences about this placement" }
-    // If birth time unknown, omit "house" field for each planet
+    // If birth time is known, include "house" field for each planet (calculated using Placidus houses).
+    // If birth time unknown, omit "house" field for each planet.
+    // The Sun and Moon are two of the three most important placements (along with Rising/Ascendant) and must be computed correctly.
   ],
   "houses": [
     // Array of 12 objects for all houses (1st through 12th)
@@ -131,6 +160,9 @@ Return a JSON object with this EXACT structure:
     // If birth time unknown, provide general themes but note they are less precise
   ],
   "angles": {
+    // The ascendant.sign is the Rising sign and MUST be computed from the birth date, local birth time, birthplace (city + region/state + country), and timezone using the Western tropical zodiac and Placidus house system.
+    // The Rising sign (Ascendant) is one of the three most important placements (Sun, Moon, Rising) and must be accurate.
+    // When birth time is known, calculate the exact Ascendant sign based on the time and location. When birth time is unknown, use the solar chart approach (Sun's sign = Ascendant sign).
     "ascendant": { "sign": "Gemini", "description": "2-3 sentences about what this rising sign means for their outward expression" },
     "midheaven": { "sign": "Aquarius", "description": "2-3 sentences about career/public life" },
     "descendant": { "sign": "Sagittarius", "description": "2-3 sentences about partnership approach" },
