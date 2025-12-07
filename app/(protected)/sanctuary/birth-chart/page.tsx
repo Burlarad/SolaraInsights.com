@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { SanctuaryTabs } from "@/components/sanctuary/SanctuaryTabs";
 import { useSettings } from "@/providers/SettingsProvider";
 import { FullBirthChartInsight } from "@/types";
+import { formatDateForDisplay, formatTimeForDisplay } from "@/lib/datetime";
 
 export default function BirthChartPage() {
   const router = useRouter();
@@ -186,17 +187,13 @@ export default function BirthChartPage() {
                   <div>
                     <span className="text-accent-ink/50">Birth date:</span>{" "}
                     <span className="text-accent-ink font-medium">
-                      {new Date(insight.blueprint.birthDate).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
+                      {formatDateForDisplay(insight.blueprint.birthDate)}
                     </span>
                   </div>
                   <div>
                     <span className="text-accent-ink/50">Birth time:</span>{" "}
                     <span className="text-accent-ink font-medium">
-                      {insight.blueprint.birthTime || "Unknown"}
+                      {formatTimeForDisplay(insight.blueprint.birthTime)}
                     </span>
                   </div>
                   <div>

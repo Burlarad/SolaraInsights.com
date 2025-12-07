@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/shared/Chip";
 import { Connection, ConnectionInsight } from "@/types";
 import Link from "next/link";
+import { formatDateForDisplay } from "@/lib/datetime";
 
 export default function ConnectionsPage() {
   // Connections list state
@@ -245,7 +246,7 @@ export default function ConnectionsPage() {
                         </p>
                         {connection.birth_date && (
                           <p className="text-xs text-accent-ink/50 mt-1">
-                            Born {new Date(connection.birth_date).toLocaleDateString()}
+                            Born {formatDateForDisplay(connection.birth_date)}
                           </p>
                         )}
                       </div>

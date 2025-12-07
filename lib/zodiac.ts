@@ -6,9 +6,20 @@
 
 export function getZodiacSign(birthDate: string | Date): string | null {
   try {
-    const date = typeof birthDate === "string" ? new Date(birthDate) : birthDate;
-    const month = date.getMonth() + 1; // 1-12
-    const day = date.getDate();
+    let month: number;
+    let day: number;
+
+    if (typeof birthDate === "string") {
+      // Parse ISO date string directly to avoid timezone conversion
+      const [year, monthStr, dayStr] = birthDate.split("-").map(Number);
+      if (!year || !monthStr || !dayStr) return null;
+      month = monthStr;
+      day = dayStr;
+    } else {
+      // Date object - use getMonth/getDate
+      month = birthDate.getMonth() + 1; // 1-12
+      day = birthDate.getDate();
+    }
 
     if (
       (month === 3 && day >= 21) ||
