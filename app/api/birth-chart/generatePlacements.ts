@@ -122,26 +122,72 @@ export async function generateBirthChartPlacements(
     timezoneWasInferred = false;
   }
 
-  // System prompt: focused on placements math only
-  const systemPrompt = `You are an astrologer for Solara Insights.
+  // System prompt: focused on placements math only (GPT-5.1)
+  const systemPrompt = `You are the natal chart placements engine for Solara Insights.
 
-ASTROLOGICAL SYSTEM TO USE (THIS IS REQUIRED, DO NOT IGNORE):
+Your ONLY job is to compute *astrological placements* for a birth chart and return them as a JSON object that matches the BirthChartPlacements schema. You must NOT write interpretations, advice, or commentary. You must NOT output markdown or code fences.
 
-- Zodiac: Western tropical (NOT sidereal). Aries begins at 0° on the March equinox.
+ASTROLOGY SYSTEM (REQUIRED):
+- Zodiac: Western tropical (NOT sidereal).
 - House system: Placidus (time-sensitive, quadrant-based).
-- Aspects: Use major aspects only: conjunction, opposition, trine, square, sextile.
-- Aspect orbs (approximate): conjunction ±8°, opposition ±8°, trine ±6°, square ±7°, sextile ±6°.
-- Birthplace matters: City, region/state, and country are ALL critically important and must be used together to locate the correct place on Earth for house and rising sign calculations.
-- Rising sign (Ascendant):
-  - When birth time is known, you MUST compute the Ascendant from the local birth time, birthplace (city + region/state + country), and timezone using Western tropical + Placidus.
-  - The Ascendant's sign is the Rising sign and must be consistent with the chart's time and location.
-  - The Rising sign is one of the three most important placements (Sun, Moon, Rising) and must be accurate.
-- Unknown birth time:
-  - Use a solar chart approach (Sun on the Ascendant, equal houses from the Sun).
-  - Be explicit in your reasoning that houses and angles are approximate when time is unknown.
+- Angles: Ascendant is the 1st house cusp; Midheaven is the 10th house cusp.
+- Aspects: Optional. If included, use only major aspects: conjunction, opposition, trine, square, sextile.
 
-You are responsible ONLY for computing placements. Do not write long descriptions or interpretations.
-You must respond with ONLY valid JSON matching the BirthChartPlacements structure. No additional text, no markdown, no explanations—just the JSON object.`;
+INPUT:
+- You receive a single user message with:
+  - birth_date: YYYY-MM-DD
+  - birth_time: HH:MM (local civil time at birthplace, NOT UTC)
+  - timezone: IANA timezone string (e.g. "America/New_York")
+  - birth_city, birth_region, birth_country
+  - A description of the expected BirthChartPlacements JSON structure.
+- Treat the input as accurate for Western tropical + Placidus calculations.
+
+OUTPUT CONTRACT (BirthChartPlacements):
+You MUST output a single JSON object with exactly these top-level keys:
+
+{
+  "system": "western_tropical_placidus",
+  "blueprint": {
+    "birthDate": "<YYYY-MM-DD>",
+    "birthTime": "<HH:MM or null>",
+    "birthLocation": "<City, Region, Country>",
+    "timezone": "<IANA timezone>",
+    "timezoneWasInferred": <true or false, if provided>
+  },
+  "planets": [
+    {
+      "name": "<PlanetName>",
+      "sign": "<SignName>",
+      "house": <1-12 or omitted if unknown>
+    }
+    // Include at least: Sun, Moon, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto, North Node, Chiron
+  ],
+  "houses": [
+    {
+      "house": <1-12>,
+      "signOnCusp": "<SignName>"
+    }
+  ],
+  "angles": {
+    "ascendant": { "sign": "<SignName>" },
+    "midheaven": { "sign": "<SignName>" },
+    "descendant": { "sign": "<SignName>" },
+    "ic": { "sign": "<SignName>" }
+  },
+  "aspects": [
+    {
+      "between": "<Planet A> <aspect> <Planet B>",
+      "type": "conjunction" | "opposition" | "trine" | "square" | "sextile"
+    }
+  ]
+}
+
+RULES:
+- Focus on assigning consistent signs and houses according to Western tropical + Placidus.
+- The Sun, Moon, and Ascendant are the three most important placements and should be computed carefully.
+- Do NOT invent extra top-level keys.
+- Do NOT include degrees, or any natural language explanations; only the JSON fields described above.
+- Do NOT output any text outside of the JSON object.`;
 
   // User prompt: just the birth data and JSON structure
   const userPrompt = `Compute the natal chart placements for this person using the system described above.
@@ -208,15 +254,16 @@ Sun, Moon, and Ascendant (Rising) MUST be computed correctly according to the We
   try {
     console.log(`[Placements] Generating placements for ${birthData.birth_date} at ${birthData.birth_time || "unknown time"}...`);
 
+    // GPT-5.1 reasoning parameter not yet in OpenAI SDK types, so we use type assertion
     const completion = await openai.chat.completions.create({
-      model: OPENAI_MODELS.placements,
+      model: OPENAI_MODELS.placements, // gpt-5.1
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
-      temperature: 0, // Deterministic for placements
+      reasoning: { effort: "low" }, // GPT-5.1 reasoning for stability (no temperature when using reasoning)
       response_format: { type: "json_object" },
-    });
+    } as any);
 
     const responseContent = completion.choices[0]?.message?.content;
 
