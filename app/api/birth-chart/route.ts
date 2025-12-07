@@ -4,6 +4,7 @@ import { openai, OPENAI_MODELS } from "@/lib/openai/client";
 import { FullBirthChartInsight } from "@/types";
 import { getCache, setCache } from "@/lib/cache";
 import { createHash } from "crypto";
+import { generateBirthChartPlacements } from "./generatePlacements";
 
 export async function POST(req: NextRequest) {
   try {
@@ -63,17 +64,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Build location string
-    const locationString = `${profile.birth_city}, ${profile.birth_region}, ${profile.birth_country}`;
-
     // ========================================
     // CACHING LAYER
     // ========================================
 
     // Create a signature of birth details to use as cache key
+    // v2_placements = two-step pipeline (placements first, then interpretation)
     const birthSignature = `${profile.birth_date}|${profile.birth_time || "unknown"}|${profile.birth_city}|${profile.birth_region}|${profile.birth_country}|${profile.timezone}`;
     const hash = createHash("sha256").update(birthSignature).digest("hex").slice(0, 16);
-    const cacheKey = `birthChart:v1:${user.id}:${hash}`;
+    const cacheKey = `birthChart:v2_placements:${user.id}:${hash}`;
 
     // Check cache
     const cachedChart = await getCache<FullBirthChartInsight>(cacheKey);
@@ -82,31 +81,40 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(cachedChart);
     }
 
-    console.log(`[BirthChart] Cache miss for ${cacheKey}, generating fresh birth chart...`);
+    console.log(`[BirthChart] Cache miss for ${cacheKey}, generating fresh birth chart using two-step pipeline...`);
 
-    // Construct the OpenAI prompt for a full birth chart
+    // ========================================
+    // STEP A: GENERATE PLACEMENTS (RAW ASTRO MATH)
+    // ========================================
+
+    const placements = await generateBirthChartPlacements({
+      birth_date: profile.birth_date,
+      birth_time: profile.birth_time,
+      birth_city: profile.birth_city,
+      birth_region: profile.birth_region,
+      birth_country: profile.birth_country,
+      timezone: profile.timezone,
+      preferred_name: profile.preferred_name,
+      full_name: profile.full_name,
+    });
+
+    console.log(`[BirthChart] Step A complete. Placements: Sun=${placements.planets.find(p => p.name === "Sun")?.sign}, Moon=${placements.planets.find(p => p.name === "Moon")?.sign}, Rising=${placements.angles.ascendant.sign}`);
+
+    // ========================================
+    // STEP B: GENERATE INTERPRETATION FROM PLACEMENTS
+    // ========================================
+
+    // Construct the OpenAI prompt for interpretation (not re-computation)
     const systemPrompt = `You are a compassionate astrologer for Solara Insights.
 
-ASTROLOGICAL SYSTEM TO USE (THIS IS REQUIRED, DO NOT IGNORE):
+CRITICAL: You are given a complete set of natal chart placements that have already been computed using Western tropical zodiac and Placidus houses.
 
-- Zodiac: Western tropical (NOT sidereal). Aries begins at 0° on the March equinox.
-- House system: Placidus (time-sensitive, quadrant-based).
-- Aspects: Use major aspects only:
-  - conjunction, opposition, trine, square, sextile.
-- Aspect orbs (approximate):
-  - conjunction: up to ~8°
-  - opposition: up to ~8°
-  - trine: up to ~6°
-  - square: up to ~7°
-  - sextile: up to ~6°.
-- Birthplace matters: City, region/state, and country are ALL critically important and must be used together to locate the correct place on Earth for house and rising sign calculations. Do not ignore any part of the location.
-- Rising sign (Ascendant):
-  - When birth time is known, you MUST compute the Ascendant from the local birth time, birthplace (city + region/state + country), and timezone using Western tropical + Placidus.
-  - The Ascendant's sign is the Rising sign and must be consistent with the chart's time and location.
-  - The Rising sign is one of the three most important placements (Sun, Moon, Rising) and must be accurate.
-- Unknown birth time:
-  - Use a solar chart approach (Sun on the Ascendant, equal houses from the Sun).
-  - Be explicit that houses and angles are approximate/less precise when time is unknown.
+You MUST NOT recompute or change any placements, signs, houses, or aspects.
+You MUST NOT modify the Sun sign, Moon sign, Rising sign (Ascendant), or any other placement.
+
+Your ONLY job is to interpret the placements you are given and return a FullBirthChartInsight JSON object with descriptions, themes, and narratives.
+
+If you disagree with the placements, you must still treat them as authoritative and interpret them as given.
 
 Core principles:
 - Always uplifting, never deterministic or fear-based.
@@ -118,58 +126,46 @@ Core principles:
 
 You must respond with ONLY valid JSON matching the FullBirthChartInsight structure. No additional text, no markdown, no explanations—just the JSON object.`;
 
-    const userPrompt = `Generate a complete natal birth chart for ${profile.preferred_name || profile.full_name || "this person"}.
+    const userPrompt = `Using the following pre-computed natal chart placements, generate a complete birth chart interpretation for ${profile.preferred_name || profile.full_name || "this person"}.
 
-Birth details (ALL of these are critical for accurate Sun, Moon, and Rising calculations):
-- Birth date: ${profile.birth_date} (YYYY-MM-DD format)
-- Local birth time: ${profile.birth_time || "unknown birth time; use solar chart approach"} (this is the time at the birthplace in the local timezone, NOT UTC)
-- Birthplace city: ${profile.birth_city}
-- Birthplace region/state: ${profile.birth_region}
-- Birthplace country: ${profile.birth_country}
-- Full location string: ${locationString}
-- Timezone at birth: ${profile.timezone} (IANA timezone for the birthplace at the time of birth)
+CRITICAL: Do NOT change any placements. Use them EXACTLY as given below.
 
-IMPORTANT: You must use the COMPLETE birthplace (city + region/state + country) to determine the correct geographic location on Earth. This is essential for calculating the Rising sign (Ascendant) and house cusps accurately using the Placidus system.
+Pre-computed placements JSON (Western tropical zodiac + Placidus houses):
+${JSON.stringify(placements, null, 2)}
 
-${
-  !profile.birth_time
-    ? "NOTE: Birth time is unknown, so use a solar chart approach (Sun on the Ascendant, equal houses from the Sun). Houses and angles will be approximate/less precise. Omit house placements for planets and note the limitation in angle descriptions."
-    : ""
-}
-
-Return a JSON object with this EXACT structure:
+Return a JSON object with this EXACT structure (using the placements provided above):
 
 {
   "blueprint": {
-    "birthDate": "${profile.birth_date}",
-    "birthTime": ${profile.birth_time ? `"${profile.birth_time}"` : "null"},
-    "birthLocation": "${locationString}",
-    "timezone": "${profile.timezone}"
+    "birthDate": "${placements.blueprint.birthDate}",
+    "birthTime": ${placements.blueprint.birthTime ? `"${placements.blueprint.birthTime}"` : "null"},
+    "birthLocation": "${placements.blueprint.birthLocation}",
+    "timezone": "${placements.blueprint.timezone}"
   },
   "planets": [
     // Array of 12 objects for: Sun, Moon, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto, North Node, Chiron
-    // Sun and Moon MUST always be included with accurate signs calculated using Western tropical zodiac from the birth date.
-    // Each object: { "name": "Sun", "sign": "Taurus", "house": "10th house", "description": "2-4 sentences about this placement" }
-    // If birth time is known, include "house" field for each planet (calculated using Placidus houses).
-    // If birth time unknown, omit "house" field for each planet.
-    // The Sun and Moon are two of the three most important placements (along with Rising/Ascendant) and must be computed correctly.
+    // USE THE EXACT SIGNS AND HOUSES FROM THE PLACEMENTS JSON ABOVE. DO NOT RECOMPUTE.
+    // Each object: { "name": "Sun", "sign": "Taurus", "house": "10th house", "description": "2-4 sentences interpreting this placement" }
+    // Convert house numbers from placements (e.g., 10) to ordinal strings (e.g., "10th house")
+    // If house is not provided in placements, omit the "house" field
   ],
   "houses": [
     // Array of 12 objects for all houses (1st through 12th)
+    // USE THE EXACT SIGN ON CUSP FROM THE PLACEMENTS JSON ABOVE. DO NOT RECOMPUTE.
     // Each object: { "house": "1st", "signOnCusp": "Gemini", "themes": "1-2 sentences about key life themes for this house in THIS chart" }
-    // If birth time unknown, provide general themes but note they are less precise
+    // Convert house numbers from placements (e.g., 1) to ordinal strings (e.g., "1st")
   ],
   "angles": {
-    // The ascendant.sign is the Rising sign and MUST be computed from the birth date, local birth time, birthplace (city + region/state + country), and timezone using the Western tropical zodiac and Placidus house system.
-    // The Rising sign (Ascendant) is one of the three most important placements (Sun, Moon, Rising) and must be accurate.
-    // When birth time is known, calculate the exact Ascendant sign based on the time and location. When birth time is unknown, use the solar chart approach (Sun's sign = Ascendant sign).
-    "ascendant": { "sign": "Gemini", "description": "2-3 sentences about what this rising sign means for their outward expression" },
-    "midheaven": { "sign": "Aquarius", "description": "2-3 sentences about career/public life" },
-    "descendant": { "sign": "Sagittarius", "description": "2-3 sentences about partnership approach" },
-    "ic": { "sign": "Leo", "description": "2-3 sentences about roots and inner world" }
+    // USE THE EXACT SIGNS FROM THE PLACEMENTS JSON ABOVE. DO NOT RECOMPUTE.
+    // The ascendant.sign from placements is the Rising sign.
+    "ascendant": { "sign": "${placements.angles.ascendant.sign}", "description": "2-3 sentences about what this rising sign means for their outward expression" },
+    "midheaven": { "sign": "${placements.angles.midheaven.sign}", "description": "2-3 sentences about career/public life" },
+    "descendant": { "sign": "${placements.angles.descendant.sign}", "description": "2-3 sentences about partnership approach" },
+    "ic": { "sign": "${placements.angles.ic.sign}", "description": "2-3 sentences about roots and inner world" }
   },
   "aspects": [
-    // Array of 5-7 most important aspects (e.g., Sun square Moon, Venus trine Mars)
+    // Array of 5-7 aspects
+    // USE THE EXACT ASPECTS FROM THE PLACEMENTS JSON ABOVE. DO NOT RECOMPUTE OR ADD NEW ASPECTS.
     // Each object: { "between": "Sun square Moon", "type": "square", "impact": "2-3 sentences about the psychological meaning" }
   ],
   "patterns": {
@@ -197,21 +193,28 @@ Return a JSON object with this EXACT structure:
 }
 
 Focus on:
-- Providing a conceptual, meaningful chart (not technical calculations)
+- Interpreting the given placements (DO NOT change signs, houses, or aspects)
+- Providing a conceptual, meaningful interpretation (not technical recalculations)
 - Warm, non-fatalistic language
 - Actionable insights for growth and self-understanding
-- Integration of all chart elements into a coherent narrative`;
+- Integration of all chart elements into a coherent narrative
 
-    // Call OpenAI
+REMINDER: You are interpreting PRE-COMPUTED placements. The Sun sign, Moon sign, Rising sign, houses, and aspects are already determined. Your job is ONLY to write descriptions and interpretations.`;
+
+    // Call OpenAI for interpretation
+    console.log(`[BirthChart] Step B: Generating interpretation from placements...`);
+
     const completion = await openai.chat.completions.create({
       model: OPENAI_MODELS.insights,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
-      temperature: 0.7,
+      temperature: 0.7, // Higher temperature for creative interpretation
       response_format: { type: "json_object" },
     });
+
+    console.log(`[BirthChart] Step B complete. Interpretation generated.`);
 
     const responseContent = completion.choices[0]?.message?.content;
 

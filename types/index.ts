@@ -115,7 +115,108 @@ export interface BirthChartInsight {
 }
 
 // ============================================================================
-// FULL BIRTH CHART TYPES
+// BIRTH CHART PLACEMENTS (RAW ASTRO MATH - NO INTERPRETATION)
+// ============================================================================
+
+/**
+ * Valid zodiac signs in Western tropical astrology
+ */
+export type BirthChartSign =
+  | "Aries"
+  | "Taurus"
+  | "Gemini"
+  | "Cancer"
+  | "Leo"
+  | "Virgo"
+  | "Libra"
+  | "Scorpio"
+  | "Sagittarius"
+  | "Capricorn"
+  | "Aquarius"
+  | "Pisces";
+
+/**
+ * Valid planet names for birth chart
+ */
+export type BirthChartPlanetName =
+  | "Sun"
+  | "Moon"
+  | "Mercury"
+  | "Venus"
+  | "Mars"
+  | "Jupiter"
+  | "Saturn"
+  | "Uranus"
+  | "Neptune"
+  | "Pluto"
+  | "North Node"
+  | "Chiron";
+
+/**
+ * Valid aspect types (major aspects only)
+ */
+export type BirthChartAspectType =
+  | "conjunction"
+  | "opposition"
+  | "trine"
+  | "square"
+  | "sextile";
+
+/**
+ * Planet placement (no interpretation, just sign + optional house)
+ */
+export interface BirthChartPlanetPlacement {
+  name: BirthChartPlanetName;
+  sign: BirthChartSign;
+  house?: number; // 1-12 when time is known, omitted when unknown
+}
+
+/**
+ * House placement (cusp sign only, no themes)
+ */
+export interface BirthChartHousePlacement {
+  house: number; // 1-12
+  signOnCusp: BirthChartSign;
+}
+
+/**
+ * Angles placement (the 4 cardinal points)
+ */
+export interface BirthChartAnglesPlacement {
+  ascendant: { sign: BirthChartSign }; // Rising sign
+  midheaven: { sign: BirthChartSign }; // MC
+  descendant: { sign: BirthChartSign }; // Desc
+  ic: { sign: BirthChartSign }; // IC
+}
+
+/**
+ * Aspect placement (no interpretation, just the geometric relationship)
+ */
+export interface BirthChartAspectPlacement {
+  between: string; // e.g. "Sun square Moon"
+  type: BirthChartAspectType;
+}
+
+/**
+ * Complete placements-only structure (Step A output)
+ * This is the raw astro math with NO interpretations.
+ */
+export interface BirthChartPlacements {
+  system: "western_tropical_placidus"; // Fixed value for validation
+  blueprint: {
+    birthDate: string; // ISO date from profile
+    birthTime: string | null; // HH:MM or null if unknown
+    birthLocation: string; // "City, Region, Country"
+    timezone: string; // IANA timezone
+  };
+  planets: BirthChartPlanetPlacement[]; // Must include all 12 planets
+  houses: BirthChartHousePlacement[]; // All 12 houses (1-12)
+  angles: BirthChartAnglesPlacement; // Ascendant = Rising
+  aspects: BirthChartAspectPlacement[]; // 5-7 major aspects
+}
+
+// ============================================================================
+// FULL BIRTH CHART TYPES (WITH INTERPRETATION)
 // ============================================================================
 
 export interface BirthChartBlueprint {
