@@ -77,11 +77,17 @@ export async function POST(_req: NextRequest) {
     // Check cache
     const cachedChart = await getCache<FullBirthChartInsight>(cacheKey);
     if (cachedChart) {
-      console.log(`[BirthChart] Cache hit for ${cacheKey}`);
-      return NextResponse.json(cachedChart);
+      // Check if cached chart has UTC timezone - if so, treat as stale and regenerate
+      if (cachedChart.blueprint?.timezone === "UTC") {
+        console.log(`[BirthChart] Cached chart has UTC timezone; treating as stale and regenerating with timezone inference.`);
+        // Fall through to regeneration
+      } else {
+        console.log(`[BirthChart] Cache hit for ${cacheKey}`);
+        return NextResponse.json(cachedChart);
+      }
     }
 
-    console.log(`[BirthChart] Cache miss for ${cacheKey}, generating fresh birth chart using two-step pipeline...`);
+    console.log(`[BirthChart] ${cachedChart ? "Cache stale (UTC timezone)" : "Cache miss"} for ${cacheKey}, generating fresh birth chart using two-step pipeline...`);
 
     // ========================================
     // STEP A: GENERATE PLACEMENTS (RAW ASTRO MATH)
@@ -266,7 +272,12 @@ REMINDER: You are interpreting PRE-COMPUTED placements. The Sun sign, Moon sign,
       console.log(`[BirthChart] Timezone corrected to ${timezoneFromStepA}`);
     }
 
-    console.log(`[BirthChart] Guardrails passed: Sun=${sunFromStepB}, Moon=${moonFromStepB}, Rising=${risingFromStepB}, Timezone=${birthChart.blueprint.timezone}`);
+    // Preserve timezoneWasInferred flag from Step A
+    if (placements.blueprint.timezoneWasInferred !== undefined) {
+      birthChart.blueprint.timezoneWasInferred = placements.blueprint.timezoneWasInferred;
+    }
+
+    console.log(`[BirthChart] Guardrails passed: Sun=${sunFromStepB}, Moon=${moonFromStepB}, Rising=${risingFromStepB}, Timezone=${birthChart.blueprint.timezone}${birthChart.blueprint.timezoneWasInferred ? " (inferred)" : ""}`);
 
     // Cache the birth chart (TTL: 30 days - birth charts are stable unless birth data changes)
     await setCache(cacheKey, birthChart, 60 * 60 * 24 * 30);

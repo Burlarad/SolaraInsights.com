@@ -92,24 +92,35 @@ export async function generateBirthChartPlacements(
   // TIMEZONE COMPUTATION (civil timekeeping, not astrology)
   // ========================================
 
-  // If timezone is missing or clearly wrong (e.g., "UTC" for a US city),
-  // try to infer a better one from birthplace
-  let effectiveTimezone = birthData.timezone;
+  // Determine the best timezone to use for birth chart calculations
+  // Priority: 1) inferred from birthplace, 2) profile timezone (if not UTC), 3) UTC fallback
 
-  if ((!effectiveTimezone || effectiveTimezone === "UTC") &&
+  let blueprintTimezone: string;
+  let timezoneWasInferred = false;
+
+  // Attempt timezone inference if profile timezone is missing or is UTC
+  if ((!birthData.timezone || birthData.timezone === "UTC") &&
       birthData.birth_city && birthData.birth_country) {
+
     const inferred = inferTimezoneFromBirthplace(
       birthData.birth_city,
       birthData.birth_region,
       birthData.birth_country
     );
-    if (inferred) {
-      console.log(`[Placements] Inferred timezone ${inferred} from birthplace (was: ${birthData.timezone || "empty"})`);
-      effectiveTimezone = inferred;
-    }
-  }
 
-  const blueprintTimezone = effectiveTimezone || birthData.timezone || "UTC";
+    if (inferred) {
+      console.log(`[Placements] Inferred timezone ${inferred} from birthplace (profile had: ${birthData.timezone || "empty"})`);
+      blueprintTimezone = inferred;
+      timezoneWasInferred = true;
+    } else {
+      console.warn(`[Placements] WARNING: Could not infer timezone for birthplace "${birthData.birth_city}, ${birthData.birth_region}, ${birthData.birth_country}". Falling back to UTC.`);
+      blueprintTimezone = "UTC";
+    }
+  } else {
+    // Use profile timezone as-is (it's not empty and not UTC)
+    blueprintTimezone = birthData.timezone;
+    timezoneWasInferred = false;
+  }
 
   // System prompt: focused on placements math only
   const systemPrompt = `You are an astrologer for Solara Insights.
@@ -233,8 +244,9 @@ Sun, Moon, and Ascendant (Rising) MUST be computed correctly according to the We
     // ========================================
     // OpenAI should echo our timezone, but we enforce it to be certain
     placements.blueprint.timezone = blueprintTimezone;
+    placements.blueprint.timezoneWasInferred = timezoneWasInferred;
 
-    console.log(`[Placements] Successfully generated placements. Sun: ${placements.planets.find((p: any) => p.name === "Sun")?.sign}, Moon: ${placements.planets.find((p: any) => p.name === "Moon")?.sign}, Rising: ${placements.angles.ascendant.sign}, Timezone: ${blueprintTimezone}`);
+    console.log(`[Placements] Successfully generated placements. Sun: ${placements.planets.find((p: any) => p.name === "Sun")?.sign}, Moon: ${placements.planets.find((p: any) => p.name === "Moon")?.sign}, Rising: ${placements.angles.ascendant.sign}, Timezone: ${blueprintTimezone}${timezoneWasInferred ? " (inferred)" : ""}`);
 
     return placements as BirthChartPlacements;
   } catch (error: any) {

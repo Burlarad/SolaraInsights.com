@@ -208,6 +208,7 @@ export interface BirthChartPlacements {
     birthTime: string | null; // HH:MM or null if unknown
     birthLocation: string; // "City, Region, Country"
     timezone: string; // IANA timezone
+    timezoneWasInferred?: boolean; // True if timezone was inferred from birthplace
   };
   planets: BirthChartPlanetPlacement[]; // Must include all 12 planets
   houses: BirthChartHousePlacement[]; // All 12 houses (1-12)
@@ -224,6 +225,7 @@ export interface BirthChartBlueprint {
   birthTime: string | null; // HH:MM or null if unknown
   birthLocation: string; // "City, Region, Country"
   timezone: string;
+  timezoneWasInferred?: boolean; // True if timezone was inferred from birthplace
 }
 
 export interface BirthChartPlanet {

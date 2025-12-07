@@ -423,7 +423,7 @@ export default function SettingsPage() {
                 ))}
               </select>
               <p className="text-xs text-accent-ink/60">
-                The timezone where you were born (used for accurate birth chart calculations)
+                The timezone where you were born (used for accurate birth chart calculations). If this looks wrong, please correct it.
               </p>
             </div>
           </section>
