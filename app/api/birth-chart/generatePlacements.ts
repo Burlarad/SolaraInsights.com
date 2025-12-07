@@ -11,6 +11,7 @@
  * All math is done by OpenAI using Western tropical zodiac + Placidus houses.
  */
 
+import OpenAI from "openai";
 import { openai, OPENAI_MODELS } from "@/lib/openai/client";
 import { BirthChartPlacements, BirthChartPlanetName } from "@/types";
 import { inferTimezoneFromBirthplace } from "@/lib/timezone";
@@ -262,7 +263,7 @@ Sun, Moon, and Ascendant (Rising) MUST be computed correctly according to the We
     let lastError: any;
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        return await openai.chat.completions.create(params as any);
+        return await openai.chat.completions.create(params);
       } catch (error: any) {
         lastError = error;
         console.error(
@@ -281,16 +282,15 @@ Sun, Moon, and Ascendant (Rising) MUST be computed correctly according to the We
   try {
     console.log(`[Placements] Generating placements for ${birthData.birth_date} at ${birthData.birth_time || "unknown time"}...`);
 
-    // GPT-5.1 reasoning parameter not yet in OpenAI SDK types, so we use type assertion
-    const completion = await callOpenAIPlacementsWithRetry({
+    const completion = (await callOpenAIPlacementsWithRetry({
       model: OPENAI_MODELS.placements, // gpt-5.1
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
-      reasoning: { effort: "low" }, // GPT-5.1 reasoning for stability (no temperature when using reasoning)
       response_format: { type: "json_object" },
-    } as any);
+      stream: false,
+    })) as OpenAI.ChatCompletion;
 
     const responseContent = completion.choices[0]?.message?.content;
 
