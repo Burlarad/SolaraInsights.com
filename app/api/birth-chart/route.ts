@@ -6,7 +6,7 @@ import { getCache, setCache } from "@/lib/cache";
 import { createHash } from "crypto";
 import { generateBirthChartPlacements } from "./generatePlacements";
 
-export async function POST(req: NextRequest) {
+export async function POST(_req: NextRequest) {
   try {
     // Get authenticated user and their profile
     const supabase = await createServerSupabaseClient();
@@ -230,6 +230,34 @@ REMINDER: You are interpreting PRE-COMPUTED placements. The Sun sign, Moon sign,
       console.error("Failed to parse OpenAI response:", responseContent);
       throw new Error("Invalid response format from AI");
     }
+
+    // ========================================
+    // GUARDRAILS: Validate Step B didn't change Sun, Moon, or Rising
+    // ========================================
+    const sunFromStepA = placements.planets.find((p) => p.name === "Sun")?.sign;
+    const moonFromStepA = placements.planets.find((p) => p.name === "Moon")?.sign;
+    const risingFromStepA = placements.angles.ascendant.sign;
+
+    const sunFromStepB = birthChart.planets.find((p) => p.name === "Sun")?.sign;
+    const moonFromStepB = birthChart.planets.find((p) => p.name === "Moon")?.sign;
+    const risingFromStepB = birthChart.angles.ascendant.sign;
+
+    if (sunFromStepA !== sunFromStepB) {
+      console.error(`[BirthChart] GUARDRAIL VIOLATION: Step B changed Sun sign from ${sunFromStepA} to ${sunFromStepB}`);
+      throw new Error(`Step B modified Sun placement: expected ${sunFromStepA}, got ${sunFromStepB}`);
+    }
+
+    if (moonFromStepA !== moonFromStepB) {
+      console.error(`[BirthChart] GUARDRAIL VIOLATION: Step B changed Moon sign from ${moonFromStepA} to ${moonFromStepB}`);
+      throw new Error(`Step B modified Moon placement: expected ${moonFromStepA}, got ${moonFromStepB}`);
+    }
+
+    if (risingFromStepA !== risingFromStepB) {
+      console.error(`[BirthChart] GUARDRAIL VIOLATION: Step B changed Rising sign from ${risingFromStepA} to ${risingFromStepB}`);
+      throw new Error(`Step B modified Rising sign: expected ${risingFromStepA}, got ${risingFromStepB}`);
+    }
+
+    console.log(`[BirthChart] Guardrails passed: Sun=${sunFromStepB}, Moon=${moonFromStepB}, Rising=${risingFromStepB}`);
 
     // Cache the birth chart (TTL: 30 days - birth charts are stable unless birth data changes)
     await setCache(cacheKey, birthChart, 60 * 60 * 24 * 30);

@@ -12,7 +12,7 @@
  */
 
 import { openai, OPENAI_MODELS } from "@/lib/openai/client";
-import { BirthChartPlacements, BirthChartSign, BirthChartPlanetName } from "@/types";
+import { BirthChartPlacements, BirthChartPlanetName } from "@/types";
 
 interface BirthData {
   birth_date: string;
@@ -174,12 +174,12 @@ Sun, Moon, and Ascendant (Rising) MUST be computed correctly according to the We
     console.log(`[Placements] Generating placements for ${birthData.birth_date} at ${birthData.birth_time || "unknown time"}...`);
 
     const completion = await openai.chat.completions.create({
-      model: OPENAI_MODELS.insights,
+      model: OPENAI_MODELS.placements,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
-      temperature: 0.3, // Lower temperature for more consistent math
+      temperature: 0, // Deterministic for placements
       response_format: { type: "json_object" },
     });
 
