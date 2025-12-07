@@ -10,17 +10,24 @@ import { useSettings } from "@/providers/SettingsProvider";
 import { FullBirthChartInsight } from "@/types";
 import { formatDateForDisplay, formatTimeForDisplay } from "@/lib/datetime";
 
+// Error types for birth chart loading
+type BirthChartError =
+  | { type: "incomplete_profile"; message: string; missingFields?: Record<string, boolean> }
+  | { type: "api_error"; message: string }
+  | { type: "unauthorized"; message: string }
+  | { type: "none" };
+
 export default function BirthChartPage() {
   const router = useRouter();
   const { profile, loading: profileLoading, error: profileError } = useSettings();
 
   const [insight, setInsight] = useState<FullBirthChartInsight | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<BirthChartError>({ type: "none" });
 
   const loadBirthChart = async () => {
     setLoading(true);
-    setError(null);
+    setError({ type: "none" });
 
     try {
       const response = await fetch("/api/birth-chart", {
@@ -29,25 +36,49 @@ export default function BirthChartPage() {
       });
 
       if (response.status === 401) {
+        const data = await response.json();
+        setError({
+          type: "unauthorized",
+          message: data.message ?? "Please sign in to view your birth chart.",
+        });
         router.push("/sign-in");
         return;
       }
 
       if (response.status === 400) {
         const errorData = await response.json();
-        setError(errorData.message);
+        if (errorData.error === "Incomplete profile") {
+          setError({
+            type: "incomplete_profile",
+            message: errorData.message ?? "We need your full birth information in Settings to generate your birth chart.",
+            missingFields: errorData.missingFields ?? undefined,
+          });
+        } else {
+          setError({
+            type: "api_error",
+            message: errorData.message ?? "We couldn't generate your birth chart. Please try again in a moment.",
+          });
+        }
         return;
       }
 
       if (!response.ok) {
-        throw new Error("Failed to load birth chart");
+        const errorData = await response.json().catch(() => null);
+        setError({
+          type: "api_error",
+          message: errorData?.message ?? "We couldn't generate your birth chart. Please try again in a moment.",
+        });
+        return;
       }
 
       const data: FullBirthChartInsight = await response.json();
       setInsight(data);
     } catch (err: any) {
-      console.error("Error loading birth chart:", err);
-      setError("We couldn't generate your birth chart. Please try again in a moment.");
+      console.error("[BirthChart] Client error loading birth chart:", err);
+      setError({
+        type: "api_error",
+        message: "We couldn't generate your birth chart. Please try again in a moment.",
+      });
     } finally {
       setLoading(false);
     }
@@ -93,14 +124,14 @@ export default function BirthChartPage() {
       </div>
 
       {/* Error state for incomplete profile */}
-      {error && error.includes("birth") && (
+      {error.type === "incomplete_profile" && (
         <Card className="max-w-2xl mx-auto text-center border-border-subtle bg-accent-muted/20">
           <CardHeader>
             <div className="text-6xl mb-4">🌙</div>
             <CardTitle className="text-2xl">Complete your birth signature</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-accent-ink/70 leading-relaxed">{error}</p>
+            <p className="text-accent-ink/70 leading-relaxed">{error.message}</p>
             <ul className="text-sm text-accent-ink/60 space-y-2 max-w-md mx-auto text-left">
               <li>✓ Birth date</li>
               <li>✓ Birth time (or indicate if unknown)</li>
@@ -116,8 +147,34 @@ export default function BirthChartPage() {
         </Card>
       )}
 
+      {/* Error state for API/technical failures */}
+      {error.type === "api_error" && (
+        <Card className="max-w-2xl mx-auto border-border-subtle bg-accent-muted/20">
+          <CardHeader>
+            <div className="text-6xl mb-4 text-center">⚠️</div>
+            <CardTitle className="text-2xl text-center">We couldn't generate your birth chart</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-accent-ink/70 leading-relaxed text-center">
+              This looks like a technical issue on our side, not a problem with your birth details.
+            </p>
+            <p className="text-sm text-accent-ink/70 leading-relaxed">
+              {error.message}
+            </p>
+            <p className="text-xs text-accent-ink/60 leading-relaxed">
+              Please try again in a moment. If this keeps happening, you don't need to re-enter your birth signature — everything you entered in Settings is still saved.
+            </p>
+            <div className="pt-4 text-center">
+              <Button variant="outline" onClick={() => loadBirthChart()}>
+                Try again
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Check for incomplete profile before loading */}
-      {!profileLoading && profile && !hasBirthData && !error && (
+      {!profileLoading && profile && !hasBirthData && error.type === "none" && (
         <Card className="max-w-2xl mx-auto text-center border-border-subtle bg-accent-muted/20">
           <CardHeader>
             <div className="text-6xl mb-4">🌙</div>
@@ -143,7 +200,7 @@ export default function BirthChartPage() {
       )}
 
       {/* Loading state */}
-      {loading && !error && (
+      {loading && error.type === "none" && (
         <div className="space-y-6 max-w-4xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-2">Your Birth Chart Mirror</h1>
@@ -163,7 +220,7 @@ export default function BirthChartPage() {
       )}
 
       {/* Content - only show when we have data and no errors */}
-      {insight && !loading && !error && (
+      {insight && !loading && error.type === "none" && (
         <>
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-2">Your Birth Chart Mirror</h1>

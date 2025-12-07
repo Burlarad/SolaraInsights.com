@@ -251,11 +251,38 @@ Return ONLY a JSON object with this EXACT structure:
 
 Sun, Moon, and Ascendant (Rising) MUST be computed correctly according to the Western tropical zodiac and Placidus system for the given birth date, local time, birthplace, and timezone.`;
 
+  /**
+   * Retry helper for OpenAI placements call
+   * Handles transient errors like rate limits, temporary outages, etc.
+   */
+  async function callOpenAIPlacementsWithRetry(
+    params: Parameters<typeof openai.chat.completions.create>[0],
+    maxRetries = 2,
+  ) {
+    let lastError: any;
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        return await openai.chat.completions.create(params as any);
+      } catch (error: any) {
+        lastError = error;
+        console.error(
+          `[Placements] Attempt ${attempt}/${maxRetries} failed:`,
+          error?.message ?? error,
+        );
+        if (attempt < maxRetries) {
+          // Wait 1 second before retry
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        }
+      }
+    }
+    throw lastError;
+  }
+
   try {
     console.log(`[Placements] Generating placements for ${birthData.birth_date} at ${birthData.birth_time || "unknown time"}...`);
 
     // GPT-5.1 reasoning parameter not yet in OpenAI SDK types, so we use type assertion
-    const completion = await openai.chat.completions.create({
+    const completion = await callOpenAIPlacementsWithRetry({
       model: OPENAI_MODELS.placements, // gpt-5.1
       messages: [
         { role: "system", content: systemPrompt },

@@ -285,11 +285,28 @@ REMINDER: You are interpreting PRE-COMPUTED placements. The Sun sign, Moon sign,
     // Return the full birth chart insight
     return NextResponse.json(birthChart);
   } catch (error: any) {
-    console.error("Error generating birth chart:", error);
+    // Enhanced error logging for debugging
+    console.error("[BirthChart] FULL ERROR DETAILS:", {
+      message: error?.message ?? "Unknown error",
+      name: error?.name ?? "Error",
+      stack: error?.stack,
+      cause: error?.cause,
+      // Log first 500 chars of full error object for context
+      raw: JSON.stringify(error, Object.getOwnPropertyNames(error)).slice(0, 500),
+    });
+
     return NextResponse.json(
       {
         error: "Generation failed",
         message: "We couldn't generate your birth chart. Please try again in a moment.",
+        // In dev mode, include debug info
+        ...(process.env.NODE_ENV === "development" && {
+          debug: {
+            error: error?.message ?? "Unknown error",
+            type: error?.name ?? "Error",
+            at: "birth-chart route",
+          }
+        })
       },
       { status: 500 }
     );
