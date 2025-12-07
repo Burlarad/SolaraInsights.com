@@ -13,6 +13,7 @@
 
 import { openai, OPENAI_MODELS } from "@/lib/openai/client";
 import { BirthChartPlacements, BirthChartPlanetName } from "@/types";
+import { inferTimezoneFromBirthplace } from "@/lib/timezone";
 
 interface BirthData {
   birth_date: string;
@@ -87,6 +88,29 @@ export async function generateBirthChartPlacements(
 ): Promise<BirthChartPlacements> {
   const locationString = `${birthData.birth_city}, ${birthData.birth_region}, ${birthData.birth_country}`;
 
+  // ========================================
+  // TIMEZONE COMPUTATION (civil timekeeping, not astrology)
+  // ========================================
+
+  // If timezone is missing or clearly wrong (e.g., "UTC" for a US city),
+  // try to infer a better one from birthplace
+  let effectiveTimezone = birthData.timezone;
+
+  if ((!effectiveTimezone || effectiveTimezone === "UTC") &&
+      birthData.birth_city && birthData.birth_country) {
+    const inferred = inferTimezoneFromBirthplace(
+      birthData.birth_city,
+      birthData.birth_region,
+      birthData.birth_country
+    );
+    if (inferred) {
+      console.log(`[Placements] Inferred timezone ${inferred} from birthplace (was: ${birthData.timezone || "empty"})`);
+      effectiveTimezone = inferred;
+    }
+  }
+
+  const blueprintTimezone = effectiveTimezone || birthData.timezone || "UTC";
+
   // System prompt: focused on placements math only
   const systemPrompt = `You are an astrologer for Solara Insights.
 
@@ -118,7 +142,7 @@ Birth details (ALL of these are critical for accurate Sun, Moon, and Rising calc
 - Birthplace region/state: ${birthData.birth_region}
 - Birthplace country: ${birthData.birth_country}
 - Full location string: ${locationString}
-- Timezone at birth: ${birthData.timezone} (IANA timezone for the birthplace at the time of birth)
+- Timezone at birth: ${blueprintTimezone} (IANA timezone for the birthplace at the time of birth)
 
 IMPORTANT: You must use the COMPLETE birthplace (city + region/state + country) to determine the correct geographic location on Earth. This is essential for calculating the Rising sign (Ascendant) and house cusps accurately using the Placidus system.
 
@@ -136,7 +160,7 @@ Return ONLY a JSON object with this EXACT structure:
     "birthDate": "${birthData.birth_date}",
     "birthTime": ${birthData.birth_time ? `"${birthData.birth_time}"` : "null"},
     "birthLocation": "${locationString}",
-    "timezone": "${birthData.timezone}"
+    "timezone": "${blueprintTimezone}"
   },
   "planets": [
     // Array of EXACTLY 12 objects for: Sun, Moon, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto, North Node, Chiron
@@ -204,7 +228,13 @@ Sun, Moon, and Ascendant (Rising) MUST be computed correctly according to the We
       throw new Error("Placements validation failed - structure is incorrect");
     }
 
-    console.log(`[Placements] Successfully generated placements. Sun: ${placements.planets.find((p: any) => p.name === "Sun")?.sign}, Moon: ${placements.planets.find((p: any) => p.name === "Moon")?.sign}, Rising: ${placements.angles.ascendant.sign}`);
+    // ========================================
+    // FORCE THE CORRECT TIMEZONE IN BLUEPRINT
+    // ========================================
+    // OpenAI should echo our timezone, but we enforce it to be certain
+    placements.blueprint.timezone = blueprintTimezone;
+
+    console.log(`[Placements] Successfully generated placements. Sun: ${placements.planets.find((p: any) => p.name === "Sun")?.sign}, Moon: ${placements.planets.find((p: any) => p.name === "Moon")?.sign}, Rising: ${placements.angles.ascendant.sign}, Timezone: ${blueprintTimezone}`);
 
     return placements as BirthChartPlacements;
   } catch (error: any) {

@@ -9,6 +9,7 @@ import { useSettings } from "@/providers/SettingsProvider";
 import { supabase } from "@/lib/supabase/client";
 import { getPrimaryFacebookIdentity, getIdentityDisplayName } from "@/lib/social";
 import { User } from "@supabase/supabase-js";
+import { COMMON_TIMEZONES } from "@/lib/timezone";
 
 export default function SettingsPage() {
   const { profile, saveProfile, loading: profileLoading, error: profileError } = useSettings();
@@ -23,6 +24,7 @@ export default function SettingsPage() {
   const [birthCity, setBirthCity] = useState("");
   const [birthRegion, setBirthRegion] = useState("");
   const [birthCountry, setBirthCountry] = useState("");
+  const [timezone, setTimezone] = useState("");
 
   // Password change
   const [currentPassword, setCurrentPassword] = useState("");
@@ -57,6 +59,7 @@ export default function SettingsPage() {
       setBirthCity(profile.birth_city || "");
       setBirthRegion(profile.birth_region || "");
       setBirthCountry(profile.birth_country || "");
+      setTimezone(profile.timezone || "");
     }
   }, [profile]);
 
@@ -90,6 +93,7 @@ export default function SettingsPage() {
         birth_city: birthCity || null,
         birth_region: birthRegion || null,
         birth_country: birthCountry || null,
+        timezone: timezone || "UTC",
       });
 
       setSaveSuccess(true);
@@ -401,6 +405,26 @@ export default function SettingsPage() {
                   placeholder="e.g., United States"
                 />
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="timezone">Time zone</Label>
+              <select
+                id="timezone"
+                value={timezone}
+                onChange={(e) => setTimezone(e.target.value)}
+                className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="">Select a timezone</option>
+                {COMMON_TIMEZONES.map((tz) => (
+                  <option key={tz} value={tz}>
+                    {tz}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-accent-ink/60">
+                The timezone where you were born (used for accurate birth chart calculations)
+              </p>
             </div>
           </section>
 

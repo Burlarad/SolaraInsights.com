@@ -232,15 +232,17 @@ REMINDER: You are interpreting PRE-COMPUTED placements. The Sun sign, Moon sign,
     }
 
     // ========================================
-    // GUARDRAILS: Validate Step B didn't change Sun, Moon, or Rising
+    // GUARDRAILS: Validate Step B didn't change Sun, Moon, Rising, or Timezone
     // ========================================
     const sunFromStepA = placements.planets.find((p) => p.name === "Sun")?.sign;
     const moonFromStepA = placements.planets.find((p) => p.name === "Moon")?.sign;
     const risingFromStepA = placements.angles.ascendant.sign;
+    const timezoneFromStepA = placements.blueprint.timezone;
 
     const sunFromStepB = birthChart.planets.find((p) => p.name === "Sun")?.sign;
     const moonFromStepB = birthChart.planets.find((p) => p.name === "Moon")?.sign;
     const risingFromStepB = birthChart.angles.ascendant.sign;
+    const timezoneFromStepB = birthChart.blueprint.timezone;
 
     if (sunFromStepA !== sunFromStepB) {
       console.error(`[BirthChart] GUARDRAIL VIOLATION: Step B changed Sun sign from ${sunFromStepA} to ${sunFromStepB}`);
@@ -257,7 +259,14 @@ REMINDER: You are interpreting PRE-COMPUTED placements. The Sun sign, Moon sign,
       throw new Error(`Step B modified Rising sign: expected ${risingFromStepA}, got ${risingFromStepB}`);
     }
 
-    console.log(`[BirthChart] Guardrails passed: Sun=${sunFromStepB}, Moon=${moonFromStepB}, Rising=${risingFromStepB}`);
+    if (timezoneFromStepA !== timezoneFromStepB) {
+      console.error(`[BirthChart] GUARDRAIL VIOLATION: Step B changed timezone from ${timezoneFromStepA} to ${timezoneFromStepB}`);
+      // Force it to use the correct timezone from Step A
+      birthChart.blueprint.timezone = timezoneFromStepA;
+      console.log(`[BirthChart] Timezone corrected to ${timezoneFromStepA}`);
+    }
+
+    console.log(`[BirthChart] Guardrails passed: Sun=${sunFromStepB}, Moon=${moonFromStepB}, Rising=${risingFromStepB}, Timezone=${birthChart.blueprint.timezone}`);
 
     // Cache the birth chart (TTL: 30 days - birth charts are stable unless birth data changes)
     await setCache(cacheKey, birthChart, 60 * 60 * 24 * 30);
