@@ -17,6 +17,12 @@ export default function BirthChartPage() {
   const [incompleteProfile, setIncompleteProfile] = useState(false);
   const [insight, setInsight] = useState<FullBirthChartInsight | null>(null);
 
+  // Derived state: check if insight has the full expected structure
+  const hasFullInsight =
+    insight !== null &&
+    insight.coreSummary !== undefined &&
+    insight.sections !== undefined;
+
   useEffect(() => {
     const fetchBirthChart = async () => {
       setLoading(true);
@@ -96,15 +102,19 @@ export default function BirthChartPage() {
         </div>
       )}
 
-      {!loading && !error && !incompleteProfile && insight && (
+      {!loading && !error && !incompleteProfile && hasFullInsight && (
         <div className="space-y-8 p-6">
           <section className="space-y-2">
-            <h1 className="text-xl font-semibold">{insight.coreSummary.headline}</h1>
-            <p className="text-sm text-accent-ink/80">{insight.coreSummary.overallVibe}</p>
+            <h1 className="text-xl font-semibold">
+              {insight!.coreSummary.headline}
+            </h1>
             <p className="text-sm text-accent-ink/80">
-              <strong>Big 3:</strong> {insight.coreSummary.bigThree.sun} ·{" "}
-              {insight.coreSummary.bigThree.moon} ·{" "}
-              {insight.coreSummary.bigThree.rising}
+              {insight!.coreSummary.overallVibe}
+            </p>
+            <p className="text-sm text-accent-ink/80">
+              <strong>Big 3:</strong> {insight!.coreSummary.bigThree.sun} ·{" "}
+              {insight!.coreSummary.bigThree.moon} ·{" "}
+              {insight!.coreSummary.bigThree.rising}
             </p>
           </section>
 
@@ -112,42 +122,52 @@ export default function BirthChartPage() {
             <div>
               <h2 className="text-base font-semibold">Identity</h2>
               <p className="text-sm text-accent-ink/80 whitespace-pre-line">
-                {insight.sections.identity}
+                {insight!.sections.identity}
               </p>
             </div>
             <div>
               <h2 className="text-base font-semibold">Emotions</h2>
               <p className="text-sm text-accent-ink/80 whitespace-pre-line">
-                {insight.sections.emotions}
+                {insight!.sections.emotions}
               </p>
             </div>
             <div>
               <h2 className="text-base font-semibold">Love & Relationships</h2>
               <p className="text-sm text-accent-ink/80 whitespace-pre-line">
-                {insight.sections.loveAndRelationships}
+                {insight!.sections.loveAndRelationships}
               </p>
             </div>
             <div>
               <h2 className="text-base font-semibold">Work & Money</h2>
               <p className="text-sm text-accent-ink/80 whitespace-pre-line">
-                {insight.sections.workAndMoney}
+                {insight!.sections.workAndMoney}
               </p>
             </div>
             <div>
               <h2 className="text-base font-semibold">Purpose & Growth</h2>
               <p className="text-sm text-accent-ink/80 whitespace-pre-line">
-                {insight.sections.purposeAndGrowth}
+                {insight!.sections.purposeAndGrowth}
               </p>
             </div>
             <div>
               <h2 className="text-base font-semibold">Inner World</h2>
               <p className="text-sm text-accent-ink/80 whitespace-pre-line">
-                {insight.sections.innerWorld}
+                {insight!.sections.innerWorld}
               </p>
             </div>
           </section>
 
           {/* Optional: Technical placements view can be added here later */}
+        </div>
+      )}
+
+      {!loading && !error && !incompleteProfile && !hasFullInsight && (
+        <div className="p-6 rounded-xl border border-accent-soft bg-accent-soft/30 space-y-3">
+          <h2 className="text-lg font-semibold">Interpretation not available</h2>
+          <p className="text-sm text-accent-ink/80">
+            We calculated your birth chart, but couldn't generate a full interpretation right now.
+            Your chart placements are saved — please try again in a moment.
+          </p>
         </div>
       )}
     </div>

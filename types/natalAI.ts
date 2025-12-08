@@ -21,11 +21,11 @@ export type NatalAIRequest = {
   };
   birth: {
     date: string; // "YYYY-MM-DD"
-    time: string; // "HH:MM"
+    time: string | null; // "HH:MM"
     timezone: string; // IANA tz like "America/New_York"
-    city: string;
-    region: string;
-    country: string;
+    city: string | null;
+    region: string | null;
+    country: string | null;
     lat: number;
     lon: number;
   };

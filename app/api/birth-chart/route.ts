@@ -185,8 +185,31 @@ export async function POST() {
     // Parse the JSON response
     let insight: FullBirthChartInsight | null = null;
     try {
-      insight = JSON.parse(responseContent) as FullBirthChartInsight;
-      console.log("[BirthChart] OpenAI interpretation parsed successfully for user", user.id);
+      const parsed = JSON.parse(responseContent);
+
+      if (!parsed || typeof parsed !== "object") {
+        throw new Error("OpenAI response is not an object");
+      }
+
+      if (!parsed.coreSummary || !parsed.sections) {
+        console.error(
+          "[BirthChart] OpenAI response missing required coreSummary/sections fields"
+        );
+        return NextResponse.json(
+          {
+            placements: swissPlacements,
+            insight: null,
+          },
+          { status: 200 }
+        );
+      }
+
+      insight = parsed as FullBirthChartInsight;
+
+      console.log(
+        "[BirthChart] OpenAI interpretation parsed successfully for user",
+        user.id
+      );
     } catch (parseError) {
       console.error("[BirthChart] Failed to parse OpenAI response:", parseError);
       // Return placements without insight if parsing fails
