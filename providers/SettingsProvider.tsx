@@ -3,7 +3,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { Profile, ProfileUpdate } from "@/types";
-import { getZodiacSign } from "@/lib/zodiac";
 
 interface SettingsContextValue {
   profile: Profile | null;
@@ -67,6 +66,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         birth_city: null,
         birth_region: null,
         birth_country: null,
+        birth_lat: null,
+        birth_lon: null,
         timezone,
         zodiac_sign: null,
         language: "en",
@@ -119,25 +120,20 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
       setError(null);
 
-      // Auto-calculate zodiac sign if birth_date is provided
-      let finalUpdates = { ...updates };
-      if (updates.birth_date) {
-        const sign = getZodiacSign(updates.birth_date);
-        if (sign) {
-          finalUpdates.zodiac_sign = sign;
-        }
+      // Call server-side API route to handle profile update
+      // This allows server-side resolution of birth location (lat/lon/timezone)
+      const response = await fetch("/api/user/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to save profile");
       }
 
-      const { data: updatedProfile, error: updateError } = await supabase
-        .from("profiles")
-        .update(finalUpdates)
-        .eq("id", profile.id)
-        .select()
-        .single();
-
-      if (updateError) {
-        throw updateError;
-      }
+      const { profile: updatedProfile } = await response.json();
 
       setProfile(updatedProfile as Profile);
     } catch (err: any) {

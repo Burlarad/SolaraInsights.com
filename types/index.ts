@@ -12,6 +12,8 @@ export interface Profile {
   birth_city: string | null;
   birth_region: string | null;
   birth_country: string | null;
+  birth_lat: number | null; // Resolved from Google Geocoding API
+  birth_lon: number | null; // Resolved from Google Geocoding API
   timezone: string;
   zodiac_sign: string | null;
   language: string;
@@ -47,6 +49,8 @@ export interface ProfileUpdate {
   birth_city?: string | null;
   birth_region?: string | null;
   birth_country?: string | null;
+  birth_lat?: number | null;
+  birth_lon?: number | null;
   timezone?: string;
   zodiac_sign?: string | null;
   language?: string;
