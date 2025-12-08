@@ -83,16 +83,31 @@ export default function SettingsPage() {
     setSaveSuccess(false);
     setSaveError(null);
 
+    // Validate required fields for birth chart
+    const missingFields: string[] = [];
+    if (!birthDate) missingFields.push("Birth date");
+    if (!birthCity) missingFields.push("Birth city");
+    if (!birthRegion) missingFields.push("Region/State");
+    if (!birthCountry) missingFields.push("Country");
+
+    if (missingFields.length > 0) {
+      setSaveError(
+        `Please fill in the following required fields: ${missingFields.join(", ")}`
+      );
+      setIsSaving(false);
+      return;
+    }
+
     try {
       await saveProfile({
         full_name: fullName,
         preferred_name: preferredName,
         zodiac_sign: zodiacSign,
-        birth_date: birthDate || null,
+        birth_date: birthDate,
         birth_time: unknownBirthTime ? null : birthTime || null,
-        birth_city: birthCity || null,
-        birth_region: birthRegion || null,
-        birth_country: birthCountry || null,
+        birth_city: birthCity,
+        birth_region: birthRegion,
+        birth_country: birthCountry,
         timezone: timezone || "UTC",
       });
 
@@ -339,12 +354,15 @@ export default function SettingsPage() {
 
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="birthDate">Birth date</Label>
+                <Label htmlFor="birthDate">
+                  Birth date <span className="text-danger-soft">*</span>
+                </Label>
                 <Input
                   id="birthDate"
                   type="date"
                   value={birthDate}
                   onChange={(e) => setBirthDate(e.target.value)}
+                  required
                 />
               </div>
 
@@ -376,33 +394,42 @@ export default function SettingsPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="birthCity">Birth city</Label>
+              <Label htmlFor="birthCity">
+                Birth city <span className="text-danger-soft">*</span>
+              </Label>
               <Input
                 id="birthCity"
                 value={birthCity}
                 onChange={(e) => setBirthCity(e.target.value)}
                 placeholder="City where you were born"
+                required
               />
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="birthRegion">Region / State</Label>
+                <Label htmlFor="birthRegion">
+                  Region / State <span className="text-danger-soft">*</span>
+                </Label>
                 <Input
                   id="birthRegion"
                   value={birthRegion}
                   onChange={(e) => setBirthRegion(e.target.value)}
                   placeholder="e.g., California"
+                  required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="birthCountry">Country</Label>
+                <Label htmlFor="birthCountry">
+                  Country <span className="text-danger-soft">*</span>
+                </Label>
                 <Input
                   id="birthCountry"
                   value={birthCountry}
                   onChange={(e) => setBirthCountry(e.target.value)}
                   placeholder="e.g., United States"
+                  required
                 />
               </div>
             </div>
@@ -414,6 +441,7 @@ export default function SettingsPage() {
                 value={timezone}
                 onChange={(e) => setTimezone(e.target.value)}
                 className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                disabled
               >
                 <option value="">Select a timezone</option>
                 {COMMON_TIMEZONES.map((tz) => (
@@ -423,7 +451,7 @@ export default function SettingsPage() {
                 ))}
               </select>
               <p className="text-xs text-accent-ink/60">
-                The timezone where you were born (used for accurate birth chart calculations). If this looks wrong, please correct it.
+                Timezone is automatically determined from your birthplace and cannot be changed manually.
               </p>
             </div>
           </section>

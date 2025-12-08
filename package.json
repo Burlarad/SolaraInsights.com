@@ -29,12 +29,14 @@
     "stripe": "^20.0.0",
     "swisseph": "^0.5.17",
     "tailwind-merge": "^3.4.0",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "tz-lookup": "^6.1.25"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/tz-lookup": "^6.1.2",
     "autoprefixer": "^10.0.1",
     "eslint": "^8",
     "eslint-config-next": "^15.0.0",

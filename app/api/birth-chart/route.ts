@@ -65,16 +65,12 @@ export async function POST() {
       );
     }
 
-    // Validate required birth data fields
+    // Validate required birth data fields (full chart requires derived location)
     const requiredFields = [
       "birth_date",
-      "birth_time",
-      "birth_city",
-      "birth_region",
-      "birth_country",
-      "timezone",
       "birth_lat",
       "birth_lon",
+      "timezone",
     ];
 
     const missingFields = requiredFields.filter((field) => !profile[field]);
@@ -87,16 +83,28 @@ export async function POST() {
         {
           error: "Incomplete profile",
           message:
-            "We need your full birth date, time, and location in Settings to generate your birth chart.",
+            "We need your birth date and full birthplace in Settings so Solara can generate your birth chart.",
         },
         { status: 400 }
+      );
+    }
+
+    // Use birth_time if available, otherwise default to noon
+    const timeForSwiss =
+      profile.birth_time && typeof profile.birth_time === "string"
+        ? profile.birth_time
+        : "12:00";
+
+    if (!profile.birth_time) {
+      console.log(
+        `[BirthChart] No birth_time set for user ${user.id}; using 12:00 as default time for Swiss engine.`
       );
     }
 
     // STEP A: Compute Swiss Ephemeris placements
     const swissPlacements = await computeSwissPlacements({
       date: profile.birth_date,
-      time: profile.birth_time,
+      time: timeForSwiss,
       timezone: profile.timezone,
       lat: profile.birth_lat,
       lon: profile.birth_lon,

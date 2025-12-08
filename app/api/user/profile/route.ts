@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { resolveBirthLocation } from "@/lib/location/resolveBirthLocation";
 import { getZodiacSign } from "@/lib/zodiac";
+import { resolveBirthLocation } from "@/lib/location/resolveBirthLocation";
 
 export async function PATCH(req: NextRequest) {
   try {
@@ -29,40 +29,40 @@ export async function PATCH(req: NextRequest) {
       }
     }
 
-    // Resolve birth location to lat/lon/timezone if all required fields are present
-    let resolvedLocation = null;
-    if (
+    // Resolve birth location if we have date + place
+    const hasBirthPlace =
       updates.birth_date &&
-      updates.birth_time &&
       updates.birth_city &&
       updates.birth_region &&
-      updates.birth_country
-    ) {
-      try {
-        console.log(
-          `[Profile] Resolving birth location for user ${user.id}: ${updates.birth_city}, ${updates.birth_region}, ${updates.birth_country}`
-        );
+      updates.birth_country;
 
-        resolvedLocation = await resolveBirthLocation({
+    if (hasBirthPlace) {
+      try {
+        const timeForLocation =
+          updates.birth_time && typeof updates.birth_time === "string"
+            ? updates.birth_time
+            : "12:00";
+
+        const resolved = await resolveBirthLocation({
           city: updates.birth_city,
           region: updates.birth_region,
           country: updates.birth_country,
           birthDate: updates.birth_date,
-          birthTime: updates.birth_time,
+          birthTime: timeForLocation,
         });
 
-        console.log(
-          `[Profile] Location resolved: lat=${resolvedLocation.lat}, lon=${resolvedLocation.lon}, timezone=${resolvedLocation.timezone}`
-        );
+        updates.birth_lat = resolved.lat;
+        updates.birth_lon = resolved.lon;
+        updates.timezone = resolved.timezone;
 
-        // Add resolved values to updates
-        updates.birth_lat = resolvedLocation.lat;
-        updates.birth_lon = resolvedLocation.lon;
-        updates.timezone = resolvedLocation.timezone;
+        console.log("[Profile] Birth location resolved:", resolved);
       } catch (err: any) {
-        // Don't block profile save if Google API fails
-        console.error("[Profile] Failed to resolve birth location:", err.message);
         console.error(
+          "[Profile] Failed to resolve birth location:",
+          err?.message || err
+        );
+        // Do NOT block save; we can leave birth_lat/birth_lon/timezone unchanged or null
+        console.warn(
           "[Profile] Continuing with profile save without lat/lon/timezone updates"
         );
       }
@@ -85,7 +85,6 @@ export async function PATCH(req: NextRequest) {
 
     return NextResponse.json({
       profile: updatedProfile,
-      locationResolved: !!resolvedLocation,
     });
   } catch (error: any) {
     console.error("[Profile] Error updating profile:", error);

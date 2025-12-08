@@ -1,12 +1,14 @@
 /**
- * Server-side helper to resolve birth location to lat/lon/timezone using Google Maps Platform.
+ * Server-side helper to resolve birth location to lat/lon/timezone using OpenStreetMap.
  *
  * Uses:
- * - Google Geocoding API: city/region/country → lat/lon
- * - Google Time Zone API: lat/lon + timestamp → IANA timezone
+ * - OpenStreetMap Nominatim API: city/region/country → lat/lon
+ * - tz-lookup library: lat/lon → IANA timezone
  *
- * Requires: GOOGLE_MAPS_API_KEY environment variable
+ * No API keys required - fully open source solution.
  */
+
+import tzLookup from "tz-lookup";
 
 export type BirthPlaceInput = {
   city: string;
@@ -27,86 +29,88 @@ export type ResolvedBirthLocation = {
  *
  * @param input - Birth place details including date/time for timezone accuracy
  * @returns Resolved latitude, longitude, and IANA timezone
- * @throws Error if Google API key is missing or API calls fail
+ * @throws Error if geocoding fails or timezone cannot be determined
  */
 export async function resolveBirthLocation(
   input: BirthPlaceInput
 ): Promise<ResolvedBirthLocation> {
-  // Validate Google API key
-  const apiKey = process.env.GOOGLE_MAPS_API_KEY;
-  if (!apiKey) {
+  console.log("[Location] Resolving birth place:", {
+    city: input.city,
+    region: input.region,
+    country: input.country,
+  });
+
+  // Step 1: Geocode the address to get lat/lon using OpenStreetMap Nominatim
+  const query = `${input.city}, ${input.region}, ${input.country}`;
+  const encodedQuery = encodeURIComponent(query);
+  const nominatimUrl = `https://nominatim.openstreetmap.org/search?q=${encodedQuery}&format=json&limit=1`;
+
+  console.log(`[Location] Geocoding address: "${query}"`);
+
+  try {
+    const geocodeResponse = await fetch(nominatimUrl, {
+      headers: {
+        "User-Agent": "Solara-Insights-App/1.0", // Nominatim requires a User-Agent
+      },
+    });
+
+    if (!geocodeResponse.ok) {
+      throw new Error(
+        `Nominatim API request failed: ${geocodeResponse.status} ${geocodeResponse.statusText}`
+      );
+    }
+
+    const geocodeData = await geocodeResponse.json();
+
+    if (!Array.isArray(geocodeData) || geocodeData.length === 0) {
+      console.error(`[Location] Geocoding failed for "${query}": No results found`);
+      throw new Error(
+        `Could not find location "${query}". Please check the city, region, and country spelling.`
+      );
+    }
+
+    const result = geocodeData[0];
+    const lat = parseFloat(result.lat);
+    const lon = parseFloat(result.lon);
+
+    if (isNaN(lat) || isNaN(lon)) {
+      throw new Error(
+        `Invalid coordinates received from geocoding service for "${query}"`
+      );
+    }
+
+    console.log(`[Location] Geocoded "${query}" to lat=${lat}, lon=${lon}`);
+
+    // Step 2: Get IANA timezone for this lat/lon using tz-lookup
+    console.log(`[Location] Looking up timezone for lat=${lat}, lon=${lon}`);
+
+    const timezone = tzLookup(lat, lon);
+
+    if (!timezone) {
+      throw new Error(
+        `Could not determine timezone for coordinates (${lat}, ${lon}). This location may be in international waters or an unmapped area.`
+      );
+    }
+
+    console.log(`[Location] Geocoded to:`, { lat, lon, timezone });
+
+    return {
+      lat,
+      lon,
+      timezone,
+    };
+  } catch (error: any) {
+    console.error("[Location] Error resolving birth location:", error);
+
+    // Re-throw with more context if it's not already our custom error
+    if (error.message.includes("Could not find location") ||
+        error.message.includes("Could not determine timezone") ||
+        error.message.includes("Invalid coordinates")) {
+      throw error;
+    }
+
     throw new Error(
-      "Missing GOOGLE_MAPS_API_KEY environment variable. Please add it to your .env file."
+      `Failed to resolve birth location: ${error.message || "Unknown error"}`
     );
   }
-
-  // Step 1: Geocode the address to get lat/lon
-  const address = `${input.city}, ${input.region}, ${input.country}`;
-  const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
-    address
-  )}&key=${apiKey}`;
-
-  console.log(`[Location] Geocoding address: "${address}"`);
-
-  const geocodeResponse = await fetch(geocodeUrl);
-  if (!geocodeResponse.ok) {
-    throw new Error(
-      `Google Geocoding API request failed: ${geocodeResponse.status} ${geocodeResponse.statusText}`
-    );
-  }
-
-  const geocodeData = await geocodeResponse.json();
-
-  if (geocodeData.status !== "OK" || !geocodeData.results?.[0]) {
-    console.error(`[Location] Geocoding failed for "${address}":`, geocodeData.status);
-    throw new Error(
-      `Could not geocode location "${address}". Status: ${geocodeData.status}. Please check the city/region/country spelling.`
-    );
-  }
-
-  const location = geocodeData.results[0].geometry.location;
-  const lat = location.lat;
-  const lng = location.lng;
-
-  console.log(`[Location] Geocoded "${address}" to lat=${lat}, lon=${lng}`);
-
-  // Step 2: Get IANA timezone for this lat/lon at the birth date/time
-  // Convert birth date + time to Unix timestamp for timezone lookup
-  // Note: We use a naive local time assumption here since we don't yet know the timezone
-  // Google's API will give us the timezone that was active at this lat/lon at this timestamp
-  const localDateTime = new Date(`${input.birthDate}T${input.birthTime}:00`);
-  const timestamp = Math.floor(localDateTime.getTime() / 1000);
-
-  const timezoneUrl = `https://maps.googleapis.com/maps/api/timezone/json?location=${lat},${lng}&timestamp=${timestamp}&key=${apiKey}`;
-
-  console.log(`[Location] Getting timezone for lat=${lat}, lon=${lng}, timestamp=${timestamp}`);
-
-  const timezoneResponse = await fetch(timezoneUrl);
-  if (!timezoneResponse.ok) {
-    throw new Error(
-      `Google Time Zone API request failed: ${timezoneResponse.status} ${timezoneResponse.statusText}`
-    );
-  }
-
-  const timezoneData = await timezoneResponse.json();
-
-  if (timezoneData.status !== "OK" || !timezoneData.timeZoneId) {
-    console.error(
-      `[Location] Timezone lookup failed for lat=${lat}, lon=${lng}:`,
-      timezoneData.status
-    );
-    throw new Error(
-      `Could not determine timezone for coordinates (${lat}, ${lng}). Status: ${timezoneData.status}`
-    );
-  }
-
-  const timezone = timezoneData.timeZoneId;
-
-  console.log(`[Location] Resolved "${address}" → lat=${lat}, lon=${lng}, timezone=${timezone}`);
-
-  return {
-    lat,
-    lon: lng,
-    timezone,
-  };
 }

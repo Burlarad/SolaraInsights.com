@@ -237,49 +237,81 @@ export async function computeSwissPlacements(
     // Calculate Julian Day for the birth moment
     const julianDay = localToJulianDay(input.date, input.time, input.timezone);
 
-    // Calculate houses using Placidus system
-    // swe_houses returns { house: number[], ascmc: number[] } or { error: string }
-    // house[1..12] = house cusps in degrees
-    // ascmc[0] = Ascendant, ascmc[1] = MC, ascmc[2] = ARMC, etc.
-    const housesResult = swisseph.swe_houses(
-      julianDay,
-      input.lat,
-      input.lon,
-      "P" // 'P' = Placidus
-    );
+    // Check if we have valid geographic coordinates
+    // If lat/lon are 0,0 or invalid, we'll skip house calculations
+    const hasValidLocation =
+      typeof input.lat === "number" &&
+      typeof input.lon === "number" &&
+      !Number.isNaN(input.lat) &&
+      !Number.isNaN(input.lon) &&
+      !(input.lat === 0 && input.lon === 0);
 
-    if ("error" in housesResult) {
-      throw new Error(`House calculation failed: ${housesResult.error}`);
+    let houses: SwissHousePlacement[] = [];
+    let angles: SwissAngles;
+    let houseCusps: number[] = [];
+
+    if (hasValidLocation) {
+      // Calculate houses using Placidus system
+      // swe_houses returns { house: number[], ascmc: number[] } or { error: string }
+      // house[1..12] = house cusps in degrees
+      // ascmc[0] = Ascendant, ascmc[1] = MC, ascmc[2] = ARMC, etc.
+      const housesResult = swisseph.swe_houses(
+        julianDay,
+        input.lat,
+        input.lon,
+        "P" // 'P' = Placidus
+      );
+
+      if ("error" in housesResult) {
+        console.warn(`[Swiss] House calculation failed: ${housesResult.error}. Proceeding without houses.`);
+        // Proceed without houses
+        angles = {
+          ascendant: { sign: "Unknown" },
+          midheaven: { sign: "Unknown" },
+          descendant: { sign: "Unknown" },
+          ic: { sign: "Unknown" },
+        };
+      } else {
+        houseCusps = housesResult.house; // Array: [undefined, cusp1, cusp2, ..., cusp12]
+        const ascendantDegrees = housesResult.ascendant;
+        const midheavenDegrees = housesResult.mc;
+        const descendantDegrees = (ascendantDegrees + 180) % 360;
+        const icDegrees = (midheavenDegrees + 180) % 360;
+
+        console.log(
+          `[Swiss] Houses calculated: Asc=${ascendantDegrees.toFixed(2)}°, MC=${midheavenDegrees.toFixed(2)}°`
+        );
+
+        // Build angles
+        angles = {
+          ascendant: { sign: degreesToSign(ascendantDegrees) },
+          midheaven: { sign: degreesToSign(midheavenDegrees) },
+          descendant: { sign: degreesToSign(descendantDegrees) },
+          ic: { sign: degreesToSign(icDegrees) },
+        };
+
+        // Build house placements
+        for (let i = 1; i <= 12; i++) {
+          houses.push({
+            house: i,
+            signOnCusp: degreesToSign(houseCusps[i]),
+          });
+        }
+      }
+    } else {
+      console.log(
+        `[Swiss] No valid location coordinates; generating sign-based chart without houses/angles`
+      );
+      // Return placeholder angles when location is unknown
+      angles = {
+        ascendant: { sign: "Unknown" },
+        midheaven: { sign: "Unknown" },
+        descendant: { sign: "Unknown" },
+        ic: { sign: "Unknown" },
+      };
     }
 
-    const houseCusps = housesResult.house; // Array: [undefined, cusp1, cusp2, ..., cusp12]
-    const ascendantDegrees = housesResult.ascendant;
-    const midheavenDegrees = housesResult.mc;
-    const descendantDegrees = (ascendantDegrees + 180) % 360;
-    const icDegrees = (midheavenDegrees + 180) % 360;
-
-    console.log(
-      `[Swiss] Houses calculated: Asc=${ascendantDegrees.toFixed(2)}°, MC=${midheavenDegrees.toFixed(2)}°`
-    );
-
-    // Build angles
-    const angles: SwissAngles = {
-      ascendant: { sign: degreesToSign(ascendantDegrees) },
-      midheaven: { sign: degreesToSign(midheavenDegrees) },
-      descendant: { sign: degreesToSign(descendantDegrees) },
-      ic: { sign: degreesToSign(icDegrees) },
-    };
-
-    // Build house placements
-    const houses: SwissHousePlacement[] = [];
-    for (let i = 1; i <= 12; i++) {
-      houses.push({
-        house: i,
-        signOnCusp: degreesToSign(houseCusps[i]),
-      });
-    }
-
-    // Calculate planet positions
+    // Calculate planet positions (these don't require lat/lon)
     const planets: SwissPlanetPlacement[] = [];
 
     for (const [key, planetId] of Object.entries(PLANETS)) {
@@ -304,7 +336,11 @@ export async function computeSwissPlacements(
 
       const longitude = result.longitude; // Ecliptic longitude in degrees
       const sign = degreesToSign(longitude);
-      const house = determinePlanetHouse(longitude, houseCusps);
+
+      // Only determine house if we have valid house cusps
+      const house = hasValidLocation && houseCusps.length > 0
+        ? determinePlanetHouse(longitude, houseCusps)
+        : null;
 
       planets.push({
         name: PLANET_NAMES[planetId],
@@ -312,9 +348,15 @@ export async function computeSwissPlacements(
         house,
       });
 
-      console.log(
-        `[Swiss] ${PLANET_NAMES[planetId]}: ${longitude.toFixed(2)}° → ${sign} in house ${house}`
-      );
+      if (hasValidLocation && house !== null) {
+        console.log(
+          `[Swiss] ${PLANET_NAMES[planetId]}: ${longitude.toFixed(2)}° → ${sign} in house ${house}`
+        );
+      } else {
+        console.log(
+          `[Swiss] ${PLANET_NAMES[planetId]}: ${longitude.toFixed(2)}° → ${sign}`
+        );
+      }
     }
 
     // Close Swiss Ephemeris (cleanup)
