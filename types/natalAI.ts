@@ -79,46 +79,21 @@ export type FullBirthChartInsight = {
     language: string;
   };
   coreSummary: {
-    headline: string; // 1-2 sentence headline
+    headline: string;
+    overallVibe: string;
     bigThree: {
-      sun: string; // e.g. "Sun in Taurus (4th house)"
-      moon: string; // e.g. "Moon in Gemini (6th house)"
-      rising: string; // e.g. "Capricorn Rising"
+      sun: string;
+      moon: string;
+      rising: string;
     };
-    overallVibe: string; // a short summary paragraph
   };
   sections: {
-    identity: string; // paragraphs
-    emotions: string; // paragraphs
-    loveAndRelationships: string; // paragraphs
-    workAndMoney: string; // paragraphs
-    purposeAndGrowth: string; // paragraphs
-    innerWorld: string; // paragraphs
-  };
-  planetInsights?: Array<{
-    name: string; // "Sun", "Moon", etc.
-    sign: string; // "Taurus"
-    house: number | null; // 1-12 or null
-    summary: string; // 2-4 sentences
-  }>;
-  houseInsights?: Array<{
-    house: number; // 1-12
-    signOnCusp: string; // "Capricorn"
-    summary: string; // 2-4 sentences
-  }>;
-  angleInsights?: {
-    ascendant: string; // interpretation of Rising
-    midheaven: string; // interpretation of MC
-    descendant: string; // interpretation of Desc
-    ic: string; // interpretation of IC
-  };
-  aspectInsights?: {
-    summary?: string; // overview of key aspects
-    aspects?: Array<{
-      between: string; // "Sun square Moon"
-      type: "conjunction" | "sextile" | "square" | "trine" | "opposition";
-      interpretation: string;
-    }>;
+    identity: string;
+    emotions: string;
+    loveAndRelationships: string;
+    workAndMoney: string;
+    purposeAndGrowth: string;
+    innerWorld: string;
   };
 };
 
