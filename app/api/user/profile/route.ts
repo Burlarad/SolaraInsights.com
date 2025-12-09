@@ -43,6 +43,7 @@ export async function PATCH(req: NextRequest) {
             ? updates.birth_time
             : "12:00";
 
+        console.log("[Profile] Attempting to resolve birth location...");
         const resolved = await resolveBirthLocation({
           city: updates.birth_city,
           region: updates.birth_region,
@@ -55,16 +56,31 @@ export async function PATCH(req: NextRequest) {
         updates.birth_lon = resolved.lon;
         updates.timezone = resolved.timezone;
 
-        console.log("[Profile] Birth location resolved:", resolved);
+        console.log("[Profile] ✓ Birth location resolved successfully:", {
+          city: updates.birth_city,
+          region: updates.birth_region,
+          country: updates.birth_country,
+          lat: resolved.lat,
+          lon: resolved.lon,
+          timezone: resolved.timezone,
+        });
       } catch (err: any) {
         console.error(
-          "[Profile] Failed to resolve birth location:",
+          "[Profile] ✗ Failed to resolve birth location:",
           err?.message || err
         );
+        console.error("[Profile] Location input:", {
+          city: updates.birth_city,
+          region: updates.birth_region,
+          country: updates.birth_country,
+        });
         // Do NOT block save; we can leave birth_lat/birth_lon/timezone unchanged or null
+        // This allows users to save their profile even if geocoding fails
+        // They can try again later or fix typos in Settings
         console.warn(
           "[Profile] Continuing with profile save without lat/lon/timezone updates"
         );
+        console.warn("[Profile] User can retry in Settings to resolve location");
       }
     }
 

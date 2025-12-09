@@ -71,6 +71,7 @@ export interface PublicHoroscopeRequest {
   sign: string; // "Aries", "Taurus", etc.
   timeframe: "today" | "week" | "month";
   timezone: string; // IANA timezone, e.g., "America/New_York"
+  language?: string; // Language code (e.g., "en", "es", "fr"), defaults to "en"
 }
 
 // ============================================================================

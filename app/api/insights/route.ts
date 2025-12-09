@@ -86,8 +86,11 @@ export async function POST(req: NextRequest) {
         periodKey = getDayKey(profile.timezone);
     }
 
-    // Build cache key
-    const cacheKey = `insight:v1:${user.id}:${timeframe}:${periodKey}`;
+    // Get user's language preference (default to English)
+    const targetLanguage = profile.language || "en";
+
+    // Build cache key (include language so different languages get separate caches)
+    const cacheKey = `insight:v1:${user.id}:${timeframe}:${periodKey}:${targetLanguage}`;
 
     // Check cache
     const cachedInsight = await getCache<SanctuaryInsight>(cacheKey);
@@ -111,6 +114,11 @@ Core principles:
 - Use plain, dyslexia-friendly language with short paragraphs
 - Avoid medical, legal, or financial advice
 - Focus on emotional intelligence and practical wisdom
+
+LANGUAGE:
+- The user has selected language code: ${targetLanguage}
+- You MUST write ALL narrative text in the user's selected language
+- Field names in the JSON remain in English, but all content values must be in the user's language
 
 You must respond with ONLY valid JSON matching this exact structure. No additional text, no markdown, no explanations—just the JSON object.`;
 

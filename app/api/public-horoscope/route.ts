@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
   try {
     // Parse request body
     const body: PublicHoroscopeRequest = await req.json();
-    const { sign, timeframe, timezone } = body;
+    const { sign, timeframe, timezone, language } = body;
 
     if (!sign || !timeframe || !timezone) {
       return NextResponse.json(
@@ -16,13 +16,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Get language preference (default to English)
+    const targetLanguage = language || "en";
+
     // ========================================
     // CACHING LAYER
     // ========================================
 
     // Use timezone to compute a day key (public horoscopes refresh daily regardless of timeframe)
     const periodKey = getDayKey(timezone);
-    const cacheKey = `publicHoroscope:v1:${sign}:${timeframe}:${periodKey}:${timezone}`;
+    const cacheKey = `publicHoroscope:v1:${sign}:${timeframe}:${periodKey}:${timezone}:${targetLanguage}`;
 
     // Check cache
     const cachedHoroscope = await getCache<PublicHoroscopeResponse>(cacheKey);
@@ -44,6 +47,11 @@ Core principles:
 - Focus on emotional intelligence and practical wisdom
 
 This is a PUBLIC, non-personalized reading. Keep it general but still warm and insightful.
+
+LANGUAGE:
+- The user has selected language code: ${targetLanguage}
+- You MUST write ALL content (title, summary, keyThemes) in the user's selected language
+- Field names in the JSON remain in English, but all content values must be in the user's language
 
 You must respond with ONLY valid JSON matching this exact structure. No additional text, no markdown, no explanations—just the JSON object.`;
 
