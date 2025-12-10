@@ -269,6 +269,9 @@ export async function POST() {
     }
 
     // Return both placements and insight
+    console.log(`[BirthChart] Returning ${swissPlacements.houses.length} houses to client`);
+    console.log(`[BirthChart] Houses:`, JSON.stringify(swissPlacements.houses, null, 2));
+
     return NextResponse.json({
       placements: swissPlacements,
       insight,

@@ -273,6 +273,10 @@ export async function computeSwissPlacements(
         };
       } else {
         houseCusps = housesResult.house; // Array: [undefined, cusp1, cusp2, ..., cusp12]
+        console.log(`[Swiss] Raw housesResult.house type:`, typeof housesResult.house);
+        console.log(`[Swiss] Raw housesResult.house:`, housesResult.house);
+        console.log(`[Swiss] housesResult.house array length:`, housesResult.house?.length);
+
         const ascendantDegrees = housesResult.ascendant;
         const midheavenDegrees = housesResult.mc;
         const descendantDegrees = (ascendantDegrees + 180) % 360;
@@ -291,11 +295,45 @@ export async function computeSwissPlacements(
         };
 
         // Build house placements
+        console.log(`[Swiss] houseCusps array length: ${houseCusps.length}`);
+
+        // Swiss Ephemeris swe_houses() returns a 1-indexed array: [undefined, cusp1, cusp2, ..., cusp12]
+        // So the array should have 13 elements (indices 0-12), with index 0 being undefined
         for (let i = 1; i <= 12; i++) {
+          const cusp = houseCusps[i];
+
+          // Check if cusp is defined and is a valid number
+          if (cusp === undefined || typeof cusp !== "number" || isNaN(cusp)) {
+            console.error(`[Swiss] House ${i} cusp is invalid:`, cusp);
+            console.error(`[Swiss] This suggests an indexing issue with the Swiss Ephemeris library`);
+            console.error(`[Swiss] houseCusps array:`, houseCusps);
+
+            // Try alternate indexing (0-based) as fallback
+            const altCusp = houseCusps[i - 1];
+            if (altCusp !== undefined && typeof altCusp === "number" && !isNaN(altCusp)) {
+              console.warn(`[Swiss] Using 0-indexed cusp for house ${i}: ${altCusp}`);
+              const sign = degreesToSign(altCusp);
+              houses.push({ house: i, signOnCusp: sign });
+              console.log(`[Swiss] House ${i}: cusp=${altCusp.toFixed(2)}° → ${sign} (using 0-index fallback)`);
+            } else {
+              console.error(`[Swiss] Cannot determine cusp for house ${i}, skipping`);
+            }
+            continue;
+          }
+
+          const sign = degreesToSign(cusp);
+          console.log(`[Swiss] House ${i}: cusp=${cusp.toFixed(2)}° → ${sign}`);
           houses.push({
             house: i,
-            signOnCusp: degreesToSign(houseCusps[i]),
+            signOnCusp: sign,
           });
+        }
+        console.log(`[Swiss] Total houses built: ${houses.length}`);
+
+        // Runtime guard: verify we have exactly 12 houses
+        if (houses.length !== 12) {
+          console.error(`[Swiss] UNEXPECTED HOUSE COUNT: ${houses.length} (expected 12)`);
+          console.error(`[Swiss] Houses array:`, houses);
         }
       }
     } else {
@@ -314,7 +352,7 @@ export async function computeSwissPlacements(
     // Calculate planet positions (these don't require lat/lon)
     const planets: SwissPlanetPlacement[] = [];
 
-    for (const [key, planetId] of Object.entries(PLANETS)) {
+    for (const [, planetId] of Object.entries(PLANETS)) {
       const result = swisseph.swe_calc_ut(
         julianDay,
         planetId,

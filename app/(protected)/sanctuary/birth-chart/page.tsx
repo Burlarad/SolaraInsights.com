@@ -58,6 +58,9 @@ export default function BirthChartPage() {
         }
 
         const data: BirthChartResponse = await res.json();
+        console.log("[BirthChart UI] Received placements:", data.placements);
+        console.log("[BirthChart UI] Houses count:", data.placements?.houses?.length);
+        console.log("[BirthChart UI] Houses array:", data.placements?.houses);
         setPlacements(data.placements || null);
         setInsight(data.insight ?? null);
         setLoading(false);
