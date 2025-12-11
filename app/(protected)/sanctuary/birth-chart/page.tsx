@@ -5,6 +5,27 @@ import { SanctuaryTabs } from "@/components/sanctuary/SanctuaryTabs";
 import type { FullBirthChartInsight } from "@/types/natalAI";
 import { SolaraCard } from "@/components/ui/solara-card";
 
+const HOUSE_LABELS: Record<number, { ordinal: string; title: string }> = {
+  1: { ordinal: "1st", title: "Self & Aura" },
+  2: { ordinal: "2nd", title: "Money & Worth" },
+  3: { ordinal: "3rd", title: "Mind & Messages" },
+  4: { ordinal: "4th", title: "Home & Roots" },
+  5: { ordinal: "5th", title: "Joy & Creation" },
+  6: { ordinal: "6th", title: "Work & Well-Being" },
+  7: { ordinal: "7th", title: "Partners & Mirrors" },
+  8: { ordinal: "8th", title: "Intimacy & Transformation" },
+  9: { ordinal: "9th", title: "Beliefs & Exploration" },
+  10: { ordinal: "10th", title: "Career & Legacy" },
+  11: { ordinal: "11th", title: "Community & Dreams" },
+  12: { ordinal: "12th", title: "Inner World & Spirit" },
+};
+
+function formatHouseLabel(house: number): string {
+  const meta = HOUSE_LABELS[house];
+  if (!meta) return `${house}th House`;
+  return `${meta.ordinal} House – ${meta.title}`;
+}
+
 type BirthChartResponse = {
   placements: any; // SwissPlacements type - can refine later
   insight: FullBirthChartInsight | null;
@@ -277,7 +298,7 @@ export default function BirthChartPage() {
                     ?.filter((h: any) => !!h.signOnCusp)
                     .map((h: any) => (
                       <li key={h.house}>
-                        <span className="font-medium">{h.house} house cusp</span>{" "}
+                        <span className="font-medium">{formatHouseLabel(h.house)}</span>{" "}
                         — {h.signOnCusp}
                       </li>
                     ))}
