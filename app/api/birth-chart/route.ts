@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { computeSwissPlacements } from "@/lib/ephemeris/swissEngine";
+import { getOrComputeBirthChart } from "@/lib/birthChart/storage";
 import { openai, OPENAI_MODELS } from "@/lib/openai/client";
 import type { NatalAIRequest, FullBirthChartInsight } from "@/types/natalAI";
 
@@ -135,28 +135,48 @@ export async function POST() {
       );
     }
 
-    // Use birth_time if available, otherwise default to noon
-    const timeForSwiss =
-      profile.birth_time && typeof profile.birth_time === "string"
-        ? profile.birth_time
-        : "12:00";
-
-    if (!profile.birth_time) {
-      console.log(
-        `[BirthChart] No birth_time set for user ${user.id}; using 12:00 as default time for Swiss engine.`
-      );
-    }
-
-    // STEP A: Compute Swiss Ephemeris placements
-    const swissPlacements = await computeSwissPlacements({
-      date: profile.birth_date,
-      time: timeForSwiss,
+    console.log("[BirthChart] Using birth data for computation", {
+      userId: user.id,
+      birth_date: profile.birth_date,
+      birth_time: profile.birth_time,
       timezone: profile.timezone,
-      lat: profile.birth_lat,
-      lon: profile.birth_lon,
+      birth_city: profile.birth_city,
+      birth_region: profile.birth_region,
+      birth_country: profile.birth_country,
+      birth_lat: profile.birth_lat,
+      birth_lon: profile.birth_lon,
     });
 
-    console.log("[BirthChart] Swiss placements computed for user", user.id);
+    // STEP A: Load or compute Swiss Ephemeris placements
+    // This uses stored placements from database if available,
+    // or computes fresh if not found/invalid
+    const swissPlacements = await getOrComputeBirthChart(user.id, profile);
+
+    console.log("[BirthChart] Placements loaded for user", user.id);
+    console.log(
+      "[BirthChart] Placements snapshot",
+      JSON.stringify(
+        {
+          houses: swissPlacements.houses.map((h) => ({
+            house: h.house,
+            signOnCusp: h.signOnCusp,
+          })),
+          planets: swissPlacements.planets.map((p) => ({
+            name: p.name,
+            sign: p.sign,
+            house: p.house,
+          })),
+          angles: {
+            ascendant: swissPlacements.angles.ascendant,
+            midheaven: swissPlacements.angles.midheaven,
+            descendant: swissPlacements.angles.descendant,
+            ic: swissPlacements.angles.ic,
+          },
+        },
+        null,
+        2
+      )
+    );
 
     // Build NatalAIRequest for OpenAI
     const displayName = profile.preferred_name || profile.full_name;

@@ -4,7 +4,9 @@ import { openai, OPENAI_MODELS } from "@/lib/openai/client";
 import { InsightsRequest, SanctuaryInsight } from "@/types";
 import { getTarotCardNames } from "@/lib/tarot";
 import { getRuneNames } from "@/lib/runes";
-import { getCache, setCache, getDayKey, getWeekKey, getMonthKey, getYearKey } from "@/lib/cache";
+import { getCache, setCache, acquireLock, releaseLock } from "@/lib/cache/redis";
+import { getUserPeriodKeys, buildInsightCacheKey, buildInsightLockKey } from "@/lib/timezone/periodKeys";
+import { getEffectiveTimezone } from "@/lib/location/detection";
 
 export async function POST(req: NextRequest) {
   try {
@@ -67,39 +69,56 @@ export async function POST(req: NextRequest) {
     // CACHING LAYER
     // ========================================
 
-    // Compute period key based on user's local timezone
-    let periodKey: string;
-    switch (timeframe) {
-      case "today":
-        periodKey = getDayKey(profile.timezone);
-        break;
-      case "week":
-        periodKey = getWeekKey(profile.timezone);
-        break;
-      case "month":
-        periodKey = getMonthKey(profile.timezone);
-        break;
-      case "year":
-        periodKey = getYearKey(profile.timezone);
-        break;
-      default:
-        periodKey = getDayKey(profile.timezone);
-    }
+    // Get effective timezone (with UTC fallback if missing)
+    const effectiveTimezone = getEffectiveTimezone(profile);
+
+    // Get period keys based on user's timezone
+    const periodKeys = getUserPeriodKeys(effectiveTimezone);
+
+    // Select the appropriate period key based on timeframe
+    const periodKey = timeframe === "today" ? periodKeys.daily
+      : timeframe === "week" ? periodKeys.weekly
+      : timeframe === "month" ? periodKeys.monthly
+      : periodKeys.yearly;
 
     // Get user's language preference (default to English)
     const targetLanguage = profile.language || "en";
 
-    // Build cache key (include language so different languages get separate caches)
-    const cacheKey = `insight:v1:${user.id}:${timeframe}:${periodKey}:${targetLanguage}`;
+    // Build cache and lock keys
+    const cacheKey = buildInsightCacheKey(user.id, timeframe, periodKey, targetLanguage);
+    const lockKey = buildInsightLockKey(user.id, timeframe, periodKey);
 
-    // Check cache
+    // Check cache first
     const cachedInsight = await getCache<SanctuaryInsight>(cacheKey);
     if (cachedInsight) {
-      console.log(`[Insights] Cache hit for ${cacheKey}`);
+      console.log(`[Insights] ✓ Cache hit for ${cacheKey}`);
       return NextResponse.json(cachedInsight);
     }
 
-    console.log(`[Insights] Cache miss for ${cacheKey}, generating fresh insight...`);
+    // Cache miss - need to generate fresh insight
+    console.log(`[Insights] ✗ Cache miss for ${cacheKey}`);
+
+    // Acquire lock to prevent duplicate generation
+    const lockAcquired = await acquireLock(lockKey, 60); // 60 second lock
+
+    if (!lockAcquired) {
+      // Another request is already generating this insight
+      console.log(`[Insights] Lock already held for ${lockKey}, waiting for cached result...`);
+
+      // Wait a bit and check cache again (likely populated by the other request)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      const nowCachedInsight = await getCache<SanctuaryInsight>(cacheKey);
+      if (nowCachedInsight) {
+        console.log(`[Insights] ✓ Found cached result after lock wait`);
+        return NextResponse.json(nowCachedInsight);
+      }
+
+      // Still not cached - proceed to generate (lock may have been released)
+      console.log(`[Insights] No cached result after wait, generating anyway`);
+    } else {
+      console.log(`[Insights] ✓ Lock acquired for ${lockKey}, generating insight...`);
+    }
 
     // TODO: Future enhancement - load recent journal entries for this user
     // and summarize "themes" with OpenAI to feed into the insights prompt
@@ -223,10 +242,25 @@ Return a JSON object with this structure:
     // Cache the fresh insight (TTL: 24 hours)
     await setCache(cacheKey, insight, 86400);
 
+    // Release lock after successful generation
+    if (lockAcquired) {
+      await releaseLock(lockKey);
+      console.log(`[Insights] ✓ Lock released for ${lockKey}`);
+    }
+
     // Return the insight
     return NextResponse.json(insight);
   } catch (error: any) {
     console.error("Error generating insights:", error);
+
+    // Release lock on error
+    try {
+      const lockKey = buildInsightLockKey(user.id, timeframe, periodKey);
+      await releaseLock(lockKey);
+    } catch (unlockError) {
+      console.error("Error releasing lock on failure:", unlockError);
+    }
+
     return NextResponse.json(
       {
         error: "Generation failed",

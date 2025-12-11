@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getZodiacSign } from "@/lib/zodiac";
 import { resolveBirthLocation } from "@/lib/location/resolveBirthLocation";
+import { computeAndStoreBirthChart } from "@/lib/birthChart/storage";
 
 export async function PATCH(req: NextRequest) {
   try {
@@ -98,6 +99,32 @@ export async function PATCH(req: NextRequest) {
     }
 
     console.log(`[Profile] Profile updated successfully for user ${user.id}`);
+
+    // STEP: Recompute birth chart if birth data changed
+    // Only compute if we have complete birth data (date + geocoded location)
+    const hasCompleteBirthData =
+      updatedProfile.birth_date &&
+      updatedProfile.birth_lat &&
+      updatedProfile.birth_lon &&
+      updatedProfile.timezone;
+
+    if (hasCompleteBirthData) {
+      try {
+        console.log("[Profile] Recomputing birth chart after profile update...");
+        await computeAndStoreBirthChart(user.id, {
+          birth_date: updatedProfile.birth_date,
+          birth_time: updatedProfile.birth_time,
+          birth_lat: updatedProfile.birth_lat,
+          birth_lon: updatedProfile.birth_lon,
+          timezone: updatedProfile.timezone,
+        });
+        console.log("[Profile] ✓ Birth chart recomputed and stored");
+      } catch (chartError: any) {
+        // Log error but don't block profile update response
+        console.error("[Profile] ✗ Failed to recompute birth chart:", chartError.message);
+        console.warn("[Profile] Chart will be computed on next birth chart page load");
+      }
+    }
 
     return NextResponse.json({
       profile: updatedProfile,
