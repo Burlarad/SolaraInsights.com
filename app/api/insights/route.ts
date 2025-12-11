@@ -9,23 +9,30 @@ import { getUserPeriodKeys, buildInsightCacheKey, buildInsightLockKey } from "@/
 import { getEffectiveTimezone } from "@/lib/location/detection";
 
 export async function POST(req: NextRequest) {
+  // Parse request body first (outside try block for error handling)
+  const body: InsightsRequest = await req.json();
+  const { timeframe, focusQuestion } = body;
+
+  // Get authenticated user (outside try block so we can use in catch)
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json(
+      { error: "Unauthorized", message: "Please sign in to access insights." },
+      { status: 401 }
+    );
+  }
+
+  // Capture user ID for use in error handler
+  const userId = user.id;
+
+  // Declare periodKey outside try block so it's accessible in error handler
+  let periodKey: string | undefined;
+
   try {
-    // Parse request body
-    const body: InsightsRequest = await req.json();
-    const { timeframe, focusQuestion } = body;
-
-    // Get authenticated user and their profile
-    const supabase = await createServerSupabaseClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized", message: "Please sign in to access insights." },
-        { status: 401 }
-      );
-    }
 
     // Load user's profile
     const { data: profile, error: profileError } = await supabase
@@ -76,7 +83,7 @@ export async function POST(req: NextRequest) {
     const periodKeys = getUserPeriodKeys(effectiveTimezone);
 
     // Select the appropriate period key based on timeframe
-    const periodKey = timeframe === "today" ? periodKeys.daily
+    periodKey = timeframe === "today" ? periodKeys.daily
       : timeframe === "week" ? periodKeys.weekly
       : timeframe === "month" ? periodKeys.monthly
       : periodKeys.yearly;
@@ -253,10 +260,13 @@ Return a JSON object with this structure:
   } catch (error: any) {
     console.error("Error generating insights:", error);
 
-    // Release lock on error
+    // Release lock on error (if we got far enough to create one)
     try {
-      const lockKey = buildInsightLockKey(user.id, timeframe, periodKey);
-      await releaseLock(lockKey);
+      // Note: periodKey might not be defined if error occurred before caching layer
+      if (periodKey) {
+        const lockKey = buildInsightLockKey(userId, timeframe, periodKey);
+        await releaseLock(lockKey);
+      }
     } catch (unlockError) {
       console.error("Error releasing lock on failure:", unlockError);
     }

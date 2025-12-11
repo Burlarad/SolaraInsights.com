@@ -140,41 +140,6 @@ export default function BirthChartPage() {
                   {insight!.coreSummary.headline}
                 </h1>
 
-                {/* Big 3 hero card */}
-                <SolaraCard className="space-y-2">
-                  <h2 className="text-sm font-semibold tracking-wide uppercase text-accent-ink/70">
-                    Big 3
-                  </h2>
-                  {placements && (
-                    <ul className="text-sm text-accent-ink/80 space-y-1">
-                      {placements.planets?.find((p: any) => p.name === "Sun") && (
-                        <li>
-                          <span className="font-medium">Sun</span>{" "}
-                          in {placements.planets.find((p: any) => p.name === "Sun").sign}
-                          {placements.planets.find((p: any) => p.name === "Sun").house
-                            ? ` — ${placements.planets.find((p: any) => p.name === "Sun").house} house`
-                            : ""}
-                        </li>
-                      )}
-                      {placements.planets?.find((p: any) => p.name === "Moon") && (
-                        <li>
-                          <span className="font-medium">Moon</span>{" "}
-                          in {placements.planets.find((p: any) => p.name === "Moon").sign}
-                          {placements.planets.find((p: any) => p.name === "Moon").house
-                            ? ` — ${placements.planets.find((p: any) => p.name === "Moon").house} house`
-                            : ""}
-                        </li>
-                      )}
-                      {placements.angles?.ascendant?.sign && (
-                        <li>
-                          <span className="font-medium">Rising</span>{" "}
-                          in {placements.angles.ascendant.sign}
-                        </li>
-                      )}
-                    </ul>
-                  )}
-                </SolaraCard>
-
                 {/* Overall vibe paragraph */}
                 <p className="text-sm text-accent-ink/80 leading-relaxed whitespace-pre-line">
                   {insight!.coreSummary.overallVibe}
