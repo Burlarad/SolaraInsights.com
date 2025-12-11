@@ -189,21 +189,16 @@ function determinePlanetHouse(planetLongitude: number, houseCusps: number[]): nu
   // Normalize planet longitude to 0-360
   const normLon = ((planetLongitude % 360) + 360) % 360;
 
-  // Check each house (cusps are indices 1-12 in the array returned by swe_houses)
-  for (let i = 1; i <= 12; i++) {
-    const currentCusp = houseCusps[i];
-    const nextCusp = houseCusps[i === 12 ? 1 : i + 1];
+  // houseCusps is 0-indexed (0 = house 1 cusp)
+  for (let i = 0; i < 12; i++) {
+    const start = houseCusps[i];
+    const end = i === 11 ? houseCusps[0] + 360 : houseCusps[i + 1];
 
-    // Handle wrap-around at 360/0 degrees
-    if (currentCusp < nextCusp) {
-      if (normLon >= currentCusp && normLon < nextCusp) {
-        return i;
-      }
-    } else {
-      // Wrap-around case (e.g., cusp at 350° to cusp at 10°)
-      if (normLon >= currentCusp || normLon < nextCusp) {
-        return i;
-      }
+    // Adjust longitude into the same rotation as start/end
+    const lon = normLon < start ? normLon + 360 : normLon;
+
+    if (lon >= start && lon < end) {
+      return i + 1; // house numbers are 1-based
     }
   }
 
@@ -272,10 +267,16 @@ export async function computeSwissPlacements(
           ic: { sign: "Unknown" },
         };
       } else {
-        houseCusps = housesResult.house; // Array: [undefined, cusp1, cusp2, ..., cusp12]
+        houseCusps = housesResult.house; // Array: [cusp1, cusp2, ..., cusp12] (0-indexed)
         console.log(`[Swiss] Raw housesResult.house type:`, typeof housesResult.house);
         console.log(`[Swiss] Raw housesResult.house:`, housesResult.house);
         console.log(`[Swiss] housesResult.house array length:`, housesResult.house?.length);
+
+        // Validate shape
+        if (!Array.isArray(houseCusps) || houseCusps.length !== 12) {
+          console.error(`[Swiss] Unexpected housesResult.house shape:`, houseCusps);
+          throw new Error("Swiss houses array did not contain 12 cusps");
+        }
 
         const ascendantDegrees = housesResult.ascendant;
         const midheavenDegrees = housesResult.mc;
@@ -297,44 +298,17 @@ export async function computeSwissPlacements(
         // Build house placements
         console.log(`[Swiss] houseCusps array length: ${houseCusps.length}`);
 
-        // Swiss Ephemeris swe_houses() returns a 1-indexed array: [undefined, cusp1, cusp2, ..., cusp12]
-        // So the array should have 13 elements (indices 0-12), with index 0 being undefined
-        for (let i = 1; i <= 12; i++) {
+        // Build house placements using 0-based cusps
+        for (let i = 0; i < 12; i++) {
           const cusp = houseCusps[i];
-
-          // Check if cusp is defined and is a valid number
-          if (cusp === undefined || typeof cusp !== "number" || isNaN(cusp)) {
-            console.error(`[Swiss] House ${i} cusp is invalid:`, cusp);
-            console.error(`[Swiss] This suggests an indexing issue with the Swiss Ephemeris library`);
-            console.error(`[Swiss] houseCusps array:`, houseCusps);
-
-            // Try alternate indexing (0-based) as fallback
-            const altCusp = houseCusps[i - 1];
-            if (altCusp !== undefined && typeof altCusp === "number" && !isNaN(altCusp)) {
-              console.warn(`[Swiss] Using 0-indexed cusp for house ${i}: ${altCusp}`);
-              const sign = degreesToSign(altCusp);
-              houses.push({ house: i, signOnCusp: sign });
-              console.log(`[Swiss] House ${i}: cusp=${altCusp.toFixed(2)}° → ${sign} (using 0-index fallback)`);
-            } else {
-              console.error(`[Swiss] Cannot determine cusp for house ${i}, skipping`);
-            }
-            continue;
-          }
-
           const sign = degreesToSign(cusp);
-          console.log(`[Swiss] House ${i}: cusp=${cusp.toFixed(2)}° → ${sign}`);
+          console.log(`[Swiss] House ${i + 1}: cusp=${cusp.toFixed(2)}° → ${sign}`);
           houses.push({
-            house: i,
+            house: i + 1,
             signOnCusp: sign,
           });
         }
         console.log(`[Swiss] Total houses built: ${houses.length}`);
-
-        // Runtime guard: verify we have exactly 12 houses
-        if (houses.length !== 12) {
-          console.error(`[Swiss] UNEXPECTED HOUSE COUNT: ${houses.length} (expected 12)`);
-          console.error(`[Swiss] Houses array:`, houses);
-        }
       }
     } else {
       console.log(
