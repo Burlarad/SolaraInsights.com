@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { SanctuaryTabs } from "@/components/sanctuary/SanctuaryTabs";
 import type { FullBirthChartInsight } from "@/types/natalAI";
+import { SolaraCard } from "@/components/ui/solara-card";
 
 type BirthChartResponse = {
   placements: any; // SwissPlacements type - can refine later
@@ -119,7 +120,7 @@ export default function BirthChartPage() {
                 </h1>
 
                 {/* Big 3 hero card */}
-                <div className="rounded-2xl border border-accent-soft bg-accent-soft/10 p-4 space-y-2">
+                <SolaraCard className="space-y-2">
                   <h2 className="text-sm font-semibold tracking-wide uppercase text-accent-ink/70">
                     Big 3
                   </h2>
@@ -151,7 +152,7 @@ export default function BirthChartPage() {
                       )}
                     </ul>
                   )}
-                </div>
+                </SolaraCard>
 
                 {/* Overall vibe paragraph */}
                 <p className="text-sm text-accent-ink/80 leading-relaxed whitespace-pre-line">
@@ -159,58 +160,58 @@ export default function BirthChartPage() {
                 </p>
 
                 {/* Section cards */}
-                <section className="rounded-2xl border border-accent-soft/60 bg-accent-soft/5 p-4 space-y-2">
+                <SolaraCard className="space-y-2">
                   <h2 className="text-base font-semibold">Identity</h2>
                   <p className="text-sm text-accent-ink/80 leading-relaxed whitespace-pre-line">
                     {insight!.sections.identity}
                   </p>
-                </section>
+                </SolaraCard>
 
-                <section className="rounded-2xl border border-accent-soft/60 bg-accent-soft/5 p-4 space-y-2">
+                <SolaraCard className="space-y-2">
                   <h2 className="text-base font-semibold">Emotions</h2>
                   <p className="text-sm text-accent-ink/80 leading-relaxed whitespace-pre-line">
                     {insight!.sections.emotions}
                   </p>
-                </section>
+                </SolaraCard>
 
-                <section className="rounded-2xl border border-accent-soft/60 bg-accent-soft/5 p-4 space-y-2">
+                <SolaraCard className="space-y-2">
                   <h2 className="text-base font-semibold">Love & Relationships</h2>
                   <p className="text-sm text-accent-ink/80 leading-relaxed whitespace-pre-line">
                     {insight!.sections.loveAndRelationships}
                   </p>
-                </section>
+                </SolaraCard>
 
-                <section className="rounded-2xl border border-accent-soft/60 bg-accent-soft/5 p-4 space-y-2">
+                <SolaraCard className="space-y-2">
                   <h2 className="text-base font-semibold">Work & Money</h2>
                   <p className="text-sm text-accent-ink/80 leading-relaxed whitespace-pre-line">
                     {insight!.sections.workAndMoney}
                   </p>
-                </section>
+                </SolaraCard>
 
-                <section className="rounded-2xl border border-accent-soft/60 bg-accent-soft/5 p-4 space-y-2">
+                <SolaraCard className="space-y-2">
                   <h2 className="text-base font-semibold">Purpose & Growth</h2>
                   <p className="text-sm text-accent-ink/80 leading-relaxed whitespace-pre-line">
                     {insight!.sections.purposeAndGrowth}
                   </p>
-                </section>
+                </SolaraCard>
 
-                <section className="rounded-2xl border border-accent-soft/60 bg-accent-soft/5 p-4 space-y-2">
+                <SolaraCard className="space-y-2">
                   <h2 className="text-base font-semibold">Inner World</h2>
                   <p className="text-sm text-accent-ink/80 leading-relaxed whitespace-pre-line">
                     {insight!.sections.innerWorld}
                   </p>
-                </section>
+                </SolaraCard>
               </>
             )}
 
             {!hasFullInsight && (
-              <div className="rounded-2xl border border-accent-soft bg-accent-soft/30 p-6 space-y-3">
+              <SolaraCard className="space-y-3">
                 <h2 className="text-lg font-semibold">Interpretation not available</h2>
                 <p className="text-sm text-accent-ink/80 leading-relaxed">
                   We calculated your birth chart, but couldn't generate a full interpretation right now.
                   Your chart placements are saved — please try again in a moment.
                 </p>
-              </div>
+              </SolaraCard>
             )}
           </div>
 
@@ -218,7 +219,7 @@ export default function BirthChartPage() {
           {placements && (
             <aside className="space-y-4 lg:sticky lg:top-28">
               {/* Chart Snapshot */}
-              <div className="rounded-2xl border border-accent-soft bg-accent-soft/10 p-4 space-y-3">
+              <SolaraCard className="space-y-3">
                 <h2 className="text-sm font-semibold tracking-wide uppercase text-accent-ink/70">
                   Chart Snapshot
                 </h2>
@@ -248,10 +249,10 @@ export default function BirthChartPage() {
                     </li>
                   )}
                 </ul>
-              </div>
+              </SolaraCard>
 
               {/* Planets */}
-              <div className="rounded-2xl border border-accent-soft bg-accent-soft/5 p-4 space-y-3">
+              <SolaraCard className="space-y-3">
                 <h2 className="text-sm font-semibold tracking-wide uppercase text-accent-ink/70">
                   Planets
                 </h2>
@@ -264,10 +265,10 @@ export default function BirthChartPage() {
                     </li>
                   ))}
                 </ul>
-              </div>
+              </SolaraCard>
 
               {/* Houses */}
-              <div className="rounded-2xl border border-accent-soft bg-accent-soft/5 p-4 space-y-3">
+              <SolaraCard className="space-y-3">
                 <h2 className="text-sm font-semibold tracking-wide uppercase text-accent-ink/70">
                   Houses
                 </h2>
@@ -281,7 +282,7 @@ export default function BirthChartPage() {
                       </li>
                     ))}
                 </ul>
-              </div>
+              </SolaraCard>
             </aside>
           )}
         </div>
