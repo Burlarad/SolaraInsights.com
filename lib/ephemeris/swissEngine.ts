@@ -7,7 +7,11 @@
  * This module provides raw placements (planets, houses, angles) without interpretations.
  */
 
+import path from "path";
 import swisseph from "swisseph";
+import { calculateAspects, type AspectPlacement } from "./aspects";
+import { computeDerived, type DerivedSummary } from "./derived";
+import { computeCalculated, type CalculatedSummary } from "./calculated";
 
 // ============================================================================
 // TYPES
@@ -25,18 +29,21 @@ export type SwissPlanetPlacement = {
   name: string; // "Sun", "Moon", etc.
   sign: string; // "Taurus", "Gemini", etc.
   house: number | null; // 1-12 or null if cannot be determined
+  longitude: number | null; // Ecliptic longitude in degrees (0-360)
+  retrograde?: boolean; // True if planet is moving backwards (longitudeSpeed < 0)
 };
 
 export type SwissHousePlacement = {
   house: number; // 1-12
   signOnCusp: string; // "Capricorn", etc.
+  cuspLongitude: number; // Exact cusp longitude in degrees (0-360)
 };
 
 export type SwissAngles = {
-  ascendant: { sign: string };
-  midheaven: { sign: string };
-  descendant: { sign: string };
-  ic: { sign: string };
+  ascendant: { sign: string; longitude: number | null };
+  midheaven: { sign: string; longitude: number | null };
+  descendant: { sign: string; longitude: number | null };
+  ic: { sign: string; longitude: number | null };
 };
 
 export type SwissPlacements = {
@@ -44,6 +51,9 @@ export type SwissPlacements = {
   planets: SwissPlanetPlacement[];
   houses: SwissHousePlacement[];
   angles: SwissAngles;
+  aspects?: AspectPlacement[]; // Major aspects between planets
+  derived?: DerivedSummary; // Derived summary (element balance, dominant signs/planets, etc.)
+  calculated?: CalculatedSummary; // Calculated features (South Node, Part of Fortune, etc.)
 };
 
 // ============================================================================
@@ -224,10 +234,11 @@ export async function computeSwissPlacements(
   );
 
   try {
-    // Set ephemeris path (Swiss Ephemeris data files)
-    // By default, swisseph uses built-in Moshier ephemeris (less accurate but no files needed)
-    // For production, you may want to download Swiss Ephemeris data files
-    swisseph.swe_set_ephe_path("");
+    // Set ephemeris path to use Swiss Ephemeris data files
+    // This enables calculation of asteroids like Chiron, Ceres, etc.
+    // Data files are included in node_modules/swisseph/ephe
+    const ephePath = path.join(process.cwd(), "node_modules", "swisseph", "ephe");
+    swisseph.swe_set_ephe_path(ephePath);
 
     // Calculate Julian Day for the birth moment
     const julianDay = localToJulianDay(input.date, input.time, input.timezone);
@@ -261,10 +272,10 @@ export async function computeSwissPlacements(
         console.warn(`[Swiss] House calculation failed: ${housesResult.error}. Proceeding without houses.`);
         // Proceed without houses
         angles = {
-          ascendant: { sign: "Unknown" },
-          midheaven: { sign: "Unknown" },
-          descendant: { sign: "Unknown" },
-          ic: { sign: "Unknown" },
+          ascendant: { sign: "Unknown", longitude: null },
+          midheaven: { sign: "Unknown", longitude: null },
+          descendant: { sign: "Unknown", longitude: null },
+          ic: { sign: "Unknown", longitude: null },
         };
       } else {
         houseCusps = housesResult.house; // Array: [cusp1, cusp2, ..., cusp12] (0-indexed)
@@ -289,10 +300,10 @@ export async function computeSwissPlacements(
 
         // Build angles
         angles = {
-          ascendant: { sign: degreesToSign(ascendantDegrees) },
-          midheaven: { sign: degreesToSign(midheavenDegrees) },
-          descendant: { sign: degreesToSign(descendantDegrees) },
-          ic: { sign: degreesToSign(icDegrees) },
+          ascendant: { sign: degreesToSign(ascendantDegrees), longitude: ascendantDegrees },
+          midheaven: { sign: degreesToSign(midheavenDegrees), longitude: midheavenDegrees },
+          descendant: { sign: degreesToSign(descendantDegrees), longitude: descendantDegrees },
+          ic: { sign: degreesToSign(icDegrees), longitude: icDegrees },
         };
 
         // Build house placements
@@ -306,6 +317,7 @@ export async function computeSwissPlacements(
           houses.push({
             house: i + 1,
             signOnCusp: sign,
+            cuspLongitude: cusp,
           });
         }
         console.log(`[Swiss] Total houses built: ${houses.length}`);
@@ -316,10 +328,10 @@ export async function computeSwissPlacements(
       );
       // Return placeholder angles when location is unknown
       angles = {
-        ascendant: { sign: "Unknown" },
-        midheaven: { sign: "Unknown" },
-        descendant: { sign: "Unknown" },
-        ic: { sign: "Unknown" },
+        ascendant: { sign: "Unknown", longitude: null },
+        midheaven: { sign: "Unknown", longitude: null },
+        descendant: { sign: "Unknown", longitude: null },
+        ic: { sign: "Unknown", longitude: null },
       };
     }
 
@@ -347,6 +359,7 @@ export async function computeSwissPlacements(
       }
 
       const longitude = result.longitude; // Ecliptic longitude in degrees
+      const longitudeSpeed = result.longitudeSpeed; // Degrees per day
       const sign = degreesToSign(longitude);
 
       // Only determine house if we have valid house cusps
@@ -354,32 +367,87 @@ export async function computeSwissPlacements(
         ? determinePlanetHouse(longitude, houseCusps)
         : null;
 
+      // Determine if planet is retrograde (moving backwards)
+      // longitudeSpeed < 0 means retrograde motion
+      const retrograde = typeof longitudeSpeed === "number" && longitudeSpeed < 0;
+
       planets.push({
         name: PLANET_NAMES[planetId],
         sign,
         house,
+        longitude,
+        retrograde,
       });
 
+      const retrogradeLabel = retrograde ? " ℞" : "";
       if (hasValidLocation && house !== null) {
         console.log(
-          `[Swiss] ${PLANET_NAMES[planetId]}: ${longitude.toFixed(2)}° → ${sign} in house ${house}`
+          `[Swiss] ${PLANET_NAMES[planetId]}: ${longitude.toFixed(2)}° → ${sign}${retrogradeLabel} in house ${house}`
         );
       } else {
         console.log(
-          `[Swiss] ${PLANET_NAMES[planetId]}: ${longitude.toFixed(2)}° → ${sign}`
+          `[Swiss] ${PLANET_NAMES[planetId]}: ${longitude.toFixed(2)}° → ${sign}${retrogradeLabel}`
         );
       }
     }
 
-    // Close Swiss Ephemeris (cleanup)
-    swisseph.swe_close();
+    // Calculate aspects between planets
+    const aspects = calculateAspects(planets);
+    console.log(`[Swiss] Computed ${aspects.length} aspects between planets`);
 
+    // Build initial placements object (needed for derived computation)
     const placements: SwissPlacements = {
       system: "western_tropical_placidus",
       planets,
       houses,
       angles,
+      aspects,
     };
+
+    // Compute derived summary (element balance, dominant signs/planets, etc.)
+    const derived = computeDerived(placements);
+    console.log(`[Swiss] Derived summary computed:`, {
+      chartRuler: derived.chartRuler,
+      dominantSigns: derived.dominantSigns.map(s => s.sign),
+      dominantPlanets: derived.dominantPlanets.map(p => p.name),
+    });
+
+    // Add derived summary to placements
+    placements.derived = derived;
+
+    // Compute calculated features (South Node, Part of Fortune, etc.)
+    const calculated = computeCalculated(placements);
+    console.log(`[Swiss] Calculated features computed:`, {
+      chartType: calculated.chartType,
+      southNode: {
+        sign: calculated.southNode.sign,
+        house: calculated.southNode.house,
+        longitude: calculated.southNode.longitude.toFixed(2),
+      },
+      partOfFortune: calculated.partOfFortune
+        ? {
+            sign: calculated.partOfFortune.sign,
+            house: calculated.partOfFortune.house,
+            longitude: calculated.partOfFortune.longitude.toFixed(2),
+          }
+        : null,
+      emphasis: {
+        topSigns: calculated.emphasis.signEmphasis.slice(0, 3).map(s => `${s.sign} (${s.count})`),
+        topHouses: calculated.emphasis.houseEmphasis.slice(0, 3).map(h => `House ${h.house} (${h.count})`),
+        stelliums: calculated.emphasis.stelliums.map(s =>
+          s.type === "sign"
+            ? `${s.planets.length} in ${s.name}`
+            : `${s.planets.length} in House ${s.name}`
+        ),
+      },
+      patterns: calculated.patterns.map(p => `${p.type}: ${p.planets.join(", ")}`),
+    });
+
+    // Add calculated features to placements
+    placements.calculated = calculated;
+
+    // Close Swiss Ephemeris (cleanup)
+    swisseph.swe_close();
 
     console.log(`[Swiss] Placements computed successfully`);
 

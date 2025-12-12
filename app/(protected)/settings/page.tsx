@@ -83,7 +83,7 @@ export default function SettingsPage() {
     setSaveSuccess(false);
     setSaveError(null);
 
-    // Validate required fields for birth chart
+    // Validate required fields for Soul Path
     const missingFields: string[] = [];
     if (!birthDate) missingFields.push("Birth date");
     if (!birthCity) missingFields.push("Birth city");

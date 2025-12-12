@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 const tabs = [
   { label: "Insights", href: "/sanctuary" },
-  { label: "Birth Chart", href: "/sanctuary/birth-chart" },
+  { label: "Soul Path", href: "/sanctuary/birth-chart" },
   { label: "Connections", href: "/sanctuary/connections" },
   { label: "Library", href: "/sanctuary/library", disabled: true },
 ];

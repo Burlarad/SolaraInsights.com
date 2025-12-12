@@ -17,9 +17,26 @@ import { computeSwissPlacements, type SwissPlacements } from "@/lib/ephemeris/sw
 import type { Profile } from "@/types";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
+/**
+ * Birth chart schema version for cache invalidation
+ * Increment this when placements structure changes (e.g., adding aspects, longitude, etc.)
+ *
+ * Version history:
+ * - v1: Initial with basic placements
+ * - v2: Added longitude, retrograde, aspects
+ * - v3: Added derived summary (element balance, dominant signs/planets)
+ * - v4: Added calculated features (South Node) + cusp/angle longitudes
+ * - v5: Added chartType (day/night) + Part of Fortune to calculated
+ * - v6: Added emphasis (houseEmphasis, signEmphasis, stelliums) to calculated
+ * - v7: Added patterns (grand_trine, t_square) to calculated
+ * - v8: Fixed patterns to exclude North Node, South Node, Chiron from vertices
+ */
+const BIRTH_CHART_SCHEMA_VERSION = 8;
+
 export type BirthChartData = {
   placements: SwissPlacements;
   computedAt: string; // ISO timestamp
+  schemaVersion: number; // Schema version for cache invalidation
 };
 
 /**
@@ -59,7 +76,7 @@ export async function computeAndStoreBirthChart(
     lon: profile.birth_lon,
   });
 
-  // Store in database
+  // Store in database with schema version for cache invalidation
   const computedAt = new Date().toISOString();
 
   try {
@@ -68,7 +85,10 @@ export async function computeAndStoreBirthChart(
     const { error } = await supabase
       .from("profiles")
       .update({
-        birth_chart_placements_json: placements,
+        birth_chart_placements_json: {
+          schemaVersion: BIRTH_CHART_SCHEMA_VERSION,
+          ...placements,
+        },
         birth_chart_computed_at: computedAt,
       })
       .eq("id", userId);
@@ -115,9 +135,14 @@ export async function loadStoredBirthChart(
       return null;
     }
 
+    // Extract schema version (default to 0 if missing for old caches)
+    const storedData = data.birth_chart_placements_json as any;
+    const { schemaVersion = 0, ...placementsData } = storedData;
+
     return {
-      placements: data.birth_chart_placements_json as SwissPlacements,
+      placements: placementsData as SwissPlacements,
       computedAt: data.birth_chart_computed_at,
+      schemaVersion,
     };
   } catch (error: any) {
     console.error(`[BirthChart] Error loading stored placements:`, error);
@@ -144,19 +169,23 @@ export function isStoredChartValid(
 ): boolean {
   if (!storedChart) return false;
 
-  // For now, we'll consider any stored chart valid
-  // In the future, we could add validation logic to check if birth data changed
-  // by comparing profile.updated_at with birth_chart_computed_at
-  // or by tracking birth_data_hash
+  // Check 1: Schema version must match current version
+  // Old caches (before schema versioning) will have schemaVersion = 0
+  if (storedChart.schemaVersion < BIRTH_CHART_SCHEMA_VERSION) {
+    console.log(
+      `[BirthChart] Schema version outdated (stored: ${storedChart.schemaVersion}, current: ${BIRTH_CHART_SCHEMA_VERSION}), regenerating chart`
+    );
+    return false;
+  }
 
-  // Basic check: if chart was computed, assume it's valid unless profile updated after
+  // Check 2: Profile must not have been updated after chart was computed
+  // This catches changes to birth data (date, time, location, timezone)
   const chartDate = new Date(storedChart.computedAt);
   const profileDate = new Date(currentProfile.updated_at);
 
   if (profileDate > chartDate) {
-    // Profile was updated after chart was computed - might need recomputation
     console.log(
-      `[BirthChart] Profile updated after chart computation, may need regeneration`
+      `[BirthChart] Profile updated after chart computation (profile: ${currentProfile.updated_at}, chart: ${storedChart.computedAt}), may need regeneration`
     );
     return false;
   }

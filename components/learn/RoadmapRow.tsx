@@ -2,7 +2,7 @@ import { LearnGuideCard } from "./LearnGuideCard";
 
 const ROADMAP_GUIDES = [
   {
-    title: "Birth Chart Basics",
+    title: "Soul Path Basics",
     summary: "Understand the foundation of your astrological blueprint.",
     readingTime: 7,
     category: "FOUNDATIONS",

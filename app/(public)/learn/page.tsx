@@ -83,8 +83,8 @@ export default function LearnPage() {
       <section className="pt-8">
         <p className="micro-label mb-4">EVERGREEN GUIDANCE</p>
         <LearnGuideCard
-          title="Birth Chart Basics"
-          summary="Your birth chart is a map of the sky at the moment you were born. It's the foundation of all astrological work—a cosmic fingerprint that reflects your strengths, challenges, and soul's journey. In this guide, you'll learn how to read your chart with clarity and compassion."
+          title="Soul Path Basics"
+          summary="Your Soul Path is a map of the sky at the moment you were born. It's the foundation of all astrological work—a cosmic fingerprint that reflects your strengths, challenges, and soul's journey. In this guide, you'll learn how to read your Soul Path with clarity and compassion."
           readingTime={20}
           category="FOUNDATIONS"
           tags={["Astrology", "Foundations", "Wellness"]}

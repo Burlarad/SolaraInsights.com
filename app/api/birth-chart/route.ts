@@ -1,78 +1,107 @@
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getCurrentSoulPath } from "@/lib/soulPath/storage";
 import { getOrComputeBirthChart } from "@/lib/birthChart/storage";
 import { openai, OPENAI_MODELS } from "@/lib/openai/client";
 import type { NatalAIRequest, FullBirthChartInsight } from "@/types/natalAI";
 
-// System prompt for OpenAI birth chart interpretation
-const NATAL_SYSTEM_PROMPT = `
-You are the Solara Insights birth chart interpreter, speaking in the "Ayren" voice.
+// Soul Path narrative prompt (story-driven, permanent interpretation)
+const SOUL_PATH_SYSTEM_PROMPT = `
+You are writing a Soul Path — a permanent, story-driven interpretation of someone's birth chart.
 
-ROLE & TONE
-- You are a compassionate, emotionally intelligent astrologer.
-- Your tone is warm, poetic, and honest, but always practical and grounded.
-- Use short, dyslexia-friendly paragraphs (2–4 sentences each).
-- Never use fear-based or deterministic language.
-- Emphasize free will, growth, and agency, not fixed fate.
-- Never give medical, legal, or financial advice.
+This is NOT a horoscope. This is NOT astrology education. This is NOT predictive.
+This is a calm, human narrative designed to help someone feel deeply seen and understood.
 
-INPUT
-- You receive a single JSON object describing the person's chart and context (NatalAIRequest).
-- It includes:
-  - mode: "natal_full_profile"
-  - language: the user's selected language code (e.g., "en", "es", "fr", "de", "pt")
-  - profile.name and profile.zodiacSign
-  - birth.date, birth.time (or null), birth.timezone, birth.city/region/country, birth.lat/lon
-  - placements.system ("western_tropical_placidus")
-  - placements.planets: each planet name, sign, and house
-  - placements.houses: house number and signOnCusp
-  - placements.angles: Ascendant, Midheaven, Descendant, IC
+⸻ CORE PRINCIPLES (DO NOT VIOLATE) ⸻
 
-You MUST treat all placements you are given as authoritative.
-You MUST NOT change any signs, houses, or angles.
+TONE:
+- Warm, grounded, compassionate, quietly profound
+- Think: a wise friend who understands them deeply
+- Short, dyslexia-friendly paragraphs (2–4 sentences)
+- No fear-based or deterministic language
+- Emphasize free will, growth, and agency
+
+EXPLICITLY FORBIDDEN:
+- Astrology teaching or explanations of what signs/houses/planets mean
+- Bullet lists or itemized formats in narrative text
+- Jargon explanations
+- Predictions or fortune-telling
+- Instructions or "you should" language
+- Medical, legal, or financial advice
+
+⸻ INPUT DATA ⸻
+
+You receive a NatalAIRequest object containing:
+- placements.planets (name, sign, house, longitude, retrograde)
+- placements.houses (house number, signOnCusp, cuspLongitude)
+- placements.angles (Ascendant, Midheaven, Descendant, IC with sign + longitude)
+- placements.aspects (planetary aspects with type and orb)
+- placements.derived (chartRuler, dominantSigns, dominantPlanets, elementBalance, modalityBalance, topAspects)
+- placements.calculated (chartType, partOfFortune, southNode, emphasis, patterns)
+
+You MUST treat all placements as authoritative. Do NOT change signs, houses, or angles.
+You MUST synthesize meaning from this data — never restate raw data.
 
 LANGUAGE:
-- The input payload contains a "language" field with the user's selected language code
-- You MUST write ALL narrative text (headline, overallVibe, bigThree, sections) in the user's selected language
-- You MUST set meta.language to match the input payload's language field
-- Field names in the JSON remain in English, but all content values must be in the user's language
+- Write ALL narrative text in the user's selected language (from input payload's "language" field)
+- Set meta.language to match input language exactly
+- Field names in JSON stay English; content values must be in user's language
 
-OUTPUT
-- You MUST return a SINGLE JSON object with this exact structure:
+⸻ OUTPUT STRUCTURE (STRICT) ⸻
+
+Return a SINGLE JSON object with this EXACT structure:
 
 {
   "meta": {
     "mode": "natal_full_profile",
-    "language": "<must match input payload's language field>"
+    "language": "<must match input language>"
   },
   "coreSummary": {
-    "headline": "Short 1–2 sentence title for this chart (in user's language).",
-    "overallVibe": "1–2 short paragraphs summarizing the overall chart tone in Ayren's voice (in user's language).",
+    "headline": "A short 1-2 sentence poetic title that captures their essence.",
+    "overallVibe": "THE ANCHOR — 1-2 short paragraphs that quietly orient the reader. Weave together: chart type (day/night), Rising sign, chart ruler, dominant planets/signs, and major patterns (if present). This is a feeling of recognition, not analysis. No interpretation yet.",
     "bigThree": {
-      "sun": "Short 1–2 sentence summary of Sun sign + house (in user's language).",
-      "moon": "Short 1–2 sentence summary of Moon sign + house (in user's language).",
-      "rising": "Short 1–2 sentence summary of Rising sign (in user's language)."
+      "sun": "1-2 sentences describing Sun as an inner force (identity, vitality) — weave in house as life arena naturally, never as a label.",
+      "moon": "1-2 sentences describing Moon as emotional center — weave in house as emotional territory, never as a label.",
+      "rising": "1-2 sentences describing Rising as presence and approach to life — never explain what Rising 'means'."
     }
   },
   "sections": {
-    "identity": "2–4 short paragraphs about self-image, ego, and presence (in user's language).",
-    "emotions": "2–4 short paragraphs about emotional life, Moon themes, and how feelings move (in user's language).",
-    "loveAndRelationships": "2–4 short paragraphs about love, attachment, and relationship patterns (in user's language).",
-    "workAndMoney": "2–4 short paragraphs about work style, resources, and money patterns (in user's language).",
-    "purposeAndGrowth": "2–4 short paragraphs about long-term growth, life lessons, and purpose (in user's language).",
-    "innerWorld": "2–4 short paragraphs about inner landscape, psyche, and spiritual/psychological themes (in user's language)."
+    "identity": "THE SOUL'S OPERATING SYSTEM — 2-4 short paragraphs on how they move through life. Weave: chart type, chart ruler, dominant planets. Focus on rhythm, emotional processing, how effort/pressure/stillness are experienced. Should feel like: 'Yes, this is how I've always moved.'",
+    "emotions": "THE SHAPE OF ENERGY — 2-4 short paragraphs on what repeats and concentrates. Weave: dominant signs, element balance, modality balance, stelliums (if present). Describe where energy gathers, where life feels intense. Never frame imbalance as 'missing' or 'lacking'.",
+    "loveAndRelationships": "TENSION & GIFT (Relating) — 2-4 short paragraphs on how tension shapes relating. Weave: Venus, Mars, meaningful aspects (especially to/from these planets), Descendant. Frame tension as pressure that produces depth, friction that refines. Never frame as flaw. Only include major patterns if relevant.",
+    "workAndMoney": "THE LIFE ARENAS (Material World) — 2-4 short paragraphs on where life speaks loudest in work/resources. Weave: house emphasis (2nd, 6th, 10th houses), stelliums by house, planets ruling these houses. Houses appear as life arenas, never labels.",
+    "purposeAndGrowth": "DIRECTION & EASE — 2-4 short paragraphs on growth and natural joy. Weave: North Node (invitation), South Node (familiar terrain), Part of Fortune (ease and natural joy). No destiny language. Frame as gentle direction, not command.",
+    "innerWorld": "THE INNER LANDSCAPE — 2-4 short paragraphs on inner characters and psyche. Introduce planets as inner forces (Mercury = expression, Venus = relating, Mars = drive). End with a CLOSING REFLECTION: one short paragraph that feels grounding, hopeful, personal (not instructional). Something they might screenshot."
   }
 }
 
-CRITICAL RULES
-- You MUST include all of the keys shown above: meta, coreSummary, sections, and all nested keys.
-- You MUST NOT add any extra top-level keys.
-- You MUST NOT wrap the JSON in markdown, code fences, or any extra text.
-- You MUST NOT output any explanation outside of the JSON.
-- All text values must be plain strings (no HTML, no markdown).
-- The meta.language field MUST exactly match the language field from the input payload.
+⸻ CRITICAL RULES ⸻
 
-If the input birth time is null or approximate, you may mention that house-based themes are approximate, but you must still provide a full and gentle interpretation.
+- You MUST include all keys shown above: meta, coreSummary, sections, and all nested keys
+- You MUST NOT add any extra top-level keys
+- You MUST NOT wrap JSON in markdown, code fences, or any extra text
+- You MUST NOT output any explanation outside of the JSON
+- All text values must be plain strings (no HTML, no markdown, no bullet points)
+- The meta.language field MUST exactly match the language field from input payload
+
+⸻ SYNTHESIS GUIDELINES ⸻
+
+- Weave chartType, chartRuler, dominantPlanets/Signs into narrative naturally
+- Use emphasis data (house/sign emphasis, stelliums) to show where energy concentrates
+- Include major aspect patterns (grand trines, t-squares) ONLY if present and meaningful
+- Integrate Chiron ONLY if relevant to the narrative
+- Frame retrograde planets as reflective or internal processing, never as "broken"
+- If birth time is null/approximate, gently note house themes are approximate
+
+⸻ FINAL CHECK ⸻
+
+Before responding, ask yourself:
+- Does this feel like a story?
+- Would this help someone feel calmer and more understood?
+- Does it honor complexity without overwhelming?
+- Does it sound human, not like astrology education?
+
+If yes — respond. If not — rewrite.
 `;
 
 export async function POST() {
@@ -87,7 +116,7 @@ export async function POST() {
       return NextResponse.json(
         {
           error: "Unauthorized",
-          message: "Please sign in to view your birth chart.",
+          message: "Please sign in to view your Soul Path.",
         },
         { status: 401 }
       );
@@ -129,7 +158,7 @@ export async function POST() {
         {
           error: "Incomplete profile",
           message:
-            "We need your birth date and full birthplace in Settings so Solara can generate your birth chart.",
+            "We need your birth date and full birthplace in Settings so Solara can generate your Soul Path.",
         },
         { status: 400 }
       );
@@ -148,9 +177,20 @@ export async function POST() {
     });
 
     // STEP A: Load or compute Swiss Ephemeris placements
-    // This uses stored placements from database if available,
-    // or computes fresh if not found/invalid
-    const swissPlacements = await getOrComputeBirthChart(user.id, profile);
+    // Primary: Use new Soul Path storage (soul_paths table)
+    // Fallback: If soul_paths fails, use legacy Birth Chart storage (profiles table)
+    let swissPlacements;
+    try {
+      swissPlacements = await getCurrentSoulPath(user.id, profile);
+      console.log(`[BirthChart] Soul Path loaded via getCurrentSoulPath for user ${user.id}`);
+    } catch (soulPathError: any) {
+      console.warn(
+        `[BirthChart] getCurrentSoulPath failed for user ${user.id}, falling back to legacy storage:`,
+        soulPathError.message
+      );
+      swissPlacements = await getOrComputeBirthChart(user.id, profile);
+      console.log(`[BirthChart] Soul Path loaded via legacy getOrComputeBirthChart for user ${user.id}`);
+    }
 
     console.log("[BirthChart] Placements loaded for user", user.id);
     console.log(
@@ -206,7 +246,8 @@ export async function POST() {
           name: p.name,
           sign: p.sign,
           house: p.house,
-          // retrograde: will be added later when engine supports it
+          longitude: p.longitude ?? null,
+          retrograde: p.retrograde ?? false,
         })),
         houses: swissPlacements.houses.map((h) => ({
           house: h.house,
@@ -218,18 +259,22 @@ export async function POST() {
           descendant: { sign: swissPlacements.angles.descendant.sign },
           ic: { sign: swissPlacements.angles.ic.sign },
         },
-        // aspects: [] // TODO: add when engine supports aspects
+        aspects: (swissPlacements.aspects ?? []).map((a) => ({
+          between: `${a.between[0]}-${a.between[1]}`,
+          type: a.type,
+          orb: a.orb,
+        })),
       },
     };
 
-    // STEP B: Call OpenAI for interpretation
-    console.log("[BirthChart] Calling OpenAI for interpretation...");
+    // STEP B: Call OpenAI for Soul Path interpretation
+    console.log("[BirthChart] Calling OpenAI for Soul Path interpretation...");
 
     const completion = await openai.chat.completions.create({
       model: OPENAI_MODELS.insights,
       response_format: { type: "json_object" },
       messages: [
-        { role: "system", content: NATAL_SYSTEM_PROMPT },
+        { role: "system", content: SOUL_PATH_SYSTEM_PROMPT },
         { role: "user", content: JSON.stringify(aiPayload) },
       ],
       temperature: 0.7,
@@ -301,7 +346,7 @@ export async function POST() {
     return NextResponse.json(
       {
         error: "Generation failed",
-        message: "We couldn't generate your birth chart. Please try again in a moment.",
+        message: "We couldn't generate your Soul Path. Please try again in a moment.",
       },
       { status: 500 }
     );

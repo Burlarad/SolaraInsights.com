@@ -143,7 +143,7 @@ export default function JoinPage() {
                 • Daily, weekly, monthly & yearly insights
               </p>
               <p className="text-sm text-accent-ink/80">
-                • Complete birth chart analysis
+                • Complete Soul Path analysis
               </p>
               <p className="text-sm text-accent-ink/80">
                 • Relationship insights
