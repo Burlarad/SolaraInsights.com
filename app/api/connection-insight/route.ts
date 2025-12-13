@@ -3,12 +3,16 @@ import { createServerSupabaseClient, createAdminSupabaseClient } from "@/lib/sup
 import { openai, OPENAI_MODELS } from "@/lib/openai/client";
 import { ConnectionInsight } from "@/types";
 import { getCache, setCache, getDayKey } from "@/lib/cache";
+import { acquireLock, releaseLock } from "@/lib/cache/redis";
 import { touchLastSeen } from "@/lib/activity/touchLastSeen";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
 
 const PROMPT_VERSION = 1;
 
 export async function POST(req: NextRequest) {
+  let lockKey: string | undefined;
+  let lockAcquired = false;
+
   try {
     // Get authenticated user
     const supabase = await createServerSupabaseClient();
@@ -151,6 +155,31 @@ export async function POST(req: NextRequest) {
 
     console.log(`[ConnectionInsight] Cache miss for ${cacheKey}, generating fresh insight...`);
 
+    // Build lock key to prevent stampede
+    lockKey = `lock:connectionInsight:v1:p${PROMPT_VERSION}:${user.id}:${connectionId}:${requestTimeframe}:${periodKey}:${language}`;
+
+    // Try to acquire lock
+    lockAcquired = await acquireLock(lockKey, 60); // 60 second lock
+
+    if (!lockAcquired) {
+      // Another request is already generating this insight
+      console.log(`[ConnectionInsight] Lock already held for ${lockKey}, waiting for cached result...`);
+
+      // Wait a bit and check cache again (likely populated by the other request)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      const nowCachedInsight = await getCache<ConnectionInsight>(cacheKey);
+      if (nowCachedInsight) {
+        console.log(`[ConnectionInsight] ✓ Found cached result after lock wait`);
+        return NextResponse.json(nowCachedInsight);
+      }
+
+      // Still not cached - proceed to generate anyway (lock may have been released)
+      console.log(`[ConnectionInsight] No cached result after wait, generating anyway`);
+    } else {
+      console.log(`[ConnectionInsight] ✓ Lock acquired for ${lockKey}, generating insight...`);
+    }
+
     // Construct OpenAI prompt
     const systemPrompt = `You are a compassionate relationship and connection guide for Solara Insights, a sanctuary of calm, emotionally intelligent guidance.
 
@@ -235,10 +264,26 @@ Write in a warm, gentle tone. Focus on meaning and practical insight, not techni
     // Cache the connection insight (TTL: 24 hours)
     await setCache(cacheKey, insight, 86400);
 
+    // Release lock after successful generation
+    if (lockAcquired) {
+      await releaseLock(lockKey!);
+      console.log(`[ConnectionInsight] ✓ Lock released for ${lockKey}`);
+    }
+
     // Return the connection insight
     return NextResponse.json(insight);
   } catch (error: any) {
     console.error("Error generating connection insight:", error);
+
+    // Release lock on error (if we acquired it)
+    try {
+      if (lockAcquired && lockKey) {
+        await releaseLock(lockKey);
+      }
+    } catch (unlockError) {
+      console.error("Error releasing lock on failure:", unlockError);
+    }
+
     return NextResponse.json(
       {
         error: "Generation failed",

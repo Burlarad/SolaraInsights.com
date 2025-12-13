@@ -30,37 +30,10 @@ const MAX_USERS_PER_RUN = 500; // Safety cap to avoid timeouts
 export async function GET(req: NextRequest) {
   // Auth: Check x-cron-secret header
   const cronSecret = req.headers.get("x-cron-secret");
-  const serverSecret = process.env.CRON_SECRET;
 
-  // Safe debug: Check if server secret is configured
-  if (!serverSecret) {
-    console.error("[Prewarm] CRON_SECRET environment variable is not set");
-    return NextResponse.json(
-      { error: "CRON_SECRET_NOT_SET" },
-      { status: 500 }
-    );
-  }
-
-  // Safe debug: Check if header is missing
-  if (!cronSecret) {
-    console.warn("[Prewarm] Missing x-cron-secret header");
-    return NextResponse.json(
-      { error: "MISSING_HEADER" },
-      { status: 401 }
-    );
-  }
-
-  // Safe debug: Check if values match (only log lengths, never the actual values)
-  if (cronSecret !== serverSecret) {
-    console.warn("[Prewarm] Secret mismatch - header length:", cronSecret.length, "server length:", serverSecret.length);
-    return NextResponse.json(
-      {
-        error: "MISMATCH",
-        headerLen: cronSecret.length,
-        serverSecretLen: serverSecret.length
-      },
-      { status: 401 }
-    );
+  if (!cronSecret || cronSecret !== process.env.CRON_SECRET) {
+    console.warn("[Prewarm] Unauthorized cron attempt");
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   console.log("[Prewarm] Starting pre-warm job...");

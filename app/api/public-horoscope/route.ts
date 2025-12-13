@@ -1,29 +1,56 @@
 import { NextRequest, NextResponse } from "next/server";
 import { openai, OPENAI_MODELS } from "@/lib/openai/client";
-import { PublicHoroscopeRequest, PublicHoroscopeResponse } from "@/types";
+import { PublicHoroscopeResponse } from "@/types";
 import { getCache, setCache, getDayKey } from "@/lib/cache";
 import { acquireLock, releaseLock } from "@/lib/cache/redis";
+import { checkRateLimit, getClientIP } from "@/lib/cache/rateLimit";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
+import { publicHoroscopeSchema, validateRequest } from "@/lib/validation/schemas";
+
+// Rate limit: 30 requests per minute per IP
+const RATE_LIMIT = 30;
+const RATE_WINDOW_SECONDS = 60;
 
 const PROMPT_VERSION = 1;
 
 export async function POST(req: NextRequest) {
+  // Rate limiting
+  const clientIP = getClientIP(req);
+  const rateLimit = await checkRateLimit(
+    `public-horoscope:${clientIP}`,
+    RATE_LIMIT,
+    RATE_WINDOW_SECONDS
+  );
+
+  // Rate limit headers for all responses
+  const rateLimitHeaders: Record<string, string> = {
+    "X-RateLimit-Limit": String(rateLimit.limit),
+    "X-RateLimit-Remaining": String(rateLimit.remaining),
+    "X-RateLimit-Reset": String(Math.ceil(rateLimit.resetAt / 1000)),
+    "X-RateLimit-Backend": rateLimit.backend,
+  };
+
+  if (!rateLimit.success) {
+    return NextResponse.json(
+      { error: "Too many requests", message: "Please wait a moment before trying again." },
+      { status: 429, headers: rateLimitHeaders }
+    );
+  }
+
   let lockKey: string | undefined;
   let lockAcquired = false;
 
   try {
-    // Parse request body
-    const body: PublicHoroscopeRequest = await req.json();
-    const { sign, timeframe, timezone, language } = body;
-
-    if (!sign || !timeframe || !timezone) {
+    // Validate request body
+    const validation = await validateRequest(req, publicHoroscopeSchema);
+    if (!validation.success) {
       return NextResponse.json(
-        { error: "Missing required fields", message: "Sign, timeframe, and timezone are required." },
-        { status: 400 }
+        { error: "Validation failed", message: validation.error },
+        { status: 400, headers: rateLimitHeaders }
       );
     }
 
-    // Get language preference (default to English)
+    const { sign, timeframe, timezone, language } = validation.data;
     const targetLanguage = language || "en";
 
     // ========================================
@@ -56,7 +83,7 @@ export async function POST(req: NextRequest) {
         timezone,
       });
 
-      return NextResponse.json(cachedHoroscope);
+      return NextResponse.json(cachedHoroscope, { headers: rateLimitHeaders });
     }
 
     console.log(`[PublicHoroscope] Cache miss for ${cacheKey}, generating fresh horoscope...`);
@@ -77,7 +104,7 @@ export async function POST(req: NextRequest) {
       const nowCachedHoroscope = await getCache<PublicHoroscopeResponse>(cacheKey);
       if (nowCachedHoroscope) {
         console.log(`[PublicHoroscope] ✓ Found cached result after lock wait`);
-        return NextResponse.json(nowCachedHoroscope);
+        return NextResponse.json(nowCachedHoroscope, { headers: rateLimitHeaders });
       }
 
       // Still not cached - proceed to generate anyway (lock may have been released)
@@ -179,7 +206,7 @@ Write in a warm, gentle tone. This is a public reading, so keep it general but m
     }
 
     // Return the horoscope
-    return NextResponse.json(horoscope);
+    return NextResponse.json(horoscope, { headers: rateLimitHeaders });
   } catch (error: any) {
     console.error("Error generating public horoscope:", error);
 
@@ -197,7 +224,7 @@ Write in a warm, gentle tone. This is a public reading, so keep it general but m
         error: "Generation failed",
         message: "We couldn't generate the horoscope. Please try again in a moment.",
       },
-      { status: 500 }
+      { status: 500, headers: rateLimitHeaders }
     );
   }
 }

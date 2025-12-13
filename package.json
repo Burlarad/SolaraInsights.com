@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint . --ext .ts,.tsx"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.1.0",
@@ -30,7 +30,8 @@
     "swisseph": "^0.5.17",
     "tailwind-merge": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
-    "tz-lookup": "^6.1.25"
+    "tz-lookup": "^6.1.25",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@types/node": "^20",
