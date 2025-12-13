@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createServerSupabaseClient, createAdminSupabaseClient } from "@/lib/supabase/server";
 import { Connection } from "@/types";
+import { touchLastSeen } from "@/lib/activity/touchLastSeen";
 
 export async function GET(req: NextRequest) {
   try {
@@ -16,6 +17,10 @@ export async function GET(req: NextRequest) {
         { status: 401 }
       );
     }
+
+    // Track user activity (non-blocking)
+    const admin = createAdminSupabaseClient();
+    void touchLastSeen(admin, user.id, 30);
 
     // Fetch all connections for this user
     const { data: connections, error } = await supabase
@@ -56,6 +61,10 @@ export async function POST(req: NextRequest) {
         { status: 401 }
       );
     }
+
+    // Track user activity (non-blocking)
+    const admin = createAdminSupabaseClient();
+    void touchLastSeen(admin, user.id, 30);
 
     // Parse request body
     const body = await req.json();
@@ -126,6 +135,10 @@ export async function DELETE(req: NextRequest) {
         { status: 401 }
       );
     }
+
+    // Track user activity (non-blocking)
+    const admin = createAdminSupabaseClient();
+    void touchLastSeen(admin, user.id, 30);
 
     // Parse request body
     const body = await req.json();

@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createServerSupabaseClient, createAdminSupabaseClient } from "@/lib/supabase/server";
 import { openai, OPENAI_MODELS } from "@/lib/openai/client";
 import { ConnectionInsight } from "@/types";
 import { getCache, setCache, getDayKey } from "@/lib/cache";
+import { touchLastSeen } from "@/lib/activity/touchLastSeen";
+import { trackAiUsage } from "@/lib/ai/trackUsage";
+
+const PROMPT_VERSION = 1;
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,6 +22,10 @@ export async function POST(req: NextRequest) {
         { status: 401 }
       );
     }
+
+    // Track user activity (non-blocking)
+    const admin = createAdminSupabaseClient();
+    void touchLastSeen(admin, user.id, 30);
 
     // Parse request body
     const body = await req.json();
@@ -113,12 +121,31 @@ export async function POST(req: NextRequest) {
 
     // Connection insights refresh at the viewer's (profile's) midnight
     const periodKey = getDayKey(profile.timezone);
-    const cacheKey = `connectionInsight:v1:${user.id}:${connectionId}:${requestTimeframe}:${periodKey}`;
+    const language = profile.language || "en";
+    const cacheKey = `connectionInsight:v1:p${PROMPT_VERSION}:${user.id}:${connectionId}:${requestTimeframe}:${periodKey}:${language}`;
 
     // Check cache
     const cachedInsight = await getCache<ConnectionInsight>(cacheKey);
     if (cachedInsight) {
       console.log(`[ConnectionInsight] Cache hit for ${cacheKey}`);
+
+      // Track cache hit (no tokens consumed)
+      void trackAiUsage({
+        featureLabel: "Connections • Insight",
+        route: "/api/connection-insight",
+        model: OPENAI_MODELS.insights,
+        promptVersion: PROMPT_VERSION,
+        cacheStatus: "hit",
+        inputTokens: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+        userId: user.id,
+        timeframe: requestTimeframe,
+        periodKey,
+        language,
+        timezone: profile.timezone || null,
+      });
+
       return NextResponse.json(cachedInsight);
     }
 
@@ -178,6 +205,23 @@ Write in a warm, gentle tone. Focus on meaning and practical insight, not techni
     if (!responseContent) {
       throw new Error("No response from OpenAI");
     }
+
+    // Track cache miss (tokens consumed)
+    void trackAiUsage({
+      featureLabel: "Connections • Insight",
+      route: "/api/connection-insight",
+      model: OPENAI_MODELS.insights,
+      promptVersion: PROMPT_VERSION,
+      cacheStatus: "miss",
+      inputTokens: completion.usage?.prompt_tokens || 0,
+      outputTokens: completion.usage?.completion_tokens || 0,
+      totalTokens: completion.usage?.total_tokens || 0,
+      userId: user.id,
+      timeframe: requestTimeframe,
+      periodKey,
+      language,
+      timezone: profile.timezone || null,
+    });
 
     // Parse and validate the JSON response
     let insight: ConnectionInsight;

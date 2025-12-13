@@ -2,8 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { openai, OPENAI_MODELS } from "@/lib/openai/client";
 import { PublicHoroscopeRequest, PublicHoroscopeResponse } from "@/types";
 import { getCache, setCache, getDayKey } from "@/lib/cache";
+import { acquireLock, releaseLock } from "@/lib/cache/redis";
+import { trackAiUsage } from "@/lib/ai/trackUsage";
+
+const PROMPT_VERSION = 1;
 
 export async function POST(req: NextRequest) {
+  let lockKey: string | undefined;
+  let lockAcquired = false;
+
   try {
     // Parse request body
     const body: PublicHoroscopeRequest = await req.json();
@@ -25,16 +32,59 @@ export async function POST(req: NextRequest) {
 
     // Use timezone to compute a day key (public horoscopes refresh daily regardless of timeframe)
     const periodKey = getDayKey(timezone);
-    const cacheKey = `publicHoroscope:v1:${sign}:${timeframe}:${periodKey}:${timezone}:${targetLanguage}`;
+    const cacheKey = `publicHoroscope:v1:p${PROMPT_VERSION}:${sign}:${timeframe}:${periodKey}:${targetLanguage}`;
 
     // Check cache
     const cachedHoroscope = await getCache<PublicHoroscopeResponse>(cacheKey);
     if (cachedHoroscope) {
       console.log(`[PublicHoroscope] Cache hit for ${cacheKey}`);
+
+      // Track cache hit (no tokens consumed)
+      void trackAiUsage({
+        featureLabel: "Home • Public Horoscope",
+        route: "/api/public-horoscope",
+        model: OPENAI_MODELS.horoscope,
+        promptVersion: PROMPT_VERSION,
+        cacheStatus: "hit",
+        inputTokens: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+        userId: null,
+        timeframe,
+        periodKey,
+        language: targetLanguage,
+        timezone,
+      });
+
       return NextResponse.json(cachedHoroscope);
     }
 
     console.log(`[PublicHoroscope] Cache miss for ${cacheKey}, generating fresh horoscope...`);
+
+    // Build lock key to prevent stampeding herd
+    lockKey = `lock:publicHoroscope:p${PROMPT_VERSION}:${sign}:${timeframe}:${periodKey}:${targetLanguage}`;
+
+    // Try to acquire lock
+    lockAcquired = await acquireLock(lockKey, 60); // 60 second lock
+
+    if (!lockAcquired) {
+      // Another request is already generating this horoscope
+      console.log(`[PublicHoroscope] Lock already held for ${lockKey}, waiting for cached result...`);
+
+      // Wait a bit and check cache again (likely populated by the other request)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      const nowCachedHoroscope = await getCache<PublicHoroscopeResponse>(cacheKey);
+      if (nowCachedHoroscope) {
+        console.log(`[PublicHoroscope] ✓ Found cached result after lock wait`);
+        return NextResponse.json(nowCachedHoroscope);
+      }
+
+      // Still not cached - proceed to generate anyway (lock may have been released)
+      console.log(`[PublicHoroscope] No cached result after wait, generating anyway`);
+    } else {
+      console.log(`[PublicHoroscope] ✓ Lock acquired for ${lockKey}, generating horoscope...`);
+    }
 
     // Construct the OpenAI prompt
     const systemPrompt = `You are a compassionate astrology guide for Solara Insights, a sanctuary of calm, emotionally intelligent guidance.
@@ -93,6 +143,23 @@ Write in a warm, gentle tone. This is a public reading, so keep it general but m
       throw new Error("No response from OpenAI");
     }
 
+    // Track cache miss (tokens consumed)
+    void trackAiUsage({
+      featureLabel: "Home • Public Horoscope",
+      route: "/api/public-horoscope",
+      model: OPENAI_MODELS.horoscope,
+      promptVersion: PROMPT_VERSION,
+      cacheStatus: "miss",
+      inputTokens: completion.usage?.prompt_tokens || 0,
+      outputTokens: completion.usage?.completion_tokens || 0,
+      totalTokens: completion.usage?.total_tokens || 0,
+      userId: null,
+      timeframe,
+      periodKey,
+      language: targetLanguage,
+      timezone,
+    });
+
     // Parse and validate the JSON response
     let horoscope: PublicHoroscopeResponse;
     try {
@@ -105,10 +172,26 @@ Write in a warm, gentle tone. This is a public reading, so keep it general but m
     // Cache the horoscope (TTL: 24 hours)
     await setCache(cacheKey, horoscope, 86400);
 
+    // Release lock after successful generation
+    if (lockAcquired) {
+      await releaseLock(lockKey);
+      console.log(`[PublicHoroscope] ✓ Lock released for ${lockKey}`);
+    }
+
     // Return the horoscope
     return NextResponse.json(horoscope);
   } catch (error: any) {
     console.error("Error generating public horoscope:", error);
+
+    // Release lock on error (if we acquired it)
+    try {
+      if (lockAcquired && lockKey) {
+        await releaseLock(lockKey);
+      }
+    } catch (unlockError) {
+      console.error("Error releasing lock on failure:", unlockError);
+    }
+
     return NextResponse.json(
       {
         error: "Generation failed",

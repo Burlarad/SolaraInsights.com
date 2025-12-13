@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createServerSupabaseClient, createAdminSupabaseClient } from "@/lib/supabase/server";
+import { touchLastSeen } from "@/lib/activity/touchLastSeen";
 
 export async function GET(req: NextRequest) {
   try {
@@ -15,6 +16,10 @@ export async function GET(req: NextRequest) {
         { status: 401 }
       );
     }
+
+    // Track user activity (non-blocking)
+    const admin = createAdminSupabaseClient();
+    void touchLastSeen(admin, user.id, 30);
 
     // Get query params
     const { searchParams } = new URL(req.url);
@@ -79,6 +84,10 @@ export async function POST(req: NextRequest) {
         { status: 401 }
       );
     }
+
+    // Track user activity (non-blocking)
+    const admin = createAdminSupabaseClient();
+    void touchLastSeen(admin, user.id, 30);
 
     // Parse request body
     const body = await req.json();

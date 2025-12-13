@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createServerSupabaseClient, createAdminSupabaseClient } from "@/lib/supabase/server";
 import { openai, OPENAI_MODELS } from "@/lib/openai/client";
 import { InsightsRequest, SanctuaryInsight } from "@/types";
 import { getTarotCardNames } from "@/lib/tarot";
@@ -7,6 +7,29 @@ import { getRuneNames } from "@/lib/runes";
 import { getCache, setCache, acquireLock, releaseLock } from "@/lib/cache/redis";
 import { getUserPeriodKeys, buildInsightCacheKey, buildInsightLockKey } from "@/lib/timezone/periodKeys";
 import { getEffectiveTimezone } from "@/lib/location/detection";
+import { touchLastSeen } from "@/lib/activity/touchLastSeen";
+import { trackAiUsage } from "@/lib/ai/trackUsage";
+
+const PROMPT_VERSION = 1;
+
+/**
+ * Get TTL in seconds based on insight timeframe
+ * Longer timeframes get longer TTLs since they change less frequently
+ */
+function getTtlSeconds(timeframe: string): number {
+  switch (timeframe) {
+    case "today":
+      return 172800; // 48 hours
+    case "week":
+      return 864000; // 10 days
+    case "month":
+      return 3456000; // 40 days
+    case "year":
+      return 34560000; // 400 days
+    default:
+      return 86400; // 24 hours fallback
+  }
+}
 
 export async function POST(req: NextRequest) {
   // Parse request body first (outside try block for error handling)
@@ -28,6 +51,10 @@ export async function POST(req: NextRequest) {
 
   // Capture user ID for use in error handler
   const userId = user.id;
+
+  // Track user activity (non-blocking)
+  const admin = createAdminSupabaseClient();
+  void touchLastSeen(admin, user.id, 30);
 
   // Declare periodKey outside try block so it's accessible in error handler
   let periodKey: string | undefined;
@@ -92,13 +119,31 @@ export async function POST(req: NextRequest) {
     const targetLanguage = profile.language || "en";
 
     // Build cache and lock keys
-    const cacheKey = buildInsightCacheKey(user.id, timeframe, periodKey, targetLanguage);
-    const lockKey = buildInsightLockKey(user.id, timeframe, periodKey);
+    const cacheKey = buildInsightCacheKey(user.id, timeframe, periodKey, targetLanguage, PROMPT_VERSION);
+    const lockKey = buildInsightLockKey(user.id, timeframe, periodKey, PROMPT_VERSION);
 
     // Check cache first
     const cachedInsight = await getCache<SanctuaryInsight>(cacheKey);
     if (cachedInsight) {
       console.log(`[Insights] ✓ Cache hit for ${cacheKey}`);
+
+      // Track cache hit (no tokens consumed)
+      void trackAiUsage({
+        featureLabel: "Sanctuary • Daily Light",
+        route: "/api/insights",
+        model: OPENAI_MODELS.insights,
+        promptVersion: PROMPT_VERSION,
+        cacheStatus: "hit",
+        inputTokens: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+        userId: user.id,
+        timeframe,
+        periodKey,
+        language: targetLanguage,
+        timezone: effectiveTimezone,
+      });
+
       return NextResponse.json(cachedInsight);
     }
 
@@ -237,6 +282,23 @@ Return a JSON object with this structure:
       throw new Error("No response from OpenAI");
     }
 
+    // Track cache miss (tokens consumed)
+    void trackAiUsage({
+      featureLabel: "Sanctuary • Daily Light",
+      route: "/api/insights",
+      model: OPENAI_MODELS.insights,
+      promptVersion: PROMPT_VERSION,
+      cacheStatus: "miss",
+      inputTokens: completion.usage?.prompt_tokens || 0,
+      outputTokens: completion.usage?.completion_tokens || 0,
+      totalTokens: completion.usage?.total_tokens || 0,
+      userId: user.id,
+      timeframe,
+      periodKey,
+      language: targetLanguage,
+      timezone: effectiveTimezone,
+    });
+
     // Parse and validate the JSON response
     let insight: SanctuaryInsight;
     try {
@@ -246,8 +308,9 @@ Return a JSON object with this structure:
       throw new Error("Invalid response format from AI");
     }
 
-    // Cache the fresh insight (TTL: 24 hours)
-    await setCache(cacheKey, insight, 86400);
+    // Cache the fresh insight (TTL varies by timeframe)
+    const ttlSeconds = getTtlSeconds(timeframe);
+    await setCache(cacheKey, insight, ttlSeconds);
 
     // Release lock after successful generation
     if (lockAcquired) {
@@ -264,7 +327,7 @@ Return a JSON object with this structure:
     try {
       // Note: periodKey might not be defined if error occurred before caching layer
       if (periodKey) {
-        const lockKey = buildInsightLockKey(userId, timeframe, periodKey);
+        const lockKey = buildInsightLockKey(userId, timeframe, periodKey, PROMPT_VERSION);
         await releaseLock(lockKey);
       }
     } catch (unlockError) {

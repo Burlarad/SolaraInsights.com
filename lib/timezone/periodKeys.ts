@@ -102,13 +102,15 @@ export function hasReliableTimezone(timezone: string | null | undefined): boolea
  * @param timeframe - "today" | "week" | "month" | "year"
  * @param periodKey - Period-specific key (e.g., "2025-03-15" for daily)
  * @param language - User's language code (e.g., "en")
- * @returns Cache key like "insight:v1:user-123:daily:2025-03-15:en"
+ * @param promptVersion - Prompt version number for cache invalidation
+ * @returns Cache key like "insight:v1:p1:user-123:daily:2025-03-15:en"
  */
 export function buildInsightCacheKey(
   userId: string,
   timeframe: "today" | "week" | "month" | "year",
   periodKey: string,
-  language: string = "en"
+  language: string = "en",
+  promptVersion: number = 1
 ): string {
   const timeframeMap = {
     today: "daily",
@@ -118,7 +120,7 @@ export function buildInsightCacheKey(
   };
 
   const period = timeframeMap[timeframe];
-  return `insight:v1:${userId}:${period}:${periodKey}:${language}`;
+  return `insight:v1:p${promptVersion}:${userId}:${period}:${periodKey}:${language}`;
 }
 
 /**
@@ -127,12 +129,14 @@ export function buildInsightCacheKey(
  * @param userId - User's UUID
  * @param timeframe - "today" | "week" | "month" | "year"
  * @param periodKey - Period-specific key
- * @returns Lock key like "lock:insight:user-123:daily:2025-03-15"
+ * @param promptVersion - Prompt version number to isolate locks per version
+ * @returns Lock key like "lock:insight:p1:user-123:daily:2025-03-15"
  */
 export function buildInsightLockKey(
   userId: string,
   timeframe: "today" | "week" | "month" | "year",
-  periodKey: string
+  periodKey: string,
+  promptVersion: number = 1
 ): string {
   const timeframeMap = {
     today: "daily",
@@ -142,5 +146,5 @@ export function buildInsightLockKey(
   };
 
   const period = timeframeMap[timeframe];
-  return `lock:insight:${userId}:${period}:${periodKey}`;
+  return `lock:insight:p${promptVersion}:${userId}:${period}:${periodKey}`;
 }

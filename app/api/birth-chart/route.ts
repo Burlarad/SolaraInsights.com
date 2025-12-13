@@ -1,9 +1,125 @@
 import { NextResponse } from "next/server";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { getCurrentSoulPath } from "@/lib/soulPath/storage";
+import { createServerSupabaseClient, createAdminSupabaseClient } from "@/lib/supabase/server";
+import { getCurrentSoulPath, computeBirthInputHash } from "@/lib/soulPath/storage";
 import { getOrComputeBirthChart } from "@/lib/birthChart/storage";
 import { openai, OPENAI_MODELS } from "@/lib/openai/client";
 import type { NatalAIRequest, FullBirthChartInsight } from "@/types/natalAI";
+import { touchLastSeen } from "@/lib/activity/touchLastSeen";
+import { trackAiUsage } from "@/lib/ai/trackUsage";
+
+// Must match SOUL_PATH_SCHEMA_VERSION from lib/soulPath/storage.ts
+// Incremented when placements structure changes
+const SOUL_PATH_SCHEMA_VERSION = 8;
+
+const PROMPT_VERSION = 1;
+
+/**
+ * Load cached Soul Print narrative from soul_paths table
+ *
+ * Stone tablet contract: narrative is valid ONLY if ALL conditions match:
+ * - birth_input_hash (birth data unchanged)
+ * - schema_version (placements structure unchanged)
+ * - narrative_prompt_version (prompt unchanged)
+ * - narrative_language (language unchanged)
+ * - soul_path_narrative_json is not null
+ *
+ * @param userId - User's UUID
+ * @param birthInputHash - Current birth input hash to validate against
+ * @param schemaVersion - Current schema version to validate against
+ * @param promptVersion - Prompt version to match
+ * @param language - Language code to match
+ * @returns Cached narrative or null if not found/invalid
+ */
+async function loadCachedNarrative(
+  userId: string,
+  birthInputHash: string,
+  schemaVersion: number,
+  promptVersion: number,
+  language: string
+): Promise<FullBirthChartInsight | null> {
+  try {
+    const supabase = createAdminSupabaseClient();
+
+    const { data, error } = await supabase
+      .from("soul_paths")
+      .select("soul_path_narrative_json, narrative_prompt_version, narrative_language, birth_input_hash, schema_version")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (error || !data) {
+      return null;
+    }
+
+    // Validate ALL cache conditions (stone tablet contract)
+    if (
+      !data.soul_path_narrative_json ||
+      data.birth_input_hash !== birthInputHash ||
+      data.schema_version !== schemaVersion ||
+      data.narrative_prompt_version !== promptVersion ||
+      data.narrative_language !== language
+    ) {
+      if (data.soul_path_narrative_json) {
+        // Narrative exists but is stale - log reason
+        const reasons = [];
+        if (data.birth_input_hash !== birthInputHash) reasons.push("birth data changed");
+        if (data.schema_version !== schemaVersion) reasons.push(`schema mismatch (stored: ${data.schema_version}, current: ${schemaVersion})`);
+        if (data.narrative_prompt_version !== promptVersion) reasons.push(`prompt version mismatch (stored: ${data.narrative_prompt_version}, current: ${promptVersion})`);
+        if (data.narrative_language !== language) reasons.push(`language mismatch (stored: ${data.narrative_language}, current: ${language})`);
+        console.log(`[BirthChart] Narrative cache invalid for user ${userId}: ${reasons.join(", ")}`);
+      }
+      return null;
+    }
+
+    return data.soul_path_narrative_json as FullBirthChartInsight;
+  } catch (error: any) {
+    console.warn(`[BirthChart] Error loading cached narrative:`, error.message);
+    return null;
+  }
+}
+
+/**
+ * Store Soul Print narrative in soul_paths table
+ *
+ * IMPORTANT: This function only updates narrative-specific columns.
+ * It preserves birth_input_hash and schema_version (set by getCurrentSoulPath).
+ *
+ * @param userId - User's UUID
+ * @param narrative - The generated narrative to store
+ * @param promptVersion - Prompt version used
+ * @param language - Language code used
+ * @param model - Model used for generation
+ */
+async function storeCachedNarrative(
+  userId: string,
+  narrative: FullBirthChartInsight,
+  promptVersion: number,
+  language: string,
+  model: string
+): Promise<void> {
+  try {
+    const supabase = createAdminSupabaseClient();
+
+    // Update only narrative columns - preserves birth_input_hash and schema_version
+    const { error } = await supabase
+      .from("soul_paths")
+      .update({
+        soul_path_narrative_json: narrative,
+        narrative_prompt_version: promptVersion,
+        narrative_language: language,
+        narrative_model: model,
+        narrative_generated_at: new Date().toISOString(),
+      })
+      .eq("user_id", userId);
+
+    if (error) {
+      console.error(`[BirthChart] Failed to store narrative for user ${userId}:`, error);
+    } else {
+      console.log(`[BirthChart] ✓ Narrative cached for user ${userId} (prompt v${promptVersion}, lang: ${language})`);
+    }
+  } catch (error: any) {
+    console.error(`[BirthChart] Error storing narrative:`, error.message);
+  }
+}
 
 // Soul Path narrative prompt (story-driven, permanent interpretation)
 const SOUL_PATH_SYSTEM_PROMPT = `
@@ -122,6 +238,10 @@ export async function POST() {
       );
     }
 
+    // Track user activity (non-blocking)
+    const admin = createAdminSupabaseClient();
+    void touchLastSeen(admin, user.id, 30);
+
     // Load user profile
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
@@ -218,12 +338,63 @@ export async function POST() {
       )
     );
 
+    // ========================================
+    // STEP B: Check for cached AI narrative
+    // ========================================
+
+    const targetLanguage = profile.language || "en";
+
+    // Compute birth input hash for cache validation
+    const currentBirthInputHash = computeBirthInputHash(profile);
+
+    // Try to load cached narrative (stone tablet - validates ALL conditions)
+    const cachedNarrative = await loadCachedNarrative(
+      user.id,
+      currentBirthInputHash,
+      SOUL_PATH_SCHEMA_VERSION,
+      PROMPT_VERSION,
+      targetLanguage
+    );
+
+    if (cachedNarrative) {
+      console.log(`[BirthChart] ✓ Cache hit for Soul Print narrative (user: ${user.id}, prompt v${PROMPT_VERSION}, lang: ${targetLanguage})`);
+
+      // Track cache hit (no tokens consumed)
+      void trackAiUsage({
+        featureLabel: "Soul Print • Narrative",
+        route: "/api/birth-chart",
+        model: OPENAI_MODELS.insights,
+        promptVersion: PROMPT_VERSION,
+        cacheStatus: "hit",
+        inputTokens: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+        userId: user.id,
+        timeframe: null,
+        periodKey: null,
+        language: targetLanguage,
+        timezone: profile.timezone || null,
+      });
+
+      // Return cached narrative with placements
+      return NextResponse.json({
+        placements: swissPlacements,
+        insight: cachedNarrative,
+      });
+    }
+
+    console.log(`[BirthChart] ✗ Cache miss for Soul Print narrative - generating fresh (user: ${user.id}, prompt v${PROMPT_VERSION}, lang: ${targetLanguage})`);
+
+    // ========================================
+    // STEP C: Generate fresh AI narrative
+    // ========================================
+
     // Build NatalAIRequest for OpenAI
     const displayName = profile.preferred_name || profile.full_name;
 
     const aiPayload: NatalAIRequest = {
       mode: "natal_full_profile",
-      language: profile.language || "en",
+      language: targetLanguage,
       profile: {
         name: displayName || undefined,
         zodiacSign: profile.zodiac_sign || undefined,
@@ -282,6 +453,23 @@ export async function POST() {
 
     const responseContent = completion.choices[0]?.message?.content;
 
+    // Track AI usage (cache miss - fresh generation)
+    void trackAiUsage({
+      featureLabel: "Soul Print • Narrative",
+      route: "/api/birth-chart",
+      model: OPENAI_MODELS.insights,
+      promptVersion: PROMPT_VERSION,
+      cacheStatus: "miss",
+      inputTokens: completion.usage?.prompt_tokens || 0,
+      outputTokens: completion.usage?.completion_tokens || 0,
+      totalTokens: completion.usage?.total_tokens || 0,
+      userId: user.id,
+      timeframe: null,
+      periodKey: null,
+      language: targetLanguage,
+      timezone: profile.timezone || null,
+    });
+
     if (!responseContent) {
       console.error("[BirthChart] OpenAI returned empty response");
       return NextResponse.json(
@@ -320,6 +508,15 @@ export async function POST() {
       console.log(
         "[BirthChart] OpenAI interpretation parsed successfully for user",
         user.id
+      );
+
+      // Store narrative in soul_paths for future requests (stone tablet caching)
+      void storeCachedNarrative(
+        user.id,
+        insight,
+        PROMPT_VERSION,
+        targetLanguage,
+        OPENAI_MODELS.insights
       );
     } catch (parseError) {
       console.error("[BirthChart] Failed to parse OpenAI response:", parseError);

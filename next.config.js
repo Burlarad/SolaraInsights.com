@@ -1,5 +1,10 @@
+const path = require("path");
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Pin output file tracing to this directory to prevent workspace root inference issues
+  outputFileTracingRoot: path.join(__dirname),
+
   images: {
     domains: [],
   },
