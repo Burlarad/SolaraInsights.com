@@ -82,8 +82,8 @@ export const stripeCheckoutSchema = z.object({
 // AI Response Validation Schemas
 // ========================================
 
-// Joy Deep Dive schema (Part of Fortune personalized interpretation)
-export const joyDeepDiveSchema = z.object({
+// Generic Tab Deep Dive schema (reusable for all Soul Print tabs)
+export const tabDeepDiveSchema = z.object({
   meaning: z.string()
     .min(100, "meaning must be at least 100 characters")
     .refine(
@@ -103,24 +103,99 @@ export const joyDeepDiveSchema = z.object({
   promptVersion: z.number().int().positive(),
 });
 
-// Type inference for joy deep dive
-export type ValidatedJoyDeepDive = z.infer<typeof joyDeepDiveSchema>;
+// Type inference for tab deep dive
+export type ValidatedTabDeepDive = z.infer<typeof tabDeepDiveSchema>;
 
-// Helper to validate Joy Deep Dive
-export function validateJoyDeepDive(
-  data: unknown
-): { success: true; data: ValidatedJoyDeepDive } | { success: false; error: string; fields: string[] } {
-  const result = joyDeepDiveSchema.safeParse(data);
+/**
+ * Joy Deep Dive schema
+ * @deprecated Use tabDeepDiveSchema instead. Kept for backwards compatibility.
+ */
+export const joyDeepDiveSchema = tabDeepDiveSchema;
+
+/**
+ * @deprecated Use ValidatedTabDeepDive instead.
+ */
+export type ValidatedJoyDeepDive = ValidatedTabDeepDive;
+
+// Tab keys for validation
+export const TAB_DEEP_DIVE_KEYS = [
+  "planetaryPlacements",
+  "houses",
+  "aspects",
+  "patterns",
+  "energyShape",
+  "intensityZones",
+  "direction",
+  "joy",
+] as const;
+
+export type TabDeepDiveKey = (typeof TAB_DEEP_DIVE_KEYS)[number];
+
+// Helper to validate a single Tab Deep Dive
+export function validateTabDeepDive(
+  data: unknown,
+  tabKey: string
+): { success: true; data: ValidatedTabDeepDive } | { success: false; error: string; fields: string[] } {
+  const result = tabDeepDiveSchema.safeParse(data);
 
   if (!result.success) {
-    const fields = result.error.issues.map((e) => e.path.join("."));
+    const fields = result.error.issues.map((e) => `${tabKey}.${e.path.join(".")}`);
     const errorMessage = result.error.issues
-      .map((e) => `${e.path.join(".")}: ${e.message}`)
+      .map((e) => `${tabKey}.${e.path.join(".")}: ${e.message}`)
       .join("; ");
     return { success: false, error: errorMessage, fields };
   }
 
   return { success: true, data: result.data };
+}
+
+/**
+ * Validate Joy Deep Dive
+ * @deprecated Use validateTabDeepDive instead.
+ */
+export function validateJoyDeepDive(
+  data: unknown
+): { success: true; data: ValidatedJoyDeepDive } | { success: false; error: string; fields: string[] } {
+  return validateTabDeepDive(data, "joy");
+}
+
+// Batched Tab Deep Dives validation result
+export type BatchedTabDeepDivesResult = {
+  valid: Partial<Record<TabDeepDiveKey, ValidatedTabDeepDive>>;
+  invalid: Array<{ key: TabDeepDiveKey; error: string; fields: string[] }>;
+};
+
+// Helper to validate all tab deep dives from a batched response
+export function validateBatchedTabDeepDives(
+  data: unknown
+): BatchedTabDeepDivesResult {
+  const result: BatchedTabDeepDivesResult = {
+    valid: {},
+    invalid: [],
+  };
+
+  if (!data || typeof data !== "object") {
+    return result;
+  }
+
+  const dataObj = data as Record<string, unknown>;
+
+  for (const key of TAB_DEEP_DIVE_KEYS) {
+    if (dataObj[key]) {
+      const validation = validateTabDeepDive(dataObj[key], key);
+      if (validation.success) {
+        result.valid[key] = validation.data;
+      } else {
+        result.invalid.push({
+          key,
+          error: validation.error,
+          fields: validation.fields,
+        });
+      }
+    }
+  }
+
+  return result;
 }
 
 // FullBirthChartInsight response from OpenAI

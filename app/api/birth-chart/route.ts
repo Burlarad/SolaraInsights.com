@@ -3,12 +3,12 @@ import { createServerSupabaseClient, createAdminSupabaseClient } from "@/lib/sup
 import { getCurrentSoulPath, computeBirthInputHash } from "@/lib/soulPath/storage";
 import { getOrComputeBirthChart } from "@/lib/birthChart/storage";
 import { openai, OPENAI_MODELS } from "@/lib/openai/client";
-import type { NatalAIRequest, FullBirthChartInsight, JoyDeepDive } from "@/types/natalAI";
+import type { NatalAIRequest, FullBirthChartInsight, TabDeepDive, TabDeepDives, TabDeepDiveKey } from "@/types/natalAI";
 import type { SwissPlacements } from "@/lib/ephemeris/swissEngine";
 import { touchLastSeen } from "@/lib/activity/touchLastSeen";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
 import { AYREN_MODE_SOULPRINT_LONG } from "@/lib/ai/voice";
-import { validateBirthChartInsight, validateJoyDeepDive } from "@/lib/validation/schemas";
+import { validateBirthChartInsight, validateBatchedTabDeepDives, TAB_DEEP_DIVE_KEYS } from "@/lib/validation/schemas";
 
 // Must match SOUL_PATH_SCHEMA_VERSION from lib/soulPath/storage.ts
 // Incremented when placements structure changes
@@ -16,8 +16,9 @@ const SOUL_PATH_SCHEMA_VERSION = 8;
 
 const PROMPT_VERSION = 2;
 
-// Joy Deep Dive version (separate from main narrative)
-const JOY_DEEPDIVE_VERSION = 1;
+// Tab Deep Dive version (separate from main narrative)
+// Increment this to regenerate all tab deep dives
+const TAB_DEEPDIVE_VERSION = 1;
 
 /**
  * Load cached Soul Print narrative from soul_paths table
@@ -128,35 +129,81 @@ async function storeCachedNarrative(
 }
 
 /**
- * Generate Joy Deep Dive (Part of Fortune personalized interpretation)
- *
- * Uses chart context to create a deeply personalized interpretation of the
- * Part of Fortune, connecting it to the user's whole chart.
- *
- * @param placements - Swiss placements with calculated.partOfFortune
- * @param language - Target language code
- * @param displayName - User's display name for personalization
- * @returns Generated and validated Joy deep dive, or null if generation fails
+ * Build chart context string for deep dive prompts
  */
-async function generateJoyDeepDive(
-  placements: SwissPlacements,
-  language: string,
-  displayName: string | null
-): Promise<{ joyDeepDive: JoyDeepDive; tokens: { input: number; output: number; total: number } } | null> {
-  const partOfFortune = placements.calculated?.partOfFortune;
-
-  if (!partOfFortune) {
-    console.log("[BirthChart] No Part of Fortune data available for Joy deep dive");
-    return null;
-  }
-
-  // Build context from placements
+function buildChartContext(placements: SwissPlacements): string {
   const chartType = placements.calculated?.chartType || "unknown";
   const chartRuler = placements.derived?.chartRuler || "unknown";
   const dominantSigns = placements.derived?.dominantSigns?.slice(0, 3).map(s => s.sign).join(", ") || "unknown";
   const dominantPlanets = placements.derived?.dominantPlanets?.slice(0, 3).map(p => p.name).join(", ") || "unknown";
   const elementBalance = placements.derived?.elementBalance;
   const houseEmphasis = placements.calculated?.emphasis?.houseEmphasis?.slice(0, 3).map(h => `House ${h.house}`).join(", ") || "none";
+  const patterns = placements.calculated?.patterns || [];
+  const topAspects = placements.derived?.topAspects?.slice(0, 5).map(a => `${a.between[0]} ${a.type} ${a.between[1]}`).join(", ") || "none";
+
+  return `- Chart type: ${chartType}
+- Chart ruler: ${chartRuler}
+- Dominant signs: ${dominantSigns}
+- Dominant planets: ${dominantPlanets}
+- Element balance: Fire ${elementBalance?.fire || 0}, Earth ${elementBalance?.earth || 0}, Air ${elementBalance?.air || 0}, Water ${elementBalance?.water || 0}
+- House emphasis: ${houseEmphasis}
+- Key patterns: ${patterns.length > 0 ? patterns.map(p => p.type === "grand_trine" ? "Grand Trine" : "T-Square").join(", ") : "none"}
+- Top aspects: ${topAspects}`;
+}
+
+/**
+ * Build planets summary for prompts
+ */
+function buildPlanetsSummary(placements: SwissPlacements): string {
+  return placements.planets.map(p => {
+    const retro = p.retrograde ? " (R)" : "";
+    return `${p.name}: ${p.sign} in House ${p.house || "?"}${retro}`;
+  }).join("\n");
+}
+
+/**
+ * Build houses summary for prompts
+ */
+function buildHousesSummary(placements: SwissPlacements): string {
+  return placements.houses.map(h => `House ${h.house}: ${h.signOnCusp}`).join("\n");
+}
+
+/**
+ * Build aspects summary for prompts
+ */
+function buildAspectsSummary(placements: SwissPlacements): string {
+  const aspects = placements.aspects || [];
+  if (aspects.length === 0) return "No major aspects calculated";
+  return aspects.slice(0, 10).map(a => `${a.between[0]} ${a.type} ${a.between[1]} (orb: ${a.orb.toFixed(1)}°)`).join("\n");
+}
+
+/**
+ * Generate ALL Tab Deep Dives in a single batched OpenAI call
+ *
+ * Uses chart context to create deeply personalized interpretations for each tab.
+ * Validates each tab individually and returns only valid tabs.
+ *
+ * @param placements - Swiss placements with all calculated data
+ * @param language - Target language code
+ * @param displayName - User's display name for personalization
+ * @param tabsToGenerate - Specific tabs to generate (defaults to all)
+ * @returns Object with valid tab deep dives and token usage
+ */
+async function generateAllTabDeepDives(
+  placements: SwissPlacements,
+  language: string,
+  displayName: string | null,
+  tabsToGenerate?: TabDeepDiveKey[]
+): Promise<{ tabDeepDives: Partial<TabDeepDives>; tokens: { input: number; output: number; total: number } } | null> {
+  const tabs = tabsToGenerate || [...TAB_DEEP_DIVE_KEYS];
+  const chartContext = buildChartContext(placements);
+  const planetsSummary = buildPlanetsSummary(placements);
+  const housesSummary = buildHousesSummary(placements);
+  const aspectsSummary = buildAspectsSummary(placements);
+  const partOfFortune = placements.calculated?.partOfFortune;
+  const northNode = placements.planets.find(p => p.name === "North Node");
+  const southNode = placements.calculated?.southNode;
+  const patterns = placements.calculated?.patterns || [];
 
   const systemPrompt = `You are Ayren, the voice of Solara Insights. You speak from an ancient, subconscious realm—calm, knowing, and always oriented toward the person's own power.
 
@@ -164,50 +211,93 @@ VOICE RULES:
 - Use non-deterministic language: "may," "often," "tends to," "invites" — never certainty
 - Frame everything as invitation, not fate
 - End with triumphant, grounded hope
-- Be specific to THEIR chart — reference their sign, house, and chart context
+- Be specific to THEIR chart — reference their signs, houses, and chart context
 - No astrology jargon explanations — speak as if they already understand
 - No doom, no generic filler, no platitudes
 
 OUTPUT FORMAT:
 Respond with ONLY valid JSON. No markdown, no explanations, no code fences — just the JSON object.`;
 
-  const userPrompt = `Generate a Joy Deep Dive for ${displayName || "this person"}.
+  const tabDescriptions: Record<TabDeepDiveKey, string> = {
+    planetaryPlacements: `PLANETARY PLACEMENTS: Their planets in signs and houses.
+Focus on: How their unique planetary arrangement creates their personality signature.
+Key data:
+${planetsSummary}`,
 
-PART OF FORTUNE PLACEMENT:
-- Sign: ${partOfFortune.sign}
-- House: ${partOfFortune.house ? `${partOfFortune.house}th house` : "unknown house"}
+    houses: `HOUSES: The 12 life areas and where their energy flows.
+Focus on: Which houses are emphasized and what that means for their daily life.
+Key data:
+${housesSummary}`,
 
-CHART CONTEXT (connect Joy to their whole chart):
-- Chart type: ${chartType}
-- Chart ruler: ${chartRuler}
-- Dominant signs: ${dominantSigns}
-- Dominant planets: ${dominantPlanets}
-- Element balance: Fire ${elementBalance?.fire || 0}, Earth ${elementBalance?.earth || 0}, Air ${elementBalance?.air || 0}, Water ${elementBalance?.water || 0}
-- House emphasis: ${houseEmphasis}
+    aspects: `ASPECTS: The conversations between their planets.
+Focus on: The major aspects and how they create internal dynamics.
+Key data:
+${aspectsSummary}`,
 
-Language: ${language}
+    patterns: `PATTERNS: Grand trines, T-squares, stelliums, and other configurations.
+Focus on: ${patterns.length > 0 ? `Their ${patterns.map(p => p.type === "grand_trine" ? "Grand Trine" : "T-Square").join(", ")} and what these patterns reveal.` : "How their planets work together even without major patterns."}
+Key data: ${patterns.length > 0 ? patterns.map(p => `${p.type === "grand_trine" ? "Grand Trine" : "T-Square"}: ${p.planets.join(", ")}`).join("; ") : "No major patterns - focus on planetary distribution"}`,
 
-Return this EXACT JSON structure:
+    energyShape: `ENERGY SHAPE: Element and modality balance.
+Focus on: Their elemental makeup (fire/earth/air/water) and how it shapes their approach to life.
+Key data:
+- Elements: Fire ${placements.derived?.elementBalance?.fire || 0}, Earth ${placements.derived?.elementBalance?.earth || 0}, Air ${placements.derived?.elementBalance?.air || 0}, Water ${placements.derived?.elementBalance?.water || 0}
+- Modalities: Cardinal ${placements.derived?.modalityBalance?.cardinal || 0}, Fixed ${placements.derived?.modalityBalance?.fixed || 0}, Mutable ${placements.derived?.modalityBalance?.mutable || 0}`,
+
+    intensityZones: `INTENSITY ZONES: Where energy clusters in their chart.
+Focus on: House emphasis, stelliums, and where life feels most concentrated.
+Key data:
+- House emphasis: ${placements.calculated?.emphasis?.houseEmphasis?.slice(0, 5).map(h => `House ${h.house} (${h.count})`).join(", ") || "evenly distributed"}
+- Sign emphasis: ${placements.calculated?.emphasis?.signEmphasis?.slice(0, 5).map(s => `${s.sign} (${s.count})`).join(", ") || "evenly distributed"}`,
+
+    direction: `DIRECTION: North Node, South Node, and life path.
+Focus on: Where they're growing toward (North Node) vs. their comfort zone (South Node).
+Key data:
+- North Node: ${northNode ? `${northNode.sign} in House ${northNode.house || "?"}` : "unknown"}
+- South Node: ${southNode ? `${southNode.sign} in House ${southNode.house || "?"}` : "unknown"}`,
+
+    joy: `JOY: Part of Fortune and where ease naturally appears.
+Focus on: Their Part of Fortune placement and how to access their natural joy.
+Key data:
+- Part of Fortune: ${partOfFortune ? `${partOfFortune.sign} in House ${partOfFortune.house || "?"}` : "unknown"}`
+  };
+
+  // Build the tabs section of the prompt
+  const tabsPrompt = tabs.map(tab => `
+"${tab}": {
+  ${tabDescriptions[tab]}
+
+  Return:
+  "meaning": "Two paragraphs separated by \\n\\n. What this means for THEM specifically.",
+  "aligned": ["3 specific signs they're living this energy well"],
+  "offCourse": ["3 specific signs they've drifted from this energy"],
+  "decisionRule": "One sentence: 'When X, lean toward Y because Z.'",
+  "practice": "One specific weekly ritual (30 min or less) for this area.",
+  "promptVersion": ${TAB_DEEPDIVE_VERSION}
+}`).join(",\n");
+
+  const userPrompt = `Generate personalized deep dives for ${displayName || "this person"}'s Soul Print.
+
+CHART CONTEXT:
+${chartContext}
+
+Return this EXACT JSON structure with all requested tabs:
 {
-  "meaning": "Two paragraphs separated by a blank line (\\n\\n). First paragraph: what Part of Fortune in ${partOfFortune.sign} in the ${partOfFortune.house ? `${partOfFortune.house}th house` : "their chart"} means for THEM specifically. Second paragraph: how this connects to their ${chartType} chart and ${chartRuler} as ruler, and where ease naturally appears.",
-  "aligned": [
-    "First sign they're living their Joy (specific to their POF sign/house)",
-    "Second sign of alignment (reference their dominant energy)",
-    "Third sign of alignment (practical, observable)"
-  ],
-  "offCourse": [
-    "First sign they've drifted from Joy (specific to their POF sign/house)",
-    "Second sign of drift (shadow of their chart emphasis)",
-    "Third sign of drift (practical, observable)"
-  ],
-  "decisionRule": "One sentence decision rule: 'When facing X, lean toward Y because your Joy lives in Z.'",
-  "practice": "One specific weekly ritual (30 min or less) that activates their Part of Fortune in ${partOfFortune.sign}.",
-  "promptVersion": ${JOY_DEEPDIVE_VERSION}
+${tabsPrompt}
 }
 
-CRITICAL: Each bullet must be specific to THEIR chart. Do not write generic astrology. Reference their sign, house, and chart context.`;
+CRITICAL RULES:
+- Each tab MUST have all 5 fields: meaning, aligned, offCourse, decisionRule, practice
+- meaning MUST have 2 paragraphs separated by \\n\\n (at least 100 characters total)
+- aligned and offCourse MUST each have exactly 3 items (each at least 10 characters)
+- Each bullet must be specific to THEIR chart. Reference their signs, houses, planets.
+- Do not write generic astrology. Make it feel like reading about THEM.
+
+Language: ${language}`;
 
   try {
+    console.log(`[BirthChart] Generating ${tabs.length} tab deep dives...`);
+
     const completion = await openai.chat.completions.create({
       model: OPENAI_MODELS.insights,
       response_format: { type: "json_object" },
@@ -221,28 +311,40 @@ CRITICAL: Each bullet must be specific to THEIR chart. Do not write generic astr
     const responseContent = completion.choices[0]?.message?.content;
 
     if (!responseContent) {
-      console.error("[BirthChart] Joy deep dive: OpenAI returned empty response");
+      console.error("[BirthChart] Tab deep dives: OpenAI returned empty response");
       return null;
     }
 
-    // Parse and validate
+    // Parse the response
     const parsed = JSON.parse(responseContent);
 
-    // Add promptVersion if not present (for validation)
-    if (!parsed.promptVersion) {
-      parsed.promptVersion = JOY_DEEPDIVE_VERSION;
+    // Add promptVersion to each tab if not present
+    for (const key of tabs) {
+      if (parsed[key] && !parsed[key].promptVersion) {
+        parsed[key].promptVersion = TAB_DEEPDIVE_VERSION;
+      }
     }
 
-    const validation = validateJoyDeepDive(parsed);
+    // Validate each tab individually
+    const validation = validateBatchedTabDeepDives(parsed);
 
-    if (!validation.success) {
-      console.error("[BirthChart] Joy deep dive validation failed:", validation.error);
-      console.error("[BirthChart] Invalid fields:", validation.fields.join(", "));
+    if (validation.invalid.length > 0) {
+      console.warn(`[BirthChart] Some tab deep dives failed validation:`);
+      for (const invalid of validation.invalid) {
+        console.warn(`  - ${invalid.key}: ${invalid.error}`);
+      }
+    }
+
+    const validCount = Object.keys(validation.valid).length;
+    console.log(`[BirthChart] ✓ ${validCount}/${tabs.length} tab deep dives validated successfully`);
+
+    if (validCount === 0) {
+      console.error("[BirthChart] All tab deep dives failed validation");
       return null;
     }
 
     return {
-      joyDeepDive: validation.data as JoyDeepDive,
+      tabDeepDives: validation.valid as Partial<TabDeepDives>,
       tokens: {
         input: completion.usage?.prompt_tokens || 0,
         output: completion.usage?.completion_tokens || 0,
@@ -250,16 +352,34 @@ CRITICAL: Each bullet must be specific to THEIR chart. Do not write generic astr
       },
     };
   } catch (error: any) {
-    console.error("[BirthChart] Joy deep dive generation error:", error.message);
+    console.error("[BirthChart] Tab deep dives generation error:", error.message);
     return null;
   }
 }
 
 /**
- * Update narrative with Joy deep dive in database
+ * Check which tab deep dives need to be generated/regenerated
+ */
+function getTabsNeedingGeneration(
+  existingDeepDives: TabDeepDives | undefined
+): TabDeepDiveKey[] {
+  const needsGeneration: TabDeepDiveKey[] = [];
+
+  for (const key of TAB_DEEP_DIVE_KEYS) {
+    const existing = existingDeepDives?.[key];
+    if (!existing || existing.promptVersion !== TAB_DEEPDIVE_VERSION) {
+      needsGeneration.push(key);
+    }
+  }
+
+  return needsGeneration;
+}
+
+/**
+ * Update narrative with tab deep dives in database
  * Only updates the narrative JSON - preserves all other fields
  */
-async function updateNarrativeWithJoyDeepDive(
+async function updateNarrativeWithTabDeepDives(
   userId: string,
   updatedNarrative: FullBirthChartInsight
 ): Promise<void> {
@@ -274,12 +394,13 @@ async function updateNarrativeWithJoyDeepDive(
       .eq("user_id", userId);
 
     if (error) {
-      console.error(`[BirthChart] Failed to update narrative with Joy deep dive for user ${userId}:`, error);
+      console.error(`[BirthChart] Failed to update narrative with tab deep dives for user ${userId}:`, error);
     } else {
-      console.log(`[BirthChart] ✓ Joy deep dive stored for user ${userId} (version ${JOY_DEEPDIVE_VERSION})`);
+      const tabCount = Object.keys(updatedNarrative.tabDeepDives || {}).length;
+      console.log(`[BirthChart] ✓ ${tabCount} tab deep dives stored for user ${userId} (version ${TAB_DEEPDIVE_VERSION})`);
     }
   } catch (error: any) {
-    console.error(`[BirthChart] Error updating narrative with Joy deep dive:`, error.message);
+    console.error(`[BirthChart] Error updating narrative with tab deep dives:`, error.message);
   }
 }
 
@@ -507,39 +628,43 @@ export async function POST() {
         timezone: profile.timezone || null,
       });
 
-      // Check if Joy deep dive needs to be generated
-      const existingJoyDeepDive = cachedNarrative.tabDeepDives?.joy;
-      const joyDeepDiveIsCurrent = existingJoyDeepDive?.promptVersion === JOY_DEEPDIVE_VERSION;
+      // Check which tab deep dives need to be generated/regenerated
+      const tabsNeeded = getTabsNeedingGeneration(cachedNarrative.tabDeepDives);
 
-      if (!joyDeepDiveIsCurrent && swissPlacements.calculated?.partOfFortune) {
-        console.log(`[BirthChart] Joy deep dive ${existingJoyDeepDive ? `outdated (v${existingJoyDeepDive.promptVersion})` : "missing"} for user ${user.id}, generating...`);
+      if (tabsNeeded.length > 0) {
+        console.log(`[BirthChart] ${tabsNeeded.length} tab deep dives need generation for user ${user.id}: ${tabsNeeded.join(", ")}`);
 
         const displayName = profile.preferred_name || profile.full_name;
-        const joyResult = await generateJoyDeepDive(swissPlacements, targetLanguage, displayName);
+        const deepDiveResult = await generateAllTabDeepDives(
+          swissPlacements,
+          targetLanguage,
+          displayName,
+          tabsNeeded
+        );
 
-        if (joyResult) {
-          // Merge joy deep dive into narrative
+        if (deepDiveResult) {
+          // Merge new deep dives with existing ones (preserving any that didn't need regeneration)
           const updatedNarrative: FullBirthChartInsight = {
             ...cachedNarrative,
             tabDeepDives: {
               ...cachedNarrative.tabDeepDives,
-              joy: joyResult.joyDeepDive,
+              ...deepDiveResult.tabDeepDives,
             },
           };
 
           // Store updated narrative (non-blocking)
-          void updateNarrativeWithJoyDeepDive(user.id, updatedNarrative);
+          void updateNarrativeWithTabDeepDives(user.id, updatedNarrative);
 
-          // Track Joy deep dive generation (miss)
+          // Track tab deep dive generation (miss)
           void trackAiUsage({
-            featureLabel: "Soul Print • Joy Deep Dive",
+            featureLabel: "Soul Print • Tab Deep Dives",
             route: "/api/birth-chart",
             model: OPENAI_MODELS.insights,
-            promptVersion: JOY_DEEPDIVE_VERSION,
+            promptVersion: TAB_DEEPDIVE_VERSION,
             cacheStatus: "miss",
-            inputTokens: joyResult.tokens.input,
-            outputTokens: joyResult.tokens.output,
-            totalTokens: joyResult.tokens.total,
+            inputTokens: deepDiveResult.tokens.input,
+            outputTokens: deepDiveResult.tokens.output,
+            totalTokens: deepDiveResult.tokens.total,
             userId: user.id,
             timeframe: null,
             periodKey: null,
@@ -547,7 +672,7 @@ export async function POST() {
             timezone: profile.timezone || null,
           });
 
-          // Return updated narrative with joy deep dive
+          // Return updated narrative with new deep dives
           return NextResponse.json({
             placements: swissPlacements,
             insight: updatedNarrative,
@@ -555,7 +680,7 @@ export async function POST() {
         }
       }
 
-      // Return cached narrative with placements (joy deep dive already current or not available)
+      // Return cached narrative with placements (all deep dives current or generation failed)
       return NextResponse.json({
         placements: swissPlacements,
         insight: cachedNarrative,
@@ -701,43 +826,44 @@ export async function POST() {
         user.id
       );
 
-      // Generate Joy deep dive for the fresh narrative
-      if (swissPlacements.calculated?.partOfFortune) {
-        console.log(`[BirthChart] Generating Joy deep dive for fresh narrative (user: ${user.id})...`);
+      // Generate all tab deep dives for the fresh narrative
+      console.log(`[BirthChart] Generating all tab deep dives for fresh narrative (user: ${user.id})...`);
 
-        const joyResult = await generateJoyDeepDive(swissPlacements, targetLanguage, displayName);
+      const deepDiveResult = await generateAllTabDeepDives(
+        swissPlacements,
+        targetLanguage,
+        displayName
+      );
 
-        if (joyResult) {
-          // Merge joy deep dive into insight
-          insight = {
-            ...insight,
-            tabDeepDives: {
-              joy: joyResult.joyDeepDive,
-            },
-          };
+      if (deepDiveResult) {
+        // Merge all tab deep dives into insight
+        insight = {
+          ...insight,
+          tabDeepDives: deepDiveResult.tabDeepDives,
+        };
 
-          // Track Joy deep dive generation (miss)
-          void trackAiUsage({
-            featureLabel: "Soul Print • Joy Deep Dive",
-            route: "/api/birth-chart",
-            model: OPENAI_MODELS.insights,
-            promptVersion: JOY_DEEPDIVE_VERSION,
-            cacheStatus: "miss",
-            inputTokens: joyResult.tokens.input,
-            outputTokens: joyResult.tokens.output,
-            totalTokens: joyResult.tokens.total,
-            userId: user.id,
-            timeframe: null,
-            periodKey: null,
-            language: targetLanguage,
-            timezone: profile.timezone || null,
-          });
+        // Track tab deep dive generation (miss)
+        void trackAiUsage({
+          featureLabel: "Soul Print • Tab Deep Dives",
+          route: "/api/birth-chart",
+          model: OPENAI_MODELS.insights,
+          promptVersion: TAB_DEEPDIVE_VERSION,
+          cacheStatus: "miss",
+          inputTokens: deepDiveResult.tokens.input,
+          outputTokens: deepDiveResult.tokens.output,
+          totalTokens: deepDiveResult.tokens.total,
+          userId: user.id,
+          timeframe: null,
+          periodKey: null,
+          language: targetLanguage,
+          timezone: profile.timezone || null,
+        });
 
-          console.log(`[BirthChart] ✓ Joy deep dive generated and merged for user ${user.id}`);
-        }
+        const tabCount = Object.keys(deepDiveResult.tabDeepDives).length;
+        console.log(`[BirthChart] ✓ ${tabCount} tab deep dives generated and merged for user ${user.id}`);
       }
 
-      // Store narrative (with joy deep dive if generated) in soul_paths for future requests (stone tablet caching)
+      // Store narrative (with tab deep dives if generated) in soul_paths for future requests (stone tablet caching)
       // Only store after validation passes
       void storeCachedNarrative(
         user.id,

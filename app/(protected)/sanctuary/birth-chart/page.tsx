@@ -2,8 +2,77 @@
 
 import { useEffect, useState } from "react";
 import { SanctuaryTabs } from "@/components/sanctuary/SanctuaryTabs";
-import type { FullBirthChartInsight } from "@/types/natalAI";
+import type { FullBirthChartInsight, TabDeepDive } from "@/types/natalAI";
 import { SolaraCard } from "@/components/ui/solara-card";
+
+/**
+ * Reusable component for rendering a tab deep dive
+ */
+function DeepDiveCard({
+  title,
+  subtitle,
+  deepDive,
+}: {
+  title: string;
+  subtitle?: string;
+  deepDive: TabDeepDive;
+}) {
+  return (
+    <SolaraCard className="space-y-6">
+      <div>
+        <h2 className="text-xl font-semibold mb-2">{title}</h2>
+        {subtitle && <p className="text-sm text-accent-ink/60">{subtitle}</p>}
+      </div>
+
+      {/* Meaning - 2 paragraphs */}
+      <div className="space-y-4">
+        {deepDive.meaning.split("\n\n").map((para, idx) => (
+          <p key={idx} className="text-base text-accent-ink/80 leading-relaxed">
+            {para}
+          </p>
+        ))}
+      </div>
+
+      {/* Aligned - 3 bullets */}
+      <div>
+        <h3 className="text-sm font-medium text-accent-ink/70 mb-2">When You're Aligned</h3>
+        <ul className="space-y-2">
+          {deepDive.aligned.map((item, idx) => (
+            <li key={idx} className="flex items-start gap-2 text-sm text-accent-ink/80">
+              <span className="text-accent mt-0.5">•</span>
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Off Course - 3 bullets */}
+      <div>
+        <h3 className="text-sm font-medium text-accent-ink/70 mb-2">When You're Off Course</h3>
+        <ul className="space-y-2">
+          {deepDive.offCourse.map((item, idx) => (
+            <li key={idx} className="flex items-start gap-2 text-sm text-accent-ink/80">
+              <span className="text-accent-ink/40 mt-0.5">•</span>
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Decision Rule */}
+      <div className="bg-accent-soft/30 rounded-lg p-4">
+        <h3 className="text-sm font-medium text-accent-ink/70 mb-1">Decision Rule</h3>
+        <p className="text-sm text-accent-ink font-medium">{deepDive.decisionRule}</p>
+      </div>
+
+      {/* Practice */}
+      <div className="border-t border-accent-soft pt-4">
+        <h3 className="text-sm font-medium text-accent-ink/70 mb-2">Weekly Practice</h3>
+        <p className="text-sm text-accent-ink/80 leading-relaxed">{deepDive.practice}</p>
+      </div>
+    </SolaraCard>
+  );
+}
 
 type SoulPathSection =
   | "narrative"
@@ -292,386 +361,463 @@ export default function BirthChartPage() {
 
           {/* Planetary Placements */}
           {activeSection === "planets" && placements && (
-            <SolaraCard className="space-y-4">
-              <h2 className="text-xl font-semibold">Planetary Placements</h2>
-              <p className="text-sm text-accent-ink/60 leading-relaxed">
-                These show how different parts of you express themselves—your drive, your communication style, how you love and relate.
-              </p>
-              <div className="space-y-4">
-                {placements.planets?.map((p: any) => (
-                  <div key={p.name} className="pb-3 border-b border-accent-soft/30 last:border-0">
-                    <div className="flex items-baseline justify-between gap-4 mb-1">
-                      <span className="font-medium text-accent-ink">
-                        {p.name}
-                        {p.retrograde === true && " ℞"}
-                      </span>
-                      <span className="text-sm text-accent-ink/70">
-                        {p.sign}
-                        {p.house && <> — {p.house}th house</>}
-                      </span>
-                    </div>
-                    <p className="text-sm text-accent-ink/60 leading-relaxed">
-                      {p.name === "Sun" && "Your core sense of self and vitality."}
-                      {p.name === "Moon" && "Your emotional landscape and inner world."}
-                      {p.name === "Mercury" && "How you think, communicate, and process information."}
-                      {p.name === "Venus" && "How you love, connect, and find beauty."}
-                      {p.name === "Mars" && "Your drive, desire, and how you take action."}
-                      {p.name === "Jupiter" && "Where you expand, believe, and find meaning."}
-                      {p.name === "Saturn" && "Where you build structure and meet responsibility."}
-                      {p.name === "Uranus" && "Where you innovate, rebel, and seek freedom."}
-                      {p.name === "Neptune" && "Where you dream, dissolve boundaries, and connect to the sacred."}
-                      {p.name === "Pluto" && "Where you transform, release, and reclaim power."}
-                      {p.name === "North Node" && "Your invitation toward growth."}
-                      {p.name === "Chiron" && "Where healing emerges from your deepest wounds."}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </SolaraCard>
-          )}
+            <div className="space-y-6">
+              {/* Deep Dive Card (if available) */}
+              {insight?.tabDeepDives?.planetaryPlacements && (
+                <DeepDiveCard
+                  title="What Your Planets Mean For You"
+                  subtitle="Your unique planetary signature"
+                  deepDive={insight.tabDeepDives.planetaryPlacements}
+                />
+              )}
 
-          {/* Houses */}
-          {activeSection === "houses" && placements && (
-            <SolaraCard className="space-y-4">
-              <h2 className="text-xl font-semibold">Houses</h2>
-              <p className="text-sm text-accent-ink/60 leading-relaxed">
-                Houses show where life themes unfold—which arenas of life ask the most of you, and where certain energies come alive.
-              </p>
-              <div className="space-y-4">
-                {placements.houses
-                  ?.filter((h: any) => !!h.signOnCusp)
-                  .map((h: any) => {
-                    const planetsInHouse = placements.planets?.filter(
-                      (p: any) => p.house === h.house
-                    );
-                    return (
-                      <div key={h.house} className="pb-3 border-b border-accent-soft/30 last:border-0">
-                        <div className="flex items-baseline justify-between gap-4 mb-1">
-                          <span className="font-medium text-accent-ink">
-                            {formatHouseLabel(h.house)}
-                          </span>
-                          <span className="text-sm text-accent-ink/70">{h.signOnCusp}</span>
-                        </div>
-                        {planetsInHouse && planetsInHouse.length > 0 && (
-                          <div className="text-sm text-accent-ink/60 mt-1">
-                            {planetsInHouse.map((p: any) => p.name).join(", ")}
-                          </div>
-                        )}
-                        <p className="text-sm text-accent-ink/60 leading-relaxed mt-2">
-                          {h.house === 1 && "How you meet the world and present yourself."}
-                          {h.house === 2 && "Your relationship with resources, worth, and stability."}
-                          {h.house === 3 && "How you communicate, learn, and connect nearby."}
-                          {h.house === 4 && "Your inner foundation, home, and emotional roots."}
-                          {h.house === 5 && "Where you create, play, and express joy."}
-                          {h.house === 6 && "Your daily rhythms, work, and well-being."}
-                          {h.house === 7 && "How you partner, reflect, and relate one-to-one."}
-                          {h.house === 8 && "Where you merge, transform, and face the unknown."}
-                          {h.house === 9 && "Your search for meaning, belief, and expansion."}
-                          {h.house === 10 && "Your public role, career, and visible legacy."}
-                          {h.house === 11 && "Your vision for community, friendship, and the future."}
-                          {h.house === 12 && "Your inner sanctuary, solitude, and the sacred."}
-                        </p>
+              <SolaraCard className="space-y-4">
+                <h2 className="text-xl font-semibold">Planetary Placements</h2>
+                <p className="text-sm text-accent-ink/60 leading-relaxed">
+                  These show how different parts of you express themselves—your drive, your communication style, how you love and relate.
+                </p>
+                <div className="space-y-4">
+                  {placements.planets?.map((p: any) => (
+                    <div key={p.name} className="pb-3 border-b border-accent-soft/30 last:border-0">
+                      <div className="flex items-baseline justify-between gap-4 mb-1">
+                        <span className="font-medium text-accent-ink">
+                          {p.name}
+                          {p.retrograde === true && " ℞"}
+                        </span>
+                        <span className="text-sm text-accent-ink/70">
+                          {p.sign}
+                          {p.house && <> — {p.house}th house</>}
+                        </span>
                       </div>
-                    );
-                  })}
-              </div>
-            </SolaraCard>
-          )}
-
-          {/* Aspects */}
-          {activeSection === "aspects" && placements?.aspects && (
-            <SolaraCard className="space-y-4">
-              <h2 className="text-xl font-semibold">Aspects</h2>
-              <p className="text-sm text-accent-ink/60 leading-relaxed">
-                Aspects show how different inner parts of you interact—where they support, challenge, or intensify each other.
-              </p>
-              <div className="space-y-2">
-                {placements.aspects
-                  .slice(0, showAllAspects ? undefined : 20)
-                  .map((aspect: any, idx: number) => (
-                    <div
-                      key={idx}
-                      className="flex items-baseline justify-between gap-4 py-2 border-b border-accent-soft/30 last:border-0 text-sm"
-                    >
-                      <span className="font-medium text-accent-ink">
-                        {aspect.between[0]} {aspect.type} {aspect.between[1]}
-                      </span>
-                      <span className="text-accent-ink/50 text-xs">
-                        {aspect.orb?.toFixed(2)}°
-                      </span>
-                    </div>
-                  ))}
-              </div>
-              {!showAllAspects && placements.aspects.length > 20 && (
-                <button
-                  onClick={() => setShowAllAspects(true)}
-                  className="text-sm text-accent underline hover:no-underline"
-                >
-                  Show all {placements.aspects.length} aspects
-                </button>
-              )}
-              {showAllAspects && placements.aspects.length > 20 && (
-                <button
-                  onClick={() => setShowAllAspects(false)}
-                  className="text-sm text-accent underline hover:no-underline"
-                >
-                  Show fewer aspects
-                </button>
-              )}
-            </SolaraCard>
-          )}
-
-          {/* Patterns */}
-          {activeSection === "patterns" && placements?.calculated?.patterns && (
-            <SolaraCard className="space-y-4">
-              <h2 className="text-xl font-semibold">Major Patterns</h2>
-              <p className="text-sm text-accent-ink/60 leading-relaxed">
-                Patterns are large-scale energetic shapes in your chart—where several planets connect to form a recognizable theme or recurring dynamic.
-              </p>
-              {placements.calculated.patterns.length > 0 ? (
-                <div className="space-y-5">
-                  {placements.calculated.patterns.map((pattern: any, idx: number) => (
-                    <div key={idx} className="pb-4 border-b border-accent-soft/30 last:border-0">
-                      <h3 className="font-medium text-accent-ink mb-2">
-                        {pattern.type === "t_square" && "T-Square"}
-                        {pattern.type === "grand_trine" && "Grand Trine"}
-                      </h3>
-                      {pattern.planets && (
-                        <p className="text-sm text-accent-ink/70 mb-2">
-                          {pattern.planets.join(" • ")}
-                        </p>
-                      )}
                       <p className="text-sm text-accent-ink/60 leading-relaxed">
-                        {pattern.type === "t_square" &&
-                          "A T-Square creates tension between three areas of life, asking you to find creative solutions. It often feels like productive friction—pressure that pushes you toward growth, innovation, and resilience. This pattern tends to keep you moving forward, even when stillness might feel easier."}
-                        {pattern.type === "grand_trine" &&
-                          "A Grand Trine forms a triangle of ease and flow, where energy moves smoothly between three areas. This can feel like natural talent or effortless grace. The invitation is to activate this gift consciously rather than letting it remain passive—talent unused doesn't always become mastery."}
+                        {p.name === "Sun" && "Your core sense of self and vitality."}
+                        {p.name === "Moon" && "Your emotional landscape and inner world."}
+                        {p.name === "Mercury" && "How you think, communicate, and process information."}
+                        {p.name === "Venus" && "How you love, connect, and find beauty."}
+                        {p.name === "Mars" && "Your drive, desire, and how you take action."}
+                        {p.name === "Jupiter" && "Where you expand, believe, and find meaning."}
+                        {p.name === "Saturn" && "Where you build structure and meet responsibility."}
+                        {p.name === "Uranus" && "Where you innovate, rebel, and seek freedom."}
+                        {p.name === "Neptune" && "Where you dream, dissolve boundaries, and connect to the sacred."}
+                        {p.name === "Pluto" && "Where you transform, release, and reclaim power."}
+                        {p.name === "North Node" && "Your invitation toward growth."}
+                        {p.name === "Chiron" && "Where healing emerges from your deepest wounds."}
                       </p>
                     </div>
                   ))}
                 </div>
-              ) : (
-                <p className="text-sm text-accent-ink/60">No major patterns detected in your chart.</p>
+              </SolaraCard>
+            </div>
+          )}
+
+          {/* Houses */}
+          {activeSection === "houses" && placements && (
+            <div className="space-y-6">
+              {/* Deep Dive Card (if available) */}
+              {insight?.tabDeepDives?.houses && (
+                <DeepDiveCard
+                  title="What Your Houses Mean For You"
+                  subtitle="The 12 life areas of your chart"
+                  deepDive={insight.tabDeepDives.houses}
+                />
               )}
-            </SolaraCard>
+
+              <SolaraCard className="space-y-4">
+                <h2 className="text-xl font-semibold">Houses</h2>
+                <p className="text-sm text-accent-ink/60 leading-relaxed">
+                  Houses show where life themes unfold—which arenas of life ask the most of you, and where certain energies come alive.
+                </p>
+                <div className="space-y-4">
+                  {placements.houses
+                    ?.filter((h: any) => !!h.signOnCusp)
+                    .map((h: any) => {
+                      const planetsInHouse = placements.planets?.filter(
+                        (p: any) => p.house === h.house
+                      );
+                      return (
+                        <div key={h.house} className="pb-3 border-b border-accent-soft/30 last:border-0">
+                          <div className="flex items-baseline justify-between gap-4 mb-1">
+                            <span className="font-medium text-accent-ink">
+                              {formatHouseLabel(h.house)}
+                            </span>
+                            <span className="text-sm text-accent-ink/70">{h.signOnCusp}</span>
+                          </div>
+                          {planetsInHouse && planetsInHouse.length > 0 && (
+                            <div className="text-sm text-accent-ink/60 mt-1">
+                              {planetsInHouse.map((p: any) => p.name).join(", ")}
+                            </div>
+                          )}
+                          <p className="text-sm text-accent-ink/60 leading-relaxed mt-2">
+                            {h.house === 1 && "How you meet the world and present yourself."}
+                            {h.house === 2 && "Your relationship with resources, worth, and stability."}
+                            {h.house === 3 && "How you communicate, learn, and connect nearby."}
+                            {h.house === 4 && "Your inner foundation, home, and emotional roots."}
+                            {h.house === 5 && "Where you create, play, and express joy."}
+                            {h.house === 6 && "Your daily rhythms, work, and well-being."}
+                            {h.house === 7 && "How you partner, reflect, and relate one-to-one."}
+                            {h.house === 8 && "Where you merge, transform, and face the unknown."}
+                            {h.house === 9 && "Your search for meaning, belief, and expansion."}
+                            {h.house === 10 && "Your public role, career, and visible legacy."}
+                            {h.house === 11 && "Your vision for community, friendship, and the future."}
+                            {h.house === 12 && "Your inner sanctuary, solitude, and the sacred."}
+                          </p>
+                        </div>
+                      );
+                    })}
+                </div>
+              </SolaraCard>
+            </div>
+          )}
+
+          {/* Aspects */}
+          {activeSection === "aspects" && placements?.aspects && (
+            <div className="space-y-6">
+              {/* Deep Dive Card (if available) */}
+              {insight?.tabDeepDives?.aspects && (
+                <DeepDiveCard
+                  title="What Your Aspects Mean For You"
+                  subtitle="The conversations between your planets"
+                  deepDive={insight.tabDeepDives.aspects}
+                />
+              )}
+
+              <SolaraCard className="space-y-4">
+                <h2 className="text-xl font-semibold">Aspects</h2>
+                <p className="text-sm text-accent-ink/60 leading-relaxed">
+                  Aspects show how different inner parts of you interact—where they support, challenge, or intensify each other.
+                </p>
+                <div className="space-y-2">
+                  {placements.aspects
+                    .slice(0, showAllAspects ? undefined : 20)
+                    .map((aspect: any, idx: number) => (
+                      <div
+                        key={idx}
+                        className="flex items-baseline justify-between gap-4 py-2 border-b border-accent-soft/30 last:border-0 text-sm"
+                      >
+                        <span className="font-medium text-accent-ink">
+                          {aspect.between[0]} {aspect.type} {aspect.between[1]}
+                        </span>
+                        <span className="text-accent-ink/50 text-xs">
+                          {aspect.orb?.toFixed(2)}°
+                        </span>
+                      </div>
+                    ))}
+                </div>
+                {!showAllAspects && placements.aspects.length > 20 && (
+                  <button
+                    onClick={() => setShowAllAspects(true)}
+                    className="text-sm text-accent underline hover:no-underline"
+                  >
+                    Show all {placements.aspects.length} aspects
+                  </button>
+                )}
+                {showAllAspects && placements.aspects.length > 20 && (
+                  <button
+                    onClick={() => setShowAllAspects(false)}
+                    className="text-sm text-accent underline hover:no-underline"
+                  >
+                    Show fewer aspects
+                  </button>
+                )}
+              </SolaraCard>
+            </div>
+          )}
+
+          {/* Patterns */}
+          {activeSection === "patterns" && placements?.calculated?.patterns && (
+            <div className="space-y-6">
+              {/* Deep Dive Card (if available) */}
+              {insight?.tabDeepDives?.patterns && (
+                <DeepDiveCard
+                  title="What Your Patterns Mean For You"
+                  subtitle="Major configurations in your chart"
+                  deepDive={insight.tabDeepDives.patterns}
+                />
+              )}
+
+              <SolaraCard className="space-y-4">
+                <h2 className="text-xl font-semibold">Major Patterns</h2>
+                <p className="text-sm text-accent-ink/60 leading-relaxed">
+                  Patterns are large-scale energetic shapes in your chart—where several planets connect to form a recognizable theme or recurring dynamic.
+                </p>
+                {placements.calculated.patterns.length > 0 ? (
+                  <div className="space-y-5">
+                    {placements.calculated.patterns.map((pattern: any, idx: number) => (
+                      <div key={idx} className="pb-4 border-b border-accent-soft/30 last:border-0">
+                        <h3 className="font-medium text-accent-ink mb-2">
+                          {pattern.type === "t_square" && "T-Square"}
+                          {pattern.type === "grand_trine" && "Grand Trine"}
+                        </h3>
+                        {pattern.planets && (
+                          <p className="text-sm text-accent-ink/70 mb-2">
+                            {pattern.planets.join(" • ")}
+                          </p>
+                        )}
+                        <p className="text-sm text-accent-ink/60 leading-relaxed">
+                          {pattern.type === "t_square" &&
+                            "A T-Square creates tension between three areas of life, asking you to find creative solutions. It often feels like productive friction—pressure that pushes you toward growth, innovation, and resilience. This pattern tends to keep you moving forward, even when stillness might feel easier."}
+                          {pattern.type === "grand_trine" &&
+                            "A Grand Trine forms a triangle of ease and flow, where energy moves smoothly between three areas. This can feel like natural talent or effortless grace. The invitation is to activate this gift consciously rather than letting it remain passive—talent unused doesn't always become mastery."}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-accent-ink/60">No major patterns detected in your chart.</p>
+                )}
+              </SolaraCard>
+            </div>
           )}
 
           {/* Energy Shape */}
           {activeSection === "energy" && placements && (
-            <SolaraCard className="space-y-6">
-              <h2 className="text-xl font-semibold">Energy Shape</h2>
-              <p className="text-sm text-accent-ink/60 leading-relaxed">
-                This shows how energy moves through you—the underlying rhythm of your chart and where certain qualities concentrate or disperse.
-              </p>
-
-              {placements.calculated?.chartType && (
-                <div>
-                  <h3 className="text-sm font-medium text-accent-ink/70 mb-2">Chart Type</h3>
-                  <p className="text-base text-accent-ink mb-1">
-                    {placements.calculated.chartType === "day" ? "Day Chart" : "Night Chart"}
-                  </p>
-                  <p className="text-sm text-accent-ink/60 leading-relaxed">
-                    {placements.calculated.chartType === "day"
-                      ? "Your chart is oriented toward visibility and outward expression. Life often asks you to show up, be seen, and engage with the external world."
-                      : "Your chart is oriented toward inner reflection and subtlety. Life often unfolds through inner processing, quiet observation, and behind-the-scenes work."}
-                  </p>
-                </div>
+            <div className="space-y-6">
+              {/* Deep Dive Card (if available) */}
+              {insight?.tabDeepDives?.energyShape && (
+                <DeepDiveCard
+                  title="What Your Energy Shape Means For You"
+                  subtitle="Element and modality balance"
+                  deepDive={insight.tabDeepDives.energyShape}
+                />
               )}
 
-              {placements.derived?.chartRuler && (
-                <div>
-                  <h3 className="text-sm font-medium text-accent-ink/70 mb-2">Chart Ruler</h3>
-                  <p className="text-base text-accent-ink mb-1">{placements.derived.chartRuler}</p>
-                  <p className="text-sm text-accent-ink/60 leading-relaxed">
-                    This planet guides the overall direction of your life and filters how you engage with the world.
-                  </p>
-                </div>
-              )}
+              <SolaraCard className="space-y-6">
+                <h2 className="text-xl font-semibold">Energy Shape</h2>
+                <p className="text-sm text-accent-ink/60 leading-relaxed">
+                  This shows how energy moves through you—the underlying rhythm of your chart and where certain qualities concentrate or disperse.
+                </p>
 
-              {placements.derived?.dominantPlanets && placements.derived.dominantPlanets.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-medium text-accent-ink/70 mb-2">Dominant Planets</h3>
-                  <ul className="space-y-1 mb-2">
-                    {placements.derived.dominantPlanets.slice(0, 3).map((dp: any) => (
-                      <li key={dp.planet} className="text-base text-accent-ink">
-                        {dp.planet}
-                      </li>
-                    ))}
-                  </ul>
-                  <p className="text-sm text-accent-ink/60 leading-relaxed">
-                    These planets shape your experience most strongly—they appear in multiple key positions or form important connections.
-                  </p>
-                </div>
-              )}
-
-              {placements.derived?.dominantSigns && placements.derived.dominantSigns.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-medium text-accent-ink/70 mb-2">Dominant Signs</h3>
-                  <ul className="space-y-1 mb-2">
-                    {placements.derived.dominantSigns.slice(0, 3).map((ds: any) => (
-                      <li key={ds.sign} className="text-base text-accent-ink">
-                        {ds.sign}
-                      </li>
-                    ))}
-                  </ul>
-                  <p className="text-sm text-accent-ink/60 leading-relaxed">
-                    These signs color how you move through the world. Their qualities show up repeatedly in how you express yourself.
-                  </p>
-                </div>
-              )}
-
-              {placements.derived?.elementBalance && (
-                <div>
-                  <h3 className="text-sm font-medium text-accent-ink/70 mb-2">Element Balance</h3>
-                  <div className="grid grid-cols-2 gap-2 mb-2">
-                    {Object.entries(placements.derived.elementBalance).map(([element, count]) => (
-                      <div key={element} className="text-sm text-accent-ink/80">
-                        <span className="font-medium">{element}:</span> {count as number}
-                      </div>
-                    ))}
+                {placements.calculated?.chartType && (
+                  <div>
+                    <h3 className="text-sm font-medium text-accent-ink/70 mb-2">Chart Type</h3>
+                    <p className="text-base text-accent-ink mb-1">
+                      {placements.calculated.chartType === "day" ? "Day Chart" : "Night Chart"}
+                    </p>
+                    <p className="text-sm text-accent-ink/60 leading-relaxed">
+                      {placements.calculated.chartType === "day"
+                        ? "Your chart is oriented toward visibility and outward expression. Life often asks you to show up, be seen, and engage with the external world."
+                        : "Your chart is oriented toward inner reflection and subtlety. Life often unfolds through inner processing, quiet observation, and behind-the-scenes work."}
+                    </p>
                   </div>
-                  <p className="text-sm text-accent-ink/60 leading-relaxed">
-                    This shows where your energy naturally gathers—whether in inspiration, grounding, thought, or emotion.
-                  </p>
-                </div>
-              )}
+                )}
 
-              {placements.derived?.modalityBalance && (
-                <div>
-                  <h3 className="text-sm font-medium text-accent-ink/70 mb-2">Modality Balance</h3>
-                  <div className="grid grid-cols-2 gap-2 mb-2">
-                    {Object.entries(placements.derived.modalityBalance).map(([modality, count]) => (
-                      <div key={modality} className="text-sm text-accent-ink/80">
-                        <span className="font-medium">{modality}:</span> {count as number}
-                      </div>
-                    ))}
+                {placements.derived?.chartRuler && (
+                  <div>
+                    <h3 className="text-sm font-medium text-accent-ink/70 mb-2">Chart Ruler</h3>
+                    <p className="text-base text-accent-ink mb-1">{placements.derived.chartRuler}</p>
+                    <p className="text-sm text-accent-ink/60 leading-relaxed">
+                      This planet guides the overall direction of your life and filters how you engage with the world.
+                    </p>
                   </div>
-                  <p className="text-sm text-accent-ink/60 leading-relaxed">
-                    This reflects how you initiate, sustain, or adapt—whether you tend to start things, stabilize them, or shift with change.
-                  </p>
-                </div>
-              )}
-            </SolaraCard>
+                )}
+
+                {placements.derived?.dominantPlanets && placements.derived.dominantPlanets.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-medium text-accent-ink/70 mb-2">Dominant Planets</h3>
+                    <ul className="space-y-1 mb-2">
+                      {placements.derived.dominantPlanets.slice(0, 3).map((dp: any) => (
+                        <li key={dp.planet} className="text-base text-accent-ink">
+                          {dp.planet}
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="text-sm text-accent-ink/60 leading-relaxed">
+                      These planets shape your experience most strongly—they appear in multiple key positions or form important connections.
+                    </p>
+                  </div>
+                )}
+
+                {placements.derived?.dominantSigns && placements.derived.dominantSigns.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-medium text-accent-ink/70 mb-2">Dominant Signs</h3>
+                    <ul className="space-y-1 mb-2">
+                      {placements.derived.dominantSigns.slice(0, 3).map((ds: any) => (
+                        <li key={ds.sign} className="text-base text-accent-ink">
+                          {ds.sign}
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="text-sm text-accent-ink/60 leading-relaxed">
+                      These signs color how you move through the world. Their qualities show up repeatedly in how you express yourself.
+                    </p>
+                  </div>
+                )}
+
+                {placements.derived?.elementBalance && (
+                  <div>
+                    <h3 className="text-sm font-medium text-accent-ink/70 mb-2">Element Balance</h3>
+                    <div className="grid grid-cols-2 gap-2 mb-2">
+                      {Object.entries(placements.derived.elementBalance).map(([element, count]) => (
+                        <div key={element} className="text-sm text-accent-ink/80">
+                          <span className="font-medium">{element}:</span> {count as number}
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-sm text-accent-ink/60 leading-relaxed">
+                      This shows where your energy naturally gathers—whether in inspiration, grounding, thought, or emotion.
+                    </p>
+                  </div>
+                )}
+
+                {placements.derived?.modalityBalance && (
+                  <div>
+                    <h3 className="text-sm font-medium text-accent-ink/70 mb-2">Modality Balance</h3>
+                    <div className="grid grid-cols-2 gap-2 mb-2">
+                      {Object.entries(placements.derived.modalityBalance).map(([modality, count]) => (
+                        <div key={modality} className="text-sm text-accent-ink/80">
+                          <span className="font-medium">{modality}:</span> {count as number}
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-sm text-accent-ink/60 leading-relaxed">
+                      This reflects how you initiate, sustain, or adapt—whether you tend to start things, stabilize them, or shift with change.
+                    </p>
+                  </div>
+                )}
+              </SolaraCard>
+            </div>
           )}
 
           {/* Intensity Zones */}
           {activeSection === "intensity" && placements?.calculated?.emphasis && (
-            <SolaraCard className="space-y-6">
-              <h2 className="text-xl font-semibold">Intensity Zones</h2>
-              <p className="text-sm text-accent-ink/60 leading-relaxed">
-                This shows where life feels concentrated—where multiple planets gather, creating areas of heightened focus and recurring themes.
-              </p>
+            <div className="space-y-6">
+              {/* Deep Dive Card (if available) */}
+              {insight?.tabDeepDives?.intensityZones && (
+                <DeepDiveCard
+                  title="What Your Intensity Zones Mean For You"
+                  subtitle="Where energy clusters in your chart"
+                  deepDive={insight.tabDeepDives.intensityZones}
+                />
+              )}
 
-              {placements.calculated.emphasis.signEmphasis &&
-                placements.calculated.emphasis.signEmphasis.length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-medium text-accent-ink/70 mb-2">Sign Emphasis</h3>
-                    <ul className="space-y-1 mb-2">
-                      {placements.calculated.emphasis.signEmphasis.slice(0, 3).map((se: any) => (
-                        <li key={se.sign} className="text-base text-accent-ink">
-                          {se.sign} <span className="text-sm text-accent-ink/60">({se.count} planets)</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <p className="text-sm text-accent-ink/60 leading-relaxed">
-                      Multiple planets in these signs amplify their qualities—you might notice these themes appearing repeatedly in how you think, feel, and respond.
-                    </p>
-                  </div>
-                )}
+              <SolaraCard className="space-y-6">
+                <h2 className="text-xl font-semibold">Intensity Zones</h2>
+                <p className="text-sm text-accent-ink/60 leading-relaxed">
+                  This shows where life feels concentrated—where multiple planets gather, creating areas of heightened focus and recurring themes.
+                </p>
 
-              {placements.calculated.emphasis.houseEmphasis &&
-                placements.calculated.emphasis.houseEmphasis.length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-medium text-accent-ink/70 mb-2">House Emphasis</h3>
-                    <ul className="space-y-1 mb-2">
-                      {placements.calculated.emphasis.houseEmphasis.slice(0, 3).map((he: any) => (
-                        <li key={he.house} className="text-base text-accent-ink">
-                          {he.house}th House{" "}
-                          <span className="text-sm text-accent-ink/60">({he.count} planets)</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <p className="text-sm text-accent-ink/60 leading-relaxed">
-                      These life areas ask a lot of you—they're where complexity, growth, and attention naturally gather.
-                    </p>
-                  </div>
-                )}
-
-              {placements.calculated.emphasis.stelliums &&
-                placements.calculated.emphasis.stelliums.length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-medium text-accent-ink/70 mb-2">Stelliums</h3>
-                    <div className="space-y-4">
-                      {placements.calculated.emphasis.stelliums.map((stellium: any, idx: number) => (
-                        <div key={idx} className="pb-3 border-b border-accent-soft/30 last:border-0">
-                          <p className="font-medium text-accent-ink mb-1">
-                            {stellium.type === "sign" && stellium.name}
-                            {stellium.type === "house" && `${stellium.name}th House`}
-                          </p>
-                          <p className="text-sm text-accent-ink/70 mb-2">
-                            {stellium.planets?.join(", ") || "—"}
-                          </p>
-                          <p className="text-sm text-accent-ink/60 leading-relaxed">
-                            A stellium here creates a concentrated beam of attention—multiple inner parts converging on one theme. This area tends to feel vivid, complex, and central to your experience.
-                          </p>
-                        </div>
-                      ))}
+                {placements.calculated.emphasis.signEmphasis &&
+                  placements.calculated.emphasis.signEmphasis.length > 0 && (
+                    <div>
+                      <h3 className="text-sm font-medium text-accent-ink/70 mb-2">Sign Emphasis</h3>
+                      <ul className="space-y-1 mb-2">
+                        {placements.calculated.emphasis.signEmphasis.slice(0, 3).map((se: any) => (
+                          <li key={se.sign} className="text-base text-accent-ink">
+                            {se.sign} <span className="text-sm text-accent-ink/60">({se.count} planets)</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="text-sm text-accent-ink/60 leading-relaxed">
+                        Multiple planets in these signs amplify their qualities—you might notice these themes appearing repeatedly in how you think, feel, and respond.
+                      </p>
                     </div>
-                  </div>
-                )}
-            </SolaraCard>
+                  )}
+
+                {placements.calculated.emphasis.houseEmphasis &&
+                  placements.calculated.emphasis.houseEmphasis.length > 0 && (
+                    <div>
+                      <h3 className="text-sm font-medium text-accent-ink/70 mb-2">House Emphasis</h3>
+                      <ul className="space-y-1 mb-2">
+                        {placements.calculated.emphasis.houseEmphasis.slice(0, 3).map((he: any) => (
+                          <li key={he.house} className="text-base text-accent-ink">
+                            {he.house}th House{" "}
+                            <span className="text-sm text-accent-ink/60">({he.count} planets)</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="text-sm text-accent-ink/60 leading-relaxed">
+                        These life areas ask a lot of you—they're where complexity, growth, and attention naturally gather.
+                      </p>
+                    </div>
+                  )}
+
+                {placements.calculated.emphasis.stelliums &&
+                  placements.calculated.emphasis.stelliums.length > 0 && (
+                    <div>
+                      <h3 className="text-sm font-medium text-accent-ink/70 mb-2">Stelliums</h3>
+                      <div className="space-y-4">
+                        {placements.calculated.emphasis.stelliums.map((stellium: any, idx: number) => (
+                          <div key={idx} className="pb-3 border-b border-accent-soft/30 last:border-0">
+                            <p className="font-medium text-accent-ink mb-1">
+                              {stellium.type === "sign" && stellium.name}
+                              {stellium.type === "house" && `${stellium.name}th House`}
+                            </p>
+                            <p className="text-sm text-accent-ink/70 mb-2">
+                              {stellium.planets?.join(", ") || "—"}
+                            </p>
+                            <p className="text-sm text-accent-ink/60 leading-relaxed">
+                              A stellium here creates a concentrated beam of attention—multiple inner parts converging on one theme. This area tends to feel vivid, complex, and central to your experience.
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+              </SolaraCard>
+            </div>
           )}
 
           {/* Direction */}
           {activeSection === "direction" && placements && (
-            <SolaraCard className="space-y-6">
-              <h2 className="text-xl font-semibold">Direction</h2>
-              <p className="text-sm text-accent-ink/60 leading-relaxed">
-                This reflects growth, healing, and familiarity—where you're invited to stretch, where you naturally return, and where old wounds become sources of wisdom.
-              </p>
-
-              {placements.planets?.find((p: any) => p.name === "North Node") && (
-                <div>
-                  <h3 className="font-medium text-accent-ink mb-2">North Node</h3>
-                  <p className="text-sm text-accent-ink/70 mb-2">
-                    {placements.planets.find((p: any) => p.name === "North Node").sign}
-                    {placements.planets.find((p: any) => p.name === "North Node").house &&
-                      ` — ${placements.planets.find((p: any) => p.name === "North Node").house}th house`}
-                  </p>
-                  <p className="text-sm text-accent-ink/60 leading-relaxed">
-                    Your North Node is an invitation toward growth and unfamiliar territory. It points to qualities you're developing, even when they don't feel natural yet. This is where life asks you to stretch—not because you lack something, but because expansion lives here. Moving toward the North Node often feels uncomfortable at first, but it's where you build new capacity and meet life in fresh ways.
-                  </p>
-                </div>
+            <div className="space-y-6">
+              {/* Deep Dive Card (if available) */}
+              {insight?.tabDeepDives?.direction && (
+                <DeepDiveCard
+                  title="What Your Direction Means For You"
+                  subtitle="North Node, South Node, and life path"
+                  deepDive={insight.tabDeepDives.direction}
+                />
               )}
 
-              {placements.calculated?.southNode && (
-                <div>
-                  <h3 className="font-medium text-accent-ink mb-2">South Node</h3>
-                  <p className="text-sm text-accent-ink/70 mb-2">
-                    {placements.calculated.southNode.sign}
-                    {placements.calculated.southNode.house &&
-                      ` — ${placements.calculated.southNode.house}th house`}
-                  </p>
-                  <p className="text-sm text-accent-ink/60 leading-relaxed">
-                    Your South Node represents familiar patterns and natural comfort. These are qualities you carry easily, perhaps from early life or past experience. They feel like home—but relying on them too heavily can keep you circling the same ground. The South Node isn't something to abandon, but rather a foundation to honor while you reach toward the North Node's invitation. It's what you already know how to do.
-                  </p>
-                </div>
-              )}
+              <SolaraCard className="space-y-6">
+                <h2 className="text-xl font-semibold">Direction</h2>
+                <p className="text-sm text-accent-ink/60 leading-relaxed">
+                  This reflects growth, healing, and familiarity—where you're invited to stretch, where you naturally return, and where old wounds become sources of wisdom.
+                </p>
 
-              {placements.planets?.find((p: any) => p.name === "Chiron") && (
-                <div>
-                  <h3 className="font-medium text-accent-ink mb-2">Chiron</h3>
-                  <p className="text-sm text-accent-ink/70 mb-2">
-                    {placements.planets.find((p: any) => p.name === "Chiron").sign}
-                    {placements.planets.find((p: any) => p.name === "Chiron").house &&
-                      ` — ${placements.planets.find((p: any) => p.name === "Chiron").house}th house`}
-                  </p>
-                  <p className="text-sm text-accent-ink/60 leading-relaxed">
-                    Chiron shows where healing and teaching emerge from your deepest wounds. This is often a tender area—a place where you've experienced pain or felt different, but also where you develop profound wisdom. What once hurt can become a source of compassion and guidance for others. Chiron doesn't promise that the wound disappears, but that it becomes medicine—something you understand deeply enough to help others navigate.
-                  </p>
-                </div>
-              )}
-            </SolaraCard>
+                {placements.planets?.find((p: any) => p.name === "North Node") && (
+                  <div>
+                    <h3 className="font-medium text-accent-ink mb-2">North Node</h3>
+                    <p className="text-sm text-accent-ink/70 mb-2">
+                      {placements.planets.find((p: any) => p.name === "North Node").sign}
+                      {placements.planets.find((p: any) => p.name === "North Node").house &&
+                        ` — ${placements.planets.find((p: any) => p.name === "North Node").house}th house`}
+                    </p>
+                    <p className="text-sm text-accent-ink/60 leading-relaxed">
+                      Your North Node is an invitation toward growth and unfamiliar territory. It points to qualities you're developing, even when they don't feel natural yet. This is where life asks you to stretch—not because you lack something, but because expansion lives here. Moving toward the North Node often feels uncomfortable at first, but it's where you build new capacity and meet life in fresh ways.
+                    </p>
+                  </div>
+                )}
+
+                {placements.calculated?.southNode && (
+                  <div>
+                    <h3 className="font-medium text-accent-ink mb-2">South Node</h3>
+                    <p className="text-sm text-accent-ink/70 mb-2">
+                      {placements.calculated.southNode.sign}
+                      {placements.calculated.southNode.house &&
+                        ` — ${placements.calculated.southNode.house}th house`}
+                    </p>
+                    <p className="text-sm text-accent-ink/60 leading-relaxed">
+                      Your South Node represents familiar patterns and natural comfort. These are qualities you carry easily, perhaps from early life or past experience. They feel like home—but relying on them too heavily can keep you circling the same ground. The South Node isn't something to abandon, but rather a foundation to honor while you reach toward the North Node's invitation. It's what you already know how to do.
+                    </p>
+                  </div>
+                )}
+
+                {placements.planets?.find((p: any) => p.name === "Chiron") && (
+                  <div>
+                    <h3 className="font-medium text-accent-ink mb-2">Chiron</h3>
+                    <p className="text-sm text-accent-ink/70 mb-2">
+                      {placements.planets.find((p: any) => p.name === "Chiron").sign}
+                      {placements.planets.find((p: any) => p.name === "Chiron").house &&
+                        ` — ${placements.planets.find((p: any) => p.name === "Chiron").house}th house`}
+                    </p>
+                    <p className="text-sm text-accent-ink/60 leading-relaxed">
+                      Chiron shows where healing and teaching emerge from your deepest wounds. This is often a tender area—a place where you've experienced pain or felt different, but also where you develop profound wisdom. What once hurt can become a source of compassion and guidance for others. Chiron doesn't promise that the wound disappears, but that it becomes medicine—something you understand deeply enough to help others navigate.
+                    </p>
+                  </div>
+                )}
+              </SolaraCard>
+            </div>
           )}
 
           {/* Joy */}
@@ -679,67 +825,15 @@ export default function BirthChartPage() {
             <div className="space-y-6">
               {/* Deep Dive Card (if available) */}
               {insight?.tabDeepDives?.joy && (
-                <SolaraCard className="space-y-6">
-                  <div>
-                    <h2 className="text-xl font-semibold mb-2">What This Means For You</h2>
-                    <p className="text-sm text-accent-ink/60">
-                      Part of Fortune in {placements.calculated.partOfFortune.sign}
-                      {placements.calculated.partOfFortune.house &&
-                        ` — ${placements.calculated.partOfFortune.house}th house`}
-                    </p>
-                  </div>
-
-                  {/* Meaning - 2 paragraphs */}
-                  <div className="space-y-4">
-                    {insight.tabDeepDives.joy.meaning.split("\n\n").map((para, idx) => (
-                      <p key={idx} className="text-base text-accent-ink/80 leading-relaxed">
-                        {para}
-                      </p>
-                    ))}
-                  </div>
-
-                  {/* Aligned - 3 bullets */}
-                  <div>
-                    <h3 className="text-sm font-medium text-accent-ink/70 mb-2">When You're Aligned</h3>
-                    <ul className="space-y-2">
-                      {insight.tabDeepDives.joy.aligned.map((item, idx) => (
-                        <li key={idx} className="flex items-start gap-2 text-sm text-accent-ink/80">
-                          <span className="text-accent mt-0.5">•</span>
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Off Course - 3 bullets */}
-                  <div>
-                    <h3 className="text-sm font-medium text-accent-ink/70 mb-2">When You're Off Course</h3>
-                    <ul className="space-y-2">
-                      {insight.tabDeepDives.joy.offCourse.map((item, idx) => (
-                        <li key={idx} className="flex items-start gap-2 text-sm text-accent-ink/80">
-                          <span className="text-accent-ink/40 mt-0.5">•</span>
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Decision Rule */}
-                  <div className="bg-accent-soft/30 rounded-lg p-4">
-                    <h3 className="text-sm font-medium text-accent-ink/70 mb-1">Decision Rule</h3>
-                    <p className="text-sm text-accent-ink font-medium">
-                      {insight.tabDeepDives.joy.decisionRule}
-                    </p>
-                  </div>
-
-                  {/* Practice */}
-                  <div className="border-t border-accent-soft pt-4">
-                    <h3 className="text-sm font-medium text-accent-ink/70 mb-2">Weekly Practice</h3>
-                    <p className="text-sm text-accent-ink/80 leading-relaxed">
-                      {insight.tabDeepDives.joy.practice}
-                    </p>
-                  </div>
-                </SolaraCard>
+                <DeepDiveCard
+                  title="What Your Joy Means For You"
+                  subtitle={`Part of Fortune in ${placements.calculated.partOfFortune.sign}${
+                    placements.calculated.partOfFortune.house
+                      ? ` — ${placements.calculated.partOfFortune.house}th house`
+                      : ""
+                  }`}
+                  deepDive={insight.tabDeepDives.joy}
+                />
               )}
 
               {/* Static Definition Card (always shown) */}

@@ -104,10 +104,11 @@ export type FullBirthChartInsight = {
 // ============================================================================
 
 /**
- * Joy Deep Dive - Part of Fortune interpretation
+ * Generic Tab Deep Dive structure
+ * Used for all Soul Print tabs with personalized AI interpretation
  * Generated once, stored forever (stone tablet)
  */
-export type JoyDeepDive = {
+export type TabDeepDive = {
   meaning: string;        // 2 paragraphs (separated by \n\n)
   aligned: string[];      // exactly 3 bullets
   offCourse: string[];    // exactly 3 bullets
@@ -117,10 +118,36 @@ export type JoyDeepDive = {
 };
 
 /**
+ * Joy Deep Dive - Part of Fortune interpretation
+ * @deprecated Use TabDeepDive instead. Kept for backwards compatibility.
+ */
+export type JoyDeepDive = TabDeepDive;
+
+/**
+ * Tab keys for all Soul Print deep dives
+ */
+export type TabDeepDiveKey =
+  | "planetaryPlacements"
+  | "houses"
+  | "aspects"
+  | "patterns"
+  | "energyShape"
+  | "intensityZones"
+  | "direction"
+  | "joy";
+
+/**
  * Container for all tab deep dives
  * Each tab's deep dive is optional and generated on-demand
+ * All generated in a single batched API call for efficiency
  */
 export type TabDeepDives = {
-  joy?: JoyDeepDive;
-  // Future: direction?, patterns?, intensity?, energy?
+  planetaryPlacements?: TabDeepDive;  // Sun, Moon, Rising, planets in signs/houses
+  houses?: TabDeepDive;               // 12 houses and their meanings
+  aspects?: TabDeepDive;              // Planetary aspects and patterns
+  patterns?: TabDeepDive;             // Grand trines, T-squares, stelliums
+  energyShape?: TabDeepDive;          // Element and modality balance
+  intensityZones?: TabDeepDive;       // House emphasis and clusters
+  direction?: TabDeepDive;            // North Node, South Node, life path
+  joy?: TabDeepDive;                  // Part of Fortune
 };
