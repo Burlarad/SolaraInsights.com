@@ -78,6 +78,56 @@ export const stripeCheckoutSchema = z.object({
   email: z.string().email().optional(),
 });
 
+// ========================================
+// AI Response Validation Schemas
+// ========================================
+
+// FullBirthChartInsight response from OpenAI
+// Validates that all required fields exist and are non-empty strings
+export const fullBirthChartInsightSchema = z.object({
+  meta: z.object({
+    mode: z.literal("natal_full_profile"),
+    language: z.string().min(2),
+  }),
+  coreSummary: z.object({
+    headline: z.string().min(10, "headline must be at least 10 characters"),
+    overallVibe: z.string().min(50, "overallVibe must be at least 50 characters"),
+    bigThree: z.object({
+      sun: z.string().min(50),
+      moon: z.string().min(50),
+      rising: z.string().min(50),
+    }),
+  }),
+  sections: z.object({
+    identity: z.string().min(100, "identity must be at least 100 characters"),
+    emotions: z.string().min(100, "emotions must be at least 100 characters"),
+    loveAndRelationships: z.string().min(100, "loveAndRelationships must be at least 100 characters"),
+    workAndMoney: z.string().min(100, "workAndMoney must be at least 100 characters"),
+    purposeAndGrowth: z.string().min(100, "purposeAndGrowth must be at least 100 characters"),
+    innerWorld: z.string().min(100, "innerWorld must be at least 100 characters"),
+  }),
+});
+
+// Type inference for the schema
+export type ValidatedBirthChartInsight = z.infer<typeof fullBirthChartInsightSchema>;
+
+// Helper to validate FullBirthChartInsight
+export function validateBirthChartInsight(
+  data: unknown
+): { success: true; data: ValidatedBirthChartInsight } | { success: false; error: string; fields: string[] } {
+  const result = fullBirthChartInsightSchema.safeParse(data);
+
+  if (!result.success) {
+    const fields = result.error.issues.map((e) => e.path.join("."));
+    const errorMessage = result.error.issues
+      .map((e) => `${e.path.join(".")}: ${e.message}`)
+      .join("; ");
+    return { success: false, error: errorMessage, fields };
+  }
+
+  return { success: true, data: result.data };
+}
+
 // Helper to validate and parse request body
 export async function validateRequest<T>(
   request: Request,

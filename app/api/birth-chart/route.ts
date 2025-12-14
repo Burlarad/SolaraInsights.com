@@ -7,6 +7,7 @@ import type { NatalAIRequest, FullBirthChartInsight } from "@/types/natalAI";
 import { touchLastSeen } from "@/lib/activity/touchLastSeen";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
 import { AYREN_MODE_SOULPRINT_LONG } from "@/lib/ai/voice";
+import { validateBirthChartInsight } from "@/lib/validation/schemas";
 
 // Must match SOUL_PATH_SCHEMA_VERSION from lib/soulPath/storage.ts
 // Incremented when placements structure changes
@@ -451,7 +452,7 @@ export async function POST() {
       );
     }
 
-    // Parse the JSON response
+    // Parse and validate the JSON response
     let insight: FullBirthChartInsight | null = null;
     try {
       const parsed = JSON.parse(responseContent);
@@ -460,27 +461,40 @@ export async function POST() {
         throw new Error("OpenAI response is not an object");
       }
 
-      if (!parsed.coreSummary || !parsed.sections) {
+      // Strict validation using Zod schema
+      const validation = validateBirthChartInsight(parsed);
+
+      if (!validation.success) {
         console.error(
-          "[BirthChart] OpenAI response missing required coreSummary/sections fields"
+          `[BirthChart] OpenAI response validation failed for user ${user.id}:`,
+          validation.error
         );
+        console.error(
+          `[BirthChart] Missing/invalid fields:`,
+          validation.fields.join(", ")
+        );
+
+        // Do NOT store invalid narrative - return placements only
         return NextResponse.json(
           {
             placements: swissPlacements,
             insight: null,
+            error: "Narrative generation failed",
+            reason: "VALIDATION_FAILED",
           },
           { status: 200 }
         );
       }
 
-      insight = parsed as FullBirthChartInsight;
+      insight = validation.data as FullBirthChartInsight;
 
       console.log(
-        "[BirthChart] OpenAI interpretation parsed successfully for user",
+        "[BirthChart] OpenAI interpretation validated successfully for user",
         user.id
       );
 
       // Store narrative in soul_paths for future requests (stone tablet caching)
+      // Only store after validation passes
       void storeCachedNarrative(
         user.id,
         insight,
@@ -495,6 +509,8 @@ export async function POST() {
         {
           placements: swissPlacements,
           insight: null,
+          error: "Narrative generation failed",
+          reason: "PARSE_ERROR",
         },
         { status: 200 }
       );
