@@ -22,8 +22,9 @@ import { toZonedTime, format } from "date-fns-tz";
 import { addDays } from "date-fns";
 import { SanctuaryInsight } from "@/types";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
+import { AYREN_MODE_SHORT } from "@/lib/ai/voice";
 
-const PROMPT_VERSION = 1;
+const PROMPT_VERSION = 2;
 const PREWARM_WINDOW_HOURS = 3; // Pre-warm if within 3 hours of midnight
 const MAX_USERS_PER_RUN = 500; // Safety cap to avoid timeouts
 
@@ -148,22 +149,18 @@ export async function GET(req: NextRequest) {
             .limit(1)
             .maybeSingle();
 
-          // Build OpenAI prompt (same as /api/insights)
-          const systemPrompt = `You are a compassionate astrology guide for Solara Insights, a sanctuary of calm, emotionally intelligent guidance.
+          // Build OpenAI prompt using Ayren voice (same as /api/insights)
+          const systemPrompt = `${AYREN_MODE_SHORT}
 
-Core principles:
-- Always uplifting, never deterministic or fear-based
-- Emphasize free will, growth, and agency
-- Use plain, dyslexia-friendly language with short paragraphs
-- Avoid medical, legal, or financial advice
-- Focus on emotional intelligence and practical wisdom
+CONTEXT:
+This is a PERSONALIZED insight for a specific person based on their birth chart and current transits.
 
 LANGUAGE:
-- The user has selected language code: ${language}
-- You MUST write ALL narrative text in the user's selected language
-- Field names in the JSON remain in English, but all content values must be in the user's language
+- Write ALL narrative text in language code: ${language}
+- Field names in JSON remain in English, but all content values must be in the user's language
 
-You must respond with ONLY valid JSON matching this exact structure. No additional text, no markdown, no explanations—just the JSON object.`;
+OUTPUT FORMAT:
+Respond with ONLY valid JSON. No markdown, no explanations—just the JSON object.`;
 
           const tarotCardNames = getTarotCardNames();
           const runeNames = getRuneNames();
@@ -202,7 +199,7 @@ For the rune:
 
 Return a JSON object with this structure:
 {
-  "personalNarrative": "2-3 paragraphs of gentle, personalized guidance",
+  "personalNarrative": "Exactly 2 paragraphs, 8-12 sentences total. Include 1 micro-action (<=10 min). Follow Ayren voice rules.",
   "emotionalCadence": {
     "dawn": "one-word emotional state",
     "midday": "one-word emotional state",

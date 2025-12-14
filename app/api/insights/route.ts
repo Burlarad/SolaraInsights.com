@@ -9,8 +9,9 @@ import { getUserPeriodKeys, buildInsightCacheKey, buildInsightLockKey } from "@/
 import { getEffectiveTimezone } from "@/lib/location/detection";
 import { touchLastSeen } from "@/lib/activity/touchLastSeen";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
+import { AYREN_MODE_SHORT } from "@/lib/ai/voice";
 
-const PROMPT_VERSION = 1;
+const PROMPT_VERSION = 2;
 
 /**
  * Get TTL in seconds based on insight timeframe
@@ -172,26 +173,18 @@ export async function POST(req: NextRequest) {
       console.log(`[Insights] ✓ Lock acquired for ${lockKey}, generating insight...`);
     }
 
-    // TODO: Future enhancement - load recent journal entries for this user
-    // and summarize "themes" with OpenAI to feed into the insights prompt
-    // for Ayren-style emotional intelligence coaching.
+    // Construct the OpenAI prompt using Ayren voice
+    const systemPrompt = `${AYREN_MODE_SHORT}
 
-    // Construct the OpenAI prompt
-    const systemPrompt = `You are a compassionate astrology guide for Solara Insights, a sanctuary of calm, emotionally intelligent guidance.
-
-Core principles:
-- Always uplifting, never deterministic or fear-based
-- Emphasize free will, growth, and agency
-- Use plain, dyslexia-friendly language with short paragraphs
-- Avoid medical, legal, or financial advice
-- Focus on emotional intelligence and practical wisdom
+CONTEXT:
+This is a PERSONALIZED insight for a specific person based on their birth chart and current transits.
 
 LANGUAGE:
-- The user has selected language code: ${targetLanguage}
-- You MUST write ALL narrative text in the user's selected language
-- Field names in the JSON remain in English, but all content values must be in the user's language
+- Write ALL narrative text in language code: ${targetLanguage}
+- Field names in JSON remain in English, but all content values must be in the user's language
 
-You must respond with ONLY valid JSON matching this exact structure. No additional text, no markdown, no explanations—just the JSON object.`;
+OUTPUT FORMAT:
+Respond with ONLY valid JSON. No markdown, no explanations—just the JSON object.`;
 
     // Get tarot card and rune names for prompt constraints
     const tarotCardNames = getTarotCardNames();
@@ -232,7 +225,7 @@ For the rune:
 
 Return a JSON object with this structure:
 {
-  "personalNarrative": "2-3 paragraphs of gentle, personalized guidance",
+  "personalNarrative": "Exactly 2 paragraphs, 8-12 sentences total. Include 1 micro-action (<=10 min). Follow Ayren voice rules.",
   "emotionalCadence": {
     "dawn": "one-word emotional state",
     "midday": "one-word emotional state",

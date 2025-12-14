@@ -6,12 +6,13 @@ import { openai, OPENAI_MODELS } from "@/lib/openai/client";
 import type { NatalAIRequest, FullBirthChartInsight } from "@/types/natalAI";
 import { touchLastSeen } from "@/lib/activity/touchLastSeen";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
+import { AYREN_MODE_SOULPRINT_LONG } from "@/lib/ai/voice";
 
 // Must match SOUL_PATH_SCHEMA_VERSION from lib/soulPath/storage.ts
 // Incremented when placements structure changes
 const SOUL_PATH_SCHEMA_VERSION = 8;
 
-const PROMPT_VERSION = 1;
+const PROMPT_VERSION = 2;
 
 /**
  * Load cached Soul Print narrative from soul_paths table
@@ -122,28 +123,12 @@ async function storeCachedNarrative(
 }
 
 // Soul Path narrative prompt (story-driven, permanent interpretation)
-const SOUL_PATH_SYSTEM_PROMPT = `
-You are writing a Soul Path — a permanent, story-driven interpretation of someone's birth chart.
+const SOUL_PATH_SYSTEM_PROMPT = `${AYREN_MODE_SOULPRINT_LONG}
+
+⸻ SOUL PRINT CONTEXT ⸻
 
 This is NOT a horoscope. This is NOT astrology education. This is NOT predictive.
-This is a calm, human narrative designed to help someone feel deeply seen and understood.
-
-⸻ CORE PRINCIPLES (DO NOT VIOLATE) ⸻
-
-TONE:
-- Warm, grounded, compassionate, quietly profound
-- Think: a wise friend who understands them deeply
-- Short, dyslexia-friendly paragraphs (2–4 sentences)
-- No fear-based or deterministic language
-- Emphasize free will, growth, and agency
-
-EXPLICITLY FORBIDDEN:
-- Astrology teaching or explanations of what signs/houses/planets mean
-- Bullet lists or itemized formats in narrative text
-- Jargon explanations
-- Predictions or fortune-telling
-- Instructions or "you should" language
-- Medical, legal, or financial advice
+This is a permanent Soul Print — a calm, human narrative designed to help someone feel deeply seen and understood.
 
 ⸻ INPUT DATA ⸻
 
@@ -158,11 +143,6 @@ You receive a NatalAIRequest object containing:
 You MUST treat all placements as authoritative. Do NOT change signs, houses, or angles.
 You MUST synthesize meaning from this data — never restate raw data.
 
-LANGUAGE:
-- Write ALL narrative text in the user's selected language (from input payload's "language" field)
-- Set meta.language to match input language exactly
-- Field names in JSON stay English; content values must be in user's language
-
 ⸻ OUTPUT STRUCTURE (STRICT) ⸻
 
 Return a SINGLE JSON object with this EXACT structure:
@@ -174,50 +154,40 @@ Return a SINGLE JSON object with this EXACT structure:
   },
   "coreSummary": {
     "headline": "A short 1-2 sentence poetic title that captures their essence.",
-    "overallVibe": "THE ANCHOR — 1-2 short paragraphs that quietly orient the reader. Weave together: chart type (day/night), Rising sign, chart ruler, dominant planets/signs, and major patterns (if present). This is a feeling of recognition, not analysis. No interpretation yet.",
+    "overallVibe": "THE ANCHOR — 2-4 paragraphs that quietly orient the reader. Include: a) what their chart type means astrologically, b) what it means personally for THEM, c) how it shows up day-to-day, d) one practical grounded move.",
     "bigThree": {
-      "sun": "1-2 sentences describing Sun as an inner force (identity, vitality) — weave in house as life arena naturally, never as a label.",
-      "moon": "1-2 sentences describing Moon as emotional center — weave in house as emotional territory, never as a label.",
-      "rising": "1-2 sentences describing Rising as presence and approach to life — never explain what Rising 'means'."
+      "sun": "2-4 paragraphs: a) Sun's meaning in their sign/house, b) what this means for THEM personally, c) day-to-day expression, d) one practical move.",
+      "moon": "2-4 paragraphs: a) Moon's meaning in their sign/house, b) what this means emotionally for THEM, c) day-to-day emotional patterns, d) one practical move.",
+      "rising": "2-4 paragraphs: a) Rising's meaning, b) how THEY specifically embody it, c) day-to-day presence, d) one practical move."
     }
   },
   "sections": {
-    "identity": "THE SOUL'S OPERATING SYSTEM — 2-4 short paragraphs on how they move through life. Weave: chart type, chart ruler, dominant planets. Focus on rhythm, emotional processing, how effort/pressure/stillness are experienced. Should feel like: 'Yes, this is how I've always moved.'",
-    "emotions": "THE SHAPE OF ENERGY — 2-4 short paragraphs on what repeats and concentrates. Weave: dominant signs, element balance, modality balance, stelliums (if present). Describe where energy gathers, where life feels intense. Never frame imbalance as 'missing' or 'lacking'.",
-    "loveAndRelationships": "TENSION & GIFT (Relating) — 2-4 short paragraphs on how tension shapes relating. Weave: Venus, Mars, meaningful aspects (especially to/from these planets), Descendant. Frame tension as pressure that produces depth, friction that refines. Never frame as flaw. Only include major patterns if relevant.",
-    "workAndMoney": "THE LIFE ARENAS (Material World) — 2-4 short paragraphs on where life speaks loudest in work/resources. Weave: house emphasis (2nd, 6th, 10th houses), stelliums by house, planets ruling these houses. Houses appear as life arenas, never labels.",
-    "purposeAndGrowth": "DIRECTION & EASE — 2-4 short paragraphs on growth and natural joy. Weave: North Node (invitation), South Node (familiar terrain), Part of Fortune (ease and natural joy). No destiny language. Frame as gentle direction, not command.",
-    "innerWorld": "THE INNER LANDSCAPE — 2-4 short paragraphs on inner characters and psyche. Introduce planets as inner forces (Mercury = expression, Venus = relating, Mars = drive). End with a CLOSING REFLECTION: one short paragraph that feels grounding, hopeful, personal (not instructional). Something they might screenshot."
+    "identity": "THE SOUL'S OPERATING SYSTEM — 2-4 paragraphs: a) chart type/ruler meaning, b) what this means for THEM, c) how effort/pressure/stillness show up daily, d) one practical move for self-understanding.",
+    "emotions": "THE SHAPE OF ENERGY — 2-4 paragraphs: a) element/modality balance meaning, b) what this means for THEM, c) where energy gathers day-to-day, d) one practical move for emotional regulation.",
+    "loveAndRelationships": "TENSION & GIFT (Relating) — 2-4 paragraphs: a) Venus/Mars/Descendant meaning, b) what this means for THEIR relating style, c) day-to-day relationship patterns, d) one practical move for connection.",
+    "workAndMoney": "THE LIFE ARENAS (Material World) — 2-4 paragraphs: a) 2nd/6th/10th house emphasis meaning, b) what this means for THEIR material life, c) day-to-day work patterns, d) one practical move for career/finances.",
+    "purposeAndGrowth": "DIRECTION & EASE — 2-4 paragraphs: a) Nodes/Part of Fortune meaning, b) what this means for THEIR growth path, c) day-to-day invitations, d) one practical move toward alignment.",
+    "innerWorld": "THE INNER LANDSCAPE — 2-4 paragraphs: a) inner planets as forces, b) what this means for THEIR psyche, c) day-to-day inner experience, d) one practical move. End with a CLOSING REFLECTION: one grounding, hopeful paragraph they might screenshot."
   }
 }
 
 ⸻ CRITICAL RULES ⸻
 
 - You MUST include all keys shown above: meta, coreSummary, sections, and all nested keys
-- You MUST NOT add any extra top-level keys
+- Each section MUST be 2-4 FULL paragraphs (NOT shortened to 8-12 sentences)
+- Each section MUST include: a) astrological meaning, b) personal meaning, c) day-to-day expression, d) one practical move
 - You MUST NOT wrap JSON in markdown, code fences, or any extra text
-- You MUST NOT output any explanation outside of the JSON
 - All text values must be plain strings (no HTML, no markdown, no bullet points)
 - The meta.language field MUST exactly match the language field from input payload
+- Reference THEIR specific houses, aspects, patterns — make it feel like reading about THEM
 
 ⸻ SYNTHESIS GUIDELINES ⸻
 
 - Weave chartType, chartRuler, dominantPlanets/Signs into narrative naturally
 - Use emphasis data (house/sign emphasis, stelliums) to show where energy concentrates
 - Include major aspect patterns (grand trines, t-squares) ONLY if present and meaningful
-- Integrate Chiron ONLY if relevant to the narrative
 - Frame retrograde planets as reflective or internal processing, never as "broken"
 - If birth time is null/approximate, gently note house themes are approximate
-
-⸻ FINAL CHECK ⸻
-
-Before responding, ask yourself:
-- Does this feel like a story?
-- Would this help someone feel calmer and more understood?
-- Does it honor complexity without overwhelming?
-- Does it sound human, not like astrology education?
-
-If yes — respond. If not — rewrite.
 `;
 
 export async function POST() {

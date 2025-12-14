@@ -6,8 +6,9 @@ import { getCache, setCache, getDayKey } from "@/lib/cache";
 import { acquireLock, releaseLock } from "@/lib/cache/redis";
 import { touchLastSeen } from "@/lib/activity/touchLastSeen";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
+import { AYREN_MODE_SHORT } from "@/lib/ai/voice";
 
-const PROMPT_VERSION = 1;
+const PROMPT_VERSION = 2;
 
 export async function POST(req: NextRequest) {
   let lockKey: string | undefined;
@@ -180,18 +181,20 @@ export async function POST(req: NextRequest) {
       console.log(`[ConnectionInsight] ✓ Lock acquired for ${lockKey}, generating insight...`);
     }
 
-    // Construct OpenAI prompt
-    const systemPrompt = `You are a compassionate relationship and connection guide for Solara Insights, a sanctuary of calm, emotionally intelligent guidance.
+    // Construct OpenAI prompt using Ayren voice
+    const systemPrompt = `${AYREN_MODE_SHORT}
 
-Core principles:
-- Always uplifting, never deterministic or fear-based
-- Emphasize free will, growth, and agency
-- Use plain, dyslexia-friendly language with short paragraphs (2-4 sentences max)
-- Avoid medical, legal, or financial advice
-- Focus on emotional intelligence and practical wisdom
-- You are describing the DYNAMIC BETWEEN TWO PEOPLE, not just one person
+CONTEXT:
+You are describing the DYNAMIC BETWEEN TWO PEOPLE, not just one person.
+This is a relational insight for a ${connection.relationship_type} connection.
 
-You must respond with ONLY valid JSON matching this exact structure. No additional text, no markdown, no explanations—just the JSON object.`;
+ADAPTATION FOR CONNECTIONS:
+- Each section should follow Ayren voice principles (non-deterministic, warm, triumphant close)
+- Include micro-actions where appropriate (caring gestures, communication moves)
+- Focus on the relationship dynamic, not individual charts
+
+OUTPUT FORMAT:
+Respond with ONLY valid JSON. No markdown, no explanations—just the JSON object.`;
 
     const userPrompt = `Generate a relational insight for the connection between these two people.
 
@@ -210,13 +213,13 @@ Person 2 (the connection):
 
 Return a JSON object with this structure:
 {
-  "overview": "1-2 short paragraphs about the overall energy and essence of this ${connection.relationship_type} connection",
-  "emotionalDynamics": "2-3 short paragraphs about how they tend to feel around each other, where they might regulate or trigger each other, and their emotional rhythms together",
-  "communication": "2-3 short paragraphs about how they can better communicate and really hear each other, including specific ways to bridge any natural differences in their communication styles",
-  "careSuggestions": "2-3 short paragraphs with concrete, simple ways Person 1 can care for and support Person 2 in a day-to-day way, based on their relational dynamic"
+  "overview": "Exactly 2 paragraphs about the overall energy and essence of this ${connection.relationship_type} connection. 8-12 sentences total.",
+  "emotionalDynamics": "Exactly 2 paragraphs about emotional rhythms together. Include 1 micro-action for emotional attunement.",
+  "communication": "Exactly 2 paragraphs about communication. Include 1 micro-action for better listening or expression.",
+  "careSuggestions": "Exactly 2 paragraphs with concrete ways Person 1 can support Person 2. Include 1 micro-action (<=10 min)."
 }
 
-Write in a warm, gentle tone. Focus on meaning and practical insight, not technical astrology terms.`;
+Follow Ayren voice rules: non-deterministic wording, calm-power close, practical micro-actions.`;
 
     // Call OpenAI
     const completion = await openai.chat.completions.create({

@@ -6,12 +6,13 @@ import { acquireLock, releaseLock } from "@/lib/cache/redis";
 import { checkRateLimit, getClientIP } from "@/lib/cache/rateLimit";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
 import { publicHoroscopeSchema, validateRequest } from "@/lib/validation/schemas";
+import { AYREN_MODE_SHORT } from "@/lib/ai/voice";
 
 // Rate limit: 30 requests per minute per IP
 const RATE_LIMIT = 30;
 const RATE_WINDOW_SECONDS = 60;
 
-const PROMPT_VERSION = 1;
+const PROMPT_VERSION = 2;
 
 export async function POST(req: NextRequest) {
   // Rate limiting
@@ -113,24 +114,18 @@ export async function POST(req: NextRequest) {
       console.log(`[PublicHoroscope] ✓ Lock acquired for ${lockKey}, generating horoscope...`);
     }
 
-    // Construct the OpenAI prompt
-    const systemPrompt = `You are a compassionate astrology guide for Solara Insights, a sanctuary of calm, emotionally intelligent guidance.
+    // Construct the OpenAI prompt using Ayren voice
+    const systemPrompt = `${AYREN_MODE_SHORT}
 
-Core principles:
-- Always uplifting, never deterministic or fear-based
-- Emphasize free will, growth, and agency
-- Use plain, dyslexia-friendly language with short paragraphs
-- Avoid medical, legal, or financial advice
-- Focus on emotional intelligence and practical wisdom
-
-This is a PUBLIC, non-personalized reading. Keep it general but still warm and insightful.
+CONTEXT:
+This is a PUBLIC, non-personalized reading for ${sign}. Keep it general but still warm and insightful.
 
 LANGUAGE:
-- The user has selected language code: ${targetLanguage}
-- You MUST write ALL content (title, summary, keyThemes) in the user's selected language
-- Field names in the JSON remain in English, but all content values must be in the user's language
+- Write ALL content in language code: ${targetLanguage}
+- Field names in JSON remain in English, but all content values must be in the user's language
 
-You must respond with ONLY valid JSON matching this exact structure. No additional text, no markdown, no explanations—just the JSON object.`;
+OUTPUT FORMAT:
+Respond with ONLY valid JSON. No markdown, no explanations—just the JSON object.`;
 
     const timeframeLabel =
       timeframe === "today"
@@ -144,14 +139,14 @@ You must respond with ONLY valid JSON matching this exact structure. No addition
 Current date: ${new Date().toISOString()}
 Timeframe: ${timeframe}
 
-Return a JSON object with this structure:
+Return JSON:
 {
   "title": "${timeframeLabel} Energy for ${sign}",
-  "summary": "2-3 short paragraphs of general guidance for ${sign} during this ${timeframe}",
+  "summary": "Exactly 2 paragraphs, 8-12 sentences total. Include 1 micro-action (<=10 min).",
   "keyThemes": ["theme1", "theme2", "theme3"]
 }
 
-Write in a warm, gentle tone. This is a public reading, so keep it general but meaningful.`;
+Follow the Ayren voice rules strictly: 2 paragraphs, non-deterministic wording, calm-power close.`;
 
     // Call OpenAI
     const completion = await openai.chat.completions.create({
