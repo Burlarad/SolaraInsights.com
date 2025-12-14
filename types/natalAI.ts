@@ -95,6 +95,32 @@ export type FullBirthChartInsight = {
     purposeAndGrowth: string;
     innerWorld: string;
   };
+  // Optional tab deep dives (generated separately, cached permanently)
+  tabDeepDives?: TabDeepDives;
 };
 
-// Types are already exported above with export type declarations
+// ============================================================================
+// TAB DEEP DIVES (personalized + actualized interpretations per tab)
+// ============================================================================
+
+/**
+ * Joy Deep Dive - Part of Fortune interpretation
+ * Generated once, stored forever (stone tablet)
+ */
+export type JoyDeepDive = {
+  meaning: string;        // 2 paragraphs (separated by \n\n)
+  aligned: string[];      // exactly 3 bullets
+  offCourse: string[];    // exactly 3 bullets
+  decisionRule: string;   // 1 sentence
+  practice: string;       // 1 weekly ritual
+  promptVersion: number;  // version for cache invalidation
+};
+
+/**
+ * Container for all tab deep dives
+ * Each tab's deep dive is optional and generated on-demand
+ */
+export type TabDeepDives = {
+  joy?: JoyDeepDive;
+  // Future: direction?, patterns?, intensity?, energy?
+};

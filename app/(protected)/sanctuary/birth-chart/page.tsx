@@ -676,28 +676,96 @@ export default function BirthChartPage() {
 
           {/* Joy */}
           {activeSection === "joy" && placements?.calculated?.partOfFortune && (
-            <SolaraCard className="space-y-4">
-              <h2 className="text-xl font-semibold">Part of Fortune</h2>
-              <p className="text-sm text-accent-ink/60 leading-relaxed mb-4">
-                This reflects ease, joy, and natural alignment—where life feels generous and where you access flow without force.
-              </p>
-              <p className="text-base text-accent-ink mb-3">
-                {placements.calculated.partOfFortune.sign}
-                {placements.calculated.partOfFortune.house &&
-                  ` — ${placements.calculated.partOfFortune.house}th house`}
-              </p>
-              <div className="text-sm text-accent-ink/60 leading-relaxed space-y-3">
-                <p>
-                  The Part of Fortune shows where natural joy and ease flow most readily in your life. This isn't about achievement or effort—it's where things align organically, where you feel instinctively at home. When you engage this area, life often responds with surprising support or unexpected openings.
+            <div className="space-y-6">
+              {/* Deep Dive Card (if available) */}
+              {insight?.tabDeepDives?.joy && (
+                <SolaraCard className="space-y-6">
+                  <div>
+                    <h2 className="text-xl font-semibold mb-2">What This Means For You</h2>
+                    <p className="text-sm text-accent-ink/60">
+                      Part of Fortune in {placements.calculated.partOfFortune.sign}
+                      {placements.calculated.partOfFortune.house &&
+                        ` — ${placements.calculated.partOfFortune.house}th house`}
+                    </p>
+                  </div>
+
+                  {/* Meaning - 2 paragraphs */}
+                  <div className="space-y-4">
+                    {insight.tabDeepDives.joy.meaning.split("\n\n").map((para, idx) => (
+                      <p key={idx} className="text-base text-accent-ink/80 leading-relaxed">
+                        {para}
+                      </p>
+                    ))}
+                  </div>
+
+                  {/* Aligned - 3 bullets */}
+                  <div>
+                    <h3 className="text-sm font-medium text-accent-ink/70 mb-2">When You're Aligned</h3>
+                    <ul className="space-y-2">
+                      {insight.tabDeepDives.joy.aligned.map((item, idx) => (
+                        <li key={idx} className="flex items-start gap-2 text-sm text-accent-ink/80">
+                          <span className="text-accent mt-0.5">•</span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Off Course - 3 bullets */}
+                  <div>
+                    <h3 className="text-sm font-medium text-accent-ink/70 mb-2">When You're Off Course</h3>
+                    <ul className="space-y-2">
+                      {insight.tabDeepDives.joy.offCourse.map((item, idx) => (
+                        <li key={idx} className="flex items-start gap-2 text-sm text-accent-ink/80">
+                          <span className="text-accent-ink/40 mt-0.5">•</span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Decision Rule */}
+                  <div className="bg-accent-soft/30 rounded-lg p-4">
+                    <h3 className="text-sm font-medium text-accent-ink/70 mb-1">Decision Rule</h3>
+                    <p className="text-sm text-accent-ink font-medium">
+                      {insight.tabDeepDives.joy.decisionRule}
+                    </p>
+                  </div>
+
+                  {/* Practice */}
+                  <div className="border-t border-accent-soft pt-4">
+                    <h3 className="text-sm font-medium text-accent-ink/70 mb-2">Weekly Practice</h3>
+                    <p className="text-sm text-accent-ink/80 leading-relaxed">
+                      {insight.tabDeepDives.joy.practice}
+                    </p>
+                  </div>
+                </SolaraCard>
+              )}
+
+              {/* Static Definition Card (always shown) */}
+              <SolaraCard className="space-y-4">
+                <h2 className="text-xl font-semibold">About Part of Fortune</h2>
+                <p className="text-sm text-accent-ink/60 leading-relaxed mb-4">
+                  This reflects ease, joy, and natural alignment—where life feels generous and where you access flow without force.
                 </p>
-                <p>
-                  This placement suggests where you might find your stride without needing to push. It's not that success is guaranteed here, but rather that the process itself feels nourishing. You might notice that when you orient toward this theme or life arena, ease appears—not as laziness, but as rightness.
+                <p className="text-base text-accent-ink mb-3">
+                  {placements.calculated.partOfFortune.sign}
+                  {placements.calculated.partOfFortune.house &&
+                    ` — ${placements.calculated.partOfFortune.house}th house`}
                 </p>
-                <p>
-                  Cultivating this area doesn't require force. Instead, notice when you feel genuinely resourced, when energy returns rather than depletes. That's the Part of Fortune at work—quiet, generous, and often overlooked until you learn to recognize its signature.
-                </p>
-              </div>
-            </SolaraCard>
+                <div className="text-sm text-accent-ink/60 leading-relaxed space-y-3">
+                  <p>
+                    The Part of Fortune shows where natural joy and ease flow most readily in your life. This isn't about achievement or effort—it's where things align organically, where you feel instinctively at home. When you engage this area, life often responds with surprising support or unexpected openings.
+                  </p>
+                  <p>
+                    This placement suggests where you might find your stride without needing to push. It's not that success is guaranteed here, but rather that the process itself feels nourishing. You might notice that when you orient toward this theme or life arena, ease appears—not as laziness, but as rightness.
+                  </p>
+                  <p>
+                    Cultivating this area doesn't require force. Instead, notice when you feel genuinely resourced, when energy returns rather than depletes. That's the Part of Fortune at work—quiet, generous, and often overlooked until you learn to recognize its signature.
+                  </p>
+                </div>
+              </SolaraCard>
+            </div>
           )}
         </div>
       )}

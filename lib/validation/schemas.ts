@@ -82,6 +82,47 @@ export const stripeCheckoutSchema = z.object({
 // AI Response Validation Schemas
 // ========================================
 
+// Joy Deep Dive schema (Part of Fortune personalized interpretation)
+export const joyDeepDiveSchema = z.object({
+  meaning: z.string()
+    .min(100, "meaning must be at least 100 characters")
+    .refine(
+      (val) => val.includes("\n\n"),
+      { message: "meaning must contain at least 2 paragraphs (separated by blank line)" }
+    ),
+  aligned: z.array(z.string().min(10))
+    .length(3, "aligned must have exactly 3 items"),
+  offCourse: z.array(z.string().min(10))
+    .length(3, "offCourse must have exactly 3 items"),
+  decisionRule: z.string()
+    .min(20, "decisionRule must be at least 20 characters")
+    .max(300, "decisionRule must be at most 300 characters"),
+  practice: z.string()
+    .min(30, "practice must be at least 30 characters")
+    .max(500, "practice must be at most 500 characters"),
+  promptVersion: z.number().int().positive(),
+});
+
+// Type inference for joy deep dive
+export type ValidatedJoyDeepDive = z.infer<typeof joyDeepDiveSchema>;
+
+// Helper to validate Joy Deep Dive
+export function validateJoyDeepDive(
+  data: unknown
+): { success: true; data: ValidatedJoyDeepDive } | { success: false; error: string; fields: string[] } {
+  const result = joyDeepDiveSchema.safeParse(data);
+
+  if (!result.success) {
+    const fields = result.error.issues.map((e) => e.path.join("."));
+    const errorMessage = result.error.issues
+      .map((e) => `${e.path.join(".")}: ${e.message}`)
+      .join("; ");
+    return { success: false, error: errorMessage, fields };
+  }
+
+  return { success: true, data: result.data };
+}
+
 // FullBirthChartInsight response from OpenAI
 // Validates that all required fields exist and are non-empty strings
 export const fullBirthChartInsightSchema = z.object({
