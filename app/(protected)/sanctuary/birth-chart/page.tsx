@@ -66,10 +66,17 @@ export default function BirthChartPage() {
   const [showAllAspects, setShowAllAspects] = useState(false);
 
   // Derived state: check if insight has the full expected structure
+  // Must validate ALL nested properties to prevent client-side crashes
   const hasFullInsight =
     insight !== null &&
-    insight.coreSummary !== undefined &&
-    insight.sections !== undefined;
+    typeof insight.coreSummary?.headline === "string" &&
+    typeof insight.coreSummary?.overallVibe === "string" &&
+    typeof insight.sections?.identity === "string" &&
+    typeof insight.sections?.emotions === "string" &&
+    typeof insight.sections?.loveAndRelationships === "string" &&
+    typeof insight.sections?.workAndMoney === "string" &&
+    typeof insight.sections?.purposeAndGrowth === "string" &&
+    typeof insight.sections?.innerWorld === "string";
 
   useEffect(() => {
     const fetchBirthChart = async () => {
