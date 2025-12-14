@@ -64,12 +64,6 @@ function DeepDiveCard({
         <h3 className="text-sm font-medium text-accent-ink/70 mb-1">Decision Rule</h3>
         <p className="text-sm text-accent-ink font-medium">{deepDive.decisionRule}</p>
       </div>
-
-      {/* Practice */}
-      <div className="border-t border-accent-soft pt-4">
-        <h3 className="text-sm font-medium text-accent-ink/70 mb-2">Weekly Practice</h3>
-        <p className="text-sm text-accent-ink/80 leading-relaxed">{deepDive.practice}</p>
-      </div>
     </SolaraCard>
   );
 }

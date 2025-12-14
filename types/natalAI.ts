@@ -113,7 +113,6 @@ export type TabDeepDive = {
   aligned: string[];      // exactly 3 bullets
   offCourse: string[];    // exactly 3 bullets
   decisionRule: string;   // 1 sentence
-  practice: string;       // 1 weekly ritual
   promptVersion: number;  // version for cache invalidation
 };
 

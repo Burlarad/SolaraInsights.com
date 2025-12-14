@@ -83,6 +83,7 @@ export const stripeCheckoutSchema = z.object({
 // ========================================
 
 // Generic Tab Deep Dive schema (reusable for all Soul Print tabs)
+// Note: practice field was removed - stone tablet vibe doesn't include homework
 export const tabDeepDiveSchema = z.object({
   meaning: z.string()
     .min(100, "meaning must be at least 100 characters")
@@ -97,11 +98,8 @@ export const tabDeepDiveSchema = z.object({
   decisionRule: z.string()
     .min(20, "decisionRule must be at least 20 characters")
     .max(300, "decisionRule must be at most 300 characters"),
-  practice: z.string()
-    .min(30, "practice must be at least 30 characters")
-    .max(500, "practice must be at most 500 characters"),
   promptVersion: z.number().int().positive(),
-});
+}).passthrough(); // Allow extra fields (backward compat for existing stored practice)
 
 // Type inference for tab deep dive
 export type ValidatedTabDeepDive = z.infer<typeof tabDeepDiveSchema>;

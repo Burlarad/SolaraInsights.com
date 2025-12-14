@@ -272,7 +272,6 @@ Key data:
   "aligned": ["3 specific signs they're living this energy well"],
   "offCourse": ["3 specific signs they've drifted from this energy"],
   "decisionRule": "One sentence: 'When X, lean toward Y because Z.'",
-  "practice": "One specific weekly ritual (30 min or less) for this area.",
   "promptVersion": ${TAB_DEEPDIVE_VERSION}
 }`).join(",\n");
 
@@ -287,7 +286,7 @@ ${tabsPrompt}
 }
 
 CRITICAL RULES:
-- Each tab MUST have all 5 fields: meaning, aligned, offCourse, decisionRule, practice
+- Each tab MUST have all 4 fields: meaning, aligned, offCourse, decisionRule
 - meaning MUST have 2 paragraphs separated by \\n\\n (at least 100 characters total)
 - aligned and offCourse MUST each have exactly 3 items (each at least 10 characters)
 - Each bullet must be specific to THEIR chart. Reference their signs, houses, planets.
