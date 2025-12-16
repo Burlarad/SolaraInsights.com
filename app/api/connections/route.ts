@@ -180,6 +180,15 @@ export async function POST(req: NextRequest) {
   }
 }
 
+// Fields that require the connection to be unlinked
+const BIRTH_LOCATION_FIELDS = [
+  "birth_date",
+  "birth_time",
+  "birth_city",
+  "birth_region",
+  "birth_country",
+] as const;
+
 export async function PATCH(req: NextRequest) {
   try {
     // Get authenticated user
@@ -201,7 +210,7 @@ export async function PATCH(req: NextRequest) {
 
     // Parse request body
     const body = await req.json();
-    const { id, notes } = body;
+    const { id } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -210,10 +219,110 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    // Update connection notes (RLS ensures only owner can update)
+    // Fetch the existing connection to check linked status
+    const { data: existing, error: fetchError } = await supabase
+      .from("connections")
+      .select("*")
+      .eq("id", id)
+      .eq("owner_user_id", user.id)
+      .single();
+
+    if (fetchError || !existing) {
+      return NextResponse.json(
+        { error: "Not found", message: "Connection not found." },
+        { status: 404 }
+      );
+    }
+
+    // If linked, check if any birth/location fields are being updated
+    if (existing.linked_profile_id) {
+      const attemptedBirthUpdates = BIRTH_LOCATION_FIELDS.filter(
+        (field) => body[field] !== undefined
+      );
+      if (attemptedBirthUpdates.length > 0) {
+        return NextResponse.json(
+          {
+            error: "Forbidden",
+            message:
+              "Cannot update birth/location fields for a linked connection. The linked profile is the source of truth.",
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Build dynamic update object from provided fields
+    const updateData: Record<string, unknown> = {
+      updated_at: new Date().toISOString(),
+    };
+
+    // Always-allowed fields
+    if (body.name !== undefined) {
+      if (typeof body.name !== "string" || body.name.trim().length === 0) {
+        return NextResponse.json(
+          { error: "Bad request", message: "Name must be a non-empty string." },
+          { status: 400 }
+        );
+      }
+      updateData.name = body.name.trim();
+    }
+
+    if (body.relationship_type !== undefined) {
+      const validTypes = ["Partner", "Child", "Parent", "Sibling", "Friend", "Colleague", "Other"];
+      if (!validTypes.includes(body.relationship_type)) {
+        return NextResponse.json(
+          { error: "Bad request", message: `Invalid relationship type. Must be one of: ${validTypes.join(", ")}` },
+          { status: 400 }
+        );
+      }
+      updateData.relationship_type = body.relationship_type;
+    }
+
+    if (body.notes !== undefined) {
+      updateData.notes = body.notes || null;
+    }
+
+    // Birth/location fields (only for unlinked connections)
+    if (!existing.linked_profile_id) {
+      if (body.birth_date !== undefined) {
+        // Basic ISO date validation
+        if (body.birth_date && !/^\d{4}-\d{2}-\d{2}$/.test(body.birth_date)) {
+          return NextResponse.json(
+            { error: "Bad request", message: "Birth date must be in YYYY-MM-DD format." },
+            { status: 400 }
+          );
+        }
+        updateData.birth_date = body.birth_date || null;
+      }
+
+      if (body.birth_time !== undefined) {
+        // Basic HH:MM validation
+        if (body.birth_time && !/^\d{2}:\d{2}$/.test(body.birth_time)) {
+          return NextResponse.json(
+            { error: "Bad request", message: "Birth time must be in HH:MM format." },
+            { status: 400 }
+          );
+        }
+        updateData.birth_time = body.birth_time || null;
+      }
+
+      if (body.birth_city !== undefined) {
+        updateData.birth_city = body.birth_city || null;
+      }
+
+      if (body.birth_region !== undefined) {
+        updateData.birth_region = body.birth_region || null;
+      }
+
+      if (body.birth_country !== undefined) {
+        updateData.birth_country = body.birth_country || null;
+      }
+    }
+
+    // Perform update
     const { data: connection, error } = await supabase
       .from("connections")
-      .update({ notes: notes || null, updated_at: new Date().toISOString() })
+      .update(updateData)
       .eq("id", id)
       .eq("owner_user_id", user.id)
       .select()
