@@ -190,3 +190,59 @@ export async function withLock<T>(
     await releaseLock(lockKey);
   }
 }
+
+// ========================================
+// P0 Security: Fail-Closed Support
+// ========================================
+
+/**
+ * Check if Redis is currently available.
+ *
+ * @returns true if Redis is connected and ready, false otherwise
+ */
+export function isRedisAvailable(): boolean {
+  initRedis();
+  return redis !== null && redisAvailable;
+}
+
+/**
+ * Acquire a lock with fail-closed behavior.
+ *
+ * Unlike acquireLock(), this function returns false when Redis is unavailable,
+ * preventing operations from proceeding without distributed coordination.
+ *
+ * Use this for expensive operations (like OpenAI calls) where duplicate
+ * execution is costly.
+ *
+ * @param lockKey - Unique key for the lock
+ * @param ttlSeconds - How long to hold the lock (default: 30 seconds)
+ * @returns { acquired: boolean, redisAvailable: boolean }
+ */
+export async function acquireLockFailClosed(
+  lockKey: string,
+  ttlSeconds: number = 30
+): Promise<{ acquired: boolean; redisDown: boolean }> {
+  initRedis();
+
+  if (!redis || !redisAvailable) {
+    console.warn(`[Cache] Redis unavailable, failing closed for lock "${lockKey}"`);
+    return { acquired: false, redisDown: true };
+  }
+
+  try {
+    const result = await redis.set(lockKey, "locked", "EX", ttlSeconds, "NX");
+    return { acquired: result === "OK", redisDown: false };
+  } catch (error: any) {
+    console.error(`[Cache] Error acquiring lock "${lockKey}":`, error.message);
+    // On error, fail closed (don't allow the operation)
+    return { acquired: false, redisDown: true };
+  }
+}
+
+/**
+ * Standard 503 response for Redis unavailable on expensive operations.
+ */
+export const REDIS_UNAVAILABLE_RESPONSE = {
+  error: "Service unavailable",
+  message: "Please try again in a moment.",
+};

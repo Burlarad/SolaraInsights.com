@@ -7,12 +7,21 @@ import type { NatalAIRequest, FullBirthChartInsight, TabDeepDive, TabDeepDives, 
 import type { SwissPlacements } from "@/lib/ephemeris/swissEngine";
 import { touchLastSeen } from "@/lib/activity/touchLastSeen";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
+import { checkBudget, incrementBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai/costControl";
+import { isRedisAvailable, REDIS_UNAVAILABLE_RESPONSE, getCache, setCache } from "@/lib/cache/redis";
+import { checkRateLimit } from "@/lib/cache/rateLimit";
 import { AYREN_MODE_SOULPRINT_LONG } from "@/lib/ai/voice";
 import { validateBirthChartInsight, validateBatchedTabDeepDives, TAB_DEEP_DIVE_KEYS } from "@/lib/validation/schemas";
 
 // Must match SOUL_PATH_SCHEMA_VERSION from lib/soulPath/storage.ts
 // Incremented when placements structure changes
 const SOUL_PATH_SCHEMA_VERSION = 8;
+
+// P0-3: Rate limits for birth chart (per user)
+// More generous limits since this is generated once and cached
+const USER_RATE_LIMIT = 5; // 5 requests per hour
+const USER_RATE_WINDOW = 3600; // 1 hour
+const COOLDOWN_SECONDS = 60; // 1 minute cooldown
 
 const PROMPT_VERSION = 2;
 
@@ -295,6 +304,13 @@ CRITICAL RULES:
 Language: ${language}`;
 
   try {
+    // P0: Budget check before OpenAI call
+    const budgetCheck = await checkBudget();
+    if (!budgetCheck.allowed) {
+      console.warn("[BirthChart] Budget exceeded, skipping tab deep dives generation");
+      return null;
+    }
+
     console.log(`[BirthChart] Generating ${tabs.length} tab deep dives...`);
 
     const completion = await openai.chat.completions.create({
@@ -316,6 +332,13 @@ Language: ${language}`;
 
     // Parse the response
     const parsed = JSON.parse(responseContent);
+
+    // P0: Increment daily budget counter
+    void incrementBudget(
+      OPENAI_MODELS.insights,
+      completion.usage?.prompt_tokens || 0,
+      completion.usage?.completion_tokens || 0
+    );
 
     // Add promptVersion to each tab if not present
     for (const key of tabs) {
@@ -492,6 +515,48 @@ export async function POST() {
     // Track user activity (non-blocking)
     const admin = createAdminSupabaseClient();
     void touchLastSeen(admin, user.id, 30);
+
+    // ========================================
+    // P0-3: USER RATE LIMITING
+    // ========================================
+    // Cooldown check
+    const cooldownKey = `birthchart:cooldown:${user.id}`;
+    const lastRequestTime = await getCache<number>(cooldownKey);
+    if (lastRequestTime) {
+      const elapsed = Math.floor((Date.now() - lastRequestTime) / 1000);
+      const remaining = COOLDOWN_SECONDS - elapsed;
+      if (remaining > 0) {
+        return NextResponse.json(
+          {
+            error: "Cooldown active",
+            message: `Please wait ${remaining} seconds before requesting again.`,
+            retryAfterSeconds: remaining,
+          },
+          { status: 429, headers: { "Retry-After": String(remaining) } }
+        );
+      }
+    }
+
+    // Rate limit check
+    const rateLimitResult = await checkRateLimit(
+      `birthchart:rate:${user.id}`,
+      USER_RATE_LIMIT,
+      USER_RATE_WINDOW
+    );
+    if (!rateLimitResult.success) {
+      const retryAfter = Math.ceil((rateLimitResult.resetAt - Date.now()) / 1000);
+      return NextResponse.json(
+        {
+          error: "Rate limit exceeded",
+          message: `You've reached your hourly limit. Try again in ${Math.ceil(retryAfter / 60)} minutes.`,
+          retryAfterSeconds: retryAfter,
+        },
+        { status: 429, headers: { "Retry-After": String(retryAfter) } }
+      );
+    }
+
+    // Set cooldown
+    await setCache(cooldownKey, Date.now(), COOLDOWN_SECONDS);
 
     // Load user profile
     const { data: profile, error: profileError } = await supabase
@@ -692,6 +757,19 @@ export async function POST() {
     // STEP C: Generate fresh AI narrative
     // ========================================
 
+    // P0: Redis availability check (fail-closed for expensive operations)
+    if (!isRedisAvailable()) {
+      console.warn("[BirthChart] Redis unavailable, failing closed");
+      return NextResponse.json(REDIS_UNAVAILABLE_RESPONSE, { status: 503 });
+    }
+
+    // P0: Budget check before OpenAI call
+    const budgetCheck = await checkBudget();
+    if (!budgetCheck.allowed) {
+      console.warn("[BirthChart] Budget exceeded, rejecting request");
+      return NextResponse.json(BUDGET_EXCEEDED_RESPONSE, { status: 503 });
+    }
+
     // Build NatalAIRequest for OpenAI
     const displayName = profile.preferred_name || profile.full_name;
 
@@ -772,6 +850,13 @@ export async function POST() {
       language: targetLanguage,
       timezone: profile.timezone || null,
     });
+
+    // P0: Increment daily budget counter
+    void incrementBudget(
+      OPENAI_MODELS.insights,
+      completion.usage?.prompt_tokens || 0,
+      completion.usage?.completion_tokens || 0
+    );
 
     if (!responseContent) {
       console.error("[BirthChart] OpenAI returned empty response");

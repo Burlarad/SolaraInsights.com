@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PublicTarotResponse, TarotSpread } from "@/types";
-import { findTarotCard } from "@/lib/tarot";
+import { getTarotImageUrlFromCardId } from "@/lib/tarot";
 
 // Generate UUID using native crypto API
 function generateUUID(): string {
@@ -275,11 +275,12 @@ export function TarotArena() {
                 {reading.drawnCards.map((card, i) => {
                   const interpretation = reading.interpretation.cards[i];
                   const cardName = interpretation?.cardName || "";
-                  const tarotCard = findTarotCard(cardName);
+                  // Use cardId to get image URL (more reliable than name matching)
+                  const imageUrl = getTarotImageUrlFromCardId(card.cardId);
 
                   // Log warning if card image not found
-                  if (!tarotCard && cardName) {
-                    console.warn(`[TarotArena] Missing image for card: "${cardName}" (id: ${card.cardId})`);
+                  if (!imageUrl && card.cardId) {
+                    console.warn(`[TarotArena] Missing image for cardId: "${card.cardId}"`);
                   }
 
                   return (
@@ -292,10 +293,10 @@ export function TarotArena() {
                           card.reversed ? "rotate-180" : ""
                         }`}
                       >
-                        {tarotCard ? (
+                        {imageUrl ? (
                           <Image
-                            src={tarotCard.imageUrl}
-                            alt={tarotCard.name}
+                            src={imageUrl}
+                            alt={cardName || card.cardId}
                             fill
                             className="object-cover"
                             sizes="(max-width: 768px) 80px, 96px"

@@ -133,3 +133,116 @@ export function findTarotCard(name: string): TarotCard | undefined {
   const normalizedName = name.toLowerCase().trim();
   return TAROT_CARDS.find((card) => card.name.toLowerCase() === normalizedName);
 }
+
+/**
+ * Convert a cardId from lib/tarot/cards.ts to an image URL.
+ *
+ * CardId formats:
+ * - Major: "major-00-fool", "major-01-magician", "major-12-hanged-man"
+ * - Minor: "minor-wands-01-ace", "minor-cups-02-two", "minor-swords-11-page"
+ *
+ * @param cardId - The card ID from lib/tarot/cards.ts
+ * @returns Image URL like "/tarot/rws/the-fool.png" or null if not found
+ */
+export function getTarotImageUrlFromCardId(cardId: string): string | null {
+  if (!cardId) return null;
+
+  // Major arcana: "major-{number}-{name}"
+  if (cardId.startsWith("major-")) {
+    const slug = cardIdToSlug(cardId);
+    if (slug) {
+      return `/tarot/rws/${slug}.png`;
+    }
+    return null;
+  }
+
+  // Minor arcana: "minor-{suit}-{number}-{name}"
+  if (cardId.startsWith("minor-")) {
+    const slug = cardIdToSlug(cardId);
+    if (slug) {
+      return `/tarot/rws/${slug}.png`;
+    }
+    return null;
+  }
+
+  return null;
+}
+
+/**
+ * Convert cardId to image slug.
+ *
+ * Major arcana mappings:
+ * - major-00-fool → the-fool
+ * - major-08-strength → strength (no "the")
+ * - major-12-hanged-man → the-hanged-one (special case)
+ *
+ * Minor arcana mappings:
+ * - minor-wands-01-ace → ace-of-wands
+ * - minor-cups-02-two → 2-of-cups
+ * - minor-swords-11-page → page-of-swords
+ */
+function cardIdToSlug(cardId: string): string | null {
+  // Major arcana
+  if (cardId.startsWith("major-")) {
+    // Extract parts: "major-00-fool" → ["major", "00", "fool"]
+    const parts = cardId.split("-");
+    if (parts.length < 3) return null;
+
+    const number = parseInt(parts[1], 10);
+    const name = parts.slice(2).join("-"); // Handle multi-word names like "hanged-man"
+
+    // Special cases: cards without "the" prefix in file names
+    const noThePrefixCards = ["strength", "death", "temperance", "judgement", "justice"];
+
+    // Special case: "hanged-man" → "the-hanged-one"
+    if (name === "hanged-man") {
+      return "the-hanged-one";
+    }
+
+    // Special case: "wheel" → "the-wheel-of-fortune"
+    if (name === "wheel") {
+      return "the-wheel-of-fortune";
+    }
+
+    if (noThePrefixCards.includes(name)) {
+      return name;
+    }
+
+    return `the-${name}`;
+  }
+
+  // Minor arcana: "minor-{suit}-{number}-{name}"
+  if (cardId.startsWith("minor-")) {
+    const parts = cardId.split("-");
+    if (parts.length < 4) return null;
+
+    const suit = parts[1]; // wands, cups, swords, pentacles
+    const number = parseInt(parts[2], 10);
+    const name = parts[3]; // ace, two, three, ..., page, knight, queen, king
+
+    // Convert number words to digits for 2-10
+    const numberMap: Record<string, string> = {
+      ace: "ace",
+      two: "2",
+      three: "3",
+      four: "4",
+      five: "5",
+      six: "6",
+      seven: "7",
+      eight: "8",
+      nine: "9",
+      ten: "10",
+      page: "page",
+      knight: "knight",
+      queen: "queen",
+      king: "king",
+    };
+
+    const prefix = numberMap[name];
+    if (!prefix) return null;
+
+    return `${prefix}-of-${suit}`;
+  }
+
+  return null;
+}

@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { openai, OPENAI_MODELS } from "@/lib/openai/client";
 import { PublicTarotResponse, TarotSpread } from "@/types";
 import { getCache, setCache } from "@/lib/cache";
+import { isRedisAvailable, REDIS_UNAVAILABLE_RESPONSE } from "@/lib/cache/redis";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
+import { checkBudget, incrementBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai/costControl";
 import { publicTarotSchema, validateRequest } from "@/lib/validation/schemas";
 import { AYREN_MODE_SHORT } from "@/lib/ai/voice";
 import {
@@ -112,6 +114,23 @@ export async function POST(req: NextRequest) {
     console.log(
       `[PublicTarot] Generating reading for requestId: ${requestId}, spread: ${spread}`
     );
+
+    // ========================================
+    // P0: REDIS AVAILABILITY CHECK (fail closed)
+    // ========================================
+    if (!isRedisAvailable()) {
+      console.warn("[PublicTarot] Redis unavailable, failing closed");
+      return NextResponse.json(REDIS_UNAVAILABLE_RESPONSE, { status: 503, headers: rateLimitHeaders });
+    }
+
+    // ========================================
+    // P0: BUDGET CHECK (before OpenAI call)
+    // ========================================
+    const budgetCheck = await checkBudget();
+    if (!budgetCheck.allowed) {
+      console.warn("[PublicTarot] Budget exceeded, rejecting request");
+      return NextResponse.json(BUDGET_EXCEEDED_RESPONSE, { status: 503, headers: rateLimitHeaders });
+    }
 
     // ========================================
     // OPENAI GENERATION
@@ -301,6 +320,9 @@ CRITICAL: Use ONLY card IDs from the provided list. Any invalid ID will cause a 
       language: targetLanguage,
       timezone,
     });
+
+    // P0: Increment daily budget counter
+    void incrementBudget(OPENAI_MODELS.horoscope, totalInputTokens, totalOutputTokens);
 
     // Cache for idempotency
     await setCache(idempotencyKey, reading, IDEMPOTENCY_TTL);

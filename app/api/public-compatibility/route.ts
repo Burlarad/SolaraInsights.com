@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { openai, OPENAI_MODELS } from "@/lib/openai/client";
 import { PublicCompatibilityContent, PublicCompatibilityResponse } from "@/types";
 import { getCache, setCache } from "@/lib/cache";
+import { isRedisAvailable, REDIS_UNAVAILABLE_RESPONSE } from "@/lib/cache/redis";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
+import { checkBudget, incrementBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai/costControl";
 import {
   publicCompatibilitySchema,
   validateRequest,
@@ -229,6 +231,25 @@ export async function POST(req: NextRequest) {
     await setCache(lockKey, "generating", LOCK_TTL);
 
     // ========================================
+    // P0: REDIS AVAILABILITY CHECK (fail closed)
+    // ========================================
+    if (!isRedisAvailable()) {
+      console.warn("[PublicCompatibility] Redis unavailable, failing closed");
+      return NextResponse.json(REDIS_UNAVAILABLE_RESPONSE, { status: 503 });
+    }
+
+    // ========================================
+    // P0: BUDGET CHECK (before OpenAI call)
+    // ========================================
+    const budgetCheck = await checkBudget();
+    if (!budgetCheck.allowed) {
+      console.warn("[PublicCompatibility] Budget exceeded, rejecting request");
+      // Release lock before returning
+      await setCache(lockKey, null, 0);
+      return NextResponse.json(BUDGET_EXCEEDED_RESPONSE, { status: 503 });
+    }
+
+    // ========================================
     // GENERATE WITH OPENAI
     // ========================================
     console.log(`[PublicCompatibility] Generating for pair: ${pairKey}`);
@@ -350,6 +371,9 @@ Make each section substantive and specific to this particular sign combination.`
       outputTokens,
       totalTokens: inputTokens + outputTokens,
     });
+
+    // P0: Increment daily budget counter
+    void incrementBudget(OPENAI_MODELS.horoscope, inputTokens, outputTokens);
 
     const response: PublicCompatibilityResponse = {
       ...content,

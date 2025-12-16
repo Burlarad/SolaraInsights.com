@@ -22,6 +22,7 @@ import { toZonedTime, format } from "date-fns-tz";
 import { addDays } from "date-fns";
 import { SanctuaryInsight } from "@/types";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
+import { checkBudget, incrementBudget } from "@/lib/ai/costControl";
 import { AYREN_MODE_SHORT } from "@/lib/ai/voice";
 
 const PROMPT_VERSION = 2;
@@ -126,6 +127,18 @@ export async function GET(req: NextRequest) {
 
         // Generate insight (same logic as /api/insights)
         try {
+          // P0: Budget check before OpenAI call
+          const budgetCheck = await checkBudget();
+          if (!budgetCheck.allowed) {
+            console.warn(`[Prewarm] Budget exceeded, stopping pre-warm job`);
+            await releaseLock(lockKey);
+            // Return early with current stats when budget is exceeded
+            return NextResponse.json({
+              message: "Pre-warm stopped - budget exceeded",
+              stats,
+            });
+          }
+
           // Load full profile for generation
           const { data: fullProfile } = await admin
             .from("profiles")
@@ -273,6 +286,13 @@ LUCKY COMPASS RULES:
             language,
             timezone,
           });
+
+          // P0: Increment daily budget counter
+          void incrementBudget(
+            OPENAI_MODELS.insights,
+            completion.usage?.prompt_tokens || 0,
+            completion.usage?.completion_tokens || 0
+          );
 
           // Parse response
           const insight: SanctuaryInsight = JSON.parse(responseContent);

@@ -4,14 +4,21 @@ import { openai, OPENAI_MODELS } from "@/lib/openai/client";
 import { InsightsRequest, SanctuaryInsight } from "@/types";
 import { getTarotCardNames } from "@/lib/tarot";
 import { getRuneNames } from "@/lib/runes";
-import { getCache, setCache, acquireLock, releaseLock } from "@/lib/cache/redis";
+import { getCache, setCache, acquireLockFailClosed, releaseLock, isRedisAvailable, REDIS_UNAVAILABLE_RESPONSE } from "@/lib/cache/redis";
+import { checkRateLimit } from "@/lib/cache/rateLimit";
 import { getUserPeriodKeys, buildInsightCacheKey, buildInsightLockKey } from "@/lib/timezone/periodKeys";
 import { getEffectiveTimezone } from "@/lib/location/detection";
 import { touchLastSeen } from "@/lib/activity/touchLastSeen";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
+import { checkBudget, incrementBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai/costControl";
 import { AYREN_MODE_SHORT } from "@/lib/ai/voice";
 
 const PROMPT_VERSION = 2;
+
+// P0-3: Rate limits for protected endpoint (per user)
+const USER_RATE_LIMIT = 20; // 20 requests per hour
+const USER_RATE_WINDOW = 3600; // 1 hour
+const COOLDOWN_SECONDS = 30; // 30 second cooldown between requests
 
 /**
  * Check if debug mode is enabled (query param or non-production)
@@ -64,6 +71,48 @@ export async function POST(req: NextRequest) {
   // Track user activity (non-blocking)
   const admin = createAdminSupabaseClient();
   void touchLastSeen(admin, user.id, 30);
+
+  // ========================================
+  // P0-3: USER RATE LIMITING
+  // ========================================
+  // Cooldown check
+  const cooldownKey = `insights:cooldown:${user.id}`;
+  const lastRequestTime = await getCache<number>(cooldownKey);
+  if (lastRequestTime) {
+    const elapsed = Math.floor((Date.now() - lastRequestTime) / 1000);
+    const remaining = COOLDOWN_SECONDS - elapsed;
+    if (remaining > 0) {
+      return NextResponse.json(
+        {
+          error: "Cooldown active",
+          message: `Please wait ${remaining} seconds before requesting again.`,
+          retryAfterSeconds: remaining,
+        },
+        { status: 429, headers: { "Retry-After": String(remaining) } }
+      );
+    }
+  }
+
+  // Rate limit check
+  const rateLimitResult = await checkRateLimit(
+    `insights:rate:${user.id}`,
+    USER_RATE_LIMIT,
+    USER_RATE_WINDOW
+  );
+  if (!rateLimitResult.success) {
+    const retryAfter = Math.ceil((rateLimitResult.resetAt - Date.now()) / 1000);
+    return NextResponse.json(
+      {
+        error: "Rate limit exceeded",
+        message: `You've reached your hourly limit. Try again in ${Math.ceil(retryAfter / 60)} minutes.`,
+        retryAfterSeconds: retryAfter,
+      },
+      { status: 429, headers: { "Retry-After": String(retryAfter) } }
+    );
+  }
+
+  // Set cooldown
+  await setCache(cooldownKey, Date.now(), COOLDOWN_SECONDS);
 
   // Declare periodKey outside try block so it's accessible in error handler
   let periodKey: string | undefined;
@@ -175,8 +224,32 @@ export async function POST(req: NextRequest) {
     // Cache miss - need to generate fresh insight
     console.log(`[Insights] ✗ Cache miss for ${cacheKey}`);
 
-    // Acquire lock to prevent duplicate generation
-    const lockAcquired = await acquireLock(lockKey, 60); // 60 second lock
+    // ========================================
+    // P0: REDIS AVAILABILITY CHECK (fail closed)
+    // ========================================
+    if (!isRedisAvailable()) {
+      console.warn("[Insights] Redis unavailable, failing closed");
+      return NextResponse.json(REDIS_UNAVAILABLE_RESPONSE, { status: 503 });
+    }
+
+    // ========================================
+    // P0: BUDGET CHECK (before OpenAI call)
+    // ========================================
+    const budgetCheck = await checkBudget();
+    if (!budgetCheck.allowed) {
+      console.warn("[Insights] Budget exceeded, rejecting request");
+      return NextResponse.json(BUDGET_EXCEEDED_RESPONSE, { status: 503 });
+    }
+
+    // P0: Acquire lock with FAIL-CLOSED behavior
+    const lockResult = await acquireLockFailClosed(lockKey, 60);
+
+    if (lockResult.redisDown) {
+      console.warn("[Insights] Redis unavailable during lock, failing closed");
+      return NextResponse.json(REDIS_UNAVAILABLE_RESPONSE, { status: 503 });
+    }
+
+    const lockAcquired = lockResult.acquired;
 
     if (!lockAcquired) {
       // Another request is already generating this insight
@@ -191,8 +264,12 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(nowCachedInsight);
       }
 
-      // Still not cached - proceed to generate (lock may have been released)
-      console.log(`[Insights] No cached result after wait, generating anyway`);
+      // Still not cached - return 503 to prevent duplicate generation
+      console.log(`[Insights] No cached result after wait, returning 503`);
+      return NextResponse.json(
+        { error: "Generation in progress", message: "Please try again in a moment." },
+        { status: 503 }
+      );
     } else {
       console.log(`[Insights] ✓ Lock acquired for ${lockKey}, generating insight...`);
     }
@@ -323,6 +400,13 @@ LUCKY COMPASS RULES:
       language: targetLanguage,
       timezone: effectiveTimezone,
     });
+
+    // P0: Increment daily budget counter
+    void incrementBudget(
+      OPENAI_MODELS.insights,
+      completion.usage?.prompt_tokens || 0,
+      completion.usage?.completion_tokens || 0
+    );
 
     // Parse and validate the JSON response
     let insight: SanctuaryInsight;

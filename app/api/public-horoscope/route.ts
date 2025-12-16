@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { openai, OPENAI_MODELS } from "@/lib/openai/client";
 import { PublicHoroscopeResponse } from "@/types";
 import { getCache, setCache, getDayKey } from "@/lib/cache";
-import { acquireLock, releaseLock } from "@/lib/cache/redis";
+import { acquireLockFailClosed, releaseLock, REDIS_UNAVAILABLE_RESPONSE } from "@/lib/cache/redis";
 import { checkRateLimit, getClientIP } from "@/lib/cache/rateLimit";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
+import { checkBudget, incrementBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai/costControl";
 import { publicHoroscopeSchema, validateRequest } from "@/lib/validation/schemas";
 import { AYREN_MODE_SHORT } from "@/lib/ai/voice";
 
@@ -92,11 +93,28 @@ export async function POST(req: NextRequest) {
 
     console.log(`[PublicHoroscope] Cache miss for ${cacheKey}, generating fresh horoscope...`);
 
+    // ========================================
+    // P0: BUDGET CHECK (before OpenAI call)
+    // ========================================
+    const budgetCheck = await checkBudget();
+    if (!budgetCheck.allowed) {
+      console.warn(`[PublicHoroscope] Budget exceeded, rejecting request`);
+      return NextResponse.json(BUDGET_EXCEEDED_RESPONSE, { status: 503, headers: rateLimitHeaders });
+    }
+
     // Build lock key to prevent stampeding herd
     lockKey = `lock:publicHoroscope:p${PROMPT_VERSION}:${sign}:${timeframe}:${periodKey}:${targetLanguage}`;
 
-    // Try to acquire lock
-    lockAcquired = await acquireLock(lockKey, 60); // 60 second lock
+    // P0: Try to acquire lock with FAIL-CLOSED behavior
+    const lockResult = await acquireLockFailClosed(lockKey, 60);
+
+    // If Redis is down, fail closed (don't proceed with expensive OpenAI call)
+    if (lockResult.redisDown) {
+      console.warn(`[PublicHoroscope] Redis unavailable, failing closed`);
+      return NextResponse.json(REDIS_UNAVAILABLE_RESPONSE, { status: 503, headers: rateLimitHeaders });
+    }
+
+    lockAcquired = lockResult.acquired;
 
     if (!lockAcquired) {
       // Another request is already generating this horoscope
@@ -111,8 +129,12 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(nowCachedHoroscope, { headers: rateLimitHeaders });
       }
 
-      // Still not cached - proceed to generate anyway (lock may have been released)
-      console.log(`[PublicHoroscope] No cached result after wait, generating anyway`);
+      // Still not cached - return 503 to prevent duplicate generation
+      console.log(`[PublicHoroscope] No cached result after wait, returning 503`);
+      return NextResponse.json(
+        { error: "Generation in progress", message: "Please try again in a moment." },
+        { status: 503, headers: rateLimitHeaders }
+      );
     } else {
       console.log(`[PublicHoroscope] ✓ Lock acquired for ${lockKey}, generating horoscope...`);
     }
@@ -184,6 +206,13 @@ Follow the Ayren voice rules strictly: 2 paragraphs, non-deterministic wording, 
       language: targetLanguage,
       timezone,
     });
+
+    // P0: Increment daily budget counter
+    void incrementBudget(
+      OPENAI_MODELS.horoscope,
+      completion.usage?.prompt_tokens || 0,
+      completion.usage?.completion_tokens || 0
+    );
 
     // Parse and validate the JSON response
     let horoscope: PublicHoroscopeResponse;
