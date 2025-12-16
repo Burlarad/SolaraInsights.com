@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient, createAdminSupabaseClient } from "@/lib/supabase/server";
 import { openai, OPENAI_MODELS } from "@/lib/openai/client";
-import { ConnectionInsight } from "@/types";
 import { getCache, setCache, getDayKey } from "@/lib/cache";
+
+/**
+ * Legacy connection insight format (this endpoint is deprecated)
+ * Use /api/connection-brief and /api/connection-space-between instead
+ */
+interface ConnectionInsight {
+  overview: string;
+  emotionalDynamics: string;
+  communication: string;
+  careSuggestions: string;
+}
 import { acquireLockFailClosed, releaseLock, isRedisAvailable, REDIS_UNAVAILABLE_RESPONSE } from "@/lib/cache/redis";
 import { checkRateLimit } from "@/lib/cache/rateLimit";
 import { touchLastSeen } from "@/lib/activity/touchLastSeen";

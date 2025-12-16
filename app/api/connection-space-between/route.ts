@@ -137,6 +137,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // ========================================
+    // MUTUAL CHECK GATE
+    // ========================================
+    // Space Between requires mutual connection (both users have added each other)
+    if (!connection.is_mutual) {
+      return NextResponse.json(
+        {
+          error: "MUTUAL_REQUIRED",
+          message: `Space Between unlocks when ${connection.name} adds you back. Once they do, this will open automatically.`,
+        },
+        { status: 403 }
+      );
+    }
+
     const language = profile.language || "en";
 
     // ========================================

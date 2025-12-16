@@ -2,7 +2,7 @@
 
 **Date**: 2025-12-16
 **Auditor**: Claude
-**Status**: Phase 1 Complete - Backend implemented, UI pending
+**Status**: Phase 3 Complete - Mutual Space Between with Realtime
 
 ---
 
@@ -19,10 +19,13 @@
 | **P1** | Insights cached in Redis, not saved to DB | **DONE** - Now saves to Postgres |
 | **P1** | No label-safe tone adaptation | **DONE** - Safety rules added to all prompts |
 | **P1** | No friend-safe vs partner-safe tone policy | **DONE** - `getToneGuidance()` implemented |
-| **P2** | UI has no tabs (Today, Space Between, Notes) | Pending Phase 2 |
-| ~~P2~~ | ~~No invitation flow for linked profiles~~ | **REMOVED** - Not required per updated spec |
+| **P2** | UI has no tabs (Today, Space Between, Notes) | **DONE** - Single-page with expandable cards |
+| ~~P2~~ | ~~No invitation flow for linked profiles~~ | **REPLACED** - Mutual-only Space Between gating |
+| **P2** | Space Between requires mutual connection | **DONE** - `is_mutual` column + API gate + UI |
 
-### What Was Implemented (Phase 1)
+### What Was Implemented
+
+#### Phase 1 - Backend (Complete)
 
 1. **SQL Migration** - [007_connections_v2.sql](sql/007_connections_v2.sql)
    - `daily_briefs` table with RLS policies
@@ -46,11 +49,52 @@
 5. **OpenAI Model Config** - [lib/openai/client.ts](lib/openai/client.ts)
    - Added `deep` model for stone tablet generation (gpt-4o)
 
-### Next Steps (Phase 2 - UI)
+#### Phase 2 - Single-Page UI (Complete)
 
-- Create connection detail page with tabs
-- Update connection list to link to detail view
-- Implement notes editing UI
+1. **Connections Page Rewrite** - [page.tsx](app/(protected)/sanctuary/connections/page.tsx)
+   - Single-page experience with expandable cards (no navigation to [id] route)
+   - IntersectionObserver for lazy brief generation
+   - Inline notes editing with auto-save
+   - Inline connection editing (name, relationship type, birth data)
+   - Birth field editing blocked for linked connections
+
+2. **Space Between Sheet** - [SpaceBetweenSheet.tsx](components/sanctuary/SpaceBetweenSheet.tsx)
+   - Slide-over drawer (only "window" in the feature)
+   - 5 accordion sections for stone tablet content
+   - 403 handling for MUTUAL_REQUIRED error
+
+3. **PATCH API Enhancement** - [route.ts](app/api/connections/route.ts)
+   - Accepts: name, relationship_type, notes, birth fields
+   - Validates linked_profile_id to block birth field updates
+
+4. **Deleted [id] Route** - Single-page architecture, no detail pages
+
+#### Phase 3 - Mutual Space Between (Complete)
+
+1. **SQL Migration** - [008_connections_mutual_unlock.sql](sql/008_connections_mutual_unlock.sql)
+   - Added `is_mutual` boolean column to connections
+   - Composite index for reverse connection lookups
+   - PostgreSQL trigger to maintain mutual flag bidirectionally
+   - Backfill query for existing mutual connections
+
+2. **API Gate** - [route.ts](app/api/connection-space-between/route.ts)
+   - Returns 403 `MUTUAL_REQUIRED` if `is_mutual = false`
+   - Message includes connection name for user clarity
+
+3. **UI Gating** - [page.tsx](app/(protected)/sanctuary/connections/page.tsx)
+   - Button shows "Open Space Between" only when `is_mutual = true`
+   - Locked button with tooltip when not mutual
+   - Supabase Realtime subscription for instant `is_mutual` updates
+   - Auto-close sheet if mutual status becomes false
+
+4. **Sheet Updates** - [SpaceBetweenSheet.tsx](components/sanctuary/SpaceBetweenSheet.tsx)
+   - Handles 403 with locked UI
+   - Shows message about waiting for other person to add back
+
+#### Types Cleanup
+
+- Removed deprecated `ConnectionInsight` interface from [types/index.ts](types/index.ts)
+- Added `is_mutual: boolean` to `Connection` interface
 
 ---
 
@@ -60,10 +104,12 @@
 
 | File Path | Purpose |
 |-----------|---------|
-| [page.tsx](app/(protected)/sanctuary/connections/page.tsx) | Main Connections UI page |
-| [route.ts](app/api/connections/route.ts) | CRUD API (GET/POST/DELETE) |
-| [route.ts](app/api/connection-insight/route.ts) | AI insight generation API |
-| [types/index.ts:389-409](types/index.ts#L389-L409) | `Connection` and `ConnectionInsight` interfaces |
+| [page.tsx](app/(protected)/sanctuary/connections/page.tsx) | Main Connections UI page (single-page with expandable cards) |
+| [SpaceBetweenSheet.tsx](components/sanctuary/SpaceBetweenSheet.tsx) | Space Between slide-over sheet |
+| [route.ts](app/api/connections/route.ts) | CRUD API (GET/POST/PATCH/DELETE) |
+| [route.ts](app/api/connection-brief/route.ts) | Daily Brief generation API |
+| [route.ts](app/api/connection-space-between/route.ts) | Space Between generation API (with mutual gate) |
+| [types/index.ts:389-403](types/index.ts#L389-L403) | `Connection` interface (includes `is_mutual`) |
 | [schemas.ts:62-66](lib/validation/schemas.ts#L62-L66) | `connectionInsightSchema` validation |
 | [schemas.ts:88-96](lib/validation/schemas.ts#L88-L96) | `connectionSchema` validation |
 | [voice.ts](lib/ai/voice.ts) | `AYREN_MODE_SHORT` voice system |
@@ -74,11 +120,11 @@
 
 | Table | Exists | Purpose |
 |-------|--------|---------|
-| `connections` | Yes | Stores user connections with birth data |
+| `connections` | Yes | Stores user connections with birth data + `is_mutual` flag |
 | `profiles` | Yes | User profiles (used for owner's birth data) |
-| `daily_briefs` | **NO** | Should store immutable daily connection briefs |
-| `space_between_reports` | **NO** | Should store "stone tablet" deep reports |
-| `connection_links` | **NO** | Should store invite/accept/consent |
+| `daily_briefs` | Yes | Immutable daily connection briefs (Layer A) |
+| `space_between_reports` | Yes | "Stone tablet" deep reports (Layer B) |
+| ~~`connection_links`~~ | N/A | **Not needed** - replaced by `is_mutual` trigger approach |
 
 ---
 
@@ -407,38 +453,47 @@ function getToneGuidance(type: string): string {
 └── Right (1/3): Add connection form
 ```
 
-### Required UI Structure
+### Current UI Structure (Single-Page Architecture)
 
 ```
 /sanctuary/connections
 ├── Header: "Connections" + subtitle
 ├── Left (2/3): Connection list
-│   └── Connection Card (redesigned)
-│       ├── Avatar/initial + Name
-│       ├── Relationship type badge
-│       ├── Link status indicator (Linked | Unlinked | Pending)
-│       └── "Open" button (goes to detail view)
+│   └── Expandable Connection Card
+│       ├── Collapsed:
+│       │   ├── Name + Link status (Linked | Unlinked)
+│       │   ├── Relationship type badge + birth date
+│       │   └── Brief preview (truncated shared_vibe or "Click to view")
+│       └── Expanded:
+│           ├── Action buttons:
+│           │   ├── Edit (opens inline edit form)
+│           │   ├── Space Between (gold button if mutual, locked if not)
+│           │   └── Delete
+│           ├── Today's Brief section:
+│           │   ├── Title + shared_vibe
+│           │   ├── Ways to show up (3 bullets)
+│           │   └── Optional nudge
+│           └── Notes section:
+│               ├── Textarea
+│               └── Save notes button
 └── Right (1/3): Add connection form
 
-/sanctuary/connections/[id] (NEW - detail page)
-├── Back link to /sanctuary/connections
-├── Header: Connection name + relationship type
-├── Link status + "Invite to link" button
-├── Tab navigation:
-│   ├── Today (Daily Brief)
-│   │   ├── Title: "Today with {Name}"
-│   │   ├── Shared vibe paragraph
-│   │   ├── "Ways to show up" (3 bullets)
-│   │   └── Optional nudge
-│   ├── Space Between (Deep report)
-│   │   ├── First-open: "Generate your relationship blueprint" CTA
-│   │   ├── Subsequent: Display saved stone tablet
-│   │   └── Sections: Essence, Emotional Blueprint, Communication, Growth, Care
-│   └── Notes (User notes)
-│       ├── Free-form text area
-│       └── Save button
-└── Delete connection (with confirmation)
+Space Between Sheet (slide-over)
+├── Header: "The Space Between" + subtitle
+├── States:
+│   ├── Loading: Spinner + "Generating..."
+│   ├── Mutual Locked: Lock icon + "Not Yet Unlocked" message
+│   ├── Error: Retry button
+│   └── Success: 5 accordion sections
+│       ├── Essence (default open)
+│       ├── Emotional Blueprint
+│       ├── Communication
+│       ├── Growth Edges
+│       └── Care Guide
+└── Auto-closes if is_mutual becomes false via Realtime
 ```
+
+**Note**: The `[id]` detail page route was removed. All functionality is now inline on the single connections page.
 
 ---
 

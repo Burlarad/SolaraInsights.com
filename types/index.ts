@@ -398,19 +398,9 @@ export interface Connection {
   birth_region: string | null;
   birth_country: string | null;
   notes: string | null; // User's private notes about this connection
+  is_mutual: boolean; // True if both users have added each other as connections
   created_at: string;
   updated_at: string;
-}
-
-/**
- * Legacy connection insight (deep 4-section format)
- * @deprecated Use DailyBrief or SpaceBetweenReport instead
- */
-export interface ConnectionInsight {
-  overview: string;
-  emotionalDynamics: string;
-  communication: string;
-  careSuggestions: string;
 }
 
 /**

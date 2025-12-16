@@ -18,8 +18,10 @@ import {
   Pencil,
   X,
   Check,
+  Lock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 
 // Extended type with brief preview and full brief
 interface ConnectionWithPreview extends Connection {
@@ -133,6 +135,49 @@ export default function ConnectionsPage() {
       observerRef.current?.disconnect();
     };
   }, [connections, loadingBriefIds]);
+
+  // Supabase Realtime subscription for mutual status changes
+  useEffect(() => {
+    const supabase = createBrowserSupabaseClient();
+
+    const channel = supabase
+      .channel("connections-mutual-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "connections",
+        },
+        (payload) => {
+          const updated = payload.new as Connection;
+          // Update the connection in local state if it's one of ours
+          setConnections((prev) =>
+            prev.map((c) =>
+              c.id === updated.id
+                ? { ...c, is_mutual: updated.is_mutual }
+                : c
+            )
+          );
+
+          // If the Space Between sheet is open for this connection and it became mutual,
+          // the sheet will automatically try to load (it handles this internally)
+          // If it became NOT mutual, close the sheet
+          if (
+            spaceSheetConnectionId === updated.id &&
+            spaceSheetOpen &&
+            !updated.is_mutual
+          ) {
+            setSpaceSheetOpen(false);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [spaceSheetConnectionId, spaceSheetOpen]);
 
   const loadConnections = async () => {
     try {
@@ -548,13 +593,26 @@ export default function ConnectionsPage() {
                               Edit
                             </Button>
                           )}
-                          <Button
-                            variant="gold"
-                            size="sm"
-                            onClick={(e) => openSpaceBetween(connection, e)}
-                          >
-                            Open Space Between
-                          </Button>
+                          {connection.is_mutual ? (
+                            <Button
+                              variant="gold"
+                              size="sm"
+                              onClick={(e) => openSpaceBetween(connection, e)}
+                            >
+                              Open Space Between
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled
+                              className="text-accent-ink/50"
+                              title={`Unlocks when ${connection.name} adds you back`}
+                            >
+                              <Lock className="h-4 w-4 mr-1" />
+                              Space Between
+                            </Button>
+                          )}
                           <div className="flex-1" />
                           <Button
                             variant="ghost"
