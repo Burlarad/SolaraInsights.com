@@ -138,14 +138,18 @@ export async function POST(req: NextRequest) {
     }
 
     // ========================================
-    // MUTUAL CHECK GATE
+    // SPACE BETWEEN UNLOCK GATE
     // ========================================
-    // Space Between requires mutual connection (both users have added each other)
-    if (!connection.is_mutual) {
+    // Space Between requires:
+    // 1. Both users have linked profiles (linked_profile_id set on both sides)
+    // 2. Mutual connection exists (is_mutual = true)
+    // 3. Both parties have space_between_enabled = true
+    // The is_space_between_unlocked flag is computed by DB trigger from these conditions
+    if (!connection.is_space_between_unlocked) {
       return NextResponse.json(
         {
-          error: "MUTUAL_REQUIRED",
-          message: `Space Between unlocks when ${connection.name} adds you back. Once they do, this will open automatically.`,
+          error: "SPACE_BETWEEN_LOCKED",
+          message: "Space Between is not available for this connection.",
         },
         { status: 403 }
       );

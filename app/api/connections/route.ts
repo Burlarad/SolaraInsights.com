@@ -3,6 +3,7 @@ import { createServerSupabaseClient, createAdminSupabaseClient } from "@/lib/sup
 import { Connection, DailyBrief } from "@/types";
 import { touchLastSeen } from "@/lib/activity/touchLastSeen";
 import { getDayKey } from "@/lib/cache";
+import { resolveProfileFromConnection } from "@/lib/connections/profileMatch";
 
 // Must match the PROMPT_VERSION in /api/connection-brief
 const DAILY_BRIEF_PROMPT_VERSION = 1;
@@ -145,12 +146,32 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Insert new connection
+    // Attempt profile resolution (silent - never reveals account existence)
+    // Uses admin client to bypass RLS for profile lookup
+    let resolvedProfileId: string | null = null;
+
+    if (!linked_profile_id) {
+      // Only resolve if not explicitly provided
+      resolvedProfileId = await resolveProfileFromConnection(admin, user.id, {
+        name,
+        birth_date: birth_date || null,
+        birth_time: birth_time || null,
+        birth_city: birth_city || null,
+        birth_region: birth_region || null,
+        birth_country: birth_country || null,
+      });
+
+      if (resolvedProfileId) {
+        console.log(`[Connections] Resolved profile ${resolvedProfileId} for connection "${name}"`);
+      }
+    }
+
+    // Insert new connection with resolved or provided linked_profile_id
     const { data: connection, error } = await supabase
       .from("connections")
       .insert({
         owner_user_id: user.id,
-        linked_profile_id: linked_profile_id || null,
+        linked_profile_id: linked_profile_id || resolvedProfileId || null,
         name,
         relationship_type,
         birth_date: birth_date || null,
@@ -282,6 +303,11 @@ export async function PATCH(req: NextRequest) {
       updateData.notes = body.notes || null;
     }
 
+    // Space Between toggle (always allowed)
+    if (body.space_between_enabled !== undefined) {
+      updateData.space_between_enabled = Boolean(body.space_between_enabled);
+    }
+
     // Birth/location fields (only for unlinked connections)
     if (!existing.linked_profile_id) {
       if (body.birth_date !== undefined) {
@@ -316,6 +342,33 @@ export async function PATCH(req: NextRequest) {
 
       if (body.birth_country !== undefined) {
         updateData.birth_country = body.birth_country || null;
+      }
+
+      // Re-attempt linking if birth data changed and still unlinked
+      const birthFieldsChanged =
+        body.birth_date !== undefined ||
+        body.birth_city !== undefined ||
+        body.birth_region !== undefined ||
+        body.birth_country !== undefined ||
+        body.name !== undefined;
+
+      if (birthFieldsChanged) {
+        // Build the connection data for matching (use new values if provided, else existing)
+        const matchData = {
+          name: (body.name !== undefined ? body.name.trim() : existing.name),
+          birth_date: (body.birth_date !== undefined ? body.birth_date : existing.birth_date) || null,
+          birth_time: (body.birth_time !== undefined ? body.birth_time : existing.birth_time) || null,
+          birth_city: (body.birth_city !== undefined ? body.birth_city : existing.birth_city) || null,
+          birth_region: (body.birth_region !== undefined ? body.birth_region : existing.birth_region) || null,
+          birth_country: (body.birth_country !== undefined ? body.birth_country : existing.birth_country) || null,
+        };
+
+        const resolvedProfileId = await resolveProfileFromConnection(admin, user.id, matchData);
+
+        if (resolvedProfileId) {
+          console.log(`[Connections] Re-linking: resolved profile ${resolvedProfileId} for connection "${matchData.name}"`);
+          updateData.linked_profile_id = resolvedProfileId;
+        }
       }
     }
 

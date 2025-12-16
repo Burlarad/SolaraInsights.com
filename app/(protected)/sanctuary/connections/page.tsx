@@ -18,7 +18,8 @@ import {
   Pencil,
   X,
   Check,
-  Lock,
+  ToggleLeft,
+  ToggleRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
@@ -136,12 +137,12 @@ export default function ConnectionsPage() {
     };
   }, [connections, loadingBriefIds]);
 
-  // Supabase Realtime subscription for mutual status changes
+  // Supabase Realtime subscription for unlock status changes
   useEffect(() => {
     const supabase = createBrowserSupabaseClient();
 
     const channel = supabase
-      .channel("connections-mutual-changes")
+      .channel("connections-unlock-changes")
       .on(
         "postgres_changes",
         {
@@ -155,18 +156,22 @@ export default function ConnectionsPage() {
           setConnections((prev) =>
             prev.map((c) =>
               c.id === updated.id
-                ? { ...c, is_mutual: updated.is_mutual }
+                ? {
+                    ...c,
+                    is_mutual: updated.is_mutual,
+                    space_between_enabled: updated.space_between_enabled,
+                    is_space_between_unlocked: updated.is_space_between_unlocked,
+                    linked_profile_id: updated.linked_profile_id,
+                  }
                 : c
             )
           );
 
-          // If the Space Between sheet is open for this connection and it became mutual,
-          // the sheet will automatically try to load (it handles this internally)
-          // If it became NOT mutual, close the sheet
+          // Auto-close sheet if Space Between becomes locked
           if (
             spaceSheetConnectionId === updated.id &&
             spaceSheetOpen &&
-            !updated.is_mutual
+            !updated.is_space_between_unlocked
           ) {
             setSpaceSheetOpen(false);
           }
@@ -331,6 +336,54 @@ export default function ConnectionsPage() {
     } catch (err: any) {
       console.error("Error deleting connection:", err);
       alert(err.message || "Unable to delete connection. Please try again.");
+    }
+  };
+
+  const toggleSpaceBetweenEnabled = async (connection: ConnectionWithPreview, e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    const newValue = !connection.space_between_enabled;
+
+    // Optimistically update UI
+    setConnections((prev) =>
+      prev.map((c) =>
+        c.id === connection.id
+          ? { ...c, space_between_enabled: newValue }
+          : c
+      )
+    );
+
+    // If turning OFF and sheet is open for this connection, close it
+    if (!newValue && spaceSheetConnectionId === connection.id && spaceSheetOpen) {
+      setSpaceSheetOpen(false);
+    }
+
+    try {
+      const response = await fetch("/api/connections", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: connection.id,
+          space_between_enabled: newValue,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || "Failed to update toggle");
+      }
+
+      // The realtime subscription will update the is_space_between_unlocked flag
+    } catch (err: any) {
+      console.error("Error toggling space_between_enabled:", err);
+      // Revert on error
+      setConnections((prev) =>
+        prev.map((c) =>
+          c.id === connection.id
+            ? { ...c, space_between_enabled: !newValue }
+            : c
+        )
+      );
     }
   };
 
@@ -593,7 +646,7 @@ export default function ConnectionsPage() {
                               Edit
                             </Button>
                           )}
-                          {connection.is_mutual ? (
+                          {connection.is_space_between_unlocked && (
                             <Button
                               variant="gold"
                               size="sm"
@@ -601,19 +654,31 @@ export default function ConnectionsPage() {
                             >
                               Open Space Between
                             </Button>
-                          ) : (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              disabled
-                              className="text-accent-ink/50"
-                              title={`Unlocks when ${connection.name} adds you back`}
-                            >
-                              <Lock className="h-4 w-4 mr-1" />
-                              Space Between
-                            </Button>
                           )}
                           <div className="flex-1" />
+                          {/* Space Between Toggle - only show if linked */}
+                          {connection.linked_profile_id && (
+                            <button
+                              onClick={(e) => toggleSpaceBetweenEnabled(connection, e)}
+                              className={cn(
+                                "flex items-center gap-1.5 px-2 py-1 rounded text-xs transition-colors",
+                                connection.space_between_enabled
+                                  ? "text-green-600 hover:text-green-700"
+                                  : "text-accent-ink/40 hover:text-accent-ink/60"
+                              )}
+                              title={connection.space_between_enabled
+                                ? "Space Between is enabled for this connection"
+                                : "Space Between is disabled for this connection"
+                              }
+                            >
+                              {connection.space_between_enabled ? (
+                                <ToggleRight className="h-4 w-4" />
+                              ) : (
+                                <ToggleLeft className="h-4 w-4" />
+                              )}
+                              <span>Space Between</span>
+                            </button>
+                          )}
                           <Button
                             variant="ghost"
                             size="sm"

@@ -399,6 +399,8 @@ export interface Connection {
   birth_country: string | null;
   notes: string | null; // User's private notes about this connection
   is_mutual: boolean; // True if both users have added each other as connections
+  space_between_enabled: boolean; // User's consent toggle for Space Between on this connection
+  is_space_between_unlocked: boolean; // Computed: is_mutual AND both parties have space_between_enabled
   created_at: string;
   updated_at: string;
 }

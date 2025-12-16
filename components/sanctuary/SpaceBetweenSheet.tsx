@@ -9,7 +9,7 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, Loader2, Lock } from "lucide-react";
+import { ChevronDown, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SpaceBetweenReport } from "@/types";
 
@@ -64,8 +64,6 @@ export function SpaceBetweenSheet({
   const [spaceBetween, setSpaceBetween] = useState<SpaceBetweenReport | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [mutualLocked, setMutualLocked] = useState(false);
-  const [mutualMessage, setMutualMessage] = useState<string | null>(null);
 
   const loadSpaceBetween = useCallback(async () => {
     if (!connectionId || loading) return;
@@ -73,8 +71,6 @@ export function SpaceBetweenSheet({
     try {
       setLoading(true);
       setError(null);
-      setMutualLocked(false);
-      setMutualMessage(null);
 
       const response = await fetch("/api/connection-space-between", {
         method: "POST",
@@ -85,10 +81,9 @@ export function SpaceBetweenSheet({
       const data = await response.json();
 
       if (!response.ok) {
-        // Handle mutual requirement (403)
-        if (response.status === 403 && data.error === "MUTUAL_REQUIRED") {
-          setMutualLocked(true);
-          setMutualMessage(data.message);
+        // If locked (403), just close the sheet - no locked UI
+        if (response.status === 403) {
+          onOpenChange(false);
           return;
         }
         throw new Error(data.message || "Failed to load Space Between");
@@ -101,21 +96,19 @@ export function SpaceBetweenSheet({
     } finally {
       setLoading(false);
     }
-  }, [connectionId, loading]);
+  }, [connectionId, loading, onOpenChange]);
 
   // Load when sheet opens
   useEffect(() => {
-    if (open && !spaceBetween && !loading && !error && !mutualLocked) {
+    if (open && !spaceBetween && !loading && !error) {
       loadSpaceBetween();
     }
-  }, [open, spaceBetween, loading, error, mutualLocked, loadSpaceBetween]);
+  }, [open, spaceBetween, loading, error, loadSpaceBetween]);
 
   // Reset state when connectionId changes
   useEffect(() => {
     setSpaceBetween(null);
     setError(null);
-    setMutualLocked(false);
-    setMutualMessage(null);
   }, [connectionId]);
 
   return (
@@ -136,21 +129,6 @@ export function SpaceBetweenSheet({
             </p>
             <p className="text-xs text-accent-ink/40 mt-2">
               This may take a moment
-            </p>
-          </div>
-        ) : mutualLocked ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="w-16 h-16 rounded-full bg-accent-muted/50 flex items-center justify-center mb-4">
-              <Lock className="h-8 w-8 text-accent-ink/40" />
-            </div>
-            <h3 className="text-lg font-semibold mb-2 text-accent-ink/80">
-              Not Yet Unlocked
-            </h3>
-            <p className="text-accent-ink/60 max-w-sm mx-auto mb-4">
-              {mutualMessage || `Space Between unlocks when ${connectionName} adds you back.`}
-            </p>
-            <p className="text-xs text-accent-ink/40">
-              This page will update automatically when the connection becomes mutual.
             </p>
           </div>
         ) : error ? (
