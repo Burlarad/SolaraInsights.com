@@ -1,15 +1,26 @@
 "use client";
 
-import { useState } from "react";
 import { SolaraLogo } from "@/components/layout/SolaraLogo";
 import { PrimaryCTA } from "@/components/shared/PrimaryCTA";
 import { TogglePills } from "@/components/shared/TogglePills";
 import { TIMEFRAMES, EXPERIENCES } from "@/lib/constants";
 
-export function HeroSection() {
-  const [timeframe, setTimeframe] = useState<string>("Today");
-  const [experience, setExperience] = useState<string>("Horoscope");
+type Experience = "Horoscope" | "Tarot" | "Compatibility";
+type Timeframe = "Today" | "Week" | "Month";
 
+interface HeroSectionProps {
+  experience: Experience;
+  timeframe: Timeframe;
+  onExperienceChange: (value: Experience) => void;
+  onTimeframeChange: (value: Timeframe) => void;
+}
+
+export function HeroSection({
+  experience,
+  timeframe,
+  onExperienceChange,
+  onTimeframeChange,
+}: HeroSectionProps) {
   return (
     <section className="max-w-5xl mx-auto px-6 py-16 text-center">
       {/* Logo + wordmark + tagline */}
@@ -22,33 +33,53 @@ export function HeroSection() {
 
       {/* Toggles */}
       <div className="space-y-6 mb-12">
-        {/* Daily Alignment */}
-        <div>
-          <p className="micro-label mb-3">DAILY ALIGNMENT</p>
-          <TogglePills
-            options={[...TIMEFRAMES]}
-            value={timeframe}
-            onChange={setTimeframe}
-          />
-        </div>
-
-        {/* Choose Your Experience */}
+        {/* Choose Your Experience - FIRST */}
         <div>
           <p className="micro-label mb-3">CHOOSE YOUR EXPERIENCE</p>
           <TogglePills
             options={[...EXPERIENCES]}
             value={experience}
-            onChange={setExperience}
+            onChange={(val) => onExperienceChange(val as Experience)}
           />
         </div>
+
+        {/* Daily Alignment - ONLY shown for Horoscope */}
+        {experience === "Horoscope" && (
+          <div>
+            <p className="micro-label mb-3">DAILY ALIGNMENT</p>
+            <TogglePills
+              options={[...TIMEFRAMES]}
+              value={timeframe}
+              onChange={(val) => onTimeframeChange(val as Timeframe)}
+            />
+          </div>
+        )}
       </div>
 
-      {/* Choose your sign heading */}
+      {/* Section heading - varies by experience */}
       <div className="mb-8">
-        <h2 className="text-3xl font-semibold mb-2">Choose your sign</h2>
-        <p className="text-base text-accent-ink/70">
-          Select a sign to receive {timeframe.toLowerCase()}&apos;s reading.
-        </p>
+        {experience === "Tarot" ? (
+          <>
+            <h2 className="text-3xl font-semibold mb-2">Ask the Cards</h2>
+            <p className="text-base text-accent-ink/70">
+              Enter your question and draw your spread.
+            </p>
+          </>
+        ) : experience === "Compatibility" ? (
+          <>
+            <h2 className="text-3xl font-semibold mb-2">Explore Compatibility</h2>
+            <p className="text-base text-accent-ink/70">
+              Select two signs to discover their cosmic connection.
+            </p>
+          </>
+        ) : (
+          <>
+            <h2 className="text-3xl font-semibold mb-2">Choose your sign</h2>
+            <p className="text-base text-accent-ink/70">
+              Select a sign to receive {timeframe.toLowerCase()}'s reading.
+            </p>
+          </>
+        )}
       </div>
     </section>
   );

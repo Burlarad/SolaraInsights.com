@@ -238,7 +238,7 @@ export default function BirthChartPage() {
             <select
               value={activeSection}
               onChange={(e) => setActiveSection(e.target.value as SoulPathSection)}
-              className="w-full px-4 py-3 rounded-lg border border-accent-soft bg-white text-accent-ink text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent"
+              className="w-full px-4 py-3 rounded-lg border border-accent-soft bg-white text-accent-ink text-base font-medium focus:outline-none focus:ring-2 focus:ring-accent"
             >
               {SECTIONS.map((section) => (
                 <option key={section.id} value={section.id}>

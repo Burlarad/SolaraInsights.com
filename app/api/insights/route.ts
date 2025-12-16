@@ -14,6 +14,14 @@ import { AYREN_MODE_SHORT } from "@/lib/ai/voice";
 const PROMPT_VERSION = 2;
 
 /**
+ * Check if debug mode is enabled (query param or non-production)
+ */
+function isDebugMode(req: NextRequest): boolean {
+  const debugParam = req.nextUrl.searchParams.get("debug");
+  return debugParam === "1" || process.env.NODE_ENV !== "production";
+}
+
+/**
  * Get TTL in seconds based on insight timeframe
  * Longer timeframes get longer TTLs since they change less frequently
  */
@@ -145,6 +153,22 @@ export async function POST(req: NextRequest) {
         timezone: effectiveTimezone,
       });
 
+      // Include debug meta if enabled
+      if (isDebugMode(req)) {
+        return NextResponse.json({
+          ...cachedInsight,
+          _debug: {
+            timeframe,
+            periodKey,
+            timezone: effectiveTimezone,
+            cacheKey,
+            cacheHit: true,
+            generatedAt: null, // Unknown for cached responses
+            promptVersion: PROMPT_VERSION,
+          },
+        });
+      }
+
       return NextResponse.json(cachedInsight);
     }
 
@@ -200,6 +224,7 @@ Birth details:
 - Sign: ${profile.zodiac_sign || "unknown"}
 
 Current date: ${new Date().toISOString()}
+Period: ${periodKey} (${timeframe})
 Timeframe: ${timeframe}
 ${focusQuestion ? `Focus question: ${focusQuestion}` : ""}
 
@@ -248,15 +273,22 @@ Return a JSON object with this structure:
   },
   "luckyCompass": {
     "numbers": [
-      {"value": 18, "label": "ROOT", "meaning": "one sentence"},
-      {"value": 56, "label": "ROOT", "meaning": "one sentence"},
-      {"value": 66, "label": "ROOT", "meaning": "one sentence"}
+      {"value": NUMBER_1_99, "label": "ROOT|PATH|BLOOM", "meaning": "one sentence"},
+      {"value": NUMBER_1_99, "label": "ROOT|PATH|BLOOM", "meaning": "one sentence"},
+      {"value": NUMBER_1_99, "label": "ROOT|PATH|BLOOM", "meaning": "one sentence"}
     ],
     "powerWords": ["WORD1", "WORD2", "WORD3"],
     "handwrittenNote": "1-2 sentence affirmation"
   },
   "journalPrompt": "A gentle reflection question for their private journal"
-}`;
+}
+
+LUCKY COMPASS RULES:
+- Generate 3 DIFFERENT lucky numbers between 1-99 (not duplicates)
+- Numbers should feel meaningful for this specific period (${periodKey}) and person
+- Each period should produce different numbers - do NOT reuse the same numbers across periods
+- Labels should be one of: ROOT (grounding), PATH (direction), BLOOM (growth)
+- Power words should be inspiring single words relevant to this period`;
 
     // Call OpenAI
     const completion = await openai.chat.completions.create({
@@ -311,7 +343,22 @@ Return a JSON object with this structure:
       console.log(`[Insights] ✓ Lock released for ${lockKey}`);
     }
 
-    // Return the insight
+    // Return the insight with debug meta if enabled
+    if (isDebugMode(req)) {
+      return NextResponse.json({
+        ...insight,
+        _debug: {
+          timeframe,
+          periodKey,
+          timezone: effectiveTimezone,
+          cacheKey,
+          cacheHit: false,
+          generatedAt: new Date().toISOString(),
+          promptVersion: PROMPT_VERSION,
+        },
+      });
+    }
+
     return NextResponse.json(insight);
   } catch (error: any) {
     console.error("Error generating insights:", error);

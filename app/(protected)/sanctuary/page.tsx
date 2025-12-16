@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { SanctuaryTabs } from "@/components/sanctuary/SanctuaryTabs";
 import { TimeframeToggle } from "@/components/sanctuary/TimeframeToggle";
 import { GreetingCard } from "@/components/sanctuary/GreetingCard";
+import { EmotionalCadenceTimeline } from "@/components/sanctuary/EmotionalCadenceTimeline";
 import { useSettings } from "@/providers/SettingsProvider";
 import { SanctuaryInsight, Timeframe } from "@/types";
 import { findTarotCard } from "@/lib/tarot";
@@ -170,7 +171,6 @@ export default function SanctuaryInsightsPage() {
       <GreetingCard
         name={profile?.preferred_name || profile?.full_name || "Friend"}
         message={loading ? "Tuning your insights..." : error ? error : "Your insights are ready."}
-        hasBirthTime={!!profile?.birth_time}
       />
 
       {/* Tabs and timeframe */}
@@ -238,7 +238,7 @@ export default function SanctuaryInsightsPage() {
               </CardContent>
             </Card>
 
-            {/* Emotional Cadence */}
+            {/* Emotional Cadence - Day Arc Timeline */}
             <Card>
               <CardHeader>
                 <CardTitle>Emotional Cadence</CardTitle>
@@ -247,22 +247,11 @@ export default function SanctuaryInsightsPage() {
                 </p>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center gap-4 py-4">
-                  <div className="flex-1 text-center">
-                    <p className="micro-label mb-2">DAWN</p>
-                    <p className="text-lg font-medium">{insight.emotionalCadence.dawn}</p>
-                  </div>
-                  <div className="h-12 w-px bg-border-subtle" />
-                  <div className="flex-1 text-center">
-                    <p className="micro-label mb-2">MIDDAY</p>
-                    <p className="text-lg font-medium">{insight.emotionalCadence.midday}</p>
-                  </div>
-                  <div className="h-12 w-px bg-border-subtle" />
-                  <div className="flex-1 text-center">
-                    <p className="micro-label mb-2">DUSK</p>
-                    <p className="text-lg font-medium">{insight.emotionalCadence.dusk}</p>
-                  </div>
-                </div>
+                <EmotionalCadenceTimeline
+                  dawn={insight.emotionalCadence.dawn}
+                  midday={insight.emotionalCadence.midday}
+                  dusk={insight.emotionalCadence.dusk}
+                />
               </CardContent>
             </Card>
 
@@ -376,7 +365,7 @@ export default function SanctuaryInsightsPage() {
               <CardContent className="space-y-4">
                 <div className="flex gap-3">
                   {insight.luckyCompass.numbers.map((num, i) => (
-                    <div key={i} className="flex-1 pill bg-accent-muted text-center py-3">
+                    <div key={i} className="flex-1 pill bg-accent-muted text-center min-h-[72px] py-3 flex flex-col justify-center">
                       <p className="text-2xl font-bold text-accent-ink">{num.value}</p>
                       <p className="text-xs text-accent-ink/60 mt-1">{num.label}</p>
                     </div>
@@ -384,10 +373,11 @@ export default function SanctuaryInsightsPage() {
                 </div>
 
                 {insight.luckyCompass.numbers.length > 0 && (
-                  <div className="text-xs text-accent-ink/60 space-y-1">
+                  <div className="text-sm text-accent-ink/60 space-y-2">
                     {insight.luckyCompass.numbers.map((num, i) => (
-                      <p key={i}>
-                        <span className="font-medium">{num.value}:</span> {num.meaning}
+                      <p key={i} className="min-h-[44px] flex items-start py-1">
+                        <span className="font-medium text-accent-ink/80 mr-2">{num.value}:</span>
+                        <span>{num.meaning}</span>
                       </p>
                     ))}
                   </div>
@@ -399,7 +389,7 @@ export default function SanctuaryInsightsPage() {
                     {insight.luckyCompass.powerWords.map((word, i) => (
                       <span
                         key={i}
-                        className="pill bg-white text-accent-ink text-xs border border-border-subtle"
+                        className="pill bg-white text-accent-ink text-sm border border-border-subtle min-h-[44px] px-4 flex items-center"
                       >
                         {word}
                       </span>

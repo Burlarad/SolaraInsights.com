@@ -175,6 +175,7 @@ Birth details:
 - Sign: ${fullProfile.zodiac_sign || "unknown"}
 
 Current date: ${new Date().toISOString()}
+Period: ${tomorrowPeriodKey} (today)
 Timeframe: today
 
 ${socialSummary?.summary ? `Social context (optional, do not mention platforms directly):
@@ -222,15 +223,22 @@ Return a JSON object with this structure:
   },
   "luckyCompass": {
     "numbers": [
-      {"value": 18, "label": "ROOT", "meaning": "one sentence"},
-      {"value": 56, "label": "ROOT", "meaning": "one sentence"},
-      {"value": 66, "label": "ROOT", "meaning": "one sentence"}
+      {"value": NUMBER_1_99, "label": "ROOT|PATH|BLOOM", "meaning": "one sentence"},
+      {"value": NUMBER_1_99, "label": "ROOT|PATH|BLOOM", "meaning": "one sentence"},
+      {"value": NUMBER_1_99, "label": "ROOT|PATH|BLOOM", "meaning": "one sentence"}
     ],
     "powerWords": ["WORD1", "WORD2", "WORD3"],
     "handwrittenNote": "1-2 sentence affirmation"
   },
   "journalPrompt": "A gentle reflection question for their private journal"
-}`;
+}
+
+LUCKY COMPASS RULES:
+- Generate 3 DIFFERENT lucky numbers between 1-99 (not duplicates)
+- Numbers should feel meaningful for this specific period (${tomorrowPeriodKey}) and person
+- Each period should produce different numbers - do NOT reuse the same numbers across periods
+- Labels should be one of: ROOT (grounding), PATH (direction), BLOOM (growth)
+- Power words should be inspiring single words relevant to this period`;
 
           // Call OpenAI
           const completion = await openai.chat.completions.create({

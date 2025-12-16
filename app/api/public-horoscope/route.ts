@@ -54,6 +54,9 @@ export async function POST(req: NextRequest) {
     const { sign, timeframe, timezone, language } = validation.data;
     const targetLanguage = language || "en";
 
+    // Title-case the sign for display in prompts (e.g., "aries" -> "Aries")
+    const signDisplayName = sign.charAt(0).toUpperCase() + sign.slice(1);
+
     // ========================================
     // CACHING LAYER
     // ========================================
@@ -118,7 +121,7 @@ export async function POST(req: NextRequest) {
     const systemPrompt = `${AYREN_MODE_SHORT}
 
 CONTEXT:
-This is a PUBLIC, non-personalized reading for ${sign}. Keep it general but still warm and insightful.
+This is a PUBLIC, non-personalized reading for ${signDisplayName}. Keep it general but still warm and insightful.
 
 LANGUAGE:
 - Write ALL content in language code: ${targetLanguage}
@@ -134,14 +137,14 @@ Respond with ONLY valid JSON. No markdown, no explanations—just the JSON objec
         ? "This Week's"
         : "This Month's";
 
-    const userPrompt = `Generate a ${timeframe} horoscope for ${sign}.
+    const userPrompt = `Generate a ${timeframe} horoscope for ${signDisplayName}.
 
 Current date: ${new Date().toISOString()}
 Timeframe: ${timeframe}
 
 Return JSON:
 {
-  "title": "${timeframeLabel} Energy for ${sign}",
+  "title": "${timeframeLabel} Energy for ${signDisplayName}",
   "summary": "Exactly 2 paragraphs, 8-12 sentences total. Include 1 micro-action (<=10 min).",
   "keyThemes": ["theme1", "theme2", "theme3"]
 }

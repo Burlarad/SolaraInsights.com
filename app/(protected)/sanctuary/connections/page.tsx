@@ -377,7 +377,7 @@ export default function ConnectionsPage() {
                     id="relationshipType"
                     value={relationshipType}
                     onChange={(e) => setRelationshipType(e.target.value)}
-                    className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                    className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-base"
                     disabled={isAddingConnection}
                   >
                     <option value="Partner">Partner</option>

@@ -11,13 +11,22 @@ interface TogglePillsProps {
 
 export function TogglePills({ options, value, onChange, className }: TogglePillsProps) {
   return (
-    <div className={cn("inline-flex gap-2 p-1 bg-white/50 rounded-full", className)}>
+    <div
+      className={cn(
+        // Base styles
+        "inline-flex gap-2 p-1 bg-white/50 rounded-full",
+        // Mobile overflow safety: scrollable strip with snap
+        "max-w-full overflow-x-auto overscroll-x-contain",
+        "snap-x snap-mandatory scrollbar-none",
+        className
+      )}
+    >
       {options.map((option) => (
         <button
           key={option}
           onClick={() => onChange(option)}
           className={cn(
-            "pill text-sm font-medium transition-all",
+            "pill text-sm font-medium transition-all whitespace-nowrap snap-center flex-shrink-0",
             value === option
               ? "bg-accent-ink text-white shadow-sm"
               : "bg-transparent text-accent-ink hover:bg-white/80"

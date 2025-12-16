@@ -313,6 +313,76 @@ export interface PublicHoroscopeResponse {
 }
 
 // ============================================================================
+// PUBLIC TAROT TYPES
+// ============================================================================
+
+export type TarotSpread = 1 | 3 | 5;
+
+export interface PublicTarotRequest {
+  question: string;
+  spread: TarotSpread;
+  requestId: string; // UUID for idempotency
+  timezone: string;
+  language?: string;
+}
+
+export interface TarotDrawnCard {
+  cardId: string;
+  position: string;
+  reversed: boolean;
+}
+
+export interface TarotCardInterpretation {
+  cardId: string;
+  cardName: string;
+  position: string;
+  reversed: boolean;
+  meaning: string; // 2-3 sentences
+}
+
+export interface PublicTarotResponse {
+  question: string;
+  spread: TarotSpread;
+  drawnCards: TarotDrawnCard[];
+  interpretation: {
+    cards: TarotCardInterpretation[];
+    synthesis: string; // 2-3 paragraphs tying it all together
+    actionSteps: string[]; // 2-3 concrete micro-actions
+    reflectionQuestion: string; // A question to sit with
+  };
+  generatedAt: string;
+}
+
+// ============================================================================
+// PUBLIC COMPATIBILITY TYPES
+// ============================================================================
+
+export interface PublicCompatibilityRequest {
+  signA: string; // lowercase zodiac sign
+  signB: string; // lowercase zodiac sign
+  requestId: string; // UUID for idempotency
+}
+
+export interface PublicCompatibilityContent {
+  pairKey: string; // e.g., "scorpio__taurus"
+  title: string; // e.g., "Taurus + Scorpio"
+  summary: string; // 2-3 paragraph overview
+  strengths: string[]; // 3-4 bullet points
+  frictionPoints: string[]; // 3-4 bullet points
+  howToMakeItWork: string[]; // 3-4 actionable tips
+  communicationStyle: string; // 1-2 paragraphs
+  loveAndIntimacy: string; // 1-2 paragraphs
+  trustAndSecurity: string; // 1-2 paragraphs
+  longTermPotential: string; // 1-2 paragraphs
+  bestMoveThisWeek: string; // One concrete micro-action
+}
+
+export interface PublicCompatibilityResponse extends PublicCompatibilityContent {
+  generatedAt: string;
+  fromCache: boolean;
+}
+
+// ============================================================================
 // CONNECTIONS TYPES
 // ============================================================================
 

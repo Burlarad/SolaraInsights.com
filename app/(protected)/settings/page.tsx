@@ -223,21 +223,21 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12 space-y-8">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold mb-2">Tune your birth signature</h1>
-        <p className="text-accent-ink/60">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 md:py-12 space-y-8 md:space-y-10">
+      <div className="text-center mb-6 md:mb-8">
+        <h1 className="text-3xl md:text-4xl font-bold mb-2">Tune your birth signature</h1>
+        <p className="text-sm md:text-base text-accent-ink/60">
           Update your preferred name, sign, and natal coordinates
         </p>
       </div>
 
       <Card>
-        <CardContent className="p-8 space-y-12">
+        <CardContent className="p-5 sm:p-6 md:p-8 space-y-8 md:space-y-10">
           {/* Identity */}
-          <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-accent-gold">Identity</h2>
+          <section className="space-y-5">
+            <h2 className="text-lg md:text-xl font-semibold text-accent-gold">Identity</h2>
 
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid md:grid-cols-2 gap-5">
               <div className="space-y-2">
                 <Label htmlFor="fullName">Full name</Label>
                 <Input
@@ -273,7 +273,7 @@ export default function SettingsPage() {
                 id="zodiacSign"
                 value={zodiacSign}
                 onChange={(e) => setZodiacSign(e.target.value)}
-                className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-base"
               >
                 <option value="">Select a sign</option>
                 <option value="Aries">Aries</option>
@@ -296,12 +296,12 @@ export default function SettingsPage() {
           </section>
 
           {/* Change Password */}
-          <section className="space-y-4 pt-8 border-t border-border-subtle">
-            <h2 className="text-2xl font-semibold text-accent-gold">
+          <section className="space-y-5 pt-6 border-t border-border-subtle/60">
+            <h2 className="text-lg md:text-xl font-semibold text-accent-gold">
               Change password
             </h2>
 
-            <div className="space-y-4 max-w-md">
+            <div className="space-y-5 max-w-md">
               <div className="space-y-2">
                 <Label htmlFor="currentPassword">Current password</Label>
                 <Input
@@ -332,11 +332,11 @@ export default function SettingsPage() {
                 />
               </div>
 
-              <Button variant="gold" onClick={handleChangePassword}>
+              <Button variant="gold" onClick={handleChangePassword} className="min-h-[44px]">
                 Change password
               </Button>
 
-              <p className="text-xs text-accent-ink/60">
+              <p className="text-xs md:text-sm text-accent-ink/60 leading-relaxed">
                 After changing your password, you&apos;ll be signed out and need to sign
                 in again.
               </p>
@@ -344,15 +344,17 @@ export default function SettingsPage() {
           </section>
 
           {/* Birth Details */}
-          <section className="space-y-4 pt-8 border-t border-border-subtle">
-            <h2 className="text-2xl font-semibold text-accent-gold">
-              Birth details
-            </h2>
-            <p className="text-sm text-accent-ink/60">
-              Your exact birth information allows for the most precise insights
-            </p>
+          <section className="space-y-5 pt-6 border-t border-border-subtle/60">
+            <div>
+              <h2 className="text-lg md:text-xl font-semibold text-accent-gold">
+                Birth details
+              </h2>
+              <p className="text-sm md:text-base text-accent-ink/60 mt-1">
+                Your exact birth information allows for the most precise insights
+              </p>
+            </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid md:grid-cols-2 gap-5">
               <div className="space-y-2">
                 <Label htmlFor="birthDate">
                   Birth date <span className="text-danger-soft">*</span>
@@ -375,13 +377,13 @@ export default function SettingsPage() {
                   onChange={(e) => setBirthTime(e.target.value)}
                   disabled={unknownBirthTime}
                 />
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3 min-h-[44px]">
                   <input
                     type="checkbox"
                     id="unknownBirthTime"
                     checked={unknownBirthTime}
                     onChange={(e) => setUnknownBirthTime(e.target.checked)}
-                    className="rounded"
+                    className="rounded w-5 h-5"
                   />
                   <label
                     htmlFor="unknownBirthTime"
@@ -406,7 +408,7 @@ export default function SettingsPage() {
               />
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid md:grid-cols-2 gap-5">
               <div className="space-y-2">
                 <Label htmlFor="birthRegion">
                   Region / State <span className="text-danger-soft">*</span>
@@ -440,7 +442,7 @@ export default function SettingsPage() {
                 id="timezone"
                 value={timezone}
                 onChange={(e) => setTimezone(e.target.value)}
-                className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-base"
                 disabled
               >
                 <option value="">Select a timezone</option>
@@ -450,63 +452,66 @@ export default function SettingsPage() {
                   </option>
                 ))}
               </select>
-              <p className="text-xs text-accent-ink/60">
+              <p className="text-xs md:text-sm text-accent-ink/60 leading-relaxed">
                 Timezone is automatically determined from your birthplace and cannot be changed manually.
               </p>
             </div>
           </section>
 
           {/* Social Insights / Social Personalization */}
-          <section className="space-y-4 pt-8 border-t border-border-subtle">
-            <h2 className="text-2xl font-semibold text-accent-gold">
-              Social Insights
-            </h2>
-            <p className="text-sm text-accent-ink/60 leading-relaxed">
-              Social insights can use your connected accounts to improve personalization
-              in your Sanctuary. If you choose, Solara can gently read patterns from your
-              connected social accounts to better understand your emotional tone and daily
-              rhythms. We will never post for you.
-            </p>
+          <section className="space-y-5 pt-6 border-t border-border-subtle/60">
+            <div>
+              <h2 className="text-lg md:text-xl font-semibold text-accent-gold">
+                Social Insights
+              </h2>
+              <p className="text-sm md:text-base text-accent-ink/60 leading-relaxed mt-1">
+                Social insights can use your connected accounts to improve personalization
+                in your Sanctuary. If you choose, Solara can gently read patterns from your
+                connected social accounts to better understand your emotional tone and daily
+                rhythms. We will never post for you.
+              </p>
+            </div>
 
             <div className="space-y-4">
               {/* Facebook connection */}
               <Card className="border-border-subtle">
-                <CardContent className="p-4 space-y-3">
-                  <div className="flex items-center justify-between">
+                <CardContent className="p-4 sm:p-5">
+                  {/* Mobile: Stack layout | Desktop: Row layout */}
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-[#1877F2] flex items-center justify-center text-white font-semibold">
+                      <div className="w-11 h-11 rounded-full bg-[#1877F2] flex items-center justify-center text-white font-semibold flex-shrink-0">
                         F
                       </div>
                       <div>
-                        <p className="text-sm font-medium">Facebook</p>
+                        <p className="text-sm md:text-base font-medium">Facebook</p>
                         {facebookIdentity ? (
-                          <p className="text-xs text-accent-ink/60">
+                          <p className="text-xs md:text-sm text-accent-ink/60">
                             Connected as {getIdentityDisplayName(facebookIdentity)}
                           </p>
                         ) : (
-                          <p className="text-xs text-accent-ink/60">Not connected</p>
+                          <p className="text-xs md:text-sm text-accent-ink/60">Not connected</p>
                         )}
                       </div>
                     </div>
                     <Button
                       variant="outline"
-                      size="sm"
                       onClick={handleConnectFacebook}
+                      className="w-full sm:w-auto min-h-[44px]"
                     >
                       {facebookIdentity ? "Reconnect" : "Connect"}
                     </Button>
                   </div>
 
                   {facebookIdentity && (
-                    <div className="flex items-center justify-between pl-13">
+                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-border-subtle/60">
                       <span className="text-sm text-accent-ink/80">
                         Use to improve experience
                       </span>
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-accent-ink/60">ON</span>
                         {/* TODO: Wire this to actual preference in profile */}
-                        <div className="w-10 h-6 bg-accent-gold rounded-full flex items-center px-1">
-                          <div className="w-4 h-4 bg-white rounded-full ml-auto"></div>
+                        <div className="w-11 h-7 bg-accent-gold rounded-full flex items-center px-1">
+                          <div className="w-5 h-5 bg-white rounded-full ml-auto"></div>
                         </div>
                       </div>
                     </div>
@@ -516,18 +521,18 @@ export default function SettingsPage() {
 
               {/* Placeholder for other social providers */}
               <Card className="border-border-subtle opacity-50">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
+                <CardContent className="p-4 sm:p-5">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white font-semibold">
+                      <div className="w-11 h-11 rounded-full bg-black flex items-center justify-center text-white font-semibold flex-shrink-0">
                         T
                       </div>
                       <div>
-                        <p className="text-sm font-medium">TikTok</p>
-                        <p className="text-xs text-accent-ink/60">Coming soon</p>
+                        <p className="text-sm md:text-base font-medium">TikTok</p>
+                        <p className="text-xs md:text-sm text-accent-ink/60">Coming soon</p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" disabled>
+                    <Button variant="outline" disabled className="w-full sm:w-auto min-h-[44px]">
                       Coming Soon
                     </Button>
                   </div>
@@ -535,18 +540,18 @@ export default function SettingsPage() {
               </Card>
 
               <Card className="border-border-subtle opacity-50">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
+                <CardContent className="p-4 sm:p-5">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white font-semibold">
+                      <div className="w-11 h-11 rounded-full bg-black flex items-center justify-center text-white font-semibold flex-shrink-0">
                         X
                       </div>
                       <div>
-                        <p className="text-sm font-medium">X (Twitter)</p>
-                        <p className="text-xs text-accent-ink/60">Coming soon</p>
+                        <p className="text-sm md:text-base font-medium">X (Twitter)</p>
+                        <p className="text-xs md:text-sm text-accent-ink/60">Coming soon</p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" disabled>
+                    <Button variant="outline" disabled className="w-full sm:w-auto min-h-[44px]">
                       Coming Soon
                     </Button>
                   </div>
@@ -554,25 +559,25 @@ export default function SettingsPage() {
               </Card>
 
               <Card className="border-border-subtle opacity-50">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
+                <CardContent className="p-4 sm:p-5">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-[#FF4500] flex items-center justify-center text-white font-semibold">
+                      <div className="w-11 h-11 rounded-full bg-[#FF4500] flex items-center justify-center text-white font-semibold flex-shrink-0">
                         R
                       </div>
                       <div>
-                        <p className="text-sm font-medium">Reddit</p>
-                        <p className="text-xs text-accent-ink/60">Coming soon</p>
+                        <p className="text-sm md:text-base font-medium">Reddit</p>
+                        <p className="text-xs md:text-sm text-accent-ink/60">Coming soon</p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" disabled>
+                    <Button variant="outline" disabled className="w-full sm:w-auto min-h-[44px]">
                       Coming Soon
                     </Button>
                   </div>
                 </CardContent>
               </Card>
 
-              <p className="text-xs text-accent-ink/50 leading-relaxed">
+              <p className="text-xs md:text-sm text-accent-ink/50 leading-relaxed">
                 Social insights are optional and help us better understand your unique
                 patterns. You can disconnect anytime.
               </p>
@@ -580,79 +585,83 @@ export default function SettingsPage() {
           </section>
 
           {/* Privacy & Data */}
-          <section className="space-y-4 pt-8 border-t border-border-subtle">
-            <h2 className="text-2xl font-semibold text-accent-gold">
+          <section className="space-y-3 pt-6 border-t border-border-subtle/60">
+            <h2 className="text-lg md:text-xl font-semibold text-accent-gold">
               Privacy & data
             </h2>
-            <p className="text-sm text-accent-ink/60">
+            <p className="text-sm md:text-base text-accent-ink/60 leading-relaxed">
               Your reflections are private and never shared. Manage your journal entries below.
             </p>
           </section>
 
           {/* Account State */}
-          <section className="space-y-6 pt-8 border-t border-border-subtle">
-            <h2 className="text-2xl font-semibold text-accent-gold">
+          <section className="space-y-6 pt-6 border-t border-border-subtle/60">
+            <h2 className="text-lg md:text-xl font-semibold text-accent-gold">
               Account state
             </h2>
 
-            <div className="space-y-3">
-              <h3 className="text-lg font-medium">Hibernate account</h3>
-              <p className="text-sm text-accent-ink/60">
+            <div className="space-y-4">
+              <h3 className="text-base md:text-lg font-medium">Hibernate account</h3>
+              <p className="text-sm md:text-base text-accent-ink/60 leading-relaxed">
                 Pause your subscription while keeping your data safe. You can reactivate
                 anytime.
               </p>
-              <Button variant="outline">Hibernate account</Button>
+              <Button variant="outline" className="w-full sm:w-auto min-h-[44px]">
+                Hibernate account
+              </Button>
             </div>
 
-            <div className="space-y-3">
-              <h3 className="text-lg font-medium">Delete account</h3>
-              <p className="text-sm text-accent-ink/60">
+            <div className="space-y-4">
+              <h3 className="text-base md:text-lg font-medium">Delete account</h3>
+              <p className="text-sm md:text-base text-accent-ink/60 leading-relaxed">
                 Permanently delete your account and all associated data. This action
                 cannot be undone.
               </p>
-              <Button variant="destructive">Delete account</Button>
+              <Button variant="destructive" className="w-full sm:w-auto min-h-[44px]">
+                Delete account
+              </Button>
             </div>
           </section>
 
           {/* Notifications */}
-          <section className="space-y-4 pt-8 border-t border-border-subtle">
-            <h2 className="text-2xl font-semibold text-accent-gold">
+          <section className="space-y-5 pt-6 border-t border-border-subtle/60">
+            <h2 className="text-lg md:text-xl font-semibold text-accent-gold">
               Notifications & preferences
             </h2>
 
-            <div className="space-y-4">
-              <div>
-                <div className="flex items-center gap-3 mb-1">
+            <div className="space-y-5">
+              <div className="min-h-[44px] flex flex-col justify-center">
+                <div className="flex items-center gap-3">
                   <input
                     type="checkbox"
                     id="emailNotifications"
                     checked={emailNotifications}
                     onChange={(e) => setEmailNotifications(e.target.checked)}
-                    className="rounded"
+                    className="rounded w-5 h-5"
                   />
-                  <label htmlFor="emailNotifications" className="text-sm font-medium">
+                  <label htmlFor="emailNotifications" className="text-sm md:text-base font-medium">
                     Email notifications
                   </label>
                 </div>
-                <p className="text-xs text-accent-ink/60 ml-6">
+                <p className="text-xs md:text-sm text-accent-ink/60 ml-8 mt-1">
                   Account and billing notices only. No horoscope content.
                 </p>
               </div>
 
-              <div>
-                <div className="flex items-center gap-3 mb-1">
+              <div className="min-h-[44px] flex flex-col justify-center">
+                <div className="flex items-center gap-3">
                   <input
                     type="checkbox"
                     id="pushNotifications"
                     checked={pushNotifications}
                     onChange={(e) => setPushNotifications(e.target.checked)}
-                    className="rounded"
+                    className="rounded w-5 h-5"
                   />
-                  <label htmlFor="pushNotifications" className="text-sm font-medium">
+                  <label htmlFor="pushNotifications" className="text-sm md:text-base font-medium">
                     Push notifications
                   </label>
                 </div>
-                <p className="text-xs text-accent-ink/60 ml-6">
+                <p className="text-xs md:text-sm text-accent-ink/60 ml-8 mt-1 leading-relaxed">
                   Gentle morning reminder between 7:55–8:15 AM local time. Requires
                   device registration.
                 </p>
@@ -664,36 +673,35 @@ export default function SettingsPage() {
 
       {/* Journal section */}
       <Card>
-        <CardContent className="p-8">
+        <CardContent className="p-5 sm:p-6 md:p-8">
           <section className="space-y-6">
             <div>
-              <h2 className="text-xl font-semibold mb-1">Journal</h2>
-              <p className="text-sm text-accent-ink/60">
+              <h2 className="text-lg md:text-xl font-semibold mb-1">Journal</h2>
+              <p className="text-sm md:text-base text-accent-ink/60">
                 Export or manage your private reflections
               </p>
             </div>
 
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm font-medium mb-2">Export journal (.MD)</p>
-                <p className="text-xs text-accent-ink/60 mb-3">
+            <div className="space-y-5">
+              <div className="space-y-3">
+                <p className="text-sm md:text-base font-medium">Export journal (.MD)</p>
+                <p className="text-xs md:text-sm text-accent-ink/60 leading-relaxed">
                   Download all your journal entries as a markdown file.
                 </p>
-                <Button variant="outline" onClick={handleExportJournal} size="sm">
+                <Button variant="outline" onClick={handleExportJournal} className="w-full sm:w-auto min-h-[44px]">
                   Export journal
                 </Button>
               </div>
 
-              <div>
-                <p className="text-sm font-medium mb-2">Delete journal</p>
-                <p className="text-xs text-accent-ink/60 mb-3">
+              <div className="space-y-3 pt-4 border-t border-border-subtle/60">
+                <p className="text-sm md:text-base font-medium">Delete journal</p>
+                <p className="text-xs md:text-sm text-accent-ink/60 leading-relaxed">
                   Permanently delete all journal entries. This cannot be undone.
                 </p>
                 <Button
                   variant="outline"
                   onClick={handleDeleteJournal}
-                  size="sm"
-                  className="text-danger-soft border-danger-soft hover:bg-danger-soft/10"
+                  className="w-full sm:w-auto min-h-[44px] text-danger-soft border-danger-soft hover:bg-danger-soft/10"
                 >
                   Delete all entries
                 </Button>
@@ -708,33 +716,36 @@ export default function SettingsPage() {
       </Card>
 
       {/* Action buttons */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex gap-3">
-            <Button
-              variant="gold"
-              onClick={handleSaveChanges}
-              disabled={isSaving}
-            >
-              {isSaving ? "Saving..." : "Save changes"}
-            </Button>
-            <Button variant="outline" onClick={() => window.location.reload()}>
-              Reset
-            </Button>
-          </div>
+      <div className="space-y-5">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button
+            variant="gold"
+            onClick={handleSaveChanges}
+            disabled={isSaving}
+            className="w-full sm:w-auto min-h-[48px] text-base"
+          >
+            {isSaving ? "Saving..." : "Save changes"}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => window.location.reload()}
+            className="w-full sm:w-auto min-h-[48px]"
+          >
+            Reset
+          </Button>
         </div>
 
         {/* Success/Error messages */}
         {saveSuccess && (
-          <p className="text-sm text-accent-gold text-center">
+          <p className="text-sm md:text-base text-accent-gold text-center">
             ✓ Details updated.
           </p>
         )}
         {saveError && (
-          <p className="text-sm text-danger-soft text-center">{saveError}</p>
+          <p className="text-sm md:text-base text-danger-soft text-center">{saveError}</p>
         )}
 
-        <p className="text-xs text-center text-accent-ink/60 leading-relaxed max-w-2xl mx-auto">
+        <p className="text-xs md:text-sm text-center text-accent-ink/60 leading-relaxed max-w-2xl mx-auto">
           Changes settle softly—return anytime to tune your details at your own rhythm.
         </p>
       </div>

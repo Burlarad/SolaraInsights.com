@@ -24,6 +24,34 @@ export const publicHoroscopeSchema = z.object({
   language: language.optional(),
 });
 
+// Public compatibility request
+export const publicCompatibilitySchema = z.object({
+  signA: zodiacSign,
+  signB: zodiacSign,
+  requestId: z.string().uuid("requestId must be a valid UUID"),
+});
+
+// Public tarot request
+export const publicTarotSchema = z.object({
+  question: z.string()
+    .min(10, "Question must be at least 10 characters")
+    .max(500, "Question must be at most 500 characters")
+    .refine(
+      (q) => q.trim().length >= 10,
+      { message: "Question cannot be only whitespace" }
+    ),
+  spread: z.union([z.literal(1), z.literal(3), z.literal(5)]),
+  requestId: z.string().uuid("requestId must be a valid UUID"),
+  timezone: timezone,
+  language: language.optional(),
+  // Optional userContext for quiet personalization (logged-in users)
+  userContext: z.object({
+    preferredName: z.string().optional(),
+    astroSummary: z.string().optional(),
+    socialInsightsSummary: z.string().optional(),
+  }).optional(),
+});
+
 // Insights request
 export const insightsSchema = z.object({
   timeframe: timeframe,
