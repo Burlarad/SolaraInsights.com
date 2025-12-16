@@ -1,14 +1,8 @@
-export type LearnStatus = "live" | "coming_soon";
-
 export type LearnCategory =
   | "Astrology Basics"
   | "Astrology Intermediate"
   | "Tarot Basics"
-  | "Compatibility"
-  | "Sanctuary"
-  | "Settings"
-  | "Connections"
-  | "Journal";
+  | "Compatibility";
 
 export interface LearnItem {
   slug: string;
@@ -18,7 +12,6 @@ export interface LearnItem {
   level: "Beginner" | "Intermediate" | "Advanced";
   minutes: number;
   tags: string[];
-  status: LearnStatus;
 }
 
 export const LEARN_ITEMS: LearnItem[] = [
@@ -34,7 +27,6 @@ export const LEARN_ITEMS: LearnItem[] = [
     level: "Beginner",
     minutes: 6,
     tags: ["Signs", "Charts", "Foundations"],
-    status: "live",
   },
   {
     slug: "big-three",
@@ -45,7 +37,6 @@ export const LEARN_ITEMS: LearnItem[] = [
     level: "Beginner",
     minutes: 7,
     tags: ["Sun", "Moon", "Rising"],
-    status: "live",
   },
   {
     slug: "elements-modalities",
@@ -56,7 +47,6 @@ export const LEARN_ITEMS: LearnItem[] = [
     level: "Beginner",
     minutes: 8,
     tags: ["Elements", "Modalities", "Signs"],
-    status: "live",
   },
   {
     slug: "planets-101",
@@ -67,7 +57,6 @@ export const LEARN_ITEMS: LearnItem[] = [
     level: "Beginner",
     minutes: 9,
     tags: ["Planets", "Mercury", "Venus", "Mars"],
-    status: "live",
   },
   {
     slug: "houses-101",
@@ -78,34 +67,11 @@ export const LEARN_ITEMS: LearnItem[] = [
     level: "Beginner",
     minutes: 10,
     tags: ["Houses", "Angles", "Life Areas"],
-    status: "live",
-  },
-  {
-    slug: "aspects-101",
-    title: "Aspects 101",
-    description:
-      "Conjunctions, squares, trines, and more. How planets talk to each other.",
-    category: "Astrology Basics",
-    level: "Beginner",
-    minutes: 8,
-    tags: ["Aspects", "Conjunction", "Square", "Trine"],
-    status: "coming_soon",
   },
 
   // ========================================
   // ASTROLOGY INTERMEDIATE
   // ========================================
-  {
-    slug: "reading-a-chart",
-    title: "Reading a Chart",
-    description:
-      "How to read a birth chart in 10 practical steps — no memorization required.",
-    category: "Astrology Intermediate",
-    level: "Intermediate",
-    minutes: 12,
-    tags: ["Charts", "Interpretation", "Practical"],
-    status: "coming_soon",
-  },
   {
     slug: "transits-101",
     title: "Transits 101",
@@ -115,7 +81,6 @@ export const LEARN_ITEMS: LearnItem[] = [
     level: "Intermediate",
     minutes: 10,
     tags: ["Transits", "Timing", "Cycles"],
-    status: "coming_soon",
   },
   {
     slug: "retrogrades",
@@ -126,7 +91,6 @@ export const LEARN_ITEMS: LearnItem[] = [
     level: "Intermediate",
     minutes: 7,
     tags: ["Retrogrades", "Mercury", "Cycles"],
-    status: "coming_soon",
   },
   {
     slug: "nodes-chiron-lilith",
@@ -137,18 +101,6 @@ export const LEARN_ITEMS: LearnItem[] = [
     level: "Intermediate",
     minutes: 11,
     tags: ["Nodes", "Chiron", "Lilith"],
-    status: "coming_soon",
-  },
-  {
-    slug: "timing-toolkit",
-    title: "Timing Toolkit",
-    description:
-      "How to use astrology for planning without becoming dependent on it.",
-    category: "Astrology Intermediate",
-    level: "Intermediate",
-    minutes: 8,
-    tags: ["Timing", "Planning", "Practical"],
-    status: "coming_soon",
   },
 
   // ========================================
@@ -163,7 +115,6 @@ export const LEARN_ITEMS: LearnItem[] = [
     level: "Beginner",
     minutes: 7,
     tags: ["Spreads", "Questions", "Reversals"],
-    status: "live",
   },
 
   // ========================================
@@ -178,69 +129,12 @@ export const LEARN_ITEMS: LearnItem[] = [
     level: "Beginner",
     minutes: 5,
     tags: ["Signs", "Dynamics", "Practical"],
-    status: "live",
-  },
-
-  // ========================================
-  // SOLARA FEATURES
-  // ========================================
-  {
-    slug: "sanctuary-tour",
-    title: "Sanctuary Tour",
-    description:
-      "A guided walkthrough of Sanctuary: Insights, Soul Path, Connections, and how it fits together.",
-    category: "Sanctuary",
-    level: "Beginner",
-    minutes: 6,
-    tags: ["Insights", "Soul Path", "Connections"],
-    status: "coming_soon",
-  },
-  {
-    slug: "settings-guide",
-    title: "Settings Guide",
-    description:
-      "How to set birth data correctly, why timezone matters, and what gets locked.",
-    category: "Settings",
-    level: "Beginner",
-    minutes: 6,
-    tags: ["Birth Data", "Timezone", "Profile"],
-    status: "coming_soon",
-  },
-  {
-    slug: "connections-guide",
-    title: "Connections Guide",
-    description:
-      "How to use Connections to explore relationship dynamics without overthinking.",
-    category: "Connections",
-    level: "Beginner",
-    minutes: 6,
-    tags: ["People", "Dynamics", "Reflection"],
-    status: "coming_soon",
-  },
-  {
-    slug: "journal-guide",
-    title: "Journal Guide",
-    description:
-      "How to use journaling inside Solara to turn insights into behavior changes.",
-    category: "Journal",
-    level: "Beginner",
-    minutes: 5,
-    tags: ["Reflection", "Habits", "Clarity"],
-    status: "coming_soon",
   },
 ];
 
 // Helper functions
 export function getLearnItemBySlug(slug: string): LearnItem | undefined {
   return LEARN_ITEMS.find((item) => item.slug === slug);
-}
-
-export function getLiveItems(): LearnItem[] {
-  return LEARN_ITEMS.filter((item) => item.status === "live");
-}
-
-export function getComingSoonItems(): LearnItem[] {
-  return LEARN_ITEMS.filter((item) => item.status === "coming_soon");
 }
 
 export function getAllCategories(): LearnCategory[] {

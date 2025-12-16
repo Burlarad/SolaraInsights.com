@@ -7,7 +7,6 @@ import { Clock, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   LEARN_ITEMS,
   getLearnItemBySlug,
-  getLiveItems,
   getPrevNextLearnItems,
 } from "@/lib/learn/content";
 
@@ -17,6 +16,9 @@ import { GuideBigThree } from "@/components/learn/guides/big-three";
 import { GuideElementsModalities } from "@/components/learn/guides/elements-modalities";
 import { GuidePlanets101 } from "@/components/learn/guides/planets-101";
 import { GuideHouses101 } from "@/components/learn/guides/houses-101";
+import { GuideTransits101 } from "@/components/learn/guides/transits-101";
+import { GuideRetrogrades } from "@/components/learn/guides/retrogrades";
+import { GuideNodesChironLilith } from "@/components/learn/guides/nodes-chiron-lilith";
 import { GuideTarot101 } from "@/components/learn/guides/tarot-101";
 import { GuideCompatibility101 } from "@/components/learn/guides/compatibility-101";
 
@@ -27,6 +29,9 @@ const GUIDE_COMPONENTS: Record<string, React.ReactNode> = {
   "elements-modalities": <GuideElementsModalities />,
   "planets-101": <GuidePlanets101 />,
   "houses-101": <GuideHouses101 />,
+  "transits-101": <GuideTransits101 />,
+  "retrogrades": <GuideRetrogrades />,
+  "nodes-chiron-lilith": <GuideNodesChironLilith />,
   "tarot-101": <GuideTarot101 />,
   "compatibility-101": <GuideCompatibility101 />,
 };
@@ -67,8 +72,6 @@ export default async function LearnGuidePage({ params }: PageProps) {
     notFound();
   }
 
-  const isComingSoon = item.status === "coming_soon";
-  const liveItems = getLiveItems().filter((i) => i.slug !== slug);
   const { prev, next } = getPrevNextLearnItems(slug);
 
   return (
@@ -93,11 +96,6 @@ export default async function LearnGuidePage({ params }: PageProps) {
           <span className="text-xs bg-accent-muted text-accent-ink/70 px-2 py-0.5 rounded-full">
             {item.level}
           </span>
-          {isComingSoon && (
-            <span className="text-xs bg-accent-lavender text-accent-ink/70 px-2 py-0.5 rounded-full">
-              Coming soon
-            </span>
-          )}
         </div>
         <h1 className="text-3xl md:text-4xl font-bold mb-4">{item.title}</h1>
         <p className="text-lg text-accent-ink/70 leading-relaxed">
@@ -113,38 +111,11 @@ export default async function LearnGuidePage({ params }: PageProps) {
       </header>
 
       {/* Content area */}
-      {isComingSoon ? (
-        <Card className="p-8 md:p-12 text-center">
-          <CardContent className="p-0 space-y-4">
-            <span className="text-5xl" aria-hidden="true">
-              ✨
-            </span>
-            <h2 className="text-xl font-semibold">Coming Soon</h2>
-            <p className="text-accent-ink/70 max-w-md mx-auto">
-              This lesson is being carved into stone. Check back soon for the
-              full content.
-            </p>
-          </CardContent>
-        </Card>
-      ) : GUIDE_COMPONENTS[slug] ? (
-        <Card className="p-6 md:p-8">
-          <CardContent className="p-0 prose prose-lg max-w-none">
-            {GUIDE_COMPONENTS[slug]}
-          </CardContent>
-        </Card>
-      ) : (
-        <Card className="p-8 md:p-12 text-center">
-          <CardContent className="p-0 space-y-4">
-            <span className="text-5xl" aria-hidden="true">
-              📝
-            </span>
-            <h2 className="text-xl font-semibold">Content In Progress</h2>
-            <p className="text-accent-ink/70 max-w-md mx-auto">
-              This guide is being written. Check back soon!
-            </p>
-          </CardContent>
-        </Card>
-      )}
+      <Card className="p-6 md:p-8">
+        <CardContent className="p-0 prose prose-lg max-w-none">
+          {GUIDE_COMPONENTS[slug]}
+        </CardContent>
+      </Card>
 
       {/* Prev/Next navigation */}
       {(prev || next) && (
@@ -169,14 +140,6 @@ export default async function LearnGuidePage({ params }: PageProps) {
                   <span>{prev.minutes} min</span>
                   <span>&middot;</span>
                   <span>{prev.level}</span>
-                  {prev.status === "coming_soon" && (
-                    <>
-                      <span>&middot;</span>
-                      <span className="text-xs bg-accent-lavender/50 text-accent-ink/70 px-1.5 py-0.5 rounded">
-                        Coming soon
-                      </span>
-                    </>
-                  )}
                 </div>
               </div>
             </Link>
@@ -200,14 +163,6 @@ export default async function LearnGuidePage({ params }: PageProps) {
                   <span>{next.minutes} min</span>
                   <span>&middot;</span>
                   <span>{next.level}</span>
-                  {next.status === "coming_soon" && (
-                    <>
-                      <span>&middot;</span>
-                      <span className="text-xs bg-accent-lavender/50 text-accent-ink/70 px-1.5 py-0.5 rounded">
-                        Coming soon
-                      </span>
-                    </>
-                  )}
                 </div>
               </div>
               <ChevronRight
@@ -223,4 +178,3 @@ export default async function LearnGuidePage({ params }: PageProps) {
     </div>
   );
 }
-

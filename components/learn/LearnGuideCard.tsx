@@ -16,32 +16,23 @@ export function LearnGuideCard({
   variant = "default",
   stepNumber,
 }: LearnGuideCardProps) {
-  const { slug, title, description, category, level, minutes, tags, status } =
-    item;
-  const isComingSoon = status === "coming_soon";
+  const { slug, title, description, category, level, minutes, tags } = item;
 
   // Roadmap variant - horizontal scroll card with step number
   if (variant === "roadmap") {
     return (
       <Link href={`/learn/${slug}`} className="block group">
         <Card className="min-w-[280px] max-w-[300px] p-5 flex flex-col gap-3 bg-white hover:shadow-lg transition-shadow h-full">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {stepNumber && (
-                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-accent-gold/10 text-accent-gold text-xs font-semibold">
-                  {stepNumber}
-                </span>
-              )}
-              <div className="flex items-center gap-1 text-xs text-accent-ink/60">
-                <Clock className="h-3 w-3" aria-hidden="true" />
-                <span>{minutes} MIN</span>
-              </div>
-            </div>
-            {isComingSoon && (
-              <span className="text-xs bg-accent-lavender/50 text-accent-ink/70 px-2 py-0.5 rounded-full">
-                Soon
+          <div className="flex items-center gap-2">
+            {stepNumber && (
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-accent-gold/10 text-accent-gold text-xs font-semibold">
+                {stepNumber}
               </span>
             )}
+            <div className="flex items-center gap-1 text-xs text-accent-ink/60">
+              <Clock className="h-3 w-3" aria-hidden="true" />
+              <span>{minutes} MIN</span>
+            </div>
           </div>
           <div className="flex-1">
             <h3 className="text-base font-semibold mb-1 group-hover:text-accent-gold transition-colors line-clamp-2">
@@ -67,16 +58,9 @@ export function LearnGuideCard({
     return (
       <Link href={`/learn/${slug}`} className="block group">
         <Card className="min-w-[280px] p-6 flex flex-col gap-4 bg-white hover:shadow-lg transition-shadow">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs text-accent-ink/60">
-              <Clock className="h-3 w-3" aria-hidden="true" />
-              <span>{minutes} MIN</span>
-            </div>
-            {isComingSoon && (
-              <span className="text-xs bg-accent-lavender/50 text-accent-ink/70 px-2 py-0.5 rounded-full">
-                Coming soon
-              </span>
-            )}
+          <div className="flex items-center gap-2 text-xs text-accent-ink/60">
+            <Clock className="h-3 w-3" aria-hidden="true" />
+            <span>{minutes} MIN</span>
           </div>
           <div>
             <h3 className="text-lg font-semibold mb-2 group-hover:text-accent-gold transition-colors">
@@ -117,22 +101,12 @@ export function LearnGuideCard({
             </div>
             <span className="micro-label bg-white/90 pill">{level}</span>
           </div>
-          {isComingSoon && (
-            <div className="absolute top-4 right-4">
-              <span className="text-xs bg-white/90 text-accent-ink/70 px-2 py-1 rounded-full">
-                Coming soon
-              </span>
-            </div>
-          )}
-          {/* Category icon placeholder */}
+          {/* Category icon */}
           <span className="text-4xl opacity-40" aria-hidden="true">
             {category === "Astrology Basics" && "✦"}
+            {category === "Astrology Intermediate" && "✧"}
             {category === "Tarot Basics" && "🃏"}
             {category === "Compatibility" && "💫"}
-            {category === "Sanctuary" && "🏛️"}
-            {category === "Settings" && "⚙️"}
-            {category === "Connections" && "🤝"}
-            {category === "Journal" && "📓"}
           </span>
         </div>
 

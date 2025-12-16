@@ -13,12 +13,8 @@ export default function LearnPage() {
 
   const handleFilterChange = useCallback((items: LearnItem[]) => {
     setFilteredItems(items);
-    // Check if filters changed the results
     setHasActiveFilters(items.length !== LEARN_ITEMS.length);
   }, []);
-
-  const liveItems = filteredItems.filter((item) => item.status === "live");
-  const comingSoonItems = filteredItems.filter((item) => item.status === "coming_soon");
 
   const hasNoResults = filteredItems.length === 0;
 
@@ -42,42 +38,19 @@ export default function LearnPage() {
           </p>
         </div>
       ) : (
-        <>
-          {/* Live guides */}
-          {liveItems.length > 0 && (
-            <section className="space-y-6">
-              <div className="flex items-center gap-3">
-                <h2 className="micro-label">AVAILABLE NOW</h2>
-                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                  {liveItems.length} {liveItems.length === 1 ? "guide" : "guides"}
-                </span>
-              </div>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {liveItems.map((item) => (
-                  <LearnGuideCard key={item.slug} item={item} />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Coming soon guides */}
-          {comingSoonItems.length > 0 && (
-            <section className="space-y-6">
-              <div className="flex items-center gap-3">
-                <h2 className="micro-label">COMING SOON</h2>
-                <span className="text-xs bg-accent-lavender/50 text-accent-ink/70 px-2 py-0.5 rounded-full">
-                  {comingSoonItems.length}{" "}
-                  {comingSoonItems.length === 1 ? "guide" : "guides"}
-                </span>
-              </div>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {comingSoonItems.map((item) => (
-                  <LearnGuideCard key={item.slug} item={item} />
-                ))}
-              </div>
-            </section>
-          )}
-        </>
+        <section className="space-y-6">
+          <div className="flex items-center gap-3">
+            <h2 className="micro-label">ALL GUIDES</h2>
+            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+              {filteredItems.length} {filteredItems.length === 1 ? "guide" : "guides"}
+            </span>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredItems.map((item) => (
+              <LearnGuideCard key={item.slug} item={item} />
+            ))}
+          </div>
+        </section>
       )}
     </div>
   );
