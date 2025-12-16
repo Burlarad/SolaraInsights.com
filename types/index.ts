@@ -466,7 +466,7 @@ export interface SpaceBetweenReport {
 
 export type SocialProvider = "facebook" | "instagram" | "tiktok" | "x" | "reddit";
 
-export type SocialConnectionStatus = "disconnected" | "connected" | "processing" | "ready" | "failed";
+export type SocialConnectionStatus = "disconnected" | "connected" | "syncing" | "ready" | "needs_reauth";
 
 export interface SocialConnection {
   id: string;
@@ -475,7 +475,13 @@ export interface SocialConnection {
   provider_user_id: string | null;
   handle: string | null;
   status: SocialConnectionStatus;
-  last_ingested_at: string | null;
+  // OAuth tokens (encrypted at rest, never exposed to client)
+  access_token_encrypted: string | null;
+  refresh_token_encrypted: string | null;
+  token_expires_at: string | null;
+  scopes: string | null;
+  // Sync metadata
+  last_synced_at: string | null;
   last_error: string | null;
   created_at: string;
   updated_at: string;
@@ -492,19 +498,13 @@ export interface SocialSummary {
   created_at: string;
 }
 
-// Request/response types for social API
-export interface SocialIngestRequest {
-  provider: SocialProvider;
-  handle?: string;
-  payload: string; // User-pasted content
-}
-
+// Response type for social status API
 export interface SocialStatusResponse {
   connections: {
     provider: SocialProvider;
     status: SocialConnectionStatus;
     handle: string | null;
-    lastIngestedAt: string | null;
+    lastSyncedAt: string | null;
     lastError: string | null;
     hasSummary: boolean;
   }[];

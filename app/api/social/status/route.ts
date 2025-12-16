@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
     // Fetch all social connections for this user
     const { data: connections, error: connectionsError } = await supabase
       .from("social_connections")
-      .select("provider, status, handle, last_ingested_at, last_error")
+      .select("provider, status, handle, last_synced_at, last_error")
       .eq("user_id", user.id);
 
     if (connectionsError) {
@@ -66,7 +66,7 @@ export async function GET(req: NextRequest) {
     const connectionMap = new Map<string, {
       status: SocialConnectionStatus;
       handle: string | null;
-      last_ingested_at: string | null;
+      last_synced_at: string | null;
       last_error: string | null;
     }>();
 
@@ -74,7 +74,7 @@ export async function GET(req: NextRequest) {
       connectionMap.set(conn.provider, {
         status: conn.status as SocialConnectionStatus,
         handle: conn.handle,
-        last_ingested_at: conn.last_ingested_at,
+        last_synced_at: conn.last_synced_at,
         last_error: conn.last_error,
       });
     }
@@ -87,7 +87,7 @@ export async function GET(req: NextRequest) {
           provider,
           status: conn?.status || "disconnected",
           handle: conn?.handle || null,
-          lastIngestedAt: conn?.last_ingested_at || null,
+          lastSyncedAt: conn?.last_synced_at || null,
           lastError: conn?.last_error || null,
           hasSummary: providersWithSummaries.has(provider),
         };

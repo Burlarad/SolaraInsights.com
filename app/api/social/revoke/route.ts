@@ -49,11 +49,16 @@ export async function POST(req: NextRequest) {
       // Continue anyway - we still want to update the connection status
     }
 
-    // Update connection status to disconnected (or delete it)
+    // Update connection status to disconnected and clear tokens
     const { error: updateConnectionError } = await supabase
       .from("social_connections")
       .update({
         status: "disconnected",
+        access_token_encrypted: null,
+        refresh_token_encrypted: null,
+        token_expires_at: null,
+        scopes: null,
+        last_synced_at: null,
         last_error: null,
         updated_at: new Date().toISOString(),
       })
