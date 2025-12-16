@@ -397,15 +397,75 @@ export interface Connection {
   birth_city: string | null;
   birth_region: string | null;
   birth_country: string | null;
+  notes: string | null; // User's private notes about this connection
   created_at: string;
   updated_at: string;
 }
 
+/**
+ * Legacy connection insight (deep 4-section format)
+ * @deprecated Use DailyBrief or SpaceBetweenReport instead
+ */
 export interface ConnectionInsight {
   overview: string;
   emotionalDynamics: string;
   communication: string;
   careSuggestions: string;
+}
+
+/**
+ * Daily Connection Brief (Layer A)
+ * Light, general "weather report" for the connection today.
+ * Generated on-demand, saved to DB, immutable for that day.
+ */
+export interface DailyBrief {
+  id: string;
+  connection_id: string;
+  owner_user_id: string;
+
+  // Cache key components
+  local_date: string; // YYYY-MM-DD
+  language: string;
+  prompt_version: number;
+  model_version: string | null;
+
+  // Content
+  title: string; // "Today with {Name}"
+  shared_vibe: string; // 2-4 sentences
+  ways_to_show_up: string[]; // Exactly 3 bullets
+  nudge: string | null; // Optional single line
+
+  created_at: string;
+}
+
+/**
+ * Space Between Report (Layer B)
+ * Deep "stone tablet" relationship blueprint.
+ * Generated once (first open), never regenerated.
+ */
+export interface SpaceBetweenReport {
+  id: string;
+  connection_id: string;
+  owner_user_id: string;
+
+  // Cache key components
+  language: string;
+  prompt_version: number;
+  model_version: string | null;
+
+  // Data sources used
+  includes_linked_birth_data: boolean;
+  includes_linked_social_data: boolean;
+  linked_profile_id: string | null;
+
+  // Content sections
+  relationship_essence: string; // Core dynamic
+  emotional_blueprint: string; // How you feel together
+  communication_patterns: string; // How you talk
+  growth_edges: string; // Where you stretch each other
+  care_guide: string; // How to show up
+
+  created_at: string;
 }
 
 // ============================================================================

@@ -258,12 +258,47 @@ export async function POST(req: NextRequest) {
       console.log(`[ConnectionInsight] ✓ Lock acquired for ${lockKey}, generating insight...`);
     }
 
+    // Determine tone guidance based on relationship type
+    const getToneGuidance = (type: string): string => {
+      const t = type.toLowerCase();
+      if (t === "partner") {
+        return "Romantic, intimate tone is appropriate. May reference emotional and physical closeness.";
+      } else if (t === "friend" || t === "colleague") {
+        return "Warm, platonic tone. Never romance-coded. Focus on mutual respect, support, and camaraderie.";
+      } else if (t === "parent" || t === "child" || t === "sibling") {
+        return "Family-appropriate tone. Focus on unconditional bonds, growth, and generational patterns.";
+      }
+      return "Warm, neutral tone. Default to friend-safe content.";
+    };
+
+    const toneGuidance = getToneGuidance(connection.relationship_type);
+    const userName = profile.preferred_name || profile.full_name || "you";
+    const connectionName = connection.name;
+
     // Construct OpenAI prompt using Ayren voice
     const systemPrompt = `${AYREN_MODE_SHORT}
 
 CONTEXT:
-You are describing the DYNAMIC BETWEEN TWO PEOPLE, not just one person.
-This is a relational insight for a ${connection.relationship_type} connection.
+You are describing the DYNAMIC between ${userName} and ${connectionName}.
+This is a ${connection.relationship_type} connection.
+
+TONE GUIDANCE:
+${toneGuidance}
+
+NAMING RULES (STRICT):
+- Always use "${userName}" when referring to the person reading this
+- Always use "${connectionName}" when referring to the other person
+- NEVER use "Person 1", "Person 2", "the owner", "the connection", or any impersonal labels
+- Use "you and ${connectionName}" phrasing throughout
+
+SAFETY RULES (STRICT):
+- Never claim to know ${connectionName}'s private thoughts or feelings with certainty
+- Never say "they secretly feel..." or "they are thinking..."
+- Never reveal what relationship label either person chose
+- Never expose if their relationship labels don't match
+- Never give manipulation tactics or coercion advice
+- Never weaponize insights ("say this to trigger them")
+- Use "may," "might," "could," "tends to" — not "will," "is," "definitely"
 
 ADAPTATION FOR CONNECTIONS:
 - Each section should follow Ayren voice principles (non-deterministic, warm, triumphant close)
@@ -273,16 +308,15 @@ ADAPTATION FOR CONNECTIONS:
 OUTPUT FORMAT:
 Respond with ONLY valid JSON. No markdown, no explanations—just the JSON object.`;
 
-    const userPrompt = `Generate a relational insight for the connection between these two people.
+    const userPrompt = `Generate a relational insight for the connection between ${userName} and ${connectionName}.
 
-Person 1 (the owner):
+${userName}'s birth signature:
 - Birth date: ${profile.birth_date}
 - Birth time: ${profile.birth_time || "unknown (use solar chart approach)"}
 - Birth location: ${profile.birth_city || "unknown"}, ${profile.birth_region || ""}, ${profile.birth_country || ""}
 - Timezone: ${profile.timezone}
 
-Person 2 (the connection):
-- Name: ${connection.name}
+${connectionName}'s birth signature:
 - Relationship type: ${connection.relationship_type}
 - Birth date: ${connectionBirthData.birth_date || "unknown"}
 - Birth time: ${connectionBirthData.birth_time || "unknown (use solar chart approach)"}
@@ -290,12 +324,13 @@ Person 2 (the connection):
 
 Return a JSON object with this structure:
 {
-  "overview": "Exactly 2 paragraphs about the overall energy and essence of this ${connection.relationship_type} connection. 8-12 sentences total.",
-  "emotionalDynamics": "Exactly 2 paragraphs about emotional rhythms together. Include 1 micro-action for emotional attunement.",
-  "communication": "Exactly 2 paragraphs about communication. Include 1 micro-action for better listening or expression.",
-  "careSuggestions": "Exactly 2 paragraphs with concrete ways Person 1 can support Person 2. Include 1 micro-action (<=10 min)."
+  "overview": "Exactly 2 paragraphs about the overall energy and essence of this ${connection.relationship_type} connection between ${userName} and ${connectionName}. 8-12 sentences total. Use their names throughout.",
+  "emotionalDynamics": "Exactly 2 paragraphs about emotional rhythms between ${userName} and ${connectionName}. Include 1 micro-action for emotional attunement.",
+  "communication": "Exactly 2 paragraphs about how ${userName} and ${connectionName} communicate. Include 1 micro-action for better listening or expression.",
+  "careSuggestions": "Exactly 2 paragraphs with concrete ways ${userName} can support ${connectionName}. Include 1 micro-action (<=10 min)."
 }
 
+Remember: Use "${userName}" and "${connectionName}" throughout. Never use "Person 1/2" or impersonal labels.
 Follow Ayren voice rules: non-deterministic wording, calm-power close, practical micro-actions.`;
 
     // Call OpenAI

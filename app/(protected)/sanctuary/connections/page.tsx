@@ -1,19 +1,38 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SanctuaryTabs } from "@/components/sanctuary/SanctuaryTabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/shared/Chip";
-import { Connection, ConnectionInsight } from "@/types";
-import Link from "next/link";
+import { Connection } from "@/types";
 import { formatDateForDisplay } from "@/lib/datetime";
+import { Link2, Unlink, ArrowRight } from "lucide-react";
+
+// Extended type with brief preview
+interface ConnectionWithPreview extends Connection {
+  todayBrief?: {
+    title: string;
+    shared_vibe: string;
+  } | null;
+}
+
+// Truncate text to specified length
+function truncateText(text: string, maxLength: number = 140): string {
+  if (text.length <= maxLength) return text;
+  const truncated = text.slice(0, maxLength);
+  const lastSpace = truncated.lastIndexOf(" ");
+  return (lastSpace > 0 ? truncated.slice(0, lastSpace) : truncated) + "...";
+}
 
 export default function ConnectionsPage() {
+  const router = useRouter();
+
   // Connections list state
-  const [connections, setConnections] = useState<Connection[]>([]);
+  const [connections, setConnections] = useState<ConnectionWithPreview[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,12 +48,6 @@ export default function ConnectionsPage() {
   const [isAddingConnection, setIsAddingConnection] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
   const [savedMessage, setSavedMessage] = useState(false);
-
-  // Connection insight state
-  const [selectedConnectionId, setSelectedConnectionId] = useState<string | null>(null);
-  const [connectionInsight, setConnectionInsight] = useState<ConnectionInsight | null>(null);
-  const [insightLoading, setInsightLoading] = useState(false);
-  const [insightError, setInsightError] = useState<string | null>(null);
 
   // Load connections on mount
   useEffect(() => {
@@ -89,8 +102,8 @@ export default function ConnectionsPage() {
         throw new Error(data.message || "Failed to add connection");
       }
 
-      // Add new connection to list
-      setConnections([...connections, data.connection]);
+      // Add new connection to list (without brief preview)
+      setConnections([...connections, { ...data.connection, todayBrief: null }]);
 
       // Clear form
       setName("");
@@ -113,45 +126,9 @@ export default function ConnectionsPage() {
     }
   };
 
-  const handleConnectionClick = async (connectionId: string) => {
-    try {
-      setSelectedConnectionId(connectionId);
-      setInsightLoading(true);
-      setInsightError(null);
-      setConnectionInsight(null);
+  const handleDeleteConnection = async (connectionId: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
 
-      const response = await fetch("/api/connection-insight", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ connectionId }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        // Handle specific error cases
-        if (response.status === 400 && data.error === "Incomplete profile") {
-          setInsightError(
-            "Please complete your birth signature in Settings to view connection insights."
-          );
-        } else if (response.status === 404) {
-          setInsightError("This connection doesn't exist or you don't have access to it.");
-        } else {
-          setInsightError(data.message || "Unable to generate insight. Please try again.");
-        }
-        return;
-      }
-
-      setConnectionInsight(data);
-    } catch (err: any) {
-      console.error("Error loading connection insight:", err);
-      setInsightError("Unable to load connection insight. Please try again.");
-    } finally {
-      setInsightLoading(false);
-    }
-  };
-
-  const handleDeleteConnection = async (connectionId: string) => {
     if (!confirm("Delete this connection? This cannot be undone.")) {
       return;
     }
@@ -170,16 +147,14 @@ export default function ConnectionsPage() {
 
       // Remove from list
       setConnections(connections.filter((c) => c.id !== connectionId));
-
-      // Clear selected if deleted
-      if (selectedConnectionId === connectionId) {
-        setSelectedConnectionId(null);
-        setConnectionInsight(null);
-      }
     } catch (err: any) {
       console.error("Error deleting connection:", err);
       alert(err.message || "Unable to delete connection. Please try again.");
     }
+  };
+
+  const openConnection = (connectionId: string) => {
+    router.push(`/sanctuary/connections/${connectionId}`);
   };
 
   return (
@@ -203,14 +178,13 @@ export default function ConnectionsPage() {
           {loading ? (
             <Card className="text-center py-12">
               <CardContent>
-                <div className="text-5xl mb-4">⏳</div>
+                <div className="text-5xl mb-4">...</div>
                 <p className="text-accent-ink/60">Loading your connections...</p>
               </CardContent>
             </Card>
           ) : error ? (
             <Card className="text-center py-12 border-red-200">
               <CardContent>
-                <div className="text-5xl mb-4">⚠️</div>
                 <p className="text-red-600 mb-4">{error}</p>
                 <Button variant="outline" onClick={loadConnections}>
                   Try again
@@ -220,7 +194,6 @@ export default function ConnectionsPage() {
           ) : connections.length === 0 ? (
             <Card className="text-center py-12">
               <CardContent>
-                <div className="text-5xl mb-4">🤝</div>
                 <p className="text-accent-ink/60">
                   No connections yet. Add someone to begin exploring relational insights.
                 </p>
@@ -231,103 +204,60 @@ export default function ConnectionsPage() {
               {connections.map((connection) => (
                 <Card
                   key={connection.id}
-                  className={
-                    selectedConnectionId === connection.id
-                      ? "border-gold-500 border-2"
-                      : ""
-                  }
+                  className="cursor-pointer hover:border-accent-gold/50 hover:shadow-md transition-all"
+                  onClick={() => openConnection(connection.id)}
                 >
                   <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div>
-                        <h3 className="text-lg font-semibold">{connection.name}</h3>
-                        <p className="text-sm text-accent-ink/60">
-                          {connection.relationship_type}
-                        </p>
-                        {connection.birth_date && (
-                          <p className="text-xs text-accent-ink/50 mt-1">
-                            Born {formatDateForDisplay(connection.birth_date)}
-                          </p>
-                        )}
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-1">
+                          <h3 className="text-lg font-semibold">{connection.name}</h3>
+                          {connection.linked_profile_id ? (
+                            <span className="inline-flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                              <Link2 className="h-3 w-3" />
+                              Linked
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-xs text-accent-ink/40 bg-accent-muted/50 px-2 py-0.5 rounded-full">
+                              <Unlink className="h-3 w-3" />
+                              Unlinked
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Chip className="text-xs">{connection.relationship_type}</Chip>
+                          {connection.birth_date && (
+                            <span className="text-xs text-accent-ink/50">
+                              Born {formatDateForDisplay(connection.birth_date)}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleConnectionClick(connection.id)}
-                          disabled={insightLoading && selectedConnectionId === connection.id}
-                        >
-                          {insightLoading && selectedConnectionId === connection.id
-                            ? "Loading..."
-                            : "View insight"}
-                        </Button>
+                      <div className="flex items-center gap-2">
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleDeleteConnection(connection.id)}
+                          onClick={(e) => handleDeleteConnection(connection.id, e)}
+                          className="text-accent-ink/40 hover:text-red-500"
                         >
-                          🗑️
+                          Delete
                         </Button>
+                        <ArrowRight className="h-4 w-4 text-accent-ink/30" />
                       </div>
                     </div>
 
-                    {/* Show insight if this connection is selected */}
-                    {selectedConnectionId === connection.id && (
-                      <div className="mt-4 pt-4 border-t space-y-4">
-                        {insightLoading ? (
-                          <div className="text-center py-8">
-                            <div className="text-3xl mb-2">✨</div>
-                            <p className="text-sm text-accent-ink/60">
-                              Generating relational insight...
-                            </p>
-                          </div>
-                        ) : insightError ? (
-                          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                            <p className="text-sm text-red-700">{insightError}</p>
-                            {insightError.includes("Settings") && (
-                              <Link href="/settings">
-                                <Button variant="link" size="sm" className="mt-2 p-0">
-                                  Go to Settings →
-                                </Button>
-                              </Link>
-                            )}
-                          </div>
-                        ) : connectionInsight ? (
-                          <div className="space-y-4">
-                            <div>
-                              <h4 className="font-semibold text-gold-600 mb-2">Overview</h4>
-                              <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                                {connectionInsight.overview}
-                              </p>
-                            </div>
-                            <div>
-                              <h4 className="font-semibold text-gold-600 mb-2">
-                                Emotional Dynamics
-                              </h4>
-                              <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                                {connectionInsight.emotionalDynamics}
-                              </p>
-                            </div>
-                            <div>
-                              <h4 className="font-semibold text-gold-600 mb-2">
-                                Communication
-                              </h4>
-                              <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                                {connectionInsight.communication}
-                              </p>
-                            </div>
-                            <div>
-                              <h4 className="font-semibold text-gold-600 mb-2">
-                                Care Suggestions
-                              </h4>
-                              <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                                {connectionInsight.careSuggestions}
-                              </p>
-                            </div>
-                          </div>
-                        ) : null}
-                      </div>
-                    )}
+                    {/* Mini preview */}
+                    <div className="mt-3 pt-3 border-t border-accent-muted/50">
+                      {connection.todayBrief ? (
+                        <p className="text-sm text-accent-ink/70 leading-relaxed">
+                          {truncateText(connection.todayBrief.shared_vibe, 150)}
+                        </p>
+                      ) : (
+                        <p className="text-sm text-accent-ink/50 italic">
+                          Open to generate today&apos;s brief
+                        </p>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -355,7 +285,7 @@ export default function ConnectionsPage() {
 
                 {savedMessage && (
                   <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                    <p className="text-sm text-green-700">✓ Connection added</p>
+                    <p className="text-sm text-green-700">Connection added</p>
                   </div>
                 )}
 

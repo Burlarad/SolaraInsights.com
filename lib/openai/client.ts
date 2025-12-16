@@ -17,4 +17,5 @@ export const OPENAI_MODELS = {
   horoscope: process.env.OPENAI_HOROSCOPE_MODEL || "gpt-4o-mini",
   insights: process.env.OPENAI_INSIGHTS_MODEL || "gpt-4o-mini",
   placements: process.env.OPENAI_PLACEMENTS_MODEL || "gpt-5.1",
+  deep: process.env.OPENAI_DEEP_MODEL || "gpt-4o", // For stone tablet / permanent content
 } as const;
