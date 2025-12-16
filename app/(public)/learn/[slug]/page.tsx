@@ -1,0 +1,226 @@
+import { Metadata } from "next";
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import { Card, CardContent } from "@/components/ui/card";
+import { Chip } from "@/components/shared/Chip";
+import { Clock, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  LEARN_ITEMS,
+  getLearnItemBySlug,
+  getLiveItems,
+  getPrevNextLearnItems,
+} from "@/lib/learn/content";
+
+// Guide content components
+import { GuideAstrology101 } from "@/components/learn/guides/astrology-101";
+import { GuideBigThree } from "@/components/learn/guides/big-three";
+import { GuideElementsModalities } from "@/components/learn/guides/elements-modalities";
+import { GuidePlanets101 } from "@/components/learn/guides/planets-101";
+import { GuideHouses101 } from "@/components/learn/guides/houses-101";
+import { GuideTarot101 } from "@/components/learn/guides/tarot-101";
+import { GuideCompatibility101 } from "@/components/learn/guides/compatibility-101";
+
+// Map slugs to guide content components
+const GUIDE_COMPONENTS: Record<string, React.ReactNode> = {
+  "astrology-101": <GuideAstrology101 />,
+  "big-three": <GuideBigThree />,
+  "elements-modalities": <GuideElementsModalities />,
+  "planets-101": <GuidePlanets101 />,
+  "houses-101": <GuideHouses101 />,
+  "tarot-101": <GuideTarot101 />,
+  "compatibility-101": <GuideCompatibility101 />,
+};
+
+interface PageProps {
+  params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const item = getLearnItemBySlug(slug);
+
+  if (!item) {
+    return {
+      title: "Guide Not Found | Solara Insights",
+    };
+  }
+
+  return {
+    title: `${item.title} | Learn | Solara Insights`,
+    description: item.description,
+    openGraph: {
+      title: `${item.title} | Learn | Solara Insights`,
+      description: item.description,
+    },
+  };
+}
+
+export function generateStaticParams() {
+  return LEARN_ITEMS.map((item) => ({ slug: item.slug }));
+}
+
+export default async function LearnGuidePage({ params }: PageProps) {
+  const { slug } = await params;
+  const item = getLearnItemBySlug(slug);
+
+  if (!item) {
+    notFound();
+  }
+
+  const isComingSoon = item.status === "coming_soon";
+  const liveItems = getLiveItems().filter((i) => i.slug !== slug);
+  const { prev, next } = getPrevNextLearnItems(slug);
+
+  return (
+    <div className="max-w-3xl mx-auto px-4 md:px-6 py-8 md:py-12">
+      {/* Back link */}
+      <Link
+        href="/learn"
+        className="inline-flex items-center gap-2 text-sm text-accent-ink/60 hover:text-accent-gold transition-colors mb-8"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to Learn Center
+      </Link>
+
+      {/* Guide header */}
+      <header className="mb-8">
+        <div className="flex flex-wrap items-center gap-3 mb-4">
+          <span className="micro-label">{item.category.toUpperCase()}</span>
+          <div className="flex items-center gap-1 text-sm text-accent-ink/60">
+            <Clock className="h-3 w-3" aria-hidden="true" />
+            <span>{item.minutes} min read</span>
+          </div>
+          <span className="text-xs bg-accent-muted text-accent-ink/70 px-2 py-0.5 rounded-full">
+            {item.level}
+          </span>
+          {isComingSoon && (
+            <span className="text-xs bg-accent-lavender text-accent-ink/70 px-2 py-0.5 rounded-full">
+              Coming soon
+            </span>
+          )}
+        </div>
+        <h1 className="text-3xl md:text-4xl font-bold mb-4">{item.title}</h1>
+        <p className="text-lg text-accent-ink/70 leading-relaxed">
+          {item.description}
+        </p>
+        <div className="flex flex-wrap gap-2 mt-6">
+          {item.tags.map((tag) => (
+            <Chip key={tag} className="text-xs">
+              {tag}
+            </Chip>
+          ))}
+        </div>
+      </header>
+
+      {/* Content area */}
+      {isComingSoon ? (
+        <Card className="p-8 md:p-12 text-center">
+          <CardContent className="p-0 space-y-4">
+            <span className="text-5xl" aria-hidden="true">
+              ✨
+            </span>
+            <h2 className="text-xl font-semibold">Coming Soon</h2>
+            <p className="text-accent-ink/70 max-w-md mx-auto">
+              This lesson is being carved into stone. Check back soon for the
+              full content.
+            </p>
+          </CardContent>
+        </Card>
+      ) : GUIDE_COMPONENTS[slug] ? (
+        <Card className="p-6 md:p-8">
+          <CardContent className="p-0 prose prose-lg max-w-none">
+            {GUIDE_COMPONENTS[slug]}
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="p-8 md:p-12 text-center">
+          <CardContent className="p-0 space-y-4">
+            <span className="text-5xl" aria-hidden="true">
+              📝
+            </span>
+            <h2 className="text-xl font-semibold">Content In Progress</h2>
+            <p className="text-accent-ink/70 max-w-md mx-auto">
+              This guide is being written. Check back soon!
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Prev/Next navigation */}
+      {(prev || next) && (
+        <nav className="mt-12 flex flex-col md:flex-row gap-4" aria-label="Guide navigation">
+          {prev ? (
+            <Link
+              href={`/learn/${prev.slug}`}
+              className="flex-1 group flex items-center gap-3 p-4 rounded-lg border border-accent-muted hover:bg-accent-muted/30 hover:border-accent-gold/50 transition-colors min-h-[72px]"
+            >
+              <ChevronLeft
+                className="h-5 w-5 text-accent-ink/40 group-hover:text-accent-gold transition-colors flex-shrink-0"
+                aria-hidden="true"
+              />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-accent-ink/50 uppercase tracking-wide mb-1">
+                  Previous
+                </p>
+                <p className="font-medium truncate group-hover:text-accent-gold transition-colors">
+                  {prev.title}
+                </p>
+                <div className="flex items-center gap-2 text-sm text-accent-ink/60">
+                  <span>{prev.minutes} min</span>
+                  <span>&middot;</span>
+                  <span>{prev.level}</span>
+                  {prev.status === "coming_soon" && (
+                    <>
+                      <span>&middot;</span>
+                      <span className="text-xs bg-accent-lavender/50 text-accent-ink/70 px-1.5 py-0.5 rounded">
+                        Coming soon
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
+            </Link>
+          ) : (
+            <div className="flex-1 hidden md:block" />
+          )}
+
+          {next ? (
+            <Link
+              href={`/learn/${next.slug}`}
+              className="flex-1 group flex items-center gap-3 p-4 rounded-lg border border-accent-muted hover:bg-accent-muted/30 hover:border-accent-gold/50 transition-colors min-h-[72px] md:text-right"
+            >
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-accent-ink/50 uppercase tracking-wide mb-1">
+                  Next
+                </p>
+                <p className="font-medium truncate group-hover:text-accent-gold transition-colors">
+                  {next.title}
+                </p>
+                <div className="flex items-center gap-2 text-sm text-accent-ink/60 md:justify-end">
+                  <span>{next.minutes} min</span>
+                  <span>&middot;</span>
+                  <span>{next.level}</span>
+                  {next.status === "coming_soon" && (
+                    <>
+                      <span>&middot;</span>
+                      <span className="text-xs bg-accent-lavender/50 text-accent-ink/70 px-1.5 py-0.5 rounded">
+                        Coming soon
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
+              <ChevronRight
+                className="h-5 w-5 text-accent-ink/40 group-hover:text-accent-gold transition-colors flex-shrink-0"
+                aria-hidden="true"
+              />
+            </Link>
+          ) : (
+            <div className="flex-1 hidden md:block" />
+          )}
+        </nav>
+      )}
+    </div>
+  );
+}
+
