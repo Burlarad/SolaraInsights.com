@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PublicTarotResponse, TarotSpread } from "@/types";
+import { findTarotCard } from "@/lib/tarot";
 
 // Generate UUID using native crypto API
 function generateUUID(): string {
@@ -272,22 +274,41 @@ export function TarotArena() {
               <div className="flex flex-wrap justify-center gap-4">
                 {reading.drawnCards.map((card, i) => {
                   const interpretation = reading.interpretation.cards[i];
+                  const cardName = interpretation?.cardName || "";
+                  const tarotCard = findTarotCard(cardName);
+
+                  // Log warning if card image not found
+                  if (!tarotCard && cardName) {
+                    console.warn(`[TarotArena] Missing image for card: "${cardName}" (id: ${card.cardId})`);
+                  }
+
                   return (
                     <div
                       key={i}
                       className="flex flex-col items-center text-center"
                     >
                       <div
-                        className={`w-20 h-32 md:w-24 md:h-40 bg-gradient-to-b from-accent-gold/20 to-accent-gold/5 border-2 border-accent-gold/30 rounded-lg flex items-center justify-center mb-2 ${
+                        className={`relative w-20 h-32 md:w-24 md:h-40 rounded-lg overflow-hidden mb-2 shadow-md ${
                           card.reversed ? "rotate-180" : ""
                         }`}
                       >
-                        <span className="text-3xl md:text-4xl">
-                          {card.cardId.startsWith("major") ? "+" : "*"}
-                        </span>
+                        {tarotCard ? (
+                          <Image
+                            src={tarotCard.imageUrl}
+                            alt={tarotCard.name}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 80px, 96px"
+                          />
+                        ) : (
+                          // Fallback placeholder if image not found
+                          <div className="w-full h-full bg-gradient-to-b from-accent-gold/20 to-accent-gold/5 border-2 border-accent-gold/30 flex items-center justify-center">
+                            <span className="text-3xl md:text-4xl text-accent-gold/50">?</span>
+                          </div>
+                        )}
                       </div>
                       <p className="font-medium text-accent-ink text-sm md:text-base max-w-[100px]">
-                        {interpretation?.cardName || card.cardId}
+                        {cardName || card.cardId}
                       </p>
                       <p className="text-xs text-accent-ink/60">{card.position}</p>
                       {card.reversed && (
