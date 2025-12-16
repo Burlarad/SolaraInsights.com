@@ -11,8 +11,6 @@ import { Chip } from "@/components/shared/Chip";
 import { Connection, DailyBrief } from "@/types";
 import { formatDateForDisplay } from "@/lib/datetime";
 import {
-  Link2,
-  Unlink,
   ChevronDown,
   Loader2,
   Pencil,
@@ -577,17 +575,6 @@ export default function ConnectionsPage() {
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-1">
                             <h3 className="text-lg font-semibold">{connection.name}</h3>
-                            {isLinked ? (
-                              <span className="inline-flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
-                                <Link2 className="h-3 w-3" />
-                                Linked
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 text-xs text-accent-ink/40 bg-accent-muted/50 px-2 py-0.5 rounded-full">
-                                <Unlink className="h-3 w-3" />
-                                Unlinked
-                              </span>
-                            )}
                           </div>
                           <div className="flex items-center gap-3">
                             <Chip className="text-xs">{connection.relationship_type}</Chip>
@@ -656,8 +643,8 @@ export default function ConnectionsPage() {
                             </Button>
                           )}
                           <div className="flex-1" />
-                          {/* Space Between Toggle - only show if linked */}
-                          {connection.linked_profile_id && (
+                          {/* Space Between Toggle - only show when mutual (both users added each other) */}
+                          {connection.is_mutual && (
                             <button
                               onClick={(e) => toggleSpaceBetweenEnabled(connection, e)}
                               className={cn(

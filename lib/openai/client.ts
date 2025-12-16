@@ -18,4 +18,5 @@ export const OPENAI_MODELS = {
   insights: process.env.OPENAI_INSIGHTS_MODEL || "gpt-4o-mini",
   placements: process.env.OPENAI_PLACEMENTS_MODEL || "gpt-5.1",
   deep: process.env.OPENAI_DEEP_MODEL || "gpt-4o", // For stone tablet / permanent content
+  fast: process.env.OPENAI_FAST_MODEL || "gpt-4o-mini", // For lightweight tasks like social summaries
 } as const;

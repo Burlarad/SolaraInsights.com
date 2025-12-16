@@ -11,7 +11,8 @@ import { getEffectiveTimezone } from "@/lib/location/detection";
 import { touchLastSeen } from "@/lib/activity/touchLastSeen";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
 import { checkBudget, incrementBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai/costControl";
-import { AYREN_MODE_SHORT } from "@/lib/ai/voice";
+import { AYREN_MODE_SHORT, PRO_SOCIAL_NUDGE_INSTRUCTION, HUMOR_INSTRUCTION, LOW_SIGNAL_GUARDRAIL } from "@/lib/ai/voice";
+import { parseMetadataFromSummary, getSummaryTextOnly } from "@/lib/social/summarize";
 
 const PROMPT_VERSION = 2;
 
@@ -147,15 +148,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Optionally load social summary for Facebook (if available)
-    const { data: socialSummary } = await supabase
+    // Optionally load all social summaries for the user (if any exist)
+    const { data: socialSummaries } = await supabase
       .from("social_summaries")
-      .select("*")
+      .select("provider, summary")
       .eq("user_id", user.id)
-      .eq("provider", "facebook")
-      .order("last_collected_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+      .order("last_collected_at", { ascending: false });
+
+    // Parse metadata from first summary (if any) for humor/nudge decisions
+    const socialMetadata = socialSummaries && socialSummaries.length > 0
+      ? parseMetadataFromSummary(socialSummaries[0].summary)
+      : null;
+
+    // Combine all social summaries into a single context block (text only, no metadata block)
+    const socialContext = socialSummaries && socialSummaries.length > 0
+      ? socialSummaries.map(s => getSummaryTextOnly(s.summary)).join("\n\n---\n\n")
+      : null;
 
     // ========================================
     // CACHING LAYER
@@ -274,11 +282,26 @@ export async function POST(req: NextRequest) {
       console.log(`[Insights] ✓ Lock acquired for ${lockKey}, generating insight...`);
     }
 
+    // Build social metadata context for prompt
+    const socialMetadataContext = socialMetadata
+      ? `
+SOCIAL SIGNAL METADATA (internal use only, never mention to user):
+- signalStrength: ${socialMetadata.signalStrength}
+- accountType: ${socialMetadata.accountType}
+- humorEligible: ${socialMetadata.humorEligible}
+- humorDial: ${socialMetadata.humorDial}
+- humorStyle: ${socialMetadata.humorStyle}`
+      : "";
+
     // Construct the OpenAI prompt using Ayren voice
     const systemPrompt = `${AYREN_MODE_SHORT}
+${PRO_SOCIAL_NUDGE_INSTRUCTION}
+${HUMOR_INSTRUCTION}
+${LOW_SIGNAL_GUARDRAIL}
 
 CONTEXT:
 This is a PERSONALIZED insight for a specific person based on their birth chart and current transits.
+${socialMetadataContext}
 
 LANGUAGE:
 - Write ALL narrative text in language code: ${targetLanguage}
@@ -305,9 +328,9 @@ Period: ${periodKey} (${timeframe})
 Timeframe: ${timeframe}
 ${focusQuestion ? `Focus question: ${focusQuestion}` : ""}
 
-${socialSummary?.summary ? `Social context (optional, do not mention platforms directly):
+${socialContext ? `Social context (optional, do not mention platforms directly):
 
-${socialSummary.summary}
+${socialContext}
 
 If this block is empty or missing, ignore it. Use it subtly to enhance your understanding of their emotional tone and expression patterns.` : ""}
 

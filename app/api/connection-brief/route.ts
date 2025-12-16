@@ -8,7 +8,8 @@ import { checkRateLimit } from "@/lib/cache/rateLimit";
 import { touchLastSeen } from "@/lib/activity/touchLastSeen";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
 import { checkBudget, incrementBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai/costControl";
-import { AYREN_MODE_SHORT } from "@/lib/ai/voice";
+import { AYREN_MODE_SHORT, PRO_SOCIAL_NUDGE_INSTRUCTION, HUMOR_INSTRUCTION, LOW_SIGNAL_GUARDRAIL } from "@/lib/ai/voice";
+import { parseMetadataFromSummary, getSummaryTextOnly } from "@/lib/social/summarize";
 
 // Rate limits for daily brief (per user)
 const USER_RATE_LIMIT = 20; // 20 requests per hour
@@ -135,6 +136,18 @@ export async function POST(req: NextRequest) {
     const language = profile.language || "en";
 
     // ========================================
+    // LOAD SOCIAL SUMMARIES (if any)
+    // ========================================
+    const { data: ownerSocialSummaries } = await supabase
+      .from("social_summaries")
+      .select("summary")
+      .eq("user_id", user.id);
+
+    const ownerSocialMetadata = ownerSocialSummaries && ownerSocialSummaries.length > 0
+      ? parseMetadataFromSummary(ownerSocialSummaries[0].summary)
+      : null;
+
+    // ========================================
     // CHECK DB FOR EXISTING BRIEF
     // ========================================
     const { data: existingBrief } = await supabase
@@ -223,12 +236,27 @@ export async function POST(req: NextRequest) {
     const toneGuidance = getToneGuidance(connection.relationship_type);
     const connectionName = connection.name;
 
+    // Build social metadata context for prompt
+    const socialMetadataContext = ownerSocialMetadata
+      ? `
+SOCIAL SIGNAL METADATA (internal use only, never mention to user):
+- signalStrength: ${ownerSocialMetadata.signalStrength}
+- accountType: ${ownerSocialMetadata.accountType}
+- humorEligible: ${ownerSocialMetadata.humorEligible}
+- humorDial: ${ownerSocialMetadata.humorDial}
+- humorStyle: ${ownerSocialMetadata.humorStyle}`
+      : "";
+
     const systemPrompt = `${AYREN_MODE_SHORT}
+${PRO_SOCIAL_NUDGE_INSTRUCTION}
+${HUMOR_INSTRUCTION}
+${LOW_SIGNAL_GUARDRAIL}
 
 You are generating a DAILY CONNECTION BRIEF - a light, general "weather report" for the connection today.
 
 CONTEXT:
 This is a ${connection.relationship_type} connection with ${connectionName}.
+${socialMetadataContext}
 
 TONE GUIDANCE:
 ${toneGuidance}

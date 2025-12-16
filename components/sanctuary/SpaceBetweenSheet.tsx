@@ -140,14 +140,7 @@ export function SpaceBetweenSheet({
             </Button>
           </div>
         ) : spaceBetween ? (
-          <div>
-            {spaceBetween.includes_linked_birth_data && (
-              <p className="text-xs text-green-600 mb-4">
-                Includes {connectionName}&apos;s verified birth data
-              </p>
-            )}
-
-            <div className="space-y-0">
+          <div className="space-y-0">
               <SpaceAccordionItem title="Essence" defaultOpen={true}>
                 {spaceBetween.relationship_essence}
               </SpaceAccordionItem>
@@ -163,7 +156,6 @@ export function SpaceBetweenSheet({
               <SpaceAccordionItem title="Care Guide">
                 {spaceBetween.care_guide}
               </SpaceAccordionItem>
-            </div>
           </div>
         ) : (
           <div className="text-center py-16">

@@ -9,6 +9,33 @@ import { touchLastSeen } from "@/lib/activity/touchLastSeen";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
 import { checkBudget, incrementBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai/costControl";
 import { AYREN_MODE_SOULPRINT_LONG } from "@/lib/ai/voice";
+import { parseMetadataFromSummary, getSummaryTextOnly } from "@/lib/social/summarize";
+
+// Space Between specific instruction blocks (allow 2 nudges/humor vs 1 for daily content)
+const SPACE_BETWEEN_NUDGE_INSTRUCTION = `
+PRO-SOCIAL WEAVING RULE (SILENT):
+If the guidance would benefit from emotional intelligence, weave up to TWO short universal nudges into the narrative (not as separate sections).
+- Do not mention Social Insights, analysis, moderation, or any classification
+- Do not accuse the user or refer to their content
+- Never reveal that you analyzed their social presence
+- Keep it subtle, warm, practical—woven naturally into the advice
+- Maximum 2 nudges across the entire report`;
+
+const SPACE_BETWEEN_HUMOR_INSTRUCTION = `
+HUMOR RULE (SUPPORTIVE ONLY):
+If humorEligible is true in social context, you may add up to TWO gentle, uplifting humorous lines matching their humor style.
+- Humor must be warm and uplifting—NEVER roasting, teasing, or mean sarcasm
+- Humor must reduce tension and increase warmth
+- If humor style is unknown or signal is low, keep tone warm but skip explicit humor
+- Maximum 2 playful lines across the entire report`;
+
+const SPACE_BETWEEN_LOW_SIGNAL_GUARDRAIL = `
+LOW-SIGNAL GUARDRAIL:
+If social context appears to be meme content, reposts, or lacks personal expression:
+- Do NOT infer personal details from the social content
+- Use social data only to optionally adjust humor dial/tone
+- Keep all personalized content grounded in astrology inputs (birth chart, transits)
+- Full chart if birth time known, sun-sign-only approach if birth time unknown`;
 
 // Rate limits for space between (per user)
 const USER_RATE_LIMIT = 10; // 10 requests per hour (more expensive)
@@ -198,6 +225,21 @@ export async function POST(req: NextRequest) {
       birth_country: connection.birth_country,
     };
 
+    // Load owner's social summaries (if any)
+    const { data: ownerSocialSummaries } = await supabase
+      .from("social_summaries")
+      .select("summary")
+      .eq("user_id", user.id);
+
+    // Parse metadata for humor/nudge decisions
+    const ownerSocialMetadata = ownerSocialSummaries && ownerSocialSummaries.length > 0
+      ? parseMetadataFromSummary(ownerSocialSummaries[0].summary)
+      : null;
+
+    const ownerSocialData = ownerSocialSummaries && ownerSocialSummaries.length > 0
+      ? ownerSocialSummaries.map(s => getSummaryTextOnly(s.summary)).join("\n\n")
+      : null;
+
     // If linked to a real profile, use their data
     if (connection.linked_profile_id) {
       const { data: linkedProfile } = await supabase
@@ -225,7 +267,7 @@ export async function POST(req: NextRequest) {
         .eq("user_id", connection.linked_profile_id);
 
       if (socialSummaries && socialSummaries.length > 0) {
-        linkedSocialData = socialSummaries.map(s => s.summary).join(" ");
+        linkedSocialData = socialSummaries.map(s => getSummaryTextOnly(s.summary)).join(" ");
         includesLinkedSocialData = true;
       }
     }
@@ -299,6 +341,17 @@ export async function POST(req: NextRequest) {
     const userName = profile.preferred_name || profile.full_name || "you";
     const connectionName = connection.name;
 
+    // Build social metadata context for prompt
+    const socialMetadataContext = ownerSocialMetadata
+      ? `
+SOCIAL SIGNAL METADATA (internal use only, never mention to user):
+- signalStrength: ${ownerSocialMetadata.signalStrength}
+- accountType: ${ownerSocialMetadata.accountType}
+- humorEligible: ${ownerSocialMetadata.humorEligible}
+- humorDial: ${ownerSocialMetadata.humorDial}
+- humorStyle: ${ownerSocialMetadata.humorStyle}`
+      : "";
+
     // Build birth data context
     const userBirthContext = `${userName}'s birth signature:
 - Birth date: ${profile.birth_date}
@@ -312,17 +365,26 @@ export async function POST(req: NextRequest) {
 - Birth location: ${connectionBirthData.birth_city || "unknown"}, ${connectionBirthData.birth_region || ""}, ${connectionBirthData.birth_country || ""}
 ${includesLinkedBirthData ? "(This is verified birth data from their Solara profile)" : "(Birth data provided by " + userName + ")"}`;
 
-    const socialContext = includesLinkedSocialData
-      ? `\n\nAdditional context about ${connectionName} from their social presence:\n${linkedSocialData}`
-      : "";
+    // Build social context from both users' social summaries
+    let socialContext = "";
+    if (ownerSocialData) {
+      socialContext += `\n\nAdditional context about ${userName} from their social presence:\n${ownerSocialData}`;
+    }
+    if (includesLinkedSocialData && linkedSocialData) {
+      socialContext += `\n\nAdditional context about ${connectionName} from their social presence:\n${linkedSocialData}`;
+    }
 
     const systemPrompt = `${AYREN_MODE_SOULPRINT_LONG}
+${SPACE_BETWEEN_NUDGE_INSTRUCTION}
+${SPACE_BETWEEN_HUMOR_INSTRUCTION}
+${SPACE_BETWEEN_LOW_SIGNAL_GUARDRAIL}
 
 You are generating a SPACE BETWEEN REPORT - a deep "stone tablet" relationship blueprint.
 
 CONTEXT:
 This is a ${connection.relationship_type} connection between ${userName} and ${connectionName}.
 This report will be generated ONCE and saved permanently. Make it meaningful and comprehensive.
+${socialMetadataContext}
 
 TONE GUIDANCE:
 ${toneGuidance}

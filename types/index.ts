@@ -464,7 +464,9 @@ export interface SpaceBetweenReport {
 // SOCIAL CONNECTIONS TYPES
 // ============================================================================
 
-export type SocialProvider = "facebook" | "reddit" | "tiktok" | "x";
+export type SocialProvider = "facebook" | "instagram" | "tiktok" | "x" | "reddit";
+
+export type SocialConnectionStatus = "disconnected" | "connected" | "processing" | "ready" | "failed";
 
 export interface SocialConnection {
   id: string;
@@ -472,7 +474,10 @@ export interface SocialConnection {
   provider: SocialProvider;
   provider_user_id: string | null;
   handle: string | null;
-  connected_at: string;
+  status: SocialConnectionStatus;
+  last_ingested_at: string | null;
+  last_error: string | null;
+  created_at: string;
   updated_at: string;
 }
 
@@ -481,7 +486,28 @@ export interface SocialSummary {
   user_id: string;
   provider: SocialProvider;
   summary: string;
+  prompt_version: number;
+  model_version: string | null;
   last_collected_at: string;
+  created_at: string;
+}
+
+// Request/response types for social API
+export interface SocialIngestRequest {
+  provider: SocialProvider;
+  handle?: string;
+  payload: string; // User-pasted content
+}
+
+export interface SocialStatusResponse {
+  connections: {
+    provider: SocialProvider;
+    status: SocialConnectionStatus;
+    handle: string | null;
+    lastIngestedAt: string | null;
+    lastError: string | null;
+    hasSummary: boolean;
+  }[];
 }
 
 // ============================================================================
