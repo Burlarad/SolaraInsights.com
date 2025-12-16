@@ -13,20 +13,14 @@ export default function AboutPage() {
               Reason for Existence
             </h2>
             <div className="space-y-4 text-lg text-accent-ink/80 leading-relaxed-plus">
-              <p>
-                We exist to bring light where the world has grown heavy. In a time of
-                division, distraction, and relentless noise, Solara offers a different
-                kind of space—one rooted in calm, clarity, and care.
+              <p className="font-medium text-accent-ink">
+                Because so many around us have lost faith, we exist to bring the light to conquer darkness.
               </p>
               <p>
-                We believe that understanding yourself isn&apos;t a luxury. It&apos;s survival.
-                And that the tools to do so—astrology, tarot, reflection—shouldn&apos;t be
-                gatekept, fear-based, or overwhelming.
+                The world has become loud, divided, and heavy. We&apos;re here to remind people that hope still lives inside them and that goodness in humanity is not gone—it&apos;s waiting to be seen.
               </p>
               <p>
-                Solara is what happens when ancient wisdom meets modern emotional
-                intelligence. It&apos;s a sanctuary built for the seekers, the sensitive,
-                the ones who refuse to numb out.
+                Solara Insights was created to guide people back to that light with wonder, and care.
               </p>
             </div>
           </section>
@@ -37,42 +31,14 @@ export default function AboutPage() {
               The Spirit Behind the Light
             </h2>
             <div className="space-y-4 text-lg text-accent-ink/80 leading-relaxed-plus">
-              <p>Solara is built for:</p>
-              <ul className="list-none space-y-3 ml-6">
-                <li className="flex items-start gap-3">
-                  <span className="text-accent-gold mt-1">✦</span>
-                  <span>
-                    The rule-breakers and dreamers who know there&apos;s more to life than
-                    what they&apos;ve been sold.
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-accent-gold mt-1">✦</span>
-                  <span>
-                    Those who blend ancient astrology with modern insight, trusting both
-                    the cosmos and their own intuition.
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-accent-gold mt-1">✦</span>
-                  <span>
-                    Anyone who believes that being human is messy, beautiful, and worth
-                    celebrating—not fixing.
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-accent-gold mt-1">✦</span>
-                  <span>
-                    People who value emotional intelligence as much as intellectual
-                    knowledge.
-                  </span>
-                </li>
-              </ul>
-              <p>
-                We don&apos;t traffic in absolutes. We don&apos;t promise to &quot;fix&quot; you. We reflect
-                your sky back to you—gently, honestly, and with deep respect for your
-                agency and free will.
+              <p className="font-medium text-accent-ink">
+                We are the rule-breakers, the earth-shakers and the light in the dark.
               </p>
+              <p>We&apos;re dreamers.</p>
+              <p>We&apos;re rebels with open hearts challenging the status quo.</p>
+              <p>We blend ancient astrology with modern insight, art and humanity.</p>
+              <p>We don&apos;t preach perfection. We celebrate the messy, magical human journey.</p>
+              <p>Here, every sign, every soul, every story matters.</p>
             </div>
           </section>
 
@@ -83,18 +49,22 @@ export default function AboutPage() {
             </h2>
             <div className="space-y-4 text-lg text-accent-ink/80 leading-relaxed-plus">
               <p>
-                Solara isn&apos;t just a digital product. It&apos;s a commitment to doing good in
-                the world—starting with the lives most vulnerable.
+                We bring astrological fun and genuine connection to your everyday life—so self-discovery feels joyful, not judgmental.
               </p>
               <p>
-                Through the <strong>Solara Foundation</strong>, a portion of every
-                subscription directly supports families in crisis: refugees, displaced
-                communities, and those navigating systems designed to fail them.
+                Every chart, every horoscope, every spark of guidance is crafted to help you know yourself better and feel lighter doing it.
               </p>
               <p>
-                We believe in protecting lives on Earth—not just reflecting the stars
-                above it. Philanthropy isn&apos;t a side mission. It&apos;s baked into everything
-                we do.
+                But Solara isn&apos;t just about the fun. It&apos;s about protecting the lives here on Earth.
+              </p>
+              <p>
+                Every dollar you spend here helps restore hope, keep families together, and rebuild lives through The Solara Foundation.
+              </p>
+              <p>
+                When you grow brighter, others do too.
+              </p>
+              <p>
+                That&apos;s how we heal—one insight, one act of kindness, one family at a time.
               </p>
             </div>
           </section>
@@ -106,12 +76,10 @@ export default function AboutPage() {
             </h2>
             <div className="space-y-4 text-lg text-accent-ink/80 leading-relaxed-plus">
               <p>
-                If you&apos;ve been searching for a space that feels honest, human, and
-                hopeful—you&apos;ve found it.
+                If you&apos;ve been searching for a space that feels honest, human, and full of heart—you&apos;ve found it.
               </p>
-              <p>
-                Solara is here. The light is on. And there&apos;s room for you exactly as you
-                are.
+              <p className="font-medium text-accent-ink">
+                Solara Insights—where faith in humanity finds its light.
               </p>
             </div>
           </section>
