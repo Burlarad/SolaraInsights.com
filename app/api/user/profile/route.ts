@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient, createAdminSupabaseClient } from "@/lib/supabase/server";
 import { getZodiacSign } from "@/lib/zodiac";
-import { resolveBirthLocation } from "@/lib/location/resolveBirthLocation";
 import { computeAndStoreBirthChart } from "@/lib/birthChart/storage";
 import { touchLastSeen } from "@/lib/activity/touchLastSeen";
+import { isValidBirthTimezone } from "@/lib/location/detection";
+import tzLookup from "tz-lookup";
 
 export async function PATCH(req: NextRequest) {
   try {
@@ -70,56 +71,85 @@ export async function PATCH(req: NextRequest) {
         );
       }
 
-      // Attempt to resolve birth location - MUST succeed to save birthplace changes
-      const timeForLocation =
-        updates.birth_time && typeof updates.birth_time === "string"
-          ? updates.birth_time
-          : "12:00";
+      // Require lat/lon to be provided (from PlacePicker selection)
+      // No more legacy auto-geocoding - PlacePicker is the only valid pathway
+      const hasLatLon =
+        typeof updates.birth_lat === "number" &&
+        typeof updates.birth_lon === "number";
 
-      console.log("[Profile] Attempting to resolve birth location...");
-
-      try {
-        const resolved = await resolveBirthLocation({
-          city: birthCity,
-          region: birthRegion,
-          country: birthCountry,
-          birthDate: updates.birth_date,
-          birthTime: timeForLocation,
-        });
-
-        updates.birth_lat = resolved.lat;
-        updates.birth_lon = resolved.lon;
-        updates.timezone = resolved.timezone;
-
-        console.log("[Profile] ✓ Birth location resolved successfully:", {
-          city: birthCity,
-          region: birthRegion,
-          country: birthCountry,
-          lat: resolved.lat,
-          lon: resolved.lon,
-          timezone: resolved.timezone,
-        });
-      } catch (err: any) {
-        console.error(
-          "[Profile] ✗ Failed to resolve birth location:",
-          err?.message || err
-        );
-        console.error("[Profile] Location input:", {
-          city: birthCity,
-          region: birthRegion,
-          country: birthCountry,
-        });
-
-        // HARD FAIL: Return 400 and do NOT save the profile
+      if (!hasLatLon) {
         return NextResponse.json(
           {
-            error: "LocationResolutionFailed",
-            message: `We couldn't find "${birthCity}, ${birthRegion}, ${birthCountry}". Please check the spelling and try again. Use English names for best results (e.g., "Peru" not "Perú").`,
+            error: "LocationSelectionRequired",
+            message: "Please search and select a place from the dropdown so we can save accurate coordinates.",
             fields: ["birth_city", "birth_region", "birth_country"],
           },
           { status: 400 }
         );
       }
+
+      // Validate lat/lon are in reasonable ranges
+      if (
+        updates.birth_lat < -90 || updates.birth_lat > 90 ||
+        updates.birth_lon < -180 || updates.birth_lon > 180
+      ) {
+        return NextResponse.json(
+          {
+            error: "LocationValidationFailed",
+            message: "Invalid coordinates provided. Please select a location from the search results.",
+            fields: ["birth_city", "birth_region", "birth_country"],
+          },
+          { status: 400 }
+        );
+      }
+
+      // Server computes timezone from lat/lon - don't trust client-provided timezone
+      let serverTimezone: string;
+      try {
+        serverTimezone = tzLookup(updates.birth_lat, updates.birth_lon);
+      } catch (err) {
+        console.error("[Profile] ✗ Failed to compute timezone for coordinates:", {
+          lat: updates.birth_lat,
+          lon: updates.birth_lon,
+        });
+        return NextResponse.json(
+          {
+            error: "LocationValidationFailed",
+            message: "Could not determine timezone for the selected location. Please try a different location.",
+            fields: ["birth_city", "birth_region", "birth_country"],
+          },
+          { status: 400 }
+        );
+      }
+
+      // Validate computed timezone is not UTC (fallback poison)
+      if (!isValidBirthTimezone(serverTimezone)) {
+        console.error("[Profile] ✗ Computed timezone is UTC - rejecting:", {
+          lat: updates.birth_lat,
+          lon: updates.birth_lon,
+          timezone: serverTimezone,
+        });
+        return NextResponse.json(
+          {
+            error: "LocationValidationFailed",
+            message: "The selected location appears to be in international waters or an unmapped timezone. Please select a different location.",
+            fields: ["birth_city", "birth_region", "birth_country"],
+          },
+          { status: 400 }
+        );
+      }
+
+      // Use server-computed timezone (ignore client-provided)
+      updates.timezone = serverTimezone;
+
+      console.log("[Profile] ✓ Birthplace validated with server-computed timezone:", {
+        city: birthCity,
+        region: birthRegion,
+        country: birthCountry,
+        lat: updates.birth_lat,
+        lon: updates.birth_lon,
+        timezone: serverTimezone,
+      });
     }
 
     // Update profile in database

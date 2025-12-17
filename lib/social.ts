@@ -1,5 +1,4 @@
 import { User } from "@supabase/supabase-js";
-import { SocialProvider } from "@/types";
 
 /**
  * Get the primary Facebook identity from a Supabase user object
@@ -7,14 +6,6 @@ import { SocialProvider } from "@/types";
 export function getPrimaryFacebookIdentity(user: User | null) {
   if (!user || !user.identities) return null;
   return user.identities.find((id) => id.provider === "facebook") || null;
-}
-
-/**
- * Get any social provider identity from a Supabase user object
- */
-export function getSocialIdentity(user: User | null, provider: SocialProvider) {
-  if (!user || !user.identities) return null;
-  return user.identities.find((id) => id.provider === provider) || null;
 }
 
 /**

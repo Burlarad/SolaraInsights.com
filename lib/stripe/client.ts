@@ -24,21 +24,3 @@ export const STRIPE_CONFIG = {
   },
   pricingTableId: process.env.STRIPE_PRICING_TABLE_ID || "",
 } as const;
-
-/**
- * Validates that all required Stripe configuration is present.
- * Call this during app initialization to catch configuration errors early.
- */
-export function validateStripeConfig() {
-  const missing: string[] = [];
-
-  if (!STRIPE_CONFIG.publishableKey) missing.push("STRIPE_PUBLISHABLE_KEY");
-  if (!STRIPE_CONFIG.webhookSecret) missing.push("STRIPE_WEBHOOK_SECRET");
-  if (!STRIPE_CONFIG.priceIds.sanctuary) missing.push("STRIPE_PRICE_ID");
-
-  if (missing.length > 0) {
-    console.warn(
-      `⚠️  Missing optional Stripe configuration: ${missing.join(", ")}`
-    );
-  }
-}

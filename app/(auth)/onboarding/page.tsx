@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useSettings } from "@/providers/SettingsProvider";
+import { PlacePicker, PlaceSelection } from "@/components/shared/PlacePicker";
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -17,9 +18,10 @@ export default function OnboardingPage() {
   const [preferredName, setPreferredName] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [birthTime, setBirthTime] = useState("");
-  const [birthCity, setBirthCity] = useState("");
-  const [birthRegion, setBirthRegion] = useState("");
-  const [birthCountry, setBirthCountry] = useState("");
+
+  // Location state - pre-resolved from PlacePicker
+  const [birthPlace, setBirthPlace] = useState<PlaceSelection | null>(null);
+  const [birthPlaceDisplay, setBirthPlaceDisplay] = useState("");
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,9 +33,24 @@ export default function OnboardingPage() {
       setPreferredName(profile.preferred_name || "");
       setBirthDate(profile.birth_date || "");
       setBirthTime(profile.birth_time || "");
-      setBirthCity(profile.birth_city || "");
-      setBirthRegion(profile.birth_region || "");
-      setBirthCountry(profile.birth_country || "");
+
+      // Restore birth place if we have complete location data
+      if (profile.birth_city && profile.birth_lat && profile.birth_lon && profile.timezone) {
+        const displayParts = [
+          profile.birth_city,
+          profile.birth_region,
+          profile.birth_country,
+        ].filter(Boolean);
+        setBirthPlaceDisplay(displayParts.join(", "));
+        setBirthPlace({
+          birth_city: profile.birth_city,
+          birth_region: profile.birth_region || "",
+          birth_country: profile.birth_country || "",
+          birth_lat: profile.birth_lat,
+          birth_lon: profile.birth_lon,
+          timezone: profile.timezone,
+        });
+      }
 
       // If user hasn't started onboarding yet, mark as started
       if (!profile.onboarding_started_at) {
@@ -77,34 +94,30 @@ export default function OnboardingPage() {
         throw new Error("Birth date is required");
       }
 
-      if (!birthCity || !birthRegion || !birthCountry) {
-        throw new Error("Complete birth location is required (city, region, country)");
+      if (!birthPlace) {
+        throw new Error("Please select your birth location from the search results");
       }
 
-      // Save profile with onboarding completion
+      // Save profile with pre-resolved location data
       await saveProfile({
         full_name: fullName.trim(),
         preferred_name: preferredName.trim() || null,
         birth_date: birthDate,
         birth_time: birthTime || null,
-        birth_city: birthCity.trim(),
-        birth_region: birthRegion.trim(),
-        birth_country: birthCountry.trim(),
+        // Pre-resolved location from PlacePicker
+        birth_city: birthPlace.birth_city,
+        birth_region: birthPlace.birth_region,
+        birth_country: birthPlace.birth_country,
+        birth_lat: birthPlace.birth_lat,
+        birth_lon: birthPlace.birth_lon,
+        timezone: birthPlace.timezone,
         is_onboarded: true,
         onboarding_completed_at: new Date().toISOString(),
       } as any);
 
-      // Verify that location was resolved (birth_lat should be set if resolution succeeded)
-      // Note: The profile state is updated by saveProfile, so we can check it
-      // If resolution failed, profile.birth_lat will still be null
-      // We'll show a warning but allow them to continue (they can fix it in Settings)
-
       // Determine next step based on auth method
       // If user has no OAuth providers connected, show social-connect page
       // Otherwise, go straight to sanctuary
-
-      // For now, check if they used email-only signup by looking at metadata
-      // (In production, you'd check if any social providers are connected)
       const hasEmailOnly = profile?.email && !profile?.full_name?.includes("facebook");
 
       if (hasEmailOnly) {
@@ -208,55 +221,49 @@ export default function OnboardingPage() {
             </div>
 
             {/* Birth Location */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-accent-ink">
+            <div className="space-y-2">
+              <Label>
                 Place of Birth <span className="text-danger-soft">*</span>
-              </h3>
-
-              <div className="space-y-2">
-                <Label htmlFor="birthCity">City</Label>
-                <Input
-                  id="birthCity"
-                  type="text"
-                  placeholder="San Francisco"
-                  value={birthCity}
-                  onChange={(e) => setBirthCity(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="birthRegion">State / Region</Label>
-                <Input
-                  id="birthRegion"
-                  type="text"
-                  placeholder="California"
-                  value={birthRegion}
-                  onChange={(e) => setBirthRegion(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="birthCountry">Country</Label>
-                <Input
-                  id="birthCountry"
-                  type="text"
-                  placeholder="United States"
-                  value={birthCountry}
-                  onChange={(e) => setBirthCountry(e.target.value)}
-                  required
-                />
-              </div>
+              </Label>
+              <PlacePicker
+                initialValue={birthPlaceDisplay}
+                placeholder="Search for your birth city..."
+                onSelect={(place) => {
+                  setBirthPlace(place);
+                  const displayParts = [
+                    place.birth_city,
+                    place.birth_region,
+                    place.birth_country,
+                  ].filter(Boolean);
+                  setBirthPlaceDisplay(displayParts.join(", "));
+                }}
+                onClear={() => {
+                  setBirthPlace(null);
+                  setBirthPlaceDisplay("");
+                }}
+              />
+              {birthPlace && (
+                <p className="text-xs text-accent-ink/60">
+                  Timezone: {birthPlace.timezone}
+                </p>
+              )}
+              <p className="text-xs text-accent-ink/60">
+                Start typing to search, then select from the results
+              </p>
             </div>
 
             {/* Submit Button */}
-            <div className="pt-4">
+            <div className="pt-4 space-y-3">
+              {!birthPlace && (
+                <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-800">
+                  Please search and select your birth location from the dropdown to continue.
+                </div>
+              )}
               <Button
                 type="submit"
                 variant="gold"
                 className="w-full"
-                disabled={isLoading}
+                disabled={isLoading || !birthPlace}
               >
                 {isLoading ? "Saving your birth signature..." : "Complete setup"}
               </Button>

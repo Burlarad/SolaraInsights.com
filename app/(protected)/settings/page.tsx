@@ -10,6 +10,7 @@ import { supabase } from "@/lib/supabase/client";
 import { getPrimaryFacebookIdentity, getIdentityDisplayName } from "@/lib/social";
 import { User } from "@supabase/supabase-js";
 import { COMMON_TIMEZONES } from "@/lib/timezone";
+import { PlacePicker, PlaceSelection } from "@/components/shared/PlacePicker";
 
 export default function SettingsPage() {
   const { profile, saveProfile, loading: profileLoading, error: profileError } = useSettings();
@@ -21,10 +22,11 @@ export default function SettingsPage() {
   const [birthDate, setBirthDate] = useState("");
   const [birthTime, setBirthTime] = useState("");
   const [unknownBirthTime, setUnknownBirthTime] = useState(false);
-  const [birthCity, setBirthCity] = useState("");
-  const [birthRegion, setBirthRegion] = useState("");
-  const [birthCountry, setBirthCountry] = useState("");
-  const [timezone, setTimezone] = useState("");
+
+  // Location state - pre-resolved from PlacePicker
+  const [birthPlace, setBirthPlace] = useState<PlaceSelection | null>(null);
+  const [birthPlaceDisplay, setBirthPlaceDisplay] = useState("");
+  const [displayTimezone, setDisplayTimezone] = useState("");
 
   // Password change
   const [currentPassword, setCurrentPassword] = useState("");
@@ -56,10 +58,34 @@ export default function SettingsPage() {
       setBirthDate(profile.birth_date || "");
       setBirthTime(profile.birth_time || "");
       setUnknownBirthTime(!profile.birth_time);
-      setBirthCity(profile.birth_city || "");
-      setBirthRegion(profile.birth_region || "");
-      setBirthCountry(profile.birth_country || "");
-      setTimezone(profile.timezone || "");
+      setDisplayTimezone(profile.timezone || "");
+
+      // Restore birth place if we have complete location data
+      if (profile.birth_city && profile.birth_lat && profile.birth_lon && profile.timezone) {
+        const displayParts = [
+          profile.birth_city,
+          profile.birth_region,
+          profile.birth_country,
+        ].filter(Boolean);
+        setBirthPlaceDisplay(displayParts.join(", "));
+        setBirthPlace({
+          birth_city: profile.birth_city,
+          birth_region: profile.birth_region || "",
+          birth_country: profile.birth_country || "",
+          birth_lat: profile.birth_lat,
+          birth_lon: profile.birth_lon,
+          timezone: profile.timezone,
+        });
+      } else if (profile.birth_city) {
+        // Have city but no resolved coordinates - show as display but mark as unresolved
+        const displayParts = [
+          profile.birth_city,
+          profile.birth_region,
+          profile.birth_country,
+        ].filter(Boolean);
+        setBirthPlaceDisplay(displayParts.join(", "));
+        // birthPlace stays null - user needs to re-select from PlacePicker
+      }
     }
   }, [profile]);
 
@@ -86,9 +112,7 @@ export default function SettingsPage() {
     // Validate required fields for Soul Path
     const missingFields: string[] = [];
     if (!birthDate) missingFields.push("Birth date");
-    if (!birthCity) missingFields.push("Birth city");
-    if (!birthRegion) missingFields.push("Region/State");
-    if (!birthCountry) missingFields.push("Country");
+    if (!birthPlace) missingFields.push("Birth location (please search and select from results)");
 
     if (missingFields.length > 0) {
       setSaveError(
@@ -99,23 +123,21 @@ export default function SettingsPage() {
     }
 
     try {
-      // Build update payload - only include timezone if user has one
-      // Do NOT default to "UTC" as it will poison the profile
+      // Build update payload with pre-resolved location data
       const updatePayload: Record<string, any> = {
         full_name: fullName,
         preferred_name: preferredName,
         zodiac_sign: zodiacSign,
         birth_date: birthDate,
         birth_time: unknownBirthTime ? null : birthTime || null,
-        birth_city: birthCity,
-        birth_region: birthRegion,
-        birth_country: birthCountry,
+        // Pre-resolved location from PlacePicker
+        birth_city: birthPlace!.birth_city,
+        birth_region: birthPlace!.birth_region,
+        birth_country: birthPlace!.birth_country,
+        birth_lat: birthPlace!.birth_lat,
+        birth_lon: birthPlace!.birth_lon,
+        timezone: birthPlace!.timezone,
       };
-
-      // Only include timezone if we have a real value (don't overwrite with empty/UTC)
-      if (timezone && timezone !== "UTC") {
-        updatePayload.timezone = timezone;
-      }
 
       await saveProfile(updatePayload);
 
@@ -406,62 +428,45 @@ export default function SettingsPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="birthCity">
-                Birth city <span className="text-danger-soft">*</span>
+              <Label>
+                Birth location <span className="text-danger-soft">*</span>
               </Label>
-              <Input
-                id="birthCity"
-                value={birthCity}
-                onChange={(e) => setBirthCity(e.target.value)}
-                placeholder="City where you were born"
-                required
+              <PlacePicker
+                initialValue={birthPlaceDisplay}
+                placeholder="Search for your birth city..."
+                onSelect={(place) => {
+                  setBirthPlace(place);
+                  const displayParts = [
+                    place.birth_city,
+                    place.birth_region,
+                    place.birth_country,
+                  ].filter(Boolean);
+                  setBirthPlaceDisplay(displayParts.join(", "));
+                  setDisplayTimezone(place.timezone);
+                }}
+                onClear={() => {
+                  setBirthPlace(null);
+                  setBirthPlaceDisplay("");
+                  setDisplayTimezone("");
+                }}
               />
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-5">
-              <div className="space-y-2">
-                <Label htmlFor="birthRegion">
-                  Region / State <span className="text-danger-soft">*</span>
-                </Label>
-                <Input
-                  id="birthRegion"
-                  value={birthRegion}
-                  onChange={(e) => setBirthRegion(e.target.value)}
-                  placeholder="e.g., California"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="birthCountry">
-                  Country <span className="text-danger-soft">*</span>
-                </Label>
-                <Input
-                  id="birthCountry"
-                  value={birthCountry}
-                  onChange={(e) => setBirthCountry(e.target.value)}
-                  placeholder="e.g., United States"
-                  required
-                />
-              </div>
+              <p className="text-xs md:text-sm text-accent-ink/60 leading-relaxed">
+                Start typing to search, then select from the results
+              </p>
+              {!birthPlace && birthPlaceDisplay && (
+                <p className="text-xs text-amber-600">
+                  Please re-select your birth location from the search results to update coordinates
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="timezone">Time zone</Label>
-              <select
-                id="timezone"
-                value={timezone}
-                onChange={(e) => setTimezone(e.target.value)}
-                className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-base"
+              <Label>Time zone</Label>
+              <Input
+                value={displayTimezone || "Not set"}
                 disabled
-              >
-                <option value="">Select a timezone</option>
-                {COMMON_TIMEZONES.map((tz) => (
-                  <option key={tz} value={tz}>
-                    {tz}
-                  </option>
-                ))}
-              </select>
+                className="bg-gray-50"
+              />
               <p className="text-xs md:text-sm text-accent-ink/60 leading-relaxed">
                 Timezone is automatically determined from your birthplace and cannot be changed manually.
               </p>
@@ -727,11 +732,18 @@ export default function SettingsPage() {
 
       {/* Action buttons */}
       <div className="space-y-5">
+        {/* Warning if place not selected */}
+        {!birthPlace && (
+          <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-800">
+            Select a birth location from the dropdown to save your changes.
+          </div>
+        )}
+
         <div className="flex flex-col sm:flex-row gap-3">
           <Button
             variant="gold"
             onClick={handleSaveChanges}
-            disabled={isSaving}
+            disabled={isSaving || !birthPlace}
             className="w-full sm:w-auto min-h-[48px] text-base"
           >
             {isSaving ? "Saving..." : "Save changes"}
