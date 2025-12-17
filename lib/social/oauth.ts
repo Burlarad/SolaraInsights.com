@@ -3,7 +3,7 @@
  *
  * Each provider has different OAuth flows and scopes:
  * - Facebook/Instagram: Graph API with user_posts, instagram_basic
- * - TikTok: OAuth 2.0 with user.info.basic, video.list
+ * - TikTok: OAuth 2.0 with user.info.basic, user.info.profile, user.info.stats
  * - X (Twitter): OAuth 2.0 with tweet.read, users.read
  * - Reddit: OAuth 2.0 with identity, history, read
  */
@@ -46,7 +46,7 @@ export const OAUTH_PROVIDERS: Record<SocialProvider, OAuthProviderConfig> = {
     provider: "tiktok",
     authorizeUrl: "https://www.tiktok.com/v2/auth/authorize/",
     tokenUrl: "https://open.tiktokapis.com/v2/oauth/token/",
-    scopes: ["user.info.basic", "video.list"],
+    scopes: ["user.info.basic", "user.info.profile", "user.info.stats"],
     clientIdEnvKey: "TIKTOK_CLIENT_KEY",
     clientSecretEnvKey: "TIKTOK_CLIENT_SECRET",
     supportsRefreshToken: true,

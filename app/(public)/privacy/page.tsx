@@ -45,6 +45,7 @@ export default function PrivacyPolicyPage() {
                 <li>Limited, permitted data from your social account (such as recent posts, captions, or comments) to generate personalized insights about your communication style</li>
               </ul>
               <p className="text-sm italic">We only access publicly available or user-authorized content. We do not access private messages, friend lists, or other sensitive data.</p>
+              <p className="text-sm"><strong>Important:</strong> Raw social content is processed transiently to generate summaries and is not stored permanently. Only the AI-generated summary (without identifying information) is retained.</p>
 
               <p><strong>Usage Data:</strong> We collect information about how you interact with our services, including pages visited, features used, and device information.</p>
 

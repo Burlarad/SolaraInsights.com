@@ -92,12 +92,17 @@ async function fetchInstagramContent(accessToken: string): Promise<FetchedConten
 }
 
 /**
- * Fetch TikTok video descriptions for a user
+ * Fetch TikTok profile and stats for a user
+ * Uses scopes: user.info.basic, user.info.profile, user.info.stats
  */
 async function fetchTikTokContent(accessToken: string): Promise<FetchedContent> {
-  // Get user info
+  // Get user info with profile and stats fields
+  // Fields available per scope:
+  // - user.info.basic: display_name, avatar_url
+  // - user.info.profile: bio_description, profile_deep_link, is_verified, username
+  // - user.info.stats: follower_count, following_count, likes_count, video_count
   const userResponse = await fetch(
-    "https://open.tiktokapis.com/v2/user/info/?fields=display_name,username",
+    "https://open.tiktokapis.com/v2/user/info/?fields=display_name,username,bio_description,is_verified,follower_count,following_count,likes_count,video_count",
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -112,36 +117,50 @@ async function fetchTikTokContent(accessToken: string): Promise<FetchedContent> 
   const userData = await userResponse.json();
   const user = userData.data?.user;
 
-  // Get videos
-  const videosResponse = await fetch(
-    "https://open.tiktokapis.com/v2/video/list/?fields=title,video_description",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ max_count: 50 }),
-    }
-  );
-
-  if (!videosResponse.ok) {
-    throw new Error("Failed to fetch TikTok videos");
+  if (!user) {
+    throw new Error("No user data returned from TikTok");
   }
 
-  const videosData = await videosResponse.json();
-  const videos = videosData.data?.videos || [];
+  // Build content from profile info and stats
+  const contentParts: string[] = [];
 
-  // Combine video descriptions
-  const content = videos
-    .filter((v: any) => v.title || v.video_description)
-    .map((v: any) => v.title || v.video_description)
-    .join("\n\n---\n\n");
+  if (user.display_name) {
+    contentParts.push(`Display Name: ${user.display_name}`);
+  }
+
+  if (user.bio_description) {
+    contentParts.push(`Bio: ${user.bio_description}`);
+  }
+
+  if (user.is_verified !== undefined) {
+    contentParts.push(`Verified: ${user.is_verified ? "Yes" : "No"}`);
+  }
+
+  // Add stats for context
+  const stats: string[] = [];
+  if (user.follower_count !== undefined) {
+    stats.push(`${user.follower_count.toLocaleString()} followers`);
+  }
+  if (user.following_count !== undefined) {
+    stats.push(`${user.following_count.toLocaleString()} following`);
+  }
+  if (user.likes_count !== undefined) {
+    stats.push(`${user.likes_count.toLocaleString()} likes`);
+  }
+  if (user.video_count !== undefined) {
+    stats.push(`${user.video_count.toLocaleString()} videos`);
+  }
+
+  if (stats.length > 0) {
+    contentParts.push(`Stats: ${stats.join(", ")}`);
+  }
+
+  const content = contentParts.join("\n\n");
 
   return {
     content,
-    handle: user?.username ? `@${user.username}` : null,
-    postCount: videos.length,
+    handle: user.username ? `@${user.username}` : null,
+    postCount: 1, // Profile counts as 1 item
   };
 }
 
