@@ -7,8 +7,9 @@ import {
   getCallbackUrl,
   generateOAuthState,
   isOAuthConfigured,
-  OAUTH_PROVIDERS,
 } from "@/lib/social/oauth";
+import { isProviderEnabled } from "@/lib/oauth/providers";
+import { generatePKCEPair, storeCodeVerifier } from "@/lib/oauth/pkce";
 
 const VALID_PROVIDERS: SocialProvider[] = [
   "facebook",
@@ -22,6 +23,7 @@ const VALID_PROVIDERS: SocialProvider[] = [
  * GET /api/social/oauth/[provider]/connect
  *
  * Initiates the OAuth flow for a social provider.
+ * Implements PKCE (S256) for all providers.
  * Redirects the user to the provider's authorization page.
  */
 export async function GET(
@@ -37,6 +39,17 @@ export async function GET(
       return NextResponse.json(
         { error: "Invalid provider", message: `Provider "${provider}" is not supported.` },
         { status: 400 }
+      );
+    }
+
+    // Check if provider is enabled (X is feature-flagged)
+    if (!isProviderEnabled(provider)) {
+      return NextResponse.json(
+        {
+          error: "Provider disabled",
+          message: `${provider} OAuth is not currently enabled.`,
+        },
+        { status: 404 }
       );
     }
 
@@ -61,9 +74,12 @@ export async function GET(
       // Redirect to login with return URL
       const returnUrl = `/api/social/oauth/${provider}/connect`;
       return NextResponse.redirect(
-        new URL(`/login?returnUrl=${encodeURIComponent(returnUrl)}`, req.url)
+        new URL(`/sign-in?returnUrl=${encodeURIComponent(returnUrl)}`, req.url)
       );
     }
+
+    // Generate PKCE pair (verifier + S256 challenge)
+    const pkce = generatePKCEPair();
 
     // Generate state for CSRF protection
     const state = generateOAuthState();
@@ -85,9 +101,12 @@ export async function GET(
       path: "/",
     });
 
-    // Generate authorization URL
+    // Store PKCE verifier in separate cookie (scoped to provider + state)
+    await storeCodeVerifier(provider, state, pkce.verifier);
+
+    // Generate authorization URL with PKCE challenge
     const redirectUri = getCallbackUrl(provider);
-    const authUrl = generateAuthUrl(provider, redirectUri, state);
+    const authUrl = generateAuthUrl(provider, redirectUri, state, pkce.challenge);
 
     // Redirect to provider's authorization page
     return NextResponse.redirect(authUrl);

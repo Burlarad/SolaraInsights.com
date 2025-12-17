@@ -1,92 +1,44 @@
 /**
- * OAuth Provider Configuration for Social Connections
+ * OAuth Orchestration Layer
  *
- * Each provider has different OAuth flows and scopes:
- * - Facebook/Instagram: Graph API with user_posts, instagram_basic
- * - TikTok: OAuth 2.0 with user.info.basic, user.info.profile, user.info.stats
- * - X (Twitter): OAuth 2.0 with tweet.read, users.read
- * - Reddit: OAuth 2.0 with identity, history, read
+ * This module provides a unified interface for OAuth operations across all providers.
+ * It delegates provider-specific logic to adapters in lib/oauth/providers/*.
+ *
+ * All providers use:
+ * - Authorization Code flow with PKCE (S256)
+ * - State parameter for CSRF protection
+ * - Server-side token exchange only
+ * - Encrypted token storage (AES-256-GCM)
  */
 
 import { SocialProvider } from "@/types";
+import {
+  getProviderAdapter,
+  isProviderEnabled,
+  PROVIDER_ADAPTERS,
+  NormalizedTokens,
+} from "@/lib/oauth/providers";
 
-export interface OAuthProviderConfig {
-  provider: SocialProvider;
-  authorizeUrl: string;
-  tokenUrl: string;
-  scopes: string[];
-  clientIdEnvKey: string;
-  clientSecretEnvKey: string;
-  supportsRefreshToken: boolean;
-}
-
-/**
- * OAuth configurations for each supported provider
- */
-export const OAUTH_PROVIDERS: Record<SocialProvider, OAuthProviderConfig> = {
-  facebook: {
-    provider: "facebook",
-    authorizeUrl: "https://www.facebook.com/v18.0/dialog/oauth",
-    tokenUrl: "https://graph.facebook.com/v18.0/oauth/access_token",
-    scopes: ["public_profile", "user_posts"],
-    clientIdEnvKey: "FACEBOOK_CLIENT_ID",
-    clientSecretEnvKey: "FACEBOOK_CLIENT_SECRET",
-    supportsRefreshToken: false, // FB uses long-lived tokens instead
-  },
-  instagram: {
-    provider: "instagram",
-    authorizeUrl: "https://api.instagram.com/oauth/authorize",
-    tokenUrl: "https://api.instagram.com/oauth/access_token",
-    scopes: ["user_profile", "user_media"],
-    clientIdEnvKey: "INSTAGRAM_CLIENT_ID",
-    clientSecretEnvKey: "INSTAGRAM_CLIENT_SECRET",
-    supportsRefreshToken: true,
-  },
-  tiktok: {
-    provider: "tiktok",
-    authorizeUrl: "https://www.tiktok.com/v2/auth/authorize/",
-    tokenUrl: "https://open.tiktokapis.com/v2/oauth/token/",
-    scopes: ["user.info.basic", "user.info.profile", "user.info.stats"],
-    clientIdEnvKey: "TIKTOK_CLIENT_KEY",
-    clientSecretEnvKey: "TIKTOK_CLIENT_SECRET",
-    supportsRefreshToken: true,
-  },
-  x: {
-    provider: "x",
-    authorizeUrl: "https://twitter.com/i/oauth2/authorize",
-    tokenUrl: "https://api.twitter.com/2/oauth2/token",
-    scopes: ["tweet.read", "users.read", "offline.access"],
-    clientIdEnvKey: "X_CLIENT_ID",
-    clientSecretEnvKey: "X_CLIENT_SECRET",
-    supportsRefreshToken: true,
-  },
-  reddit: {
-    provider: "reddit",
-    authorizeUrl: "https://www.reddit.com/api/v1/authorize",
-    tokenUrl: "https://www.reddit.com/api/v1/access_token",
-    scopes: ["identity", "history", "read"],
-    clientIdEnvKey: "REDDIT_CLIENT_ID",
-    clientSecretEnvKey: "REDDIT_CLIENT_SECRET",
-    supportsRefreshToken: true,
-  },
-};
+// Re-export for backwards compatibility
+export { PROVIDER_ADAPTERS as OAUTH_PROVIDERS };
+export { isProviderEnabled, getProviderAdapter };
 
 /**
- * Get OAuth credentials for a provider
+ * Get OAuth credentials for a provider from environment variables
  */
 export function getOAuthCredentials(provider: SocialProvider): {
   clientId: string;
   clientSecret: string;
 } {
-  const config = OAUTH_PROVIDERS[provider];
+  const adapter = getProviderAdapter(provider);
 
-  const clientId = process.env[config.clientIdEnvKey];
-  const clientSecret = process.env[config.clientSecretEnvKey];
+  const clientId = process.env[adapter.clientIdEnvKey];
+  const clientSecret = process.env[adapter.clientSecretEnvKey];
 
   if (!clientId || !clientSecret) {
     throw new Error(
       `OAuth credentials not configured for ${provider}. ` +
-        `Set ${config.clientIdEnvKey} and ${config.clientSecretEnvKey} environment variables.`
+        `Set ${adapter.clientIdEnvKey} and ${adapter.clientSecretEnvKey} environment variables.`
     );
   }
 
@@ -95,87 +47,58 @@ export function getOAuthCredentials(provider: SocialProvider): {
 
 /**
  * Generate the OAuth authorization URL for a provider
+ * Includes PKCE code_challenge (S256 method)
  */
 export function generateAuthUrl(
   provider: SocialProvider,
   redirectUri: string,
-  state: string
+  state: string,
+  codeChallenge: string
 ): string {
-  const config = OAUTH_PROVIDERS[provider];
+  const adapter = getProviderAdapter(provider);
   const { clientId } = getOAuthCredentials(provider);
 
-  const params = new URLSearchParams({
-    client_id: clientId,
-    redirect_uri: redirectUri,
-    response_type: "code",
-    scope: config.scopes.join(" "),
+  const params = adapter.buildAuthorizeParams({
+    clientId,
+    redirectUri,
     state,
+    codeChallenge,
+    codeChallengeMethod: "S256",
   });
 
-  // Provider-specific parameters
-  if (provider === "x") {
-    // X requires PKCE
-    params.set("code_challenge", "challenge"); // Simplified - real impl needs proper PKCE
-    params.set("code_challenge_method", "plain");
-  }
-
-  if (provider === "reddit") {
-    params.set("duration", "permanent"); // For refresh tokens
-  }
-
-  if (provider === "tiktok") {
-    // TikTok uses client_key instead of client_id
-    params.delete("client_id");
-    params.set("client_key", clientId);
-  }
-
-  return `${config.authorizeUrl}?${params.toString()}`;
+  return `${adapter.authorizeUrl}?${params.toString()}`;
 }
 
 /**
  * Exchange authorization code for tokens
+ * Requires code_verifier for PKCE validation
  */
 export async function exchangeCodeForTokens(
   provider: SocialProvider,
   code: string,
-  redirectUri: string
-): Promise<{
-  accessToken: string;
-  refreshToken: string | null;
-  expiresIn: number | null;
-  userId: string | null;
-}> {
-  const config = OAUTH_PROVIDERS[provider];
+  redirectUri: string,
+  codeVerifier: string
+): Promise<NormalizedTokens> {
+  const adapter = getProviderAdapter(provider);
   const { clientId, clientSecret } = getOAuthCredentials(provider);
 
-  const params: Record<string, string> = {
-    grant_type: "authorization_code",
+  const body = adapter.buildTokenRequestBody({
+    clientId,
+    clientSecret,
     code,
-    redirect_uri: redirectUri,
-  };
+    redirectUri,
+    codeVerifier,
+  });
 
-  let headers: Record<string, string> = {
-    "Content-Type": "application/x-www-form-urlencoded",
-  };
+  const headers = adapter.buildTokenRequestHeaders({
+    clientId,
+    clientSecret,
+  });
 
-  // Provider-specific token request handling
-  if (provider === "reddit") {
-    // Reddit uses Basic auth for token requests
-    const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
-    headers["Authorization"] = `Basic ${credentials}`;
-  } else if (provider === "tiktok") {
-    params["client_key"] = clientId;
-    params["client_secret"] = clientSecret;
-    headers["Content-Type"] = "application/x-www-form-urlencoded";
-  } else {
-    params["client_id"] = clientId;
-    params["client_secret"] = clientSecret;
-  }
-
-  const response = await fetch(config.tokenUrl, {
+  const response = await fetch(adapter.tokenUrl, {
     method: "POST",
     headers,
-    body: new URLSearchParams(params),
+    body,
   });
 
   if (!response.ok) {
@@ -185,14 +108,7 @@ export async function exchangeCodeForTokens(
   }
 
   const data = await response.json();
-
-  // Normalize response across providers
-  return {
-    accessToken: data.access_token,
-    refreshToken: data.refresh_token || null,
-    expiresIn: data.expires_in || null,
-    userId: data.user_id || data.open_id || null, // TikTok uses open_id
-  };
+  return adapter.parseTokenResponse(data);
 }
 
 /**
@@ -201,43 +117,30 @@ export async function exchangeCodeForTokens(
 export async function refreshAccessToken(
   provider: SocialProvider,
   refreshToken: string
-): Promise<{
-  accessToken: string;
-  refreshToken: string | null;
-  expiresIn: number | null;
-}> {
-  const config = OAUTH_PROVIDERS[provider];
+): Promise<NormalizedTokens> {
+  const adapter = getProviderAdapter(provider);
 
-  if (!config.supportsRefreshToken) {
+  if (!adapter.supportsRefreshToken) {
     throw new Error(`${provider} does not support refresh tokens`);
   }
 
   const { clientId, clientSecret } = getOAuthCredentials(provider);
 
-  const params: Record<string, string> = {
-    grant_type: "refresh_token",
-    refresh_token: refreshToken,
-  };
+  const body = adapter.buildRefreshRequestBody({
+    clientId,
+    clientSecret,
+    refreshToken,
+  });
 
-  let headers: Record<string, string> = {
-    "Content-Type": "application/x-www-form-urlencoded",
-  };
+  const headers = adapter.buildRefreshRequestHeaders({
+    clientId,
+    clientSecret,
+  });
 
-  if (provider === "reddit") {
-    const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
-    headers["Authorization"] = `Basic ${credentials}`;
-  } else if (provider === "tiktok") {
-    params["client_key"] = clientId;
-    params["client_secret"] = clientSecret;
-  } else {
-    params["client_id"] = clientId;
-    params["client_secret"] = clientSecret;
-  }
-
-  const response = await fetch(config.tokenUrl, {
+  const response = await fetch(adapter.tokenUrl, {
     method: "POST",
     headers,
-    body: new URLSearchParams(params),
+    body,
   });
 
   if (!response.ok) {
@@ -247,16 +150,18 @@ export async function refreshAccessToken(
   }
 
   const data = await response.json();
+  const tokens = adapter.parseTokenResponse(data);
 
+  // Some providers rotate refresh tokens, others don't
   return {
-    accessToken: data.access_token,
-    refreshToken: data.refresh_token || refreshToken, // Some providers rotate refresh tokens
-    expiresIn: data.expires_in || null,
+    ...tokens,
+    refreshToken: tokens.refreshToken || refreshToken,
   };
 }
 
 /**
  * Get the callback URL for a provider
+ * Uses NEXT_PUBLIC_SITE_URL as the single source of truth
  */
 export function getCallbackUrl(provider: SocialProvider): string {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
@@ -267,10 +172,10 @@ export function getCallbackUrl(provider: SocialProvider): string {
  * Check if OAuth is configured for a provider
  */
 export function isOAuthConfigured(provider: SocialProvider): boolean {
-  const config = OAUTH_PROVIDERS[provider];
+  const adapter = getProviderAdapter(provider);
 
   return !!(
-    process.env[config.clientIdEnvKey] && process.env[config.clientSecretEnvKey]
+    process.env[adapter.clientIdEnvKey] && process.env[adapter.clientSecretEnvKey]
   );
 }
 
@@ -281,4 +186,12 @@ export function generateOAuthState(): string {
   const array = new Uint8Array(32);
   crypto.getRandomValues(array);
   return Array.from(array, (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+/**
+ * Get scopes for a provider
+ */
+export function getProviderScopes(provider: SocialProvider): string[] {
+  const adapter = getProviderAdapter(provider);
+  return adapter.scopes;
 }

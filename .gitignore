@@ -33,6 +33,11 @@ yarn-error.log*
 .env.production
 !.env.example
 
+# env backups
+.env.bak
+.env.local.bak
+*.bak
+
 # vercel
 .vercel
 

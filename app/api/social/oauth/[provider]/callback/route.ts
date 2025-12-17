@@ -5,8 +5,10 @@ import { SocialProvider } from "@/types";
 import {
   exchangeCodeForTokens,
   getCallbackUrl,
-  OAUTH_PROVIDERS,
+  getProviderScopes,
 } from "@/lib/social/oauth";
+import { isProviderEnabled } from "@/lib/oauth/providers";
+import { retrieveCodeVerifier } from "@/lib/oauth/pkce";
 import { encryptToken } from "@/lib/social/crypto";
 
 const VALID_PROVIDERS: SocialProvider[] = [
@@ -21,7 +23,8 @@ const VALID_PROVIDERS: SocialProvider[] = [
  * GET /api/social/oauth/[provider]/callback
  *
  * Handles the OAuth callback from the provider.
- * Exchanges the authorization code for tokens and stores them.
+ * Exchanges the authorization code for tokens using PKCE verifier.
+ * Stores encrypted tokens and triggers quiet sync.
  */
 export async function GET(
   req: NextRequest,
@@ -40,6 +43,13 @@ export async function GET(
       );
     }
 
+    // Check if provider is enabled
+    if (!isProviderEnabled(provider)) {
+      return NextResponse.redirect(
+        new URL(`/connect-social?error=provider_disabled&provider=${provider}`, baseUrl)
+      );
+    }
+
     // Get query parameters
     const searchParams = req.nextUrl.searchParams;
     const code = searchParams.get("code");
@@ -50,15 +60,20 @@ export async function GET(
     // Check for OAuth errors from provider
     if (error) {
       console.error(`[OAuth Callback] Provider error for ${provider}:`, error, errorDescription);
+
+      // Quiet error - map to "needs_reauth" behavior
+      if (error === "access_denied") {
+        return NextResponse.redirect(
+          new URL(`/connect-social?error=access_denied&provider=${provider}`, baseUrl)
+        );
+      }
+
       return NextResponse.redirect(
-        new URL(
-          `/connect-social?error=${encodeURIComponent(error)}&provider=${provider}`,
-          baseUrl
-        )
+        new URL(`/connect-social?error=needs_reauth&provider=${provider}`, baseUrl)
       );
     }
 
-    // Validate code and state
+    // Validate code and state presence
     if (!code || !state) {
       return NextResponse.redirect(
         new URL(`/connect-social?error=missing_params&provider=${provider}`, baseUrl)
@@ -107,9 +122,20 @@ export async function GET(
     // Clear the state cookie
     cookieStore.delete("social_oauth_state");
 
-    // Exchange code for tokens
+    // Retrieve PKCE verifier from cookie
+    const codeVerifier = await retrieveCodeVerifier(provider, state);
+
+    if (!codeVerifier) {
+      // PKCE verifier missing - quiet error, request re-auth
+      console.error(`[OAuth Callback] PKCE verifier missing for ${provider}`);
+      return NextResponse.redirect(
+        new URL(`/connect-social?error=needs_reauth&provider=${provider}`, baseUrl)
+      );
+    }
+
+    // Exchange code for tokens with PKCE verifier
     const redirectUri = getCallbackUrl(provider);
-    const tokens = await exchangeCodeForTokens(provider, code, redirectUri);
+    const tokens = await exchangeCodeForTokens(provider, code, redirectUri, codeVerifier);
 
     // Encrypt tokens before storing
     const accessTokenEncrypted = encryptToken(tokens.accessToken);
@@ -136,7 +162,7 @@ export async function GET(
           access_token_encrypted: accessTokenEncrypted,
           refresh_token_encrypted: refreshTokenEncrypted,
           token_expires_at: tokenExpiresAt,
-          scopes: OAUTH_PROVIDERS[provider].scopes.join(" "),
+          scopes: getProviderScopes(provider).join(" "),
           last_error: null,
           updated_at: new Date().toISOString(),
         },
@@ -174,8 +200,10 @@ export async function GET(
     );
   } catch (error: any) {
     console.error("[OAuth Callback] Error:", error.message);
+
+    // Quiet error - don't leak details
     return NextResponse.redirect(
-      new URL(`/connect-social?error=server_error`, baseUrl)
+      new URL(`/connect-social?error=needs_reauth`, baseUrl)
     );
   }
 }
