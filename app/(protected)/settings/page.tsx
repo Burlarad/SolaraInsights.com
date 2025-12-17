@@ -99,7 +99,9 @@ export default function SettingsPage() {
     }
 
     try {
-      await saveProfile({
+      // Build update payload - only include timezone if user has one
+      // Do NOT default to "UTC" as it will poison the profile
+      const updatePayload: Record<string, any> = {
         full_name: fullName,
         preferred_name: preferredName,
         zodiac_sign: zodiacSign,
@@ -108,13 +110,21 @@ export default function SettingsPage() {
         birth_city: birthCity,
         birth_region: birthRegion,
         birth_country: birthCountry,
-        timezone: timezone || "UTC",
-      });
+      };
+
+      // Only include timezone if we have a real value (don't overwrite with empty/UTC)
+      if (timezone && timezone !== "UTC") {
+        updatePayload.timezone = timezone;
+      }
+
+      await saveProfile(updatePayload);
 
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err: any) {
-      setSaveError("Unable to save changes. Please try again.");
+      // Show the API error message if available
+      const errorMessage = err?.message || "Unable to save changes. Please try again.";
+      setSaveError(errorMessage);
     } finally {
       setIsSaving(false);
     }

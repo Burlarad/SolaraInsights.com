@@ -141,6 +141,9 @@ export function needsLocationOnboarding(profile: Profile): boolean {
  * 2. Profile timezone (if manually set)
  * 3. UTC fallback
  *
+ * WARNING: This function falls back to UTC which can cause incorrect birth chart calculations.
+ * For birth-related features, use requireBirthTimezone() instead.
+ *
  * @param profile - User's profile
  * @returns Effective timezone (never null - falls back to "UTC")
  */
@@ -153,4 +156,64 @@ export function getEffectiveTimezone(profile: Profile): string {
     `[Location] No timezone found for user ${profile.id}, falling back to UTC`
   );
   return "UTC";
+}
+
+/**
+ * Strict timezone guard for birth-related features.
+ *
+ * Unlike getEffectiveTimezone(), this function:
+ * - THROWS if timezone is missing/blank
+ * - THROWS if timezone is "UTC" (likely from fallback poisoning)
+ * - Should be used for birth chart generation, Soul Print, and any feature requiring accurate birth time
+ *
+ * A "UTC" timezone is considered invalid for birth charts because:
+ * - Very few users are actually born in UTC timezone regions
+ * - UTC often indicates a failed geocoding or fallback value
+ * - Using UTC for a non-UTC birth location produces incorrect planetary positions
+ *
+ * @param profile - User's profile
+ * @returns Valid IANA timezone string (never "UTC")
+ * @throws Error if timezone is missing, blank, or "UTC"
+ */
+export function requireBirthTimezone(profile: Profile): string {
+  const tz = profile.timezone?.trim();
+
+  if (!tz) {
+    throw new Error(
+      "Birth timezone not resolved. Please update your birth location in Settings."
+    );
+  }
+
+  // Treat plain "UTC" as invalid - it's almost always from fallback poisoning
+  // Users genuinely in UTC zones (UK, Iceland, etc.) would have proper IANA zones
+  // like "Europe/London" or "Atlantic/Reykjavik"
+  if (tz === "UTC" || tz === "Etc/UTC" || tz === "GMT") {
+    throw new Error(
+      "Birth timezone not properly resolved (UTC fallback detected). Please update your birth location in Settings to get accurate insights."
+    );
+  }
+
+  return tz;
+}
+
+/**
+ * Check if a timezone is valid for birth-related features.
+ * Non-throwing version of requireBirthTimezone() for conditional checks.
+ *
+ * @param timezone - Timezone string to validate
+ * @returns true if timezone is valid for birth features, false otherwise
+ */
+export function isValidBirthTimezone(timezone: string | null | undefined): boolean {
+  if (!timezone || !timezone.trim()) {
+    return false;
+  }
+
+  const tz = timezone.trim();
+
+  // UTC variants are considered invalid for birth features
+  if (tz === "UTC" || tz === "Etc/UTC" || tz === "GMT") {
+    return false;
+  }
+
+  return true;
 }

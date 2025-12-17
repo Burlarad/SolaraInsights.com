@@ -7,7 +7,7 @@ import { getRuneNames } from "@/lib/runes";
 import { getCache, setCache, acquireLockFailClosed, releaseLock, isRedisAvailable, REDIS_UNAVAILABLE_RESPONSE } from "@/lib/cache/redis";
 import { checkRateLimit } from "@/lib/cache/rateLimit";
 import { getUserPeriodKeys, buildInsightCacheKey, buildInsightLockKey } from "@/lib/timezone/periodKeys";
-import { getEffectiveTimezone } from "@/lib/location/detection";
+import { getEffectiveTimezone, isValidBirthTimezone } from "@/lib/location/detection";
 import { touchLastSeen } from "@/lib/activity/touchLastSeen";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
 import { checkBudget, incrementBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai/costControl";
@@ -143,6 +143,21 @@ export async function POST(req: NextRequest) {
         {
           error: "Incomplete profile",
           message: "Please complete your birth signature in Settings to receive personalized insights.",
+        },
+        { status: 400 }
+      );
+    }
+
+    // PR2 Guardrail: Reject UTC timezone (likely from fallback poisoning)
+    // Sanctuary insights use timezone for period key calculation - UTC produces wrong timing
+    if (!isValidBirthTimezone(profile.timezone)) {
+      console.log(
+        `[Insights] Invalid timezone for user ${user.id}: "${profile.timezone}" (UTC fallback detected)`
+      );
+      return NextResponse.json(
+        {
+          error: "Invalid timezone",
+          message: "Your timezone appears to be incorrectly set to UTC. Please update your birth location in Settings to receive properly timed insights.",
         },
         { status: 400 }
       );

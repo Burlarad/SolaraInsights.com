@@ -24,6 +24,7 @@ import { SanctuaryInsight } from "@/types";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
 import { checkBudget, incrementBudget } from "@/lib/ai/costControl";
 import { AYREN_MODE_SHORT } from "@/lib/ai/voice";
+import { isValidBirthTimezone } from "@/lib/location/detection";
 
 const PROMPT_VERSION = 2;
 const PREWARM_WINDOW_HOURS = 3; // Pre-warm if within 3 hours of midnight
@@ -46,6 +47,7 @@ export async function GET(req: NextRequest) {
     warmed: 0,
     skippedCached: 0,
     skippedLocked: 0,
+    skippedInvalidTz: 0, // PR2: Users with missing/UTC timezone
     errors: 0,
   };
 
@@ -79,7 +81,15 @@ export async function GET(req: NextRequest) {
     for (const profile of profiles) {
       try {
         const userId = profile.id;
-        const timezone = profile.timezone || "UTC";
+
+        // PR2 Guardrail: Skip users with invalid/UTC timezone
+        // Don't fall back to UTC - it produces wrong timing for insights
+        if (!isValidBirthTimezone(profile.timezone)) {
+          stats.skippedInvalidTz++;
+          continue; // Skip this user silently (logged once at end via stats)
+        }
+
+        const timezone = profile.timezone!; // Safe - validated above
         const language = profile.language || "en";
 
         // Check if user is within PREWARM_WINDOW_HOURS of their local midnight
@@ -313,6 +323,13 @@ LUCKY COMPASS RULES:
         console.error(`[Prewarm] Error processing user ${profile.id}:`, userError.message);
         stats.errors++;
       }
+    }
+
+    // Log summary including timezone issues
+    if (stats.skippedInvalidTz > 0) {
+      console.log(
+        `[Prewarm] Note: ${stats.skippedInvalidTz} users skipped due to missing/UTC timezone (need to update birth location)`
+      );
     }
 
     console.log(`[Prewarm] Job complete:`, stats);

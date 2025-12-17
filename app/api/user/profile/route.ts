@@ -35,25 +35,54 @@ export async function PATCH(req: NextRequest) {
       }
     }
 
-    // Resolve birth location if we have date + place
-    const hasBirthPlace =
-      updates.birth_date &&
-      updates.birth_city &&
-      updates.birth_region &&
-      updates.birth_country;
+    // Check if request is attempting to change birthplace fields
+    const isTouchingBirthplace =
+      updates.birth_city !== undefined ||
+      updates.birth_region !== undefined ||
+      updates.birth_country !== undefined;
 
-    if (hasBirthPlace) {
+    // If touching birthplace, require all 3 fields to be present and non-empty
+    if (isTouchingBirthplace) {
+      const birthCity = updates.birth_city?.trim();
+      const birthRegion = updates.birth_region?.trim();
+      const birthCountry = updates.birth_country?.trim();
+
+      if (!birthCity || !birthRegion || !birthCountry) {
+        return NextResponse.json(
+          {
+            error: "LocationValidationFailed",
+            message: "Birth location requires city, region, and country. Please fill in all fields.",
+            fields: ["birth_city", "birth_region", "birth_country"],
+          },
+          { status: 400 }
+        );
+      }
+
+      // Also require birth_date when setting birthplace
+      if (!updates.birth_date) {
+        return NextResponse.json(
+          {
+            error: "LocationValidationFailed",
+            message: "Birth date is required when setting birth location.",
+            fields: ["birth_date"],
+          },
+          { status: 400 }
+        );
+      }
+
+      // Attempt to resolve birth location - MUST succeed to save birthplace changes
+      const timeForLocation =
+        updates.birth_time && typeof updates.birth_time === "string"
+          ? updates.birth_time
+          : "12:00";
+
+      console.log("[Profile] Attempting to resolve birth location...");
+
       try {
-        const timeForLocation =
-          updates.birth_time && typeof updates.birth_time === "string"
-            ? updates.birth_time
-            : "12:00";
-
-        console.log("[Profile] Attempting to resolve birth location...");
         const resolved = await resolveBirthLocation({
-          city: updates.birth_city,
-          region: updates.birth_region,
-          country: updates.birth_country,
+          city: birthCity,
+          region: birthRegion,
+          country: birthCountry,
           birthDate: updates.birth_date,
           birthTime: timeForLocation,
         });
@@ -63,9 +92,9 @@ export async function PATCH(req: NextRequest) {
         updates.timezone = resolved.timezone;
 
         console.log("[Profile] ✓ Birth location resolved successfully:", {
-          city: updates.birth_city,
-          region: updates.birth_region,
-          country: updates.birth_country,
+          city: birthCity,
+          region: birthRegion,
+          country: birthCountry,
           lat: resolved.lat,
           lon: resolved.lon,
           timezone: resolved.timezone,
@@ -76,17 +105,20 @@ export async function PATCH(req: NextRequest) {
           err?.message || err
         );
         console.error("[Profile] Location input:", {
-          city: updates.birth_city,
-          region: updates.birth_region,
-          country: updates.birth_country,
+          city: birthCity,
+          region: birthRegion,
+          country: birthCountry,
         });
-        // Do NOT block save; we can leave birth_lat/birth_lon/timezone unchanged or null
-        // This allows users to save their profile even if geocoding fails
-        // They can try again later or fix typos in Settings
-        console.warn(
-          "[Profile] Continuing with profile save without lat/lon/timezone updates"
+
+        // HARD FAIL: Return 400 and do NOT save the profile
+        return NextResponse.json(
+          {
+            error: "LocationResolutionFailed",
+            message: `We couldn't find "${birthCity}, ${birthRegion}, ${birthCountry}". Please check the spelling and try again. Use English names for best results (e.g., "Peru" not "Perú").`,
+            fields: ["birth_city", "birth_region", "birth_country"],
+          },
+          { status: 400 }
         );
-        console.warn("[Profile] User can retry in Settings to resolve location");
       }
     }
 

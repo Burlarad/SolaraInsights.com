@@ -12,6 +12,7 @@ import { isRedisAvailable, REDIS_UNAVAILABLE_RESPONSE, getCache, setCache } from
 import { checkRateLimit } from "@/lib/cache/rateLimit";
 import { AYREN_MODE_SOULPRINT_LONG } from "@/lib/ai/voice";
 import { validateBirthChartInsight, validateBatchedTabDeepDives, TAB_DEEP_DIVE_KEYS } from "@/lib/validation/schemas";
+import { isValidBirthTimezone } from "@/lib/location/detection";
 
 // Must match SOUL_PATH_SCHEMA_VERSION from lib/soulPath/storage.ts
 // Incremented when placements structure changes
@@ -595,6 +596,22 @@ export async function POST() {
           error: "Incomplete profile",
           message:
             "We need your birth date and full birthplace in Settings so Solara can generate your Soul Path.",
+        },
+        { status: 400 }
+      );
+    }
+
+    // PR2 Guardrail: Reject UTC timezone (likely from fallback poisoning)
+    // Birth charts require accurate timezone for correct planetary positions
+    if (!isValidBirthTimezone(profile.timezone)) {
+      console.log(
+        `[BirthChart] Invalid timezone for user ${user.id}: "${profile.timezone}" (UTC fallback detected)`
+      );
+      return NextResponse.json(
+        {
+          error: "Invalid timezone",
+          message:
+            "Your birth timezone appears to be incorrectly set to UTC. Please update your birth location in Settings to get accurate chart calculations.",
         },
         { status: 400 }
       );
