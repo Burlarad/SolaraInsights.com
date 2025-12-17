@@ -61,6 +61,7 @@ export function PlacePicker({
   const [candidates, setCandidates] = useState<LocationCandidate[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -72,6 +73,7 @@ export function PlacePicker({
     if (searchQuery.trim().length < 2) {
       setCandidates([]);
       setIsOpen(false);
+      setHasSearched(false);
       return;
     }
 
@@ -91,12 +93,15 @@ export function PlacePicker({
 
       const data = await response.json();
       setCandidates(data.candidates || []);
-      setIsOpen(data.candidates?.length > 0);
+      setHasSearched(true);
+      // Always open dropdown after search so user sees results OR "no results" message
+      setIsOpen(true);
     } catch (err) {
       console.error("[PlacePicker] Search error:", err);
       setError("Search failed. Please try again.");
       setCandidates([]);
-      setIsOpen(false);
+      setHasSearched(true);
+      setIsOpen(true); // Show error state in dropdown area
     } finally {
       setIsLoading(false);
     }
@@ -113,8 +118,11 @@ export function PlacePicker({
     }
 
     // Clear selection if input is cleared
-    if (!value.trim() && onClear) {
-      onClear();
+    if (!value.trim()) {
+      setHasSearched(false);
+      if (onClear) {
+        onClear();
+      }
     }
 
     // Debounce the search
@@ -128,6 +136,7 @@ export function PlacePicker({
     setQuery(candidate.displayName);
     setCandidates([]);
     setIsOpen(false);
+    setHasSearched(false);
 
     onSelect({
       birth_city: candidate.birth_city,
@@ -224,7 +233,7 @@ export function PlacePicker({
       )}
 
       {/* No results message */}
-      {isOpen && candidates.length === 0 && !isLoading && query.length >= 2 && (
+      {isOpen && hasSearched && candidates.length === 0 && !isLoading && !error && (
         <div className="absolute z-50 mt-1 w-full rounded-lg border border-border-subtle bg-white p-3 shadow-lg">
           <p className="text-sm text-accent-ink/60">
             No locations found. Try a different search term.
