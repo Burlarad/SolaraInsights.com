@@ -49,43 +49,8 @@ export async function POST(req: NextRequest) {
     void touchLastSeen(admin, user.id, 30);
 
     // ========================================
-    // RATE LIMITING
+    // VALIDATION (before cache check)
     // ========================================
-    const cooldownKey = `connbrief:cooldown:${user.id}`;
-    const lastRequestTime = await getCache<number>(cooldownKey);
-    if (lastRequestTime) {
-      const elapsed = Math.floor((Date.now() - lastRequestTime) / 1000);
-      const remaining = COOLDOWN_SECONDS - elapsed;
-      if (remaining > 0) {
-        return NextResponse.json(
-          {
-            error: "Cooldown active",
-            message: `Please wait ${remaining} seconds before requesting again.`,
-            retryAfterSeconds: remaining,
-          },
-          { status: 429, headers: { "Retry-After": String(remaining) } }
-        );
-      }
-    }
-
-    const rateLimitResult = await checkRateLimit(
-      `connbrief:rate:${user.id}`,
-      USER_RATE_LIMIT,
-      USER_RATE_WINDOW
-    );
-    if (!rateLimitResult.success) {
-      const retryAfter = Math.ceil((rateLimitResult.resetAt - Date.now()) / 1000);
-      return NextResponse.json(
-        {
-          error: "Rate limit exceeded",
-          message: `You've reached your hourly limit. Try again in ${Math.ceil(retryAfter / 60)} minutes.`,
-          retryAfterSeconds: retryAfter,
-        },
-        { status: 429, headers: { "Retry-After": String(retryAfter) } }
-      );
-    }
-
-    await setCache(cooldownKey, Date.now(), COOLDOWN_SECONDS);
 
     // Parse request body
     const body = await req.json();
@@ -167,6 +132,50 @@ export async function POST(req: NextRequest) {
     console.log(`[DailyBrief] No existing brief for ${connectionId} on ${localDate}, generating...`);
 
     // ========================================
+    // CACHE MISS - Apply rate limiting now
+    // Only generation attempts count toward limits
+    // ========================================
+
+    // Cooldown check (only for generation attempts)
+    const cooldownKey = `connbrief:cooldown:${user.id}`;
+    const lastRequestTime = await getCache<number>(cooldownKey);
+    if (lastRequestTime) {
+      const elapsed = Math.floor((Date.now() - lastRequestTime) / 1000);
+      const remaining = COOLDOWN_SECONDS - elapsed;
+      if (remaining > 0) {
+        return NextResponse.json(
+          {
+            error: "Cooldown active",
+            message: `Please wait ${remaining} seconds before requesting again.`,
+            retryAfterSeconds: remaining,
+          },
+          { status: 429, headers: { "Retry-After": String(remaining) } }
+        );
+      }
+    }
+
+    // Rate limit check (only for generation attempts)
+    const rateLimitResult = await checkRateLimit(
+      `connbrief:rate:${user.id}`,
+      USER_RATE_LIMIT,
+      USER_RATE_WINDOW
+    );
+    if (!rateLimitResult.success) {
+      const retryAfter = Math.ceil((rateLimitResult.resetAt - Date.now()) / 1000);
+      return NextResponse.json(
+        {
+          error: "Rate limit exceeded",
+          message: `You've reached your hourly limit. Try again in ${Math.ceil(retryAfter / 60)} minutes.`,
+          retryAfterSeconds: retryAfter,
+        },
+        { status: 429, headers: { "Retry-After": String(retryAfter) } }
+      );
+    }
+
+    // Set cooldown NOW (we're about to generate)
+    await setCache(cooldownKey, Date.now(), COOLDOWN_SECONDS);
+
+    // ========================================
     // REDIS AVAILABILITY CHECK
     // ========================================
     if (!isRedisAvailable()) {
@@ -196,24 +205,35 @@ export async function POST(req: NextRequest) {
     lockAcquired = lockResult.acquired;
 
     if (!lockAcquired) {
-      // Another request is generating - wait and check DB again
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Another request is generating - PR-2: retry loop instead of failing fast
+      console.log(`[DailyBrief] Lock already held for ${lockKey}, entering retry loop...`);
 
-      const { data: nowExistingBrief } = await supabase
-        .from("daily_briefs")
-        .select("*")
-        .eq("connection_id", connectionId)
-        .eq("local_date", localDate)
-        .eq("language", language)
-        .eq("prompt_version", PROMPT_VERSION)
-        .single();
+      const MAX_RETRIES = 3;
+      const RETRY_DELAY_MS = 2000;
 
-      if (nowExistingBrief) {
-        return NextResponse.json(nowExistingBrief);
+      for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        console.log(`[DailyBrief] Retry ${attempt}/${MAX_RETRIES}: waiting ${RETRY_DELAY_MS}ms for cached result...`);
+        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
+
+        const { data: nowExistingBrief } = await supabase
+          .from("daily_briefs")
+          .select("*")
+          .eq("connection_id", connectionId)
+          .eq("local_date", localDate)
+          .eq("language", language)
+          .eq("prompt_version", PROMPT_VERSION)
+          .single();
+
+        if (nowExistingBrief) {
+          console.log(`[DailyBrief] ✓ Found cached result on retry ${attempt}`);
+          return NextResponse.json(nowExistingBrief);
+        }
       }
 
+      // Still not cached after all retries - return user-friendly response
+      console.log(`[DailyBrief] No cached result after ${MAX_RETRIES} retries, returning 503`);
       return NextResponse.json(
-        { error: "Generation in progress", message: "Please try again in a moment." },
+        { error: "Still generating", message: "Your connection brief is being created. Please try again in a moment." },
         { status: 503 }
       );
     }

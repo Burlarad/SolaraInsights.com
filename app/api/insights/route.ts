@@ -73,52 +73,13 @@ export async function POST(req: NextRequest) {
   const admin = createAdminSupabaseClient();
   void touchLastSeen(admin, user.id, 30);
 
-  // ========================================
-  // P0-3: USER RATE LIMITING
-  // ========================================
-  // Cooldown check
-  const cooldownKey = `insights:cooldown:${user.id}`;
-  const lastRequestTime = await getCache<number>(cooldownKey);
-  if (lastRequestTime) {
-    const elapsed = Math.floor((Date.now() - lastRequestTime) / 1000);
-    const remaining = COOLDOWN_SECONDS - elapsed;
-    if (remaining > 0) {
-      return NextResponse.json(
-        {
-          error: "Cooldown active",
-          message: `Please wait ${remaining} seconds before requesting again.`,
-          retryAfterSeconds: remaining,
-        },
-        { status: 429, headers: { "Retry-After": String(remaining) } }
-      );
-    }
-  }
-
-  // Rate limit check
-  const rateLimitResult = await checkRateLimit(
-    `insights:rate:${user.id}`,
-    USER_RATE_LIMIT,
-    USER_RATE_WINDOW
-  );
-  if (!rateLimitResult.success) {
-    const retryAfter = Math.ceil((rateLimitResult.resetAt - Date.now()) / 1000);
-    return NextResponse.json(
-      {
-        error: "Rate limit exceeded",
-        message: `You've reached your hourly limit. Try again in ${Math.ceil(retryAfter / 60)} minutes.`,
-        retryAfterSeconds: retryAfter,
-      },
-      { status: 429, headers: { "Retry-After": String(retryAfter) } }
-    );
-  }
-
-  // Set cooldown
-  await setCache(cooldownKey, Date.now(), COOLDOWN_SECONDS);
-
   // Declare periodKey outside try block so it's accessible in error handler
   let periodKey: string | undefined;
 
   try {
+    // ========================================
+    // PROFILE VALIDATION (before cache check)
+    // ========================================
 
     // Load user's profile
     const { data: profile, error: profileError } = await supabase
@@ -149,7 +110,6 @@ export async function POST(req: NextRequest) {
     }
 
     // PR2 Guardrail: Reject UTC timezone (likely from fallback poisoning)
-    // Sanctuary insights use timezone for period key calculation - UTC produces wrong timing
     if (!isValidBirthTimezone(profile.timezone)) {
       console.log(
         `[Insights] Invalid timezone for user ${user.id}: "${profile.timezone}" (UTC fallback detected)`
@@ -163,25 +123,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Optionally load all social summaries for the user (if any exist)
-    const { data: socialSummaries } = await supabase
-      .from("social_summaries")
-      .select("provider, summary")
-      .eq("user_id", user.id)
-      .order("last_collected_at", { ascending: false });
-
-    // Parse metadata from first summary (if any) for humor/nudge decisions
-    const socialMetadata = socialSummaries && socialSummaries.length > 0
-      ? parseMetadataFromSummary(socialSummaries[0].summary)
-      : null;
-
-    // Combine all social summaries into a single context block (text only, no metadata block)
-    const socialContext = socialSummaries && socialSummaries.length > 0
-      ? socialSummaries.map(s => getSummaryTextOnly(s.summary)).join("\n\n---\n\n")
-      : null;
-
     // ========================================
-    // CACHING LAYER
+    // COMPUTE CACHE KEY EARLY
     // ========================================
 
     // Get effective timezone (with UTC fallback if missing)
@@ -203,7 +146,10 @@ export async function POST(req: NextRequest) {
     const cacheKey = buildInsightCacheKey(user.id, timeframe, periodKey, targetLanguage, PROMPT_VERSION);
     const lockKey = buildInsightLockKey(user.id, timeframe, periodKey, PROMPT_VERSION);
 
-    // Check cache first
+    // ========================================
+    // CACHE CHECK FIRST (before rate limiting)
+    // Cache hits are FREE - no cooldown, no rate limit
+    // ========================================
     const cachedInsight = await getCache<SanctuaryInsight>(cacheKey);
     if (cachedInsight) {
       console.log(`[Insights] ✓ Cache hit for ${cacheKey}`);
@@ -235,7 +181,7 @@ export async function POST(req: NextRequest) {
             timezone: effectiveTimezone,
             cacheKey,
             cacheHit: true,
-            generatedAt: null, // Unknown for cached responses
+            generatedAt: null,
             promptVersion: PROMPT_VERSION,
           },
         });
@@ -244,8 +190,67 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(cachedInsight);
     }
 
-    // Cache miss - need to generate fresh insight
+    // ========================================
+    // CACHE MISS - Apply rate limiting now
+    // Only generation attempts count toward limits
+    // ========================================
     console.log(`[Insights] ✗ Cache miss for ${cacheKey}`);
+
+    // Cooldown check (only for generation attempts)
+    const cooldownKey = `insights:cooldown:${user.id}`;
+    const lastRequestTime = await getCache<number>(cooldownKey);
+    if (lastRequestTime) {
+      const elapsed = Math.floor((Date.now() - lastRequestTime) / 1000);
+      const remaining = COOLDOWN_SECONDS - elapsed;
+      if (remaining > 0) {
+        return NextResponse.json(
+          {
+            error: "Cooldown active",
+            message: `Please wait ${remaining} seconds before requesting again.`,
+            retryAfterSeconds: remaining,
+          },
+          { status: 429, headers: { "Retry-After": String(remaining) } }
+        );
+      }
+    }
+
+    // Rate limit check (only for generation attempts)
+    const rateLimitResult = await checkRateLimit(
+      `insights:rate:${user.id}`,
+      USER_RATE_LIMIT,
+      USER_RATE_WINDOW
+    );
+    if (!rateLimitResult.success) {
+      const retryAfter = Math.ceil((rateLimitResult.resetAt - Date.now()) / 1000);
+      return NextResponse.json(
+        {
+          error: "Rate limit exceeded",
+          message: `You've reached your hourly limit. Try again in ${Math.ceil(retryAfter / 60)} minutes.`,
+          retryAfterSeconds: retryAfter,
+        },
+        { status: 429, headers: { "Retry-After": String(retryAfter) } }
+      );
+    }
+
+    // Set cooldown NOW (we're about to generate)
+    await setCache(cooldownKey, Date.now(), COOLDOWN_SECONDS);
+
+    // Optionally load all social summaries for the user (if any exist)
+    const { data: socialSummaries } = await supabase
+      .from("social_summaries")
+      .select("provider, summary")
+      .eq("user_id", user.id)
+      .order("last_collected_at", { ascending: false });
+
+    // Parse metadata from first summary (if any) for humor/nudge decisions
+    const socialMetadata = socialSummaries && socialSummaries.length > 0
+      ? parseMetadataFromSummary(socialSummaries[0].summary)
+      : null;
+
+    // Combine all social summaries into a single context block (text only, no metadata block)
+    const socialContext = socialSummaries && socialSummaries.length > 0
+      ? socialSummaries.map(s => getSummaryTextOnly(s.summary)).join("\n\n---\n\n")
+      : null;
 
     // ========================================
     // P0: REDIS AVAILABILITY CHECK (fail closed)
@@ -276,21 +281,27 @@ export async function POST(req: NextRequest) {
 
     if (!lockAcquired) {
       // Another request is already generating this insight
-      console.log(`[Insights] Lock already held for ${lockKey}, waiting for cached result...`);
+      // PR-2: Retry loop instead of failing fast
+      console.log(`[Insights] Lock already held for ${lockKey}, entering retry loop...`);
 
-      // Wait a bit and check cache again (likely populated by the other request)
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const MAX_RETRIES = 3;
+      const RETRY_DELAY_MS = 2000;
 
-      const nowCachedInsight = await getCache<SanctuaryInsight>(cacheKey);
-      if (nowCachedInsight) {
-        console.log(`[Insights] ✓ Found cached result after lock wait`);
-        return NextResponse.json(nowCachedInsight);
+      for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        console.log(`[Insights] Retry ${attempt}/${MAX_RETRIES}: waiting ${RETRY_DELAY_MS}ms for cached result...`);
+        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
+
+        const nowCachedInsight = await getCache<SanctuaryInsight>(cacheKey);
+        if (nowCachedInsight) {
+          console.log(`[Insights] ✓ Found cached result on retry ${attempt}`);
+          return NextResponse.json(nowCachedInsight);
+        }
       }
 
-      // Still not cached - return 503 to prevent duplicate generation
-      console.log(`[Insights] No cached result after wait, returning 503`);
+      // Still not cached after all retries - return user-friendly response
+      console.log(`[Insights] No cached result after ${MAX_RETRIES} retries, returning 503`);
       return NextResponse.json(
-        { error: "Generation in progress", message: "Please try again in a moment." },
+        { error: "Still generating", message: "Your insight is being created. Please try again in a moment." },
         { status: 503 }
       );
     } else {

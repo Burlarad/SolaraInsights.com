@@ -518,46 +518,8 @@ export async function POST() {
     void touchLastSeen(admin, user.id, 30);
 
     // ========================================
-    // P0-3: USER RATE LIMITING
+    // PROFILE VALIDATION (before cache check)
     // ========================================
-    // Cooldown check
-    const cooldownKey = `birthchart:cooldown:${user.id}`;
-    const lastRequestTime = await getCache<number>(cooldownKey);
-    if (lastRequestTime) {
-      const elapsed = Math.floor((Date.now() - lastRequestTime) / 1000);
-      const remaining = COOLDOWN_SECONDS - elapsed;
-      if (remaining > 0) {
-        return NextResponse.json(
-          {
-            error: "Cooldown active",
-            message: `Please wait ${remaining} seconds before requesting again.`,
-            retryAfterSeconds: remaining,
-          },
-          { status: 429, headers: { "Retry-After": String(remaining) } }
-        );
-      }
-    }
-
-    // Rate limit check
-    const rateLimitResult = await checkRateLimit(
-      `birthchart:rate:${user.id}`,
-      USER_RATE_LIMIT,
-      USER_RATE_WINDOW
-    );
-    if (!rateLimitResult.success) {
-      const retryAfter = Math.ceil((rateLimitResult.resetAt - Date.now()) / 1000);
-      return NextResponse.json(
-        {
-          error: "Rate limit exceeded",
-          message: `You've reached your hourly limit. Try again in ${Math.ceil(retryAfter / 60)} minutes.`,
-          retryAfterSeconds: retryAfter,
-        },
-        { status: 429, headers: { "Retry-After": String(retryAfter) } }
-      );
-    }
-
-    // Set cooldown
-    await setCache(cooldownKey, Date.now(), COOLDOWN_SECONDS);
 
     // Load user profile
     const { data: profile, error: profileError } = await supabase
@@ -769,6 +731,50 @@ export async function POST() {
     }
 
     console.log(`[BirthChart] ✗ Cache miss for Soul Print narrative - generating fresh (user: ${user.id}, prompt v${PROMPT_VERSION}, lang: ${targetLanguage})`);
+
+    // ========================================
+    // CACHE MISS - Apply rate limiting now
+    // Only generation attempts count toward limits
+    // ========================================
+
+    // Cooldown check (only for generation attempts)
+    const cooldownKey = `birthchart:cooldown:${user.id}`;
+    const lastRequestTime = await getCache<number>(cooldownKey);
+    if (lastRequestTime) {
+      const elapsed = Math.floor((Date.now() - lastRequestTime) / 1000);
+      const remaining = COOLDOWN_SECONDS - elapsed;
+      if (remaining > 0) {
+        return NextResponse.json(
+          {
+            error: "Cooldown active",
+            message: `Please wait ${remaining} seconds before requesting again.`,
+            retryAfterSeconds: remaining,
+          },
+          { status: 429, headers: { "Retry-After": String(remaining) } }
+        );
+      }
+    }
+
+    // Rate limit check (only for generation attempts)
+    const rateLimitResult = await checkRateLimit(
+      `birthchart:rate:${user.id}`,
+      USER_RATE_LIMIT,
+      USER_RATE_WINDOW
+    );
+    if (!rateLimitResult.success) {
+      const retryAfter = Math.ceil((rateLimitResult.resetAt - Date.now()) / 1000);
+      return NextResponse.json(
+        {
+          error: "Rate limit exceeded",
+          message: `You've reached your hourly limit. Try again in ${Math.ceil(retryAfter / 60)} minutes.`,
+          retryAfterSeconds: retryAfter,
+        },
+        { status: 429, headers: { "Retry-After": String(retryAfter) } }
+      );
+    }
+
+    // Set cooldown NOW (we're about to generate)
+    await setCache(cooldownKey, Date.now(), COOLDOWN_SECONDS);
 
     // ========================================
     // STEP C: Generate fresh AI narrative
