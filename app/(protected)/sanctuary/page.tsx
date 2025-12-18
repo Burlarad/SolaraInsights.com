@@ -248,9 +248,9 @@ export default function SanctuaryInsightsPage() {
               </CardHeader>
               <CardContent>
                 <EmotionalCadenceTimeline
-                  dawn={insight.emotionalCadence.dawn}
-                  midday={insight.emotionalCadence.midday}
-                  dusk={insight.emotionalCadence.dusk}
+                  dawn={insight.emotionalCadence?.dawn ?? "—"}
+                  midday={insight.emotionalCadence?.midday ?? "—"}
+                  dusk={insight.emotionalCadence?.dusk ?? "—"}
                 />
               </CardContent>
             </Card>
@@ -263,7 +263,7 @@ export default function SanctuaryInsightsPage() {
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2">
-                    {insight.coreThemes.map((theme, i) => (
+                    {(insight.coreThemes ?? []).map((theme, i) => (
                       <li key={i} className="text-sm text-accent-ink/70 flex items-start gap-2">
                         <span className="text-accent-gold mt-1">✦</span>
                         <span>{theme}</span>
@@ -289,12 +289,12 @@ export default function SanctuaryInsightsPage() {
             <Card>
               <CardHeader>
                 <p className="micro-label mb-2">TAROT OVERVIEW — DAILY DRAW</p>
-                <CardTitle>{insight.tarot.cardName}</CardTitle>
-                <p className="text-sm text-accent-ink/60">{insight.tarot.arcanaType}</p>
+                <CardTitle>{insight.tarot?.cardName ?? "Your Card"}</CardTitle>
+                <p className="text-sm text-accent-ink/60">{insight.tarot?.arcanaType ?? ""}</p>
               </CardHeader>
               <CardContent className="space-y-3">
                 {(() => {
-                  const tarotCard = findTarotCard(insight.tarot.cardName);
+                  const tarotCard = insight.tarot?.cardName ? findTarotCard(insight.tarot.cardName) : null;
                   return tarotCard ? (
                     <div className="mb-4 flex justify-center">
                       <img
@@ -310,13 +310,13 @@ export default function SanctuaryInsightsPage() {
                   );
                 })()}
                 <p className="text-sm text-accent-ink/70 leading-relaxed">
-                  {insight.tarot.summary}
+                  {insight.tarot?.summary ?? ""}
                 </p>
                 <p className="text-sm text-accent-ink/70 leading-relaxed">
-                  {insight.tarot.symbolism}
+                  {insight.tarot?.symbolism ?? ""}
                 </p>
                 <p className="text-sm text-accent-ink/70 leading-relaxed">
-                  {insight.tarot.guidance}
+                  {insight.tarot?.guidance ?? ""}
                 </p>
               </CardContent>
             </Card>
@@ -325,11 +325,11 @@ export default function SanctuaryInsightsPage() {
             <Card>
               <CardHeader>
                 <p className="micro-label mb-2">RUNE WHISPER — DAILY SIGIL</p>
-                <CardTitle>{insight.rune.name} • {insight.rune.keyword}</CardTitle>
+                <CardTitle>{insight.rune?.name ?? "Your Rune"}{insight.rune?.keyword ? ` • ${insight.rune.keyword}` : ""}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {(() => {
-                  const rune = findRune(insight.rune.name);
+                  const rune = insight.rune?.name ? findRune(insight.rune.name) : null;
                   return rune ? (
                     <div className="mb-4 flex justify-center">
                       <img
@@ -345,11 +345,13 @@ export default function SanctuaryInsightsPage() {
                   );
                 })()}
                 <p className="text-sm text-accent-ink/70 leading-relaxed">
-                  {insight.rune.meaning}
+                  {insight.rune?.meaning ?? ""}
                 </p>
-                <p className="text-sm text-accent-ink/70 italic">
-                  &quot;{insight.rune.affirmation}&quot;
-                </p>
+                {insight.rune?.affirmation && (
+                  <p className="text-sm text-accent-ink/70 italic">
+                    &quot;{insight.rune.affirmation}&quot;
+                  </p>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -364,7 +366,7 @@ export default function SanctuaryInsightsPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex gap-3">
-                  {insight.luckyCompass.numbers.map((num, i) => (
+                  {(insight.luckyCompass?.numbers ?? []).map((num, i) => (
                     <div key={i} className="flex-1 pill bg-accent-muted text-center min-h-[72px] py-3 flex flex-col justify-center">
                       <p className="text-2xl font-bold text-accent-ink">{num.value}</p>
                       <p className="text-xs text-accent-ink/60 mt-1">{num.label}</p>
@@ -372,9 +374,9 @@ export default function SanctuaryInsightsPage() {
                   ))}
                 </div>
 
-                {insight.luckyCompass.numbers.length > 0 && (
+                {(insight.luckyCompass?.numbers?.length ?? 0) > 0 && (
                   <div className="text-sm text-accent-ink/60 space-y-2">
-                    {insight.luckyCompass.numbers.map((num, i) => (
+                    {(insight.luckyCompass?.numbers ?? []).map((num, i) => (
                       <p key={i} className="min-h-[44px] flex items-start py-1">
                         <span className="font-medium text-accent-ink/80 mr-2">{num.value}:</span>
                         <span>{num.meaning}</span>
@@ -386,7 +388,7 @@ export default function SanctuaryInsightsPage() {
                 <div>
                   <p className="micro-label mb-3">POWER WORDS</p>
                   <div className="flex flex-wrap gap-2">
-                    {insight.luckyCompass.powerWords.map((word, i) => (
+                    {(insight.luckyCompass?.powerWords ?? []).map((word, i) => (
                       <span
                         key={i}
                         className="pill bg-white text-accent-ink text-sm border border-border-subtle min-h-[44px] px-4 flex items-center"
@@ -397,12 +399,14 @@ export default function SanctuaryInsightsPage() {
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-border-subtle">
-                  <p className="micro-label mb-2">A HANDWRITTEN NOTE</p>
-                  <p className="text-sm text-accent-ink/70 italic leading-relaxed">
-                    &quot;{insight.luckyCompass.handwrittenNote}&quot;
-                  </p>
-                </div>
+                {insight.luckyCompass?.handwrittenNote && (
+                  <div className="pt-4 border-t border-border-subtle">
+                    <p className="micro-label mb-2">A HANDWRITTEN NOTE</p>
+                    <p className="text-sm text-accent-ink/70 italic leading-relaxed">
+                      &quot;{insight.luckyCompass.handwrittenNote}&quot;
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 

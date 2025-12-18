@@ -13,8 +13,10 @@ import { trackAiUsage } from "@/lib/ai/trackUsage";
 import { checkBudget, incrementBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai/costControl";
 import { AYREN_MODE_SHORT, PRO_SOCIAL_NUDGE_INSTRUCTION, HUMOR_INSTRUCTION, LOW_SIGNAL_GUARDRAIL } from "@/lib/ai/voice";
 import { parseMetadataFromSummary, getSummaryTextOnly } from "@/lib/social/summarize";
+import { normalizeInsight } from "@/lib/insights/normalizeInsight";
 
-const PROMPT_VERSION = 2;
+// Bump to v3 to invalidate legacy cached insights that may be missing fields
+const PROMPT_VERSION = 3;
 
 // P0-3: Rate limits for protected endpoint (per user)
 const USER_RATE_LIMIT = 20; // 20 requests per hour
@@ -171,10 +173,13 @@ export async function POST(req: NextRequest) {
         timezone: effectiveTimezone,
       });
 
+      // Normalize cached insight to ensure consistent shape
+      const normalizedCachedInsight = normalizeInsight(cachedInsight);
+
       // Include debug meta if enabled
       if (isDebugMode(req)) {
         return NextResponse.json({
-          ...cachedInsight,
+          ...normalizedCachedInsight,
           _debug: {
             timeframe,
             periodKey,
@@ -187,7 +192,7 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      return NextResponse.json(cachedInsight);
+      return NextResponse.json(normalizedCachedInsight);
     }
 
     // ========================================
@@ -294,7 +299,7 @@ export async function POST(req: NextRequest) {
         const nowCachedInsight = await getCache<SanctuaryInsight>(cacheKey);
         if (nowCachedInsight) {
           console.log(`[Insights] ✓ Found cached result on retry ${attempt}`);
-          return NextResponse.json(nowCachedInsight);
+          return NextResponse.json(normalizeInsight(nowCachedInsight));
         }
       }
 
@@ -466,9 +471,12 @@ LUCKY COMPASS RULES:
       throw new Error("Invalid response format from AI");
     }
 
-    // Cache the fresh insight (TTL varies by timeframe)
+    // Normalize the insight to ensure consistent shape before caching
+    const normalizedInsight = normalizeInsight(insight);
+
+    // Cache the normalized insight (TTL varies by timeframe)
     const ttlSeconds = getTtlSeconds(timeframe);
-    await setCache(cacheKey, insight, ttlSeconds);
+    await setCache(cacheKey, normalizedInsight, ttlSeconds);
 
     // Release lock after successful generation
     if (lockAcquired) {
@@ -476,10 +484,10 @@ LUCKY COMPASS RULES:
       console.log(`[Insights] ✓ Lock released for ${lockKey}`);
     }
 
-    // Return the insight with debug meta if enabled
+    // Return the normalized insight with debug meta if enabled
     if (isDebugMode(req)) {
       return NextResponse.json({
-        ...insight,
+        ...normalizedInsight,
         _debug: {
           timeframe,
           periodKey,
@@ -492,7 +500,7 @@ LUCKY COMPASS RULES:
       });
     }
 
-    return NextResponse.json(insight);
+    return NextResponse.json(normalizedInsight);
   } catch (error: any) {
     console.error("Error generating insights:", error);
 
