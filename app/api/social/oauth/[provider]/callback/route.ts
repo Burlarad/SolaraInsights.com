@@ -5,7 +5,6 @@ import { SocialProvider } from "@/types";
 import {
   exchangeCodeForTokens,
   getCallbackUrl,
-  getProviderScopes,
 } from "@/lib/social/oauth";
 import { isProviderEnabled } from "@/lib/oauth/providers";
 import { retrieveCodeVerifier } from "@/lib/oauth/pkce";
@@ -148,23 +147,19 @@ export async function GET(
       ? new Date(Date.now() + tokens.expiresIn * 1000).toISOString()
       : null;
 
-    // Store connection in database using service role
+    // Store tokens in social_accounts vault using service role
     const supabase = createServiceSupabaseClient();
 
     const { error: upsertError } = await supabase
-      .from("social_connections")
+      .from("social_accounts")
       .upsert(
         {
           user_id: storedState.userId,
           provider,
-          provider_user_id: tokens.userId,
-          status: "connected",
-          access_token_encrypted: accessTokenEncrypted,
-          refresh_token_encrypted: refreshTokenEncrypted,
-          token_expires_at: tokenExpiresAt,
-          scopes: getProviderScopes(provider).join(" "),
-          last_error: null,
-          updated_at: new Date().toISOString(),
+          external_user_id: tokens.userId,
+          access_token: accessTokenEncrypted,
+          refresh_token: refreshTokenEncrypted,
+          expires_at: tokenExpiresAt,
         },
         {
           onConflict: "user_id,provider",

@@ -11,18 +11,19 @@ import {
 } from "@/lib/validation/schemas";
 import { AYREN_MODE_SHORT } from "@/lib/ai/voice";
 import { createAdminSupabaseClient } from "@/lib/supabase/server";
-import { checkRateLimit, getClientIP } from "@/lib/cache/rateLimit";
+import { checkRateLimit, checkBurstLimit, getClientIP, createRateLimitResponse } from "@/lib/cache/rateLimit";
 import { ZODIAC_SIGNS } from "@/lib/constants";
 
 // Idempotency cache TTL: 60 seconds
 const IDEMPOTENCY_TTL = 60;
 
-// Rate limit: 10 requests per minute per IP
-const RATE_LIMIT = 10;
-const RATE_WINDOW = 60; // 1 minute
-
-// Cooldown: 10 seconds between requests
-const COOLDOWN_SECONDS = 10;
+// Rate limits (per IP - anonymous endpoint)
+// Human-friendly: DB hits (stone tablets) are FREE, only new generations count
+const RATE_LIMIT = 60; // 60 requests per hour per IP
+const RATE_WINDOW = 3600; // 1 hour
+const COOLDOWN_SECONDS = 5; // 5 second cooldown between generations
+const BURST_LIMIT = 10; // Max 10 requests in 10 seconds (anonymous = stricter)
+const BURST_WINDOW = 10;
 
 // Lock TTL: 30 seconds (for generation lock)
 const LOCK_TTL = 30;
@@ -55,54 +56,6 @@ function getSignDisplayName(signKey: string): string {
 
 export async function POST(req: NextRequest) {
   const clientIP = getClientIP(req);
-
-  // ========================================
-  // COOLDOWN CHECK (10 seconds)
-  // ========================================
-  const cooldownKey = `compat:cooldown:${clientIP}`;
-  const lastRequestTime = await getCache<number>(cooldownKey);
-
-  if (lastRequestTime) {
-    const elapsed = Math.floor((Date.now() - lastRequestTime) / 1000);
-    const remaining = COOLDOWN_SECONDS - elapsed;
-
-    if (remaining > 0) {
-      return NextResponse.json(
-        {
-          error: "Cooldown active",
-          message: `Please wait ${remaining} seconds before requesting again.`,
-          retryAfterSeconds: remaining,
-        },
-        { status: 429, headers: { "Retry-After": String(remaining) } }
-      );
-    }
-  }
-
-  // ========================================
-  // RATE LIMIT (10 per minute)
-  // ========================================
-  const rateLimitResult = await checkRateLimit(
-    `compat:rate:${clientIP}`,
-    RATE_LIMIT,
-    RATE_WINDOW
-  );
-
-  if (!rateLimitResult.success) {
-    const retryAfter = Math.ceil(
-      (rateLimitResult.resetAt - Date.now()) / 1000
-    );
-    return NextResponse.json(
-      {
-        error: "Rate limit exceeded",
-        message: `Too many requests. Try again in ${retryAfter} seconds.`,
-        retryAfterSeconds: retryAfter,
-      },
-      { status: 429, headers: { "Retry-After": String(retryAfter) } }
-    );
-  }
-
-  // Set cooldown for next request
-  await setCache(cooldownKey, Date.now(), COOLDOWN_SECONDS);
 
   try {
     // ========================================
@@ -161,7 +114,7 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (existingRow && !selectError) {
-      // Found in DB - return cached content
+      // Found in DB - return cached content (FREE - no rate limiting)
       console.log(`[PublicCompatibility] DB hit for pair: ${pairKey}`);
 
       const response: PublicCompatibilityResponse = {
@@ -188,36 +141,88 @@ export async function POST(req: NextRequest) {
     }
 
     // ========================================
+    // RATE LIMITING (only on new generation - DB hits are FREE)
+    // ========================================
+
+    // Burst protection (bot defense - stricter for anonymous)
+    const burstResult = await checkBurstLimit(`compat:${clientIP}`, BURST_LIMIT, BURST_WINDOW);
+    if (!burstResult.success) {
+      return NextResponse.json(
+        createRateLimitResponse(BURST_WINDOW, "You're moving too fast — slow down a bit."),
+        { status: 429, headers: { "Retry-After": String(BURST_WINDOW) } }
+      );
+    }
+
+    // Cooldown check
+    const cooldownKey = `compat:cooldown:${clientIP}`;
+    const lastRequestTime = await getCache<number>(cooldownKey);
+    if (lastRequestTime) {
+      const elapsed = Math.floor((Date.now() - lastRequestTime) / 1000);
+      const remaining = COOLDOWN_SECONDS - elapsed;
+      if (remaining > 0) {
+        return NextResponse.json(
+          createRateLimitResponse(remaining, `Please wait ${remaining} seconds before requesting again.`),
+          { status: 429, headers: { "Retry-After": String(remaining) } }
+        );
+      }
+    }
+
+    // Sustained rate limit check
+    const rateLimitResult = await checkRateLimit(
+      `compat:rate:${clientIP}`,
+      RATE_LIMIT,
+      RATE_WINDOW
+    );
+    if (!rateLimitResult.success) {
+      const retryAfter = Math.ceil((rateLimitResult.resetAt - Date.now()) / 1000);
+      return NextResponse.json(
+        createRateLimitResponse(retryAfter, "Too many compatibility requests. Please try again later."),
+        { status: 429, headers: { "Retry-After": String(retryAfter) } }
+      );
+    }
+
+    // Set cooldown (only after passing all rate limit checks)
+    await setCache(cooldownKey, Date.now(), COOLDOWN_SECONDS);
+
+    // ========================================
     // ACQUIRE LOCK (prevent duplicate generation)
     // ========================================
     const lockKey = `compat:lock:${pairKey}`;
     const existingLock = await getCache<string>(lockKey);
 
     if (existingLock) {
-      // Another request is generating - wait and retry DB check
+      // Another request is generating - PR-2: retry loop
       console.log(`[PublicCompatibility] Lock exists for ${pairKey}, waiting...`);
 
-      // Wait 2 seconds and check DB again
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const maxRetries = 3;
+      const retryDelay = 2000; // 2 seconds between retries
 
-      const { data: retryRow } = await admin
-        .from("public_compatibility")
-        .select("content_en_json, created_at")
-        .eq("pair_key", pairKey)
-        .single();
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
 
-      if (retryRow) {
-        const response: PublicCompatibilityResponse = {
-          ...(retryRow.content_en_json as PublicCompatibilityContent),
-          generatedAt: retryRow.created_at,
-          fromCache: true,
-        };
+        const { data: retryRow } = await admin
+          .from("public_compatibility")
+          .select("content_en_json, created_at")
+          .eq("pair_key", pairKey)
+          .single();
 
-        await setCache(idempotencyKey, response, IDEMPOTENCY_TTL);
-        return NextResponse.json(response);
+        if (retryRow) {
+          console.log(`[PublicCompatibility] ✓ Found DB result after ${attempt} wait(s)`);
+          const response: PublicCompatibilityResponse = {
+            ...(retryRow.content_en_json as PublicCompatibilityContent),
+            generatedAt: retryRow.created_at,
+            fromCache: true,
+          };
+
+          await setCache(idempotencyKey, response, IDEMPOTENCY_TTL);
+          return NextResponse.json(response);
+        }
+
+        console.log(`[PublicCompatibility] DB still empty after attempt ${attempt}/${maxRetries}`);
       }
 
-      // Still not ready - return temporary error
+      // Still not ready after all retries - return temporary error
+      console.log(`[PublicCompatibility] No DB result after ${maxRetries} retries, returning 503`);
       return NextResponse.json(
         {
           error: "Generation in progress",

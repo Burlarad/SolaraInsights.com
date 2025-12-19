@@ -31,52 +31,18 @@ const FULL_CARD_LIST = VALID_CARD_IDS.join('", "');
 const SESSION_COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
 
 export async function POST(req: NextRequest) {
-  // ========================================
-  // RATE LIMITING (Tiered: session + userId)
-  // ========================================
   // TODO: Extract userId from auth if available
   const userId: string | null = null; // Will be populated when auth is wired
 
-  const rateLimitResult = await checkTarotRateLimits(req, userId);
-  const rateLimitHeaders: Record<string, string> =
-    getTarotRateLimitHeaders(rateLimitResult);
-
-  // Set session cookie if this is a new session
-  if (rateLimitResult.isNewSession) {
-    rateLimitHeaders["Set-Cookie"] =
-      `tarot_session=${rateLimitResult.sessionId}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${SESSION_COOKIE_MAX_AGE}`;
-  }
-
-  if (!rateLimitResult.allowed) {
-    const retryAfter = rateLimitResult.retryAfterSeconds || 10;
-    const message =
-      rateLimitResult.reason === "cooldown"
-        ? `Please wait ${retryAfter} seconds before drawing again.`
-        : rateLimitResult.reason === "hourly_limit"
-        ? `You've reached your hourly limit. Try again in ${Math.ceil(retryAfter / 60)} minutes.`
-        : `You've reached your daily limit. Try again tomorrow.`;
-
-    return NextResponse.json(
-      {
-        error: "Rate limit exceeded",
-        message,
-        retryAfterSeconds: retryAfter,
-        reason: rateLimitResult.reason,
-      },
-      {
-        status: 429,
-        headers: { ...rateLimitHeaders, "Retry-After": String(retryAfter) },
-      }
-    );
-  }
-
   try {
-    // Validate request body
+    // ========================================
+    // 1. VALIDATE REQUEST (before everything)
+    // ========================================
     const validation = await validateRequest(req, publicTarotSchema);
     if (!validation.success) {
       return NextResponse.json(
         { error: "Validation failed", message: validation.error },
-        { status: 400, headers: rateLimitHeaders }
+        { status: 400 }
       );
     }
 
@@ -85,7 +51,7 @@ export async function POST(req: NextRequest) {
     const targetLanguage = language || "en";
 
     // ========================================
-    // IDEMPOTENCY CHECK
+    // 2. IDEMPOTENCY CHECK (idempotency hits are FREE)
     // ========================================
     // Include language in key so readings match requested language
     const idempotencyKey = `tarot:idempotency:${requestId}:${targetLanguage}`;
@@ -108,7 +74,43 @@ export async function POST(req: NextRequest) {
         timezone,
       });
 
-      return NextResponse.json(cachedReading, { headers: rateLimitHeaders });
+      return NextResponse.json(cachedReading);
+    }
+
+    // ========================================
+    // 3. RATE LIMITING (only on idempotency miss)
+    // ========================================
+    const rateLimitResult = await checkTarotRateLimits(req, userId);
+    const rateLimitHeaders: Record<string, string> =
+      getTarotRateLimitHeaders(rateLimitResult);
+
+    // Set session cookie if this is a new session
+    if (rateLimitResult.isNewSession) {
+      rateLimitHeaders["Set-Cookie"] =
+        `tarot_session=${rateLimitResult.sessionId}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${SESSION_COOKIE_MAX_AGE}`;
+    }
+
+    if (!rateLimitResult.allowed) {
+      const retryAfter = rateLimitResult.retryAfterSeconds || 10;
+      const message =
+        rateLimitResult.reason === "cooldown"
+          ? `Please wait ${retryAfter} seconds before drawing again.`
+          : rateLimitResult.reason === "hourly_limit"
+          ? `You've reached your hourly limit. Try again in ${Math.ceil(retryAfter / 60)} minutes.`
+          : `You've reached your daily limit. Try again tomorrow.`;
+
+      return NextResponse.json(
+        {
+          error: "Rate limit exceeded",
+          message,
+          retryAfterSeconds: retryAfter,
+          reason: rateLimitResult.reason,
+        },
+        {
+          status: 429,
+          headers: { ...rateLimitHeaders, "Retry-After": String(retryAfter) },
+        }
+      );
     }
 
     console.log(
@@ -339,7 +341,7 @@ CRITICAL: Use ONLY card IDs from the provided list. Any invalid ID will cause a 
         message:
           "We couldn't complete your reading. Please try again in a moment.",
       },
-      { status: 500, headers: rateLimitHeaders }
+      { status: 500 }
     );
   }
 }

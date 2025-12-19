@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { SocialProvider, SocialConnectionStatus, SocialStatusResponse } from "@/types";
+import { createServiceSupabaseClient } from "@/lib/supabase/service";
+import { SocialProvider, SocialStatusResponse } from "@/types";
 
 // All supported providers (5 only - YouTube and LinkedIn removed)
 const ALL_PROVIDERS: SocialProvider[] = [
@@ -15,6 +16,8 @@ const ALL_PROVIDERS: SocialProvider[] = [
  * GET /api/social/status
  *
  * Returns the status of all social connections for the current user.
+ * Reads from social_accounts (token vault) and social_summaries.
+ * Never exposes tokens - only returns: connected/disconnected, expires_at, needs_reauth, hasSummary.
  */
 export async function GET(req: NextRequest) {
   try {
@@ -31,21 +34,24 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Fetch all social connections for this user
-    const { data: connections, error: connectionsError } = await supabase
-      .from("social_connections")
-      .select("provider, status, handle, last_synced_at, last_error")
+    // Use service role to read from social_accounts (RLS blocks regular users)
+    const serviceSupabase = createServiceSupabaseClient();
+
+    // Fetch all social accounts for this user (tokens never exposed)
+    const { data: accounts, error: accountsError } = await serviceSupabase
+      .from("social_accounts")
+      .select("provider, expires_at")
       .eq("user_id", user.id);
 
-    if (connectionsError) {
-      console.error("[SocialStatus] Error fetching connections:", connectionsError);
+    if (accountsError) {
+      console.error("[SocialStatus] Error fetching accounts:", accountsError);
       return NextResponse.json(
         { error: "Database error", message: "Failed to load social connections." },
         { status: 500 }
       );
     }
 
-    // Fetch all social summaries for this user
+    // Fetch all social summaries for this user (regular client is fine here)
     const { data: summaries, error: summariesError } = await supabase
       .from("social_summaries")
       .select("provider")
@@ -62,33 +68,27 @@ export async function GET(req: NextRequest) {
     // Create a set of providers with summaries
     const providersWithSummaries = new Set(summaries?.map((s) => s.provider) || []);
 
-    // Create a map of connections by provider
-    const connectionMap = new Map<string, {
-      status: SocialConnectionStatus;
-      handle: string | null;
-      last_synced_at: string | null;
-      last_error: string | null;
-    }>();
-
-    for (const conn of connections || []) {
-      connectionMap.set(conn.provider, {
-        status: conn.status as SocialConnectionStatus,
-        handle: conn.handle,
-        last_synced_at: conn.last_synced_at,
-        last_error: conn.last_error,
-      });
+    // Create a map of accounts by provider
+    const accountMap = new Map<string, { expires_at: string | null }>();
+    for (const account of accounts || []) {
+      accountMap.set(account.provider, { expires_at: account.expires_at });
     }
+
+    const now = new Date();
 
     // Build response for all providers
     const response: SocialStatusResponse = {
       connections: ALL_PROVIDERS.map((provider) => {
-        const conn = connectionMap.get(provider);
+        const account = accountMap.get(provider);
+        const isConnected = !!account;
+        const expiresAt = account?.expires_at || null;
+        const needsReauth = isConnected && expiresAt ? new Date(expiresAt) < now : false;
+
         return {
           provider,
-          status: conn?.status || "disconnected",
-          handle: conn?.handle || null,
-          lastSyncedAt: conn?.last_synced_at || null,
-          lastError: conn?.last_error || null,
+          status: isConnected ? (needsReauth ? "needs_reauth" : "connected") : "disconnected",
+          expiresAt,
+          needsReauth,
           hasSummary: providersWithSummaries.has(provider),
         };
       }),

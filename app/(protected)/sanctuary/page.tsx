@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +13,15 @@ import { useSettings } from "@/providers/SettingsProvider";
 import { SanctuaryInsight, Timeframe } from "@/types";
 import { findTarotCard } from "@/lib/tarot";
 import { findRune } from "@/lib/runes";
+import { pickRotatingMessage, getErrorCategory, type ApiErrorResponse } from "@/lib/ui/pickRotatingMessage";
+
+interface ErrorInfo {
+  message: string;
+  errorCode?: string;
+  requestId?: string;
+  retryAfterSeconds?: number;
+  status: number;
+}
 
 export default function SanctuaryInsightsPage() {
   const router = useRouter();
@@ -22,6 +31,8 @@ export default function SanctuaryInsightsPage() {
   const [insight, setInsight] = useState<SanctuaryInsight | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorInfo, setErrorInfo] = useState<ErrorInfo | null>(null);
+  const [attemptCount, setAttemptCount] = useState(0);
 
   // Journal state
   const [journalContent, setJournalContent] = useState("");
@@ -29,9 +40,11 @@ export default function SanctuaryInsightsPage() {
   const [journalSavedMessage, setJournalSavedMessage] = useState<string | null>(null);
   const [journalError, setJournalError] = useState<string | null>(null);
 
-  const loadInsight = async () => {
+  const loadInsight = useCallback(async () => {
     setLoading(true);
     setError(null);
+    setErrorInfo(null);
+    setAttemptCount((prev) => prev + 1);
 
     try {
       const response = await fetch("/api/insights", {
@@ -45,28 +58,67 @@ export default function SanctuaryInsightsPage() {
         return;
       }
 
-      if (response.status === 400) {
-        const errorData = await response.json();
-        setError(errorData.message);
+      // Check content-type to avoid parsing non-JSON responses
+      const contentType = response.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        // Non-JSON response (HTML error page, etc.)
+        const category = getErrorCategory(response.status);
+        const rotatingMessage = pickRotatingMessage({
+          category: "non_json_response",
+          attempt: attemptCount + 1,
+        });
+        setError(rotatingMessage);
+        setErrorInfo({
+          message: rotatingMessage,
+          status: response.status,
+        });
         return;
       }
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to load insights");
+        // Parse error response with errorCode and requestId
+        const apiError = data as ApiErrorResponse;
+        const category = getErrorCategory(response.status, apiError.errorCode);
+        const rotatingMessage = pickRotatingMessage({
+          category,
+          attempt: attemptCount + 1,
+          retryAfterSeconds: apiError.retryAfterSeconds,
+        });
+
+        setError(rotatingMessage);
+        setErrorInfo({
+          message: rotatingMessage,
+          errorCode: apiError.errorCode,
+          requestId: apiError.requestId,
+          retryAfterSeconds: apiError.retryAfterSeconds,
+          status: response.status,
+        });
+        return;
       }
 
-      const data: SanctuaryInsight = await response.json();
-      setInsight(data);
+      const insightData: SanctuaryInsight = data;
+      setInsight(insightData);
+      setAttemptCount(0); // Reset on success
 
       // Load journal entry after insight is loaded
       loadJournalEntry();
     } catch (err: any) {
       console.error("Error loading insights:", err);
-      setError("We couldn't tune today's insight. Please try again in a moment.");
+      const rotatingMessage = pickRotatingMessage({
+        category: "provider_500",
+        attempt: attemptCount + 1,
+      });
+      setError(rotatingMessage);
+      setErrorInfo({
+        message: rotatingMessage,
+        status: 500,
+      });
     } finally {
       setLoading(false);
     }
-  };
+  }, [timeframe, attemptCount, router]);
 
   const loadJournalEntry = async () => {
     try {
@@ -187,6 +239,29 @@ export default function SanctuaryInsightsPage() {
             <Link href="/settings">
               <Button variant="gold">Tune your birth signature</Button>
             </Link>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Error state with debug crumb (for non-profile errors) */}
+      {error && !error.includes("birth signature") && !loading && (
+        <Card className="border-border-subtle bg-accent-muted/20">
+          <CardContent className="p-8 text-center space-y-4">
+            <p className="text-accent-ink/80 text-lg">{error}</p>
+
+            {/* Debug crumb */}
+            {errorInfo && (
+              <p className="text-xs text-accent-ink/40 font-mono">
+                {errorInfo.errorCode && `Code: ${errorInfo.errorCode}`}
+                {errorInfo.requestId && ` • Req: ${errorInfo.requestId}`}
+                {errorInfo.retryAfterSeconds && ` • Retry: ${errorInfo.retryAfterSeconds}s`}
+                {!errorInfo.errorCode && !errorInfo.requestId && `Status: ${errorInfo.status}`}
+              </p>
+            )}
+
+            <Button variant="outline" onClick={() => loadInsight()}>
+              Try again
+            </Button>
           </CardContent>
         </Card>
       )}

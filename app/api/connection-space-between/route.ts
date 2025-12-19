@@ -4,7 +4,7 @@ import { openai, OPENAI_MODELS } from "@/lib/openai/client";
 import { SpaceBetweenReport } from "@/types";
 import { getCache, setCache } from "@/lib/cache";
 import { acquireLockFailClosed, releaseLock, isRedisAvailable, REDIS_UNAVAILABLE_RESPONSE } from "@/lib/cache/redis";
-import { checkRateLimit } from "@/lib/cache/rateLimit";
+import { checkRateLimit, checkBurstLimit, createRateLimitResponse } from "@/lib/cache/rateLimit";
 import { touchLastSeen } from "@/lib/activity/touchLastSeen";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
 import { checkBudget, incrementBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai/costControl";
@@ -38,9 +38,12 @@ If social context appears to be meme content, reposts, or lacks personal express
 - Full chart if birth time known, sun-sign-only approach if birth time unknown`;
 
 // Rate limits for space between (per user)
-const USER_RATE_LIMIT = 10; // 10 requests per hour (more expensive)
-const USER_RATE_WINDOW = 3600; // 1 hour
-const COOLDOWN_SECONDS = 30; // 30 second cooldown
+// Human-friendly: existing reports are FREE, only new generations count
+const USER_RATE_LIMIT = 10; // 10 generations per day (very expensive endpoint)
+const USER_RATE_WINDOW = 86400; // 24 hours
+const COOLDOWN_SECONDS = 20; // 20 second cooldown between generations
+const BURST_LIMIT = 20; // Max 20 requests in 10 seconds (bot defense)
+const BURST_WINDOW = 10;
 
 const PROMPT_VERSION = 1;
 
@@ -73,45 +76,6 @@ export async function POST(req: NextRequest) {
     // Track user activity (non-blocking)
     const admin = createAdminSupabaseClient();
     void touchLastSeen(admin, user.id, 30);
-
-    // ========================================
-    // RATE LIMITING
-    // ========================================
-    const cooldownKey = `spacebetween:cooldown:${user.id}`;
-    const lastRequestTime = await getCache<number>(cooldownKey);
-    if (lastRequestTime) {
-      const elapsed = Math.floor((Date.now() - lastRequestTime) / 1000);
-      const remaining = COOLDOWN_SECONDS - elapsed;
-      if (remaining > 0) {
-        return NextResponse.json(
-          {
-            error: "Cooldown active",
-            message: `Please wait ${remaining} seconds before requesting again.`,
-            retryAfterSeconds: remaining,
-          },
-          { status: 429, headers: { "Retry-After": String(remaining) } }
-        );
-      }
-    }
-
-    const rateLimitResult = await checkRateLimit(
-      `spacebetween:rate:${user.id}`,
-      USER_RATE_LIMIT,
-      USER_RATE_WINDOW
-    );
-    if (!rateLimitResult.success) {
-      const retryAfter = Math.ceil((rateLimitResult.resetAt - Date.now()) / 1000);
-      return NextResponse.json(
-        {
-          error: "Rate limit exceeded",
-          message: `You've reached your hourly limit. Try again in ${Math.ceil(retryAfter / 60)} minutes.`,
-          retryAfterSeconds: retryAfter,
-        },
-        { status: 429, headers: { "Retry-After": String(retryAfter) } }
-      );
-    }
-
-    await setCache(cooldownKey, Date.now(), COOLDOWN_SECONDS);
 
     // Parse request body
     const body = await req.json();
@@ -201,6 +165,51 @@ export async function POST(req: NextRequest) {
     }
 
     console.log(`[SpaceBetween] No existing report for ${connectionId}, generating stone tablet...`);
+
+    // ========================================
+    // RATE LIMITING (only on new generation - existing reports are FREE)
+    // ========================================
+
+    // Burst protection (bot defense)
+    const burstResult = await checkBurstLimit(`spacebetween:${user.id}`, BURST_LIMIT, BURST_WINDOW);
+    if (!burstResult.success) {
+      return NextResponse.json(
+        createRateLimitResponse(BURST_WINDOW, "You're moving too fast — slow down a bit."),
+        { status: 429, headers: { "Retry-After": String(BURST_WINDOW) } }
+      );
+    }
+
+    // Cooldown check
+    const cooldownKey = `spacebetween:cooldown:${user.id}`;
+    const lastRequestTime = await getCache<number>(cooldownKey);
+    if (lastRequestTime) {
+      const elapsed = Math.floor((Date.now() - lastRequestTime) / 1000);
+      const remaining = COOLDOWN_SECONDS - elapsed;
+      if (remaining > 0) {
+        return NextResponse.json(
+          createRateLimitResponse(remaining, `Please wait ${remaining} seconds before generating another report.`),
+          { status: 429, headers: { "Retry-After": String(remaining) } }
+        );
+      }
+    }
+
+    // Sustained rate limit check (daily limit)
+    const rateLimitResult = await checkRateLimit(
+      `spacebetween:rate:${user.id}`,
+      USER_RATE_LIMIT,
+      USER_RATE_WINDOW
+    );
+    if (!rateLimitResult.success) {
+      const retryAfter = Math.ceil((rateLimitResult.resetAt - Date.now()) / 1000);
+      const hoursRemaining = Math.ceil(retryAfter / 3600);
+      return NextResponse.json(
+        createRateLimitResponse(retryAfter, `You've reached your daily limit for Space Between reports. Try again in ${hoursRemaining} hour${hoursRemaining > 1 ? 's' : ''}.`),
+        { status: 429, headers: { "Retry-After": String(retryAfter) } }
+      );
+    }
+
+    // Set cooldown (only after passing all rate limit checks)
+    await setCache(cooldownKey, Date.now(), COOLDOWN_SECONDS);
 
     // ========================================
     // GATHER LINKED PROFILE DATA (IF AVAILABLE)
@@ -302,20 +311,34 @@ export async function POST(req: NextRequest) {
     lockAcquired = lockResult.acquired;
 
     if (!lockAcquired) {
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Another request is already generating this report
+      // PR-2: Retry loop - wait and check DB multiple times
+      console.log(`[SpaceBetween] Lock already held for ${lockKey}, waiting for DB result...`);
 
-      const { data: nowExistingReport } = await supabase
-        .from("space_between_reports")
-        .select("*")
-        .eq("connection_id", connectionId)
-        .eq("language", language)
-        .eq("prompt_version", PROMPT_VERSION)
-        .single();
+      const maxRetries = 3;
+      const retryDelay = 3000; // 3 seconds between retries (longer for expensive operation)
 
-      if (nowExistingReport) {
-        return NextResponse.json(nowExistingReport);
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+
+        const { data: nowExistingReport } = await supabase
+          .from("space_between_reports")
+          .select("*")
+          .eq("connection_id", connectionId)
+          .eq("language", language)
+          .eq("prompt_version", PROMPT_VERSION)
+          .single();
+
+        if (nowExistingReport) {
+          console.log(`[SpaceBetween] ✓ Found DB result after ${attempt} wait(s)`);
+          return NextResponse.json(nowExistingReport);
+        }
+
+        console.log(`[SpaceBetween] DB still empty after attempt ${attempt}/${maxRetries}`);
       }
 
+      // Still not in DB after all retries - return 503
+      console.log(`[SpaceBetween] No DB result after ${maxRetries} retries, returning 503`);
       return NextResponse.json(
         { error: "Generation in progress", message: "Please try again in a moment." },
         { status: 503 }

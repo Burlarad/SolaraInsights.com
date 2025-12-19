@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createServiceSupabaseClient } from "@/lib/supabase/service";
 import { isValidProvider } from "@/lib/social/summarize";
 
 /**
  * POST /api/social/revoke
  *
- * Revokes a social connection and deletes the associated summary.
+ * Revokes a social connection by deleting tokens from social_accounts
+ * and removing the associated summary.
  */
 export async function POST(req: NextRequest) {
   const requestId = crypto.randomUUID().slice(0, 8);
@@ -37,7 +39,7 @@ export async function POST(req: NextRequest) {
 
     console.log(`[SocialRevoke:${requestId}] User ${user.id} revoking ${provider}`);
 
-    // Delete the social summary
+    // Delete the social summary (regular client is fine here)
     const { error: deleteSummaryError } = await supabase
       .from("social_summaries")
       .delete()
@@ -46,27 +48,19 @@ export async function POST(req: NextRequest) {
 
     if (deleteSummaryError) {
       console.error(`[SocialRevoke:${requestId}] Failed to delete summary:`, deleteSummaryError);
-      // Continue anyway - we still want to update the connection status
+      // Continue anyway - we still want to delete the account
     }
 
-    // Update connection status to disconnected and clear tokens
-    const { error: updateConnectionError } = await supabase
-      .from("social_connections")
-      .update({
-        status: "disconnected",
-        access_token_encrypted: null,
-        refresh_token_encrypted: null,
-        token_expires_at: null,
-        scopes: null,
-        last_synced_at: null,
-        last_error: null,
-        updated_at: new Date().toISOString(),
-      })
+    // Delete from social_accounts using service role (RLS blocks regular users)
+    const serviceSupabase = createServiceSupabaseClient();
+    const { error: deleteAccountError } = await serviceSupabase
+      .from("social_accounts")
+      .delete()
       .eq("user_id", user.id)
       .eq("provider", provider);
 
-    if (updateConnectionError) {
-      console.error(`[SocialRevoke:${requestId}] Failed to update connection:`, updateConnectionError);
+    if (deleteAccountError) {
+      console.error(`[SocialRevoke:${requestId}] Failed to delete account:`, deleteAccountError);
       return NextResponse.json(
         { error: "Database error", message: "Failed to revoke connection." },
         { status: 500 }

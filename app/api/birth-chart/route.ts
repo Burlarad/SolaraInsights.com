@@ -9,7 +9,7 @@ import { touchLastSeen } from "@/lib/activity/touchLastSeen";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
 import { checkBudget, incrementBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai/costControl";
 import { isRedisAvailable, REDIS_UNAVAILABLE_RESPONSE, getCache, setCache } from "@/lib/cache/redis";
-import { checkRateLimit } from "@/lib/cache/rateLimit";
+import { checkRateLimit, checkBurstLimit, createRateLimitResponse } from "@/lib/cache/rateLimit";
 import { AYREN_MODE_SOULPRINT_LONG } from "@/lib/ai/voice";
 import { validateBirthChartInsight, validateBatchedTabDeepDives, TAB_DEEP_DIVE_KEYS } from "@/lib/validation/schemas";
 import { isValidBirthTimezone } from "@/lib/location/detection";
@@ -18,11 +18,13 @@ import { isValidBirthTimezone } from "@/lib/location/detection";
 // Incremented when placements structure changes
 const SOUL_PATH_SCHEMA_VERSION = 8;
 
-// P0-3: Rate limits for birth chart (per user)
-// More generous limits since this is generated once and cached
-const USER_RATE_LIMIT = 5; // 5 requests per hour
+// Human-friendly rate limits for birth chart (only on cache miss)
+// Birth charts are generated once and cached forever, so limits are generous
+const USER_RATE_LIMIT = 20; // 20 generations per hour (rarely hit)
 const USER_RATE_WINDOW = 3600; // 1 hour
-const COOLDOWN_SECONDS = 60; // 1 minute cooldown
+const COOLDOWN_SECONDS = 10; // 10 second cooldown (human-friendly)
+const BURST_LIMIT = 10; // Max 10 requests in 10 seconds (bot defense)
+const BURST_WINDOW = 10; // 10 second burst window
 
 const PROMPT_VERSION = 2;
 
@@ -737,6 +739,16 @@ export async function POST() {
     // Only generation attempts count toward limits
     // ========================================
 
+    // Burst check first (bot defense - 10 requests in 10 seconds)
+    const burstResult = await checkBurstLimit(`birthchart:${user.id}`, BURST_LIMIT, BURST_WINDOW);
+    if (!burstResult.success) {
+      const retryAfter = Math.ceil((burstResult.resetAt - Date.now()) / 1000);
+      return NextResponse.json(
+        createRateLimitResponse(retryAfter, "Slow down — your Soul Print is already being generated."),
+        { status: 429, headers: { "Retry-After": String(retryAfter) } }
+      );
+    }
+
     // Cooldown check (only for generation attempts)
     const cooldownKey = `birthchart:cooldown:${user.id}`;
     const lastRequestTime = await getCache<number>(cooldownKey);
@@ -745,17 +757,13 @@ export async function POST() {
       const remaining = COOLDOWN_SECONDS - elapsed;
       if (remaining > 0) {
         return NextResponse.json(
-          {
-            error: "Cooldown active",
-            message: `Please wait ${remaining} seconds before requesting again.`,
-            retryAfterSeconds: remaining,
-          },
+          createRateLimitResponse(remaining, "Just a moment — your Soul Print is still loading."),
           { status: 429, headers: { "Retry-After": String(remaining) } }
         );
       }
     }
 
-    // Rate limit check (only for generation attempts)
+    // Sustained rate limit check (20 generations per hour)
     const rateLimitResult = await checkRateLimit(
       `birthchart:rate:${user.id}`,
       USER_RATE_LIMIT,
@@ -764,11 +772,7 @@ export async function POST() {
     if (!rateLimitResult.success) {
       const retryAfter = Math.ceil((rateLimitResult.resetAt - Date.now()) / 1000);
       return NextResponse.json(
-        {
-          error: "Rate limit exceeded",
-          message: `You've reached your hourly limit. Try again in ${Math.ceil(retryAfter / 60)} minutes.`,
-          retryAfterSeconds: retryAfter,
-        },
+        createRateLimitResponse(retryAfter, `You've reached your hourly limit. Try again in ${Math.ceil(retryAfter / 60)} minutes.`),
         { status: 429, headers: { "Retry-After": String(retryAfter) } }
       );
     }

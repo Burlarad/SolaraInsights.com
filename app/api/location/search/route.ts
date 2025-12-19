@@ -12,6 +12,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import tzLookup from "tz-lookup";
 import { getCache, setCache } from "@/lib/cache/redis";
+import { checkRateLimit, checkBurstLimit, getClientIP, createRateLimitResponse } from "@/lib/cache/rateLimit";
 
 // ========================================
 // Types
@@ -64,6 +65,13 @@ const CACHE_TTL_EMPTY = 6 * 60 * 60; // 6 hours for empty results
 
 const NOMINATIM_TIMEOUT_MS = 10000; // 10 seconds
 const RETRY_DELAYS_MS = [500, 1000, 2000]; // Exponential backoff
+
+// Rate limits (per IP - anonymous endpoint)
+const MAX_QUERY_LENGTH = 200; // Prevent DoS via huge queries
+const IP_RATE_LIMIT = 60; // 60 requests per hour per IP
+const IP_RATE_WINDOW = 3600; // 1 hour
+const BURST_LIMIT = 10; // Max 10 requests in 10 seconds (anonymous = stricter)
+const BURST_WINDOW = 10;
 
 // ========================================
 // Input Normalization
@@ -271,6 +279,9 @@ function transformResults(results: NominatimResult[]): LocationCandidate[] {
 
 export async function POST(req: NextRequest) {
   try {
+    // ========================================
+    // 1. VALIDATE REQUEST (before everything)
+    // ========================================
     const { query } = await req.json();
 
     if (!query || typeof query !== "string" || query.trim().length < 2) {
@@ -280,18 +291,61 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Normalize input
+    // Enforce max query length
+    if (query.length > MAX_QUERY_LENGTH) {
+      return NextResponse.json(
+        { error: `Query too long. Maximum ${MAX_QUERY_LENGTH} characters.` },
+        { status: 400 }
+      );
+    }
+
+    // ========================================
+    // 2. NORMALIZE + CACHE KEY
+    // ========================================
     const cleanQuery = normalizeWhitespace(query);
     const normalizedQuery = normalizeForCacheKey(query);
     const cacheKey = getCacheKey(normalizedQuery);
 
-    // Check cache first
+    // ========================================
+    // 3. CHECK CACHE FIRST (cache hits are FREE)
+    // ========================================
     const cached = await getCache<CachedSearchResult>(cacheKey);
     if (cached) {
       console.log(`[Location Search] Cache hit for: "${cleanQuery}"`);
       return NextResponse.json({ candidates: cached.candidates });
     }
 
+    // ========================================
+    // 4. RATE LIMITING (only on cache miss)
+    // ========================================
+    const clientIP = getClientIP(req);
+
+    // Burst protection (bot defense - stricter for anonymous)
+    const burstResult = await checkBurstLimit(`locsearch:${clientIP}`, BURST_LIMIT, BURST_WINDOW);
+    if (!burstResult.success) {
+      return NextResponse.json(
+        createRateLimitResponse(BURST_WINDOW, "You're searching too fast — slow down a bit."),
+        { status: 429, headers: { "Retry-After": String(BURST_WINDOW) } }
+      );
+    }
+
+    // Sustained rate limit check
+    const rateLimitResult = await checkRateLimit(
+      `locsearch:rate:${clientIP}`,
+      IP_RATE_LIMIT,
+      IP_RATE_WINDOW
+    );
+    if (!rateLimitResult.success) {
+      const retryAfter = Math.ceil((rateLimitResult.resetAt - Date.now()) / 1000);
+      return NextResponse.json(
+        createRateLimitResponse(retryAfter, "Too many location searches. Please try again later."),
+        { status: 429, headers: { "Retry-After": String(retryAfter) } }
+      );
+    }
+
+    // ========================================
+    // 5. FETCH FROM NOMINATIM
+    // ========================================
     console.log(`[Location Search] Searching for: "${cleanQuery}"`);
 
     // Prepare search queries

@@ -397,6 +397,9 @@ export interface Connection {
   birth_city: string | null;
   birth_region: string | null;
   birth_country: string | null;
+  birth_lat: number | null; // Latitude from PlacePicker
+  birth_lon: number | null; // Longitude from PlacePicker
+  timezone: string | null; // Timezone computed server-side from coordinates
   notes: string | null; // User's private notes about this connection
   is_mutual: boolean; // True if both users have added each other as connections
   space_between_enabled: boolean; // User's consent toggle for Space Between on this connection
@@ -502,10 +505,9 @@ export interface SocialSummary {
 export interface SocialStatusResponse {
   connections: {
     provider: SocialProvider;
-    status: SocialConnectionStatus;
-    handle: string | null;
-    lastSyncedAt: string | null;
-    lastError: string | null;
+    status: "connected" | "disconnected" | "needs_reauth";
+    expiresAt: string | null;
+    needsReauth: boolean;
     hasSummary: boolean;
   }[];
 }

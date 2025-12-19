@@ -14,16 +14,19 @@ interface ConnectionInsight {
   careSuggestions: string;
 }
 import { acquireLockFailClosed, releaseLock, isRedisAvailable, REDIS_UNAVAILABLE_RESPONSE } from "@/lib/cache/redis";
-import { checkRateLimit } from "@/lib/cache/rateLimit";
+import { checkRateLimit, checkBurstLimit, createRateLimitResponse } from "@/lib/cache/rateLimit";
 import { touchLastSeen } from "@/lib/activity/touchLastSeen";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
 import { checkBudget, incrementBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai/costControl";
 import { AYREN_MODE_SHORT } from "@/lib/ai/voice";
 
-// P0-3: Rate limits for connection insight (per user)
-const USER_RATE_LIMIT = 10; // 10 requests per hour
-const USER_RATE_WINDOW = 3600; // 1 hour
-const COOLDOWN_SECONDS = 30; // 30 second cooldown
+// Rate limits for connection insight (per user)
+// Human-friendly: cache hits are FREE, only cache misses count
+const USER_RATE_LIMIT = 20; // 20 generations per day (expensive endpoint)
+const USER_RATE_WINDOW = 86400; // 24 hours
+const COOLDOWN_SECONDS = 10; // 10 second cooldown between cache misses
+const BURST_LIMIT = 20; // Max 20 requests in 10 seconds (bot defense)
+const BURST_WINDOW = 10;
 
 const PROMPT_VERSION = 2;
 
@@ -48,48 +51,6 @@ export async function POST(req: NextRequest) {
     // Track user activity (non-blocking)
     const admin = createAdminSupabaseClient();
     void touchLastSeen(admin, user.id, 30);
-
-    // ========================================
-    // P0-3: USER RATE LIMITING
-    // ========================================
-    // Cooldown check
-    const cooldownKey = `conninsight:cooldown:${user.id}`;
-    const lastRequestTime = await getCache<number>(cooldownKey);
-    if (lastRequestTime) {
-      const elapsed = Math.floor((Date.now() - lastRequestTime) / 1000);
-      const remaining = COOLDOWN_SECONDS - elapsed;
-      if (remaining > 0) {
-        return NextResponse.json(
-          {
-            error: "Cooldown active",
-            message: `Please wait ${remaining} seconds before requesting again.`,
-            retryAfterSeconds: remaining,
-          },
-          { status: 429, headers: { "Retry-After": String(remaining) } }
-        );
-      }
-    }
-
-    // Rate limit check
-    const rateLimitResult = await checkRateLimit(
-      `conninsight:rate:${user.id}`,
-      USER_RATE_LIMIT,
-      USER_RATE_WINDOW
-    );
-    if (!rateLimitResult.success) {
-      const retryAfter = Math.ceil((rateLimitResult.resetAt - Date.now()) / 1000);
-      return NextResponse.json(
-        {
-          error: "Rate limit exceeded",
-          message: `You've reached your hourly limit. Try again in ${Math.ceil(retryAfter / 60)} minutes.`,
-          retryAfterSeconds: retryAfter,
-        },
-        { status: 429, headers: { "Retry-After": String(retryAfter) } }
-      );
-    }
-
-    // Set cooldown
-    await setCache(cooldownKey, Date.now(), COOLDOWN_SECONDS);
 
     // Parse request body
     const body = await req.json();
@@ -216,6 +177,51 @@ export async function POST(req: NextRequest) {
     console.log(`[ConnectionInsight] Cache miss for ${cacheKey}, generating fresh insight...`);
 
     // ========================================
+    // RATE LIMITING (only on cache miss - cache hits are FREE)
+    // ========================================
+
+    // Burst protection (bot defense)
+    const burstResult = await checkBurstLimit(`conninsight:${user.id}`, BURST_LIMIT, BURST_WINDOW);
+    if (!burstResult.success) {
+      return NextResponse.json(
+        createRateLimitResponse(BURST_WINDOW, "You're moving too fast — slow down a bit."),
+        { status: 429, headers: { "Retry-After": String(BURST_WINDOW) } }
+      );
+    }
+
+    // Cooldown check
+    const cooldownKey = `conninsight:cooldown:${user.id}`;
+    const lastRequestTime = await getCache<number>(cooldownKey);
+    if (lastRequestTime) {
+      const elapsed = Math.floor((Date.now() - lastRequestTime) / 1000);
+      const remaining = COOLDOWN_SECONDS - elapsed;
+      if (remaining > 0) {
+        return NextResponse.json(
+          createRateLimitResponse(remaining, `Please wait ${remaining} seconds before generating another insight.`),
+          { status: 429, headers: { "Retry-After": String(remaining) } }
+        );
+      }
+    }
+
+    // Sustained rate limit check (daily limit)
+    const rateLimitResult = await checkRateLimit(
+      `conninsight:rate:${user.id}`,
+      USER_RATE_LIMIT,
+      USER_RATE_WINDOW
+    );
+    if (!rateLimitResult.success) {
+      const retryAfter = Math.ceil((rateLimitResult.resetAt - Date.now()) / 1000);
+      const hoursRemaining = Math.ceil(retryAfter / 3600);
+      return NextResponse.json(
+        createRateLimitResponse(retryAfter, `You've reached your daily limit for connection insights. Try again in ${hoursRemaining} hour${hoursRemaining > 1 ? 's' : ''}.`),
+        { status: 429, headers: { "Retry-After": String(retryAfter) } }
+      );
+    }
+
+    // Set cooldown (only after passing all rate limit checks)
+    await setCache(cooldownKey, Date.now(), COOLDOWN_SECONDS);
+
+    // ========================================
     // P0: REDIS AVAILABILITY CHECK (fail closed)
     // ========================================
     if (!isRedisAvailable()) {
@@ -247,19 +253,26 @@ export async function POST(req: NextRequest) {
 
     if (!lockAcquired) {
       // Another request is already generating this insight
+      // PR-2: Retry loop - wait and check cache multiple times
       console.log(`[ConnectionInsight] Lock already held for ${lockKey}, waiting for cached result...`);
 
-      // Wait a bit and check cache again (likely populated by the other request)
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const maxRetries = 3;
+      const retryDelay = 2000; // 2 seconds between retries
 
-      const nowCachedInsight = await getCache<ConnectionInsight>(cacheKey);
-      if (nowCachedInsight) {
-        console.log(`[ConnectionInsight] ✓ Found cached result after lock wait`);
-        return NextResponse.json(nowCachedInsight);
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+
+        const nowCachedInsight = await getCache<ConnectionInsight>(cacheKey);
+        if (nowCachedInsight) {
+          console.log(`[ConnectionInsight] ✓ Found cached result after ${attempt} wait(s)`);
+          return NextResponse.json(nowCachedInsight);
+        }
+
+        console.log(`[ConnectionInsight] Cache still empty after attempt ${attempt}/${maxRetries}`);
       }
 
-      // Still not cached - return 503 to prevent duplicate generation
-      console.log(`[ConnectionInsight] No cached result after wait, returning 503`);
+      // Still not cached after all retries - return 503
+      console.log(`[ConnectionInsight] No cached result after ${maxRetries} retries, returning 503`);
       return NextResponse.json(
         { error: "Generation in progress", message: "Please try again in a moment." },
         { status: 503 }

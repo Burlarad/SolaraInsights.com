@@ -1,9 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { SanctuaryTabs } from "@/components/sanctuary/SanctuaryTabs";
 import type { FullBirthChartInsight, TabDeepDive } from "@/types/natalAI";
 import { SolaraCard } from "@/components/ui/solara-card";
+import { Button } from "@/components/ui/button";
+import { pickRotatingMessage, getErrorCategory, type ApiErrorResponse } from "@/lib/ui/pickRotatingMessage";
+
+interface ErrorInfo {
+  message: string;
+  errorCode?: string;
+  requestId?: string;
+  retryAfterSeconds?: number;
+  status: number;
+}
 
 /**
  * Reusable component for rendering a tab deep dive
@@ -122,6 +132,8 @@ type BirthChartResponse = {
 export default function BirthChartPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [errorInfo, setErrorInfo] = useState<ErrorInfo | null>(null);
+  const [attemptCount, setAttemptCount] = useState(0);
   const [incompleteProfile, setIncompleteProfile] = useState(false);
   const [insight, setInsight] = useState<FullBirthChartInsight | null>(null);
   const [placements, setPlacements] = useState<any | null>(null);
@@ -141,53 +153,93 @@ export default function BirthChartPage() {
     typeof insight.sections?.purposeAndGrowth === "string" &&
     typeof insight.sections?.innerWorld === "string";
 
-  useEffect(() => {
-    const fetchBirthChart = async () => {
-      setLoading(true);
-      setError(null);
-      setIncompleteProfile(false);
+  const fetchBirthChart = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    setErrorInfo(null);
+    setIncompleteProfile(false);
+    setAttemptCount((prev) => prev + 1);
 
-      try {
-        const res = await fetch("/api/birth-chart", { method: "POST" });
+    try {
+      const res = await fetch("/api/birth-chart", { method: "POST" });
 
-        if (res.status === 401) {
-          setError("Please sign in to view your Soul Path.");
-          setLoading(false);
-          return;
-        }
-
-        if (res.status === 400) {
-          const data = await res.json();
-          if (data?.error === "Incomplete profile") {
-            setIncompleteProfile(true);
-            setLoading(false);
-            return;
-          }
-        }
-
-        if (!res.ok) {
-          const data = await res.json().catch(() => null);
-          setError(
-            data?.message || "We couldn't generate your Soul Path. Please try again."
-          );
-          setLoading(false);
-          return;
-        }
-
-        const data: BirthChartResponse = await res.json();
-        console.log("[BirthChart UI] Received placements:", data.placements);
-        console.log("[BirthChart UI] Houses count:", data.placements?.houses?.length);
-        console.log("[BirthChart UI] Houses array:", data.placements?.houses);
-        setPlacements(data.placements || null);
-        setInsight(data.insight ?? null);
+      if (res.status === 401) {
+        setError("Please sign in to view your Soul Path.");
         setLoading(false);
-      } catch (err) {
-        console.error("[BirthChart] Client fetch error:", err);
-        setError("We couldn't generate your Soul Path. Please try again in a moment.");
-        setLoading(false);
+        return;
       }
-    };
 
+      // Check content-type to avoid parsing non-JSON
+      const contentType = res.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        const rotatingMessage = pickRotatingMessage({
+          category: "non_json_response",
+          attempt: attemptCount + 1,
+        });
+        setError(rotatingMessage);
+        setErrorInfo({
+          message: rotatingMessage,
+          status: res.status,
+        });
+        setLoading(false);
+        return;
+      }
+
+      const data = await res.json();
+
+      if (res.status === 400) {
+        if (data?.error === "Incomplete profile") {
+          setIncompleteProfile(true);
+          setLoading(false);
+          return;
+        }
+      }
+
+      if (!res.ok) {
+        const apiError = data as ApiErrorResponse;
+        const category = getErrorCategory(res.status, apiError.errorCode);
+        const rotatingMessage = pickRotatingMessage({
+          category,
+          attempt: attemptCount + 1,
+          retryAfterSeconds: apiError.retryAfterSeconds,
+        });
+
+        setError(rotatingMessage);
+        setErrorInfo({
+          message: rotatingMessage,
+          errorCode: apiError.errorCode,
+          requestId: apiError.requestId,
+          retryAfterSeconds: apiError.retryAfterSeconds,
+          status: res.status,
+        });
+        setLoading(false);
+        return;
+      }
+
+      const chartData: BirthChartResponse = data;
+      console.log("[BirthChart UI] Received placements:", chartData.placements);
+      console.log("[BirthChart UI] Houses count:", chartData.placements?.houses?.length);
+      console.log("[BirthChart UI] Houses array:", chartData.placements?.houses);
+      setPlacements(chartData.placements || null);
+      setInsight(chartData.insight ?? null);
+      setAttemptCount(0); // Reset on success
+      setLoading(false);
+    } catch (err) {
+      console.error("[BirthChart] Client fetch error:", err);
+      const rotatingMessage = pickRotatingMessage({
+        category: "provider_500",
+        attempt: attemptCount + 1,
+      });
+      setError(rotatingMessage);
+      setErrorInfo({
+        message: rotatingMessage,
+        status: 500,
+      });
+      setLoading(false);
+    }
+  }, [attemptCount]);
+
+  useEffect(() => {
     fetchBirthChart();
   }, []);
 
@@ -224,9 +276,22 @@ export default function BirthChartPage() {
       )}
 
       {!loading && error && !incompleteProfile && (
-        <div className="rounded-xl border border-accent-soft bg-accent-soft/30 p-8 space-y-3">
-          <h2 className="text-lg font-semibold">We couldn't generate your Soul Path</h2>
-          <p className="text-sm text-accent-ink/80">{error}</p>
+        <div className="rounded-xl border border-accent-soft bg-accent-soft/30 p-8 space-y-4 text-center">
+          <p className="text-lg text-accent-ink/80">{error}</p>
+
+          {/* Debug crumb */}
+          {errorInfo && (
+            <p className="text-xs text-accent-ink/40 font-mono">
+              {errorInfo.errorCode && `Code: ${errorInfo.errorCode}`}
+              {errorInfo.requestId && ` • Req: ${errorInfo.requestId}`}
+              {errorInfo.retryAfterSeconds && ` • Retry: ${errorInfo.retryAfterSeconds}s`}
+              {!errorInfo.errorCode && !errorInfo.requestId && `Status: ${errorInfo.status}`}
+            </p>
+          )}
+
+          <Button variant="outline" onClick={() => fetchBirthChart()}>
+            Try again
+          </Button>
         </div>
       )}
 

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceSupabaseClient } from "@/lib/supabase/service";
 import { SocialProvider } from "@/types";
 import { decryptToken, encryptToken } from "@/lib/social/crypto";
-import { refreshAccessToken, OAUTH_PROVIDERS } from "@/lib/social/oauth";
+import { refreshAccessToken } from "@/lib/social/oauth";
 import { fetchSocialContent } from "@/lib/social/fetchers";
 import { generateSocialSummary, SOCIAL_SUMMARY_PROMPT_VERSION } from "@/lib/social/summarize";
 
@@ -11,6 +11,7 @@ import { generateSocialSummary, SOCIAL_SUMMARY_PROMPT_VERSION } from "@/lib/soci
  *
  * Server-only route to sync social content for a user.
  * Protected by CRON_SECRET - not callable from browser.
+ * Reads/writes tokens from social_accounts vault.
  *
  * Body: { userId: string, provider: SocialProvider }
  */
@@ -53,64 +54,36 @@ export async function POST(req: NextRequest) {
 
     const supabase = createServiceSupabaseClient();
 
-    // Get the connection with encrypted tokens
-    const { data: connection, error: fetchError } = await supabase
-      .from("social_connections")
-      .select("*")
+    // Get the account with encrypted tokens from social_accounts vault
+    const { data: account, error: fetchError } = await supabase
+      .from("social_accounts")
+      .select("id, access_token, refresh_token, expires_at")
       .eq("user_id", userId)
       .eq("provider", provider)
       .single();
 
-    if (fetchError || !connection) {
-      console.error("[SocialSync] Connection not found:", fetchError);
+    if (fetchError || !account) {
+      console.error("[SocialSync] Account not found:", fetchError);
       return NextResponse.json(
-        { error: "Connection not found" },
+        { error: "Account not found" },
         { status: 404 }
       );
     }
 
-    if (!connection.access_token_encrypted) {
-      console.error("[SocialSync] No access token for connection");
-      await supabase
-        .from("social_connections")
-        .update({
-          status: "needs_reauth",
-          last_error: "No access token available",
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", connection.id);
-
+    if (!account.access_token) {
+      console.error("[SocialSync] No access token for account");
       return NextResponse.json(
         { error: "No access token" },
         { status: 400 }
       );
     }
 
-    // Update status to syncing
-    await supabase
-      .from("social_connections")
-      .update({
-        status: "syncing",
-        last_error: null,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", connection.id);
-
     // Decrypt access token
     let accessToken: string;
     try {
-      accessToken = decryptToken(connection.access_token_encrypted);
+      accessToken = decryptToken(account.access_token);
     } catch (err) {
       console.error("[SocialSync] Failed to decrypt token:", err);
-      await supabase
-        .from("social_connections")
-        .update({
-          status: "needs_reauth",
-          last_error: "Token decryption failed",
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", connection.id);
-
       return NextResponse.json(
         { error: "Token decryption failed" },
         { status: 500 }
@@ -118,22 +91,19 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if token is expired and refresh if needed
-    const tokenExpiry = connection.token_expires_at
-      ? new Date(connection.token_expires_at)
+    const tokenExpiry = account.expires_at
+      ? new Date(account.expires_at)
       : null;
 
     if (tokenExpiry && tokenExpiry < new Date()) {
       console.log(`[SocialSync] Token expired for ${provider}, attempting refresh`);
 
-      if (!connection.refresh_token_encrypted) {
+      if (!account.refresh_token) {
+        // Delete the account since we can't refresh - user needs to reconnect
         await supabase
-          .from("social_connections")
-          .update({
-            status: "needs_reauth",
-            last_error: "Token expired and no refresh token available",
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", connection.id);
+          .from("social_accounts")
+          .delete()
+          .eq("id", account.id);
 
         return NextResponse.json(
           { error: "Token expired, needs reauth" },
@@ -142,40 +112,37 @@ export async function POST(req: NextRequest) {
       }
 
       try {
-        const refreshToken = decryptToken(connection.refresh_token_encrypted);
+        const refreshToken = decryptToken(account.refresh_token);
         const newTokens = await refreshAccessToken(provider, refreshToken);
 
-        // Update tokens in database
+        // Update tokens in social_accounts
         const newAccessTokenEncrypted = encryptToken(newTokens.accessToken);
         const newRefreshTokenEncrypted = newTokens.refreshToken
           ? encryptToken(newTokens.refreshToken)
-          : connection.refresh_token_encrypted;
-        const newTokenExpiresAt = newTokens.expiresIn
+          : account.refresh_token;
+        const newExpiresAt = newTokens.expiresIn
           ? new Date(Date.now() + newTokens.expiresIn * 1000).toISOString()
           : null;
 
         await supabase
-          .from("social_connections")
+          .from("social_accounts")
           .update({
-            access_token_encrypted: newAccessTokenEncrypted,
-            refresh_token_encrypted: newRefreshTokenEncrypted,
-            token_expires_at: newTokenExpiresAt,
-            updated_at: new Date().toISOString(),
+            access_token: newAccessTokenEncrypted,
+            refresh_token: newRefreshTokenEncrypted,
+            expires_at: newExpiresAt,
           })
-          .eq("id", connection.id);
+          .eq("id", account.id);
 
         accessToken = newTokens.accessToken;
         console.log(`[SocialSync] Token refreshed for ${provider}`);
       } catch (refreshErr: any) {
         console.error("[SocialSync] Token refresh failed:", refreshErr.message);
+
+        // Delete the account since refresh failed - user needs to reconnect
         await supabase
-          .from("social_connections")
-          .update({
-            status: "needs_reauth",
-            last_error: `Token refresh failed: ${refreshErr.message}`,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", connection.id);
+          .from("social_accounts")
+          .delete()
+          .eq("id", account.id);
 
         return NextResponse.json(
           { error: "Token refresh failed" },
@@ -196,14 +163,13 @@ export async function POST(req: NextRequest) {
         fetchErr.message.toLowerCase().includes("401") ||
         fetchErr.message.toLowerCase().includes("forbidden");
 
-      await supabase
-        .from("social_connections")
-        .update({
-          status: isAuthError ? "needs_reauth" : "connected",
-          last_error: fetchErr.message,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", connection.id);
+      if (isAuthError) {
+        // Delete the account since token is invalid
+        await supabase
+          .from("social_accounts")
+          .delete()
+          .eq("id", account.id);
+      }
 
       return NextResponse.json(
         { error: "Content fetch failed", details: fetchErr.message },
@@ -214,17 +180,6 @@ export async function POST(req: NextRequest) {
     // Check if we got enough content
     if (!fetchedContent.content || fetchedContent.content.length < 100) {
       console.log(`[SocialSync] Insufficient content for ${provider} (${fetchedContent.postCount} posts)`);
-
-      await supabase
-        .from("social_connections")
-        .update({
-          status: "ready",
-          handle: fetchedContent.handle || connection.handle,
-          last_synced_at: new Date().toISOString(),
-          last_error: "Insufficient content for analysis",
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", connection.id);
 
       return NextResponse.json({
         success: true,
@@ -243,16 +198,6 @@ export async function POST(req: NextRequest) {
       );
     } catch (summaryErr: any) {
       console.error("[SocialSync] Summary generation failed:", summaryErr.message);
-
-      await supabase
-        .from("social_connections")
-        .update({
-          status: "connected",
-          handle: fetchedContent.handle || connection.handle,
-          last_error: `Summary generation failed: ${summaryErr.message}`,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", connection.id);
 
       return NextResponse.json(
         { error: "Summary generation failed", details: summaryErr.message },
@@ -286,32 +231,11 @@ ${JSON.stringify(summaryResult.metadata)}
 
     if (summaryError) {
       console.error("[SocialSync] Failed to save summary:", summaryError);
-      await supabase
-        .from("social_connections")
-        .update({
-          status: "connected",
-          last_error: "Failed to save summary",
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", connection.id);
-
       return NextResponse.json(
         { error: "Failed to save summary" },
         { status: 500 }
       );
     }
-
-    // Update connection status to ready
-    await supabase
-      .from("social_connections")
-      .update({
-        status: "ready",
-        handle: fetchedContent.handle || connection.handle,
-        last_synced_at: new Date().toISOString(),
-        last_error: null,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", connection.id);
 
     console.log(`[SocialSync] Sync complete for ${provider}, ${fetchedContent.postCount} posts analyzed`);
 

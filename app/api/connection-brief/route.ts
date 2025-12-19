@@ -4,17 +4,20 @@ import { openai, OPENAI_MODELS } from "@/lib/openai/client";
 import { DailyBrief } from "@/types";
 import { getCache, setCache, getDayKey } from "@/lib/cache";
 import { acquireLockFailClosed, releaseLock, isRedisAvailable, REDIS_UNAVAILABLE_RESPONSE } from "@/lib/cache/redis";
-import { checkRateLimit } from "@/lib/cache/rateLimit";
+import { checkRateLimit, checkBurstLimit, createRateLimitResponse } from "@/lib/cache/rateLimit";
 import { touchLastSeen } from "@/lib/activity/touchLastSeen";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
 import { checkBudget, incrementBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai/costControl";
 import { AYREN_MODE_SHORT, PRO_SOCIAL_NUDGE_INSTRUCTION, HUMOR_INSTRUCTION, LOW_SIGNAL_GUARDRAIL } from "@/lib/ai/voice";
 import { parseMetadataFromSummary, getSummaryTextOnly } from "@/lib/social/summarize";
 
-// Rate limits for daily brief (per user)
-const USER_RATE_LIMIT = 20; // 20 requests per hour
+// Human-friendly rate limits for connection briefs (only on cache miss)
+// Connections page may load many cards at once, so limits are generous
+const USER_RATE_LIMIT = 120; // 120 generations per hour (generous for many connections)
 const USER_RATE_WINDOW = 3600; // 1 hour
-const COOLDOWN_SECONDS = 10; // 10 second cooldown
+const COOLDOWN_SECONDS = 2; // 2 second cooldown (very short - cards load in parallel)
+const BURST_LIMIT = 30; // Max 30 requests in 10 seconds (bot defense, but allow parallel loads)
+const BURST_WINDOW = 10; // 10 second burst window
 
 const PROMPT_VERSION = 1;
 
@@ -136,6 +139,16 @@ export async function POST(req: NextRequest) {
     // Only generation attempts count toward limits
     // ========================================
 
+    // Burst check first (bot defense - 30 requests in 10 seconds, generous for parallel card loads)
+    const burstResult = await checkBurstLimit(`connbrief:${user.id}`, BURST_LIMIT, BURST_WINDOW);
+    if (!burstResult.success) {
+      const retryAfter = Math.ceil((burstResult.resetAt - Date.now()) / 1000);
+      return NextResponse.json(
+        createRateLimitResponse(retryAfter, "Slow down — your connection briefs are loading."),
+        { status: 429, headers: { "Retry-After": String(retryAfter) } }
+      );
+    }
+
     // Cooldown check (only for generation attempts)
     const cooldownKey = `connbrief:cooldown:${user.id}`;
     const lastRequestTime = await getCache<number>(cooldownKey);
@@ -144,17 +157,13 @@ export async function POST(req: NextRequest) {
       const remaining = COOLDOWN_SECONDS - elapsed;
       if (remaining > 0) {
         return NextResponse.json(
-          {
-            error: "Cooldown active",
-            message: `Please wait ${remaining} seconds before requesting again.`,
-            retryAfterSeconds: remaining,
-          },
+          createRateLimitResponse(remaining, "Just a moment — briefs are still loading."),
           { status: 429, headers: { "Retry-After": String(remaining) } }
         );
       }
     }
 
-    // Rate limit check (only for generation attempts)
+    // Sustained rate limit check (120 generations per hour)
     const rateLimitResult = await checkRateLimit(
       `connbrief:rate:${user.id}`,
       USER_RATE_LIMIT,
@@ -163,11 +172,7 @@ export async function POST(req: NextRequest) {
     if (!rateLimitResult.success) {
       const retryAfter = Math.ceil((rateLimitResult.resetAt - Date.now()) / 1000);
       return NextResponse.json(
-        {
-          error: "Rate limit exceeded",
-          message: `You've reached your hourly limit. Try again in ${Math.ceil(retryAfter / 60)} minutes.`,
-          retryAfterSeconds: retryAfter,
-        },
+        createRateLimitResponse(retryAfter, `You've reached your hourly limit. Try again in ${Math.ceil(retryAfter / 60)} minutes.`),
         { status: 429, headers: { "Retry-After": String(retryAfter) } }
       );
     }

@@ -4,6 +4,26 @@ import { Connection, DailyBrief } from "@/types";
 import { touchLastSeen } from "@/lib/activity/touchLastSeen";
 import { getDayKey } from "@/lib/cache";
 import { resolveProfileFromConnection } from "@/lib/connections/profileMatch";
+import tzLookup from "tz-lookup";
+
+// Helper to compute timezone from coordinates and validate it's not UTC/GMT
+function computeTimezone(lat: number, lon: number): string | null {
+  // Validate coordinate ranges
+  if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+    return null;
+  }
+
+  try {
+    const tz = tzLookup(lat, lon);
+    // Reject UTC/GMT timezones - they indicate ocean/invalid coordinates
+    if (!tz || tz === "UTC" || tz === "Etc/UTC" || tz.startsWith("Etc/GMT")) {
+      return null;
+    }
+    return tz;
+  } catch {
+    return null;
+  }
+}
 
 // Must match the PROMPT_VERSION in /api/connection-brief
 const DAILY_BRIEF_PROMPT_VERSION = 1;
@@ -136,6 +156,8 @@ export async function POST(req: NextRequest) {
       birth_city,
       birth_region,
       birth_country,
+      birth_lat,
+      birth_lon,
       linked_profile_id,
     } = body;
 
@@ -144,6 +166,18 @@ export async function POST(req: NextRequest) {
         { error: "Bad request", message: "Name and relationship type are required." },
         { status: 400 }
       );
+    }
+
+    // Compute timezone from coordinates if provided
+    let timezone: string | null = null;
+    if (birth_lat !== undefined && birth_lon !== undefined && birth_lat !== null && birth_lon !== null) {
+      timezone = computeTimezone(birth_lat, birth_lon);
+      if (!timezone) {
+        return NextResponse.json(
+          { error: "Bad request", message: "Invalid coordinates. Please select a valid birth location." },
+          { status: 400 }
+        );
+      }
     }
 
     // Attempt profile resolution (silent - never reveals account existence)
@@ -179,6 +213,9 @@ export async function POST(req: NextRequest) {
         birth_city: birth_city || null,
         birth_region: birth_region || null,
         birth_country: birth_country || null,
+        birth_lat: birth_lat ?? null,
+        birth_lon: birth_lon ?? null,
+        timezone: timezone,
       })
       .select()
       .single();
@@ -208,6 +245,8 @@ const BIRTH_LOCATION_FIELDS = [
   "birth_city",
   "birth_region",
   "birth_country",
+  "birth_lat",
+  "birth_lon",
 ] as const;
 
 export async function PATCH(req: NextRequest) {
@@ -342,6 +381,31 @@ export async function PATCH(req: NextRequest) {
 
       if (body.birth_country !== undefined) {
         updateData.birth_country = body.birth_country || null;
+      }
+
+      // Handle birth coordinates and compute timezone
+      if (body.birth_lat !== undefined || body.birth_lon !== undefined) {
+        const lat = body.birth_lat ?? null;
+        const lon = body.birth_lon ?? null;
+
+        if (lat !== null && lon !== null) {
+          // Both coordinates provided - compute timezone
+          const computedTimezone = computeTimezone(lat, lon);
+          if (!computedTimezone) {
+            return NextResponse.json(
+              { error: "Bad request", message: "Invalid coordinates. Please select a valid birth location." },
+              { status: 400 }
+            );
+          }
+          updateData.birth_lat = lat;
+          updateData.birth_lon = lon;
+          updateData.timezone = computedTimezone;
+        } else {
+          // Clearing coordinates - also clear timezone
+          updateData.birth_lat = null;
+          updateData.birth_lon = null;
+          updateData.timezone = null;
+        }
       }
 
       // Re-attempt linking if birth data changed and still unlinked

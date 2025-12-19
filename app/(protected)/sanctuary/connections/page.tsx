@@ -8,8 +8,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/shared/Chip";
+import { PlacePicker, PlaceSelection } from "@/components/shared/PlacePicker";
 import { Connection, DailyBrief } from "@/types";
 import { formatDateForDisplay } from "@/lib/datetime";
+import { pickRotatingMessage, getErrorCategory, type ApiErrorResponse } from "@/lib/ui/pickRotatingMessage";
+
+interface BriefErrorInfo {
+  message: string;
+  errorCode?: string;
+  requestId?: string;
+  retryAfterSeconds?: number;
+  status: number;
+  attempt: number;
+}
 import {
   ChevronDown,
   Loader2,
@@ -65,10 +76,9 @@ export default function ConnectionsPage() {
     relationship_type: "",
     birth_date: "",
     birth_time: "",
-    birth_city: "",
-    birth_region: "",
-    birth_country: "",
   });
+  const [editBirthPlace, setEditBirthPlace] = useState<PlaceSelection | null>(null);
+  const [editBirthPlaceDisplay, setEditBirthPlaceDisplay] = useState("");
   const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   // Notes state
@@ -78,6 +88,10 @@ export default function ConnectionsPage() {
 
   // Brief loading state (per connection)
   const [loadingBriefIds, setLoadingBriefIds] = useState<Set<string>>(new Set());
+  // Brief errors state (per connection)
+  const [briefErrors, setBriefErrors] = useState<Record<string, BriefErrorInfo>>({});
+  // Brief attempt counters (per connection)
+  const [briefAttempts, setBriefAttempts] = useState<Record<string, number>>({});
 
   // Space Between sheet state
   const [spaceSheetOpen, setSpaceSheetOpen] = useState(false);
@@ -89,9 +103,8 @@ export default function ConnectionsPage() {
   const [relationshipType, setRelationshipType] = useState("Partner");
   const [birthDate, setBirthDate] = useState("");
   const [birthTime, setBirthTime] = useState("");
-  const [birthCity, setBirthCity] = useState("");
-  const [birthRegion, setBirthRegion] = useState("");
-  const [birthCountry, setBirthCountry] = useState("");
+  const [birthPlace, setBirthPlace] = useState<PlaceSelection | null>(null);
+  const [birthPlaceDisplay, setBirthPlaceDisplay] = useState("");
   const [unknownBirthTime, setUnknownBirthTime] = useState(false);
   const [isAddingConnection, setIsAddingConnection] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
@@ -215,6 +228,17 @@ export default function ConnectionsPage() {
     async (connectionId: string) => {
       if (loadingBriefIds.has(connectionId)) return;
 
+      // Increment attempt counter
+      const currentAttempt = (briefAttempts[connectionId] || 0) + 1;
+      setBriefAttempts((prev) => ({ ...prev, [connectionId]: currentAttempt }));
+
+      // Clear previous error
+      setBriefErrors((prev) => {
+        const next = { ...prev };
+        delete next[connectionId];
+        return next;
+      });
+
       setLoadingBriefIds((prev) => new Set(prev).add(connectionId));
 
       try {
@@ -224,9 +248,29 @@ export default function ConnectionsPage() {
           body: JSON.stringify({ connectionId }),
         });
 
+        // Check content-type to avoid parsing non-JSON
+        const contentType = response.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+          const rotatingMessage = pickRotatingMessage({
+            category: "non_json_response",
+            attempt: currentAttempt,
+          });
+          setBriefErrors((prev) => ({
+            ...prev,
+            [connectionId]: {
+              message: rotatingMessage,
+              status: response.status,
+              attempt: currentAttempt,
+            },
+          }));
+          return;
+        }
+
         const data = await response.json();
 
         if (response.ok) {
+          // Success - clear attempts counter
+          setBriefAttempts((prev) => ({ ...prev, [connectionId]: 0 }));
           // Update connection with full brief
           setConnections((prev) =>
             prev.map((c) =>
@@ -242,9 +286,41 @@ export default function ConnectionsPage() {
                 : c
             )
           );
+        } else {
+          // Error response
+          const apiError = data as ApiErrorResponse;
+          const category = getErrorCategory(response.status, apiError.errorCode);
+          const rotatingMessage = pickRotatingMessage({
+            category,
+            attempt: currentAttempt,
+            retryAfterSeconds: apiError.retryAfterSeconds,
+          });
+          setBriefErrors((prev) => ({
+            ...prev,
+            [connectionId]: {
+              message: rotatingMessage,
+              errorCode: apiError.errorCode,
+              requestId: apiError.requestId,
+              retryAfterSeconds: apiError.retryAfterSeconds,
+              status: response.status,
+              attempt: currentAttempt,
+            },
+          }));
         }
       } catch (err) {
         console.error("Error generating brief:", err);
+        const rotatingMessage = pickRotatingMessage({
+          category: "provider_500",
+          attempt: currentAttempt,
+        });
+        setBriefErrors((prev) => ({
+          ...prev,
+          [connectionId]: {
+            message: rotatingMessage,
+            status: 500,
+            attempt: currentAttempt,
+          },
+        }));
       } finally {
         setLoadingBriefIds((prev) => {
           const next = new Set(prev);
@@ -253,7 +329,7 @@ export default function ConnectionsPage() {
         });
       }
     },
-    [loadingBriefIds]
+    [loadingBriefIds, briefAttempts]
   );
 
   const handleAddConnection = async (e: React.FormEvent) => {
@@ -263,18 +339,28 @@ export default function ConnectionsPage() {
       setIsAddingConnection(true);
       setAddError(null);
 
+      // Build request body with optional birth location
+      const requestBody: Record<string, unknown> = {
+        name,
+        relationship_type: relationshipType,
+        birth_date: birthDate || null,
+        birth_time: unknownBirthTime ? null : birthTime || null,
+      };
+
+      // Include birth location if selected from PlacePicker
+      if (birthPlace) {
+        requestBody.birth_city = birthPlace.birth_city;
+        requestBody.birth_region = birthPlace.birth_region;
+        requestBody.birth_country = birthPlace.birth_country;
+        requestBody.birth_lat = birthPlace.birth_lat;
+        requestBody.birth_lon = birthPlace.birth_lon;
+        // Server will compute timezone from coordinates
+      }
+
       const response = await fetch("/api/connections", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          relationship_type: relationshipType,
-          birth_date: birthDate || null,
-          birth_time: unknownBirthTime ? null : birthTime || null,
-          birth_city: birthCity || null,
-          birth_region: birthRegion || null,
-          birth_country: birthCountry || null,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       const data = await response.json();
@@ -293,9 +379,8 @@ export default function ConnectionsPage() {
       setRelationshipType("Partner");
       setBirthDate("");
       setBirthTime("");
-      setBirthCity("");
-      setBirthRegion("");
-      setBirthCountry("");
+      setBirthPlace(null);
+      setBirthPlaceDisplay("");
       setUnknownBirthTime(false);
 
       // Show saved message
@@ -409,10 +494,37 @@ export default function ConnectionsPage() {
       relationship_type: connection.relationship_type,
       birth_date: connection.birth_date || "",
       birth_time: connection.birth_time || "",
-      birth_city: connection.birth_city || "",
-      birth_region: connection.birth_region || "",
-      birth_country: connection.birth_country || "",
     });
+
+    // Initialize birth place from connection if coordinates exist
+    if (connection.birth_city && connection.birth_lat && connection.birth_lon && connection.timezone) {
+      const displayParts = [
+        connection.birth_city,
+        connection.birth_region,
+        connection.birth_country,
+      ].filter(Boolean);
+      setEditBirthPlaceDisplay(displayParts.join(", "));
+      setEditBirthPlace({
+        birth_city: connection.birth_city,
+        birth_region: connection.birth_region || "",
+        birth_country: connection.birth_country || "",
+        birth_lat: connection.birth_lat,
+        birth_lon: connection.birth_lon,
+        timezone: connection.timezone,
+      });
+    } else if (connection.birth_city) {
+      // Have city but no coordinates - show label but require re-select
+      const displayParts = [
+        connection.birth_city,
+        connection.birth_region,
+        connection.birth_country,
+      ].filter(Boolean);
+      setEditBirthPlaceDisplay(displayParts.join(", "));
+      setEditBirthPlace(null); // Needs re-selection
+    } else {
+      setEditBirthPlaceDisplay("");
+      setEditBirthPlace(null);
+    }
   };
 
   const cancelEditing = (e: React.MouseEvent) => {
@@ -436,9 +548,23 @@ export default function ConnectionsPage() {
       if (!isLinked) {
         updatePayload.birth_date = editForm.birth_date || null;
         updatePayload.birth_time = editForm.birth_time || null;
-        updatePayload.birth_city = editForm.birth_city || null;
-        updatePayload.birth_region = editForm.birth_region || null;
-        updatePayload.birth_country = editForm.birth_country || null;
+
+        // Include birth location from PlacePicker if selected
+        if (editBirthPlace) {
+          updatePayload.birth_city = editBirthPlace.birth_city;
+          updatePayload.birth_region = editBirthPlace.birth_region;
+          updatePayload.birth_country = editBirthPlace.birth_country;
+          updatePayload.birth_lat = editBirthPlace.birth_lat;
+          updatePayload.birth_lon = editBirthPlace.birth_lon;
+          // Server will compute timezone from coordinates
+        } else {
+          // Clear birth location if PlacePicker is empty
+          updatePayload.birth_city = null;
+          updatePayload.birth_region = null;
+          updatePayload.birth_country = null;
+          updatePayload.birth_lat = null;
+          updatePayload.birth_lon = null;
+        }
       }
 
       const response = await fetch("/api/connections", {
@@ -605,6 +731,27 @@ export default function ConnectionsPage() {
                                 Generating today&apos;s brief...
                               </span>
                             </div>
+                          ) : briefErrors[connection.id] ? (
+                            <div className="space-y-2">
+                              <p className="text-sm text-accent-ink/70">
+                                {briefErrors[connection.id].message}
+                              </p>
+                              <p className="text-xs text-accent-ink/40 font-mono">
+                                {briefErrors[connection.id].errorCode && `Code: ${briefErrors[connection.id].errorCode}`}
+                                {briefErrors[connection.id].requestId && ` • Req: ${briefErrors[connection.id].requestId}`}
+                                {briefErrors[connection.id].retryAfterSeconds && ` • Retry: ${briefErrors[connection.id].retryAfterSeconds}s`}
+                              </p>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  generateBriefForConnection(connection.id);
+                                }}
+                              >
+                                Try again
+                              </Button>
+                            </div>
                           ) : connection.todayBrief ? (
                             <p className="text-sm text-accent-ink/70 leading-relaxed">
                               {truncateText(connection.todayBrief.shared_vibe, 150)}
@@ -759,35 +906,33 @@ export default function ConnectionsPage() {
                                     }
                                   />
                                 </div>
-                                <div className="space-y-2">
-                                  <Label>Birth City</Label>
-                                  <Input
-                                    value={editForm.birth_city}
-                                    onChange={(e) =>
-                                      setEditForm({ ...editForm, birth_city: e.target.value })
-                                    }
-                                    placeholder="e.g. Los Angeles"
-                                  />
-                                </div>
-                                <div className="space-y-2">
-                                  <Label>Birth Region</Label>
-                                  <Input
-                                    value={editForm.birth_region}
-                                    onChange={(e) =>
-                                      setEditForm({ ...editForm, birth_region: e.target.value })
-                                    }
-                                    placeholder="e.g. California"
-                                  />
-                                </div>
                                 <div className="space-y-2 sm:col-span-2">
-                                  <Label>Birth Country</Label>
-                                  <Input
-                                    value={editForm.birth_country}
-                                    onChange={(e) =>
-                                      setEditForm({ ...editForm, birth_country: e.target.value })
-                                    }
-                                    placeholder="e.g. United States"
+                                  <Label>Birth Location</Label>
+                                  <PlacePicker
+                                    initialValue={editBirthPlaceDisplay}
+                                    placeholder="Search for their birth city..."
+                                    onSelect={(place) => {
+                                      setEditBirthPlace(place);
+                                      const displayParts = [
+                                        place.birth_city,
+                                        place.birth_region,
+                                        place.birth_country,
+                                      ].filter(Boolean);
+                                      setEditBirthPlaceDisplay(displayParts.join(", "));
+                                    }}
+                                    onClear={() => {
+                                      setEditBirthPlace(null);
+                                      setEditBirthPlaceDisplay("");
+                                    }}
                                   />
+                                  <p className="text-xs text-accent-ink/60">
+                                    Start typing to search, then select from the results
+                                  </p>
+                                  {editBirthPlace && (
+                                    <p className="text-xs text-accent-ink/60">
+                                      Timezone: {editBirthPlace.timezone}
+                                    </p>
+                                  )}
                                 </div>
                               </div>
                             )}
@@ -836,6 +981,24 @@ export default function ConnectionsPage() {
                                   </p>
                                 </div>
                               )}
+                            </div>
+                          ) : briefErrors[connection.id] ? (
+                            <div className="text-center py-6 space-y-3">
+                              <p className="text-accent-ink/70">
+                                {briefErrors[connection.id].message}
+                              </p>
+                              <p className="text-xs text-accent-ink/40 font-mono">
+                                {briefErrors[connection.id].errorCode && `Code: ${briefErrors[connection.id].errorCode}`}
+                                {briefErrors[connection.id].requestId && ` • Req: ${briefErrors[connection.id].requestId}`}
+                                {briefErrors[connection.id].retryAfterSeconds && ` • Retry: ${briefErrors[connection.id].retryAfterSeconds}s`}
+                              </p>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => generateBriefForConnection(connection.id)}
+                              >
+                                Try again
+                              </Button>
                             </div>
                           ) : connection.todayBrief ? (
                             <div>
@@ -1004,36 +1167,33 @@ export default function ConnectionsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="birthCity">Birth city (optional)</Label>
-                  <Input
-                    id="birthCity"
-                    value={birthCity}
-                    onChange={(e) => setBirthCity(e.target.value)}
-                    placeholder="e.g. Los Angeles"
+                  <Label>Birth location (optional)</Label>
+                  <PlacePicker
+                    initialValue={birthPlaceDisplay}
+                    placeholder="Search for their birth city..."
                     disabled={isAddingConnection}
+                    onSelect={(place) => {
+                      setBirthPlace(place);
+                      const displayParts = [
+                        place.birth_city,
+                        place.birth_region,
+                        place.birth_country,
+                      ].filter(Boolean);
+                      setBirthPlaceDisplay(displayParts.join(", "));
+                    }}
+                    onClear={() => {
+                      setBirthPlace(null);
+                      setBirthPlaceDisplay("");
+                    }}
                   />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="birthRegion">Birth region (optional)</Label>
-                  <Input
-                    id="birthRegion"
-                    value={birthRegion}
-                    onChange={(e) => setBirthRegion(e.target.value)}
-                    placeholder="e.g. California"
-                    disabled={isAddingConnection}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="birthCountry">Birth country (optional)</Label>
-                  <Input
-                    id="birthCountry"
-                    value={birthCountry}
-                    onChange={(e) => setBirthCountry(e.target.value)}
-                    placeholder="e.g. United States"
-                    disabled={isAddingConnection}
-                  />
+                  <p className="text-xs text-accent-ink/60">
+                    Start typing to search, then select from the results
+                  </p>
+                  {birthPlace && (
+                    <p className="text-xs text-accent-ink/60">
+                      Timezone: {birthPlace.timezone}
+                    </p>
+                  )}
                 </div>
 
                 <Button

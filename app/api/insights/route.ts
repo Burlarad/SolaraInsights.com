@@ -5,7 +5,7 @@ import { InsightsRequest, SanctuaryInsight } from "@/types";
 import { getTarotCardNames } from "@/lib/tarot";
 import { getRuneNames } from "@/lib/runes";
 import { getCache, setCache, acquireLockFailClosed, releaseLock, isRedisAvailable, REDIS_UNAVAILABLE_RESPONSE } from "@/lib/cache/redis";
-import { checkRateLimit } from "@/lib/cache/rateLimit";
+import { checkRateLimit, checkBurstLimit, createRateLimitResponse } from "@/lib/cache/rateLimit";
 import { getUserPeriodKeys, buildInsightCacheKey, buildInsightLockKey } from "@/lib/timezone/periodKeys";
 import { getEffectiveTimezone, isValidBirthTimezone } from "@/lib/location/detection";
 import { touchLastSeen } from "@/lib/activity/touchLastSeen";
@@ -14,14 +14,18 @@ import { checkBudget, incrementBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai
 import { AYREN_MODE_SHORT, PRO_SOCIAL_NUDGE_INSTRUCTION, HUMOR_INSTRUCTION, LOW_SIGNAL_GUARDRAIL } from "@/lib/ai/voice";
 import { parseMetadataFromSummary, getSummaryTextOnly } from "@/lib/social/summarize";
 import { normalizeInsight } from "@/lib/insights/normalizeInsight";
+import { createApiErrorResponse, generateRequestId, INSIGHTS_ERROR_CODES } from "@/lib/api/errorResponse";
 
 // Bump to v3 to invalidate legacy cached insights that may be missing fields
 const PROMPT_VERSION = 3;
 
-// P0-3: Rate limits for protected endpoint (per user)
-const USER_RATE_LIMIT = 20; // 20 requests per hour
+// Human-friendly rate limits (only applies on cache miss / generation)
+// Users can navigate Today→Week→Month→Year freely since cache hits bypass these
+const USER_RATE_LIMIT = 60; // 60 generations per hour (generous for heavy users)
 const USER_RATE_WINDOW = 3600; // 1 hour
-const COOLDOWN_SECONDS = 30; // 30 second cooldown between requests
+const COOLDOWN_SECONDS = 5; // 5 second cooldown (just enough to prevent spam)
+const BURST_LIMIT = 20; // Max 20 requests in 10 seconds (bot defense)
+const BURST_WINDOW = 10; // 10 second burst window
 
 /**
  * Check if debug mode is enabled (query param or non-production)
@@ -62,10 +66,13 @@ export async function POST(req: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json(
-      { error: "Unauthorized", message: "Please sign in to access insights." },
-      { status: 401 }
-    );
+    return createApiErrorResponse({
+      error: "Unauthorized",
+      message: "Please sign in to access insights.",
+      errorCode: INSIGHTS_ERROR_CODES.UNAUTHORIZED,
+      status: 401,
+      route: "/api/insights",
+    });
   }
 
   // Capture user ID for use in error handler
@@ -201,6 +208,20 @@ export async function POST(req: NextRequest) {
     // ========================================
     console.log(`[Insights] ✗ Cache miss for ${cacheKey}`);
 
+    // Burst check first (bot defense - 20 requests in 10 seconds)
+    const burstResult = await checkBurstLimit(`insights:${user.id}`, BURST_LIMIT, BURST_WINDOW);
+    if (!burstResult.success) {
+      const retryAfter = Math.ceil((burstResult.resetAt - Date.now()) / 1000);
+      return createApiErrorResponse({
+        error: "rate_limited",
+        message: "Slow down — you're generating insights too quickly.",
+        errorCode: INSIGHTS_ERROR_CODES.RATE_LIMIT,
+        status: 429,
+        retryAfterSeconds: retryAfter,
+        route: "/api/insights",
+      });
+    }
+
     // Cooldown check (only for generation attempts)
     const cooldownKey = `insights:cooldown:${user.id}`;
     const lastRequestTime = await getCache<number>(cooldownKey);
@@ -208,18 +229,18 @@ export async function POST(req: NextRequest) {
       const elapsed = Math.floor((Date.now() - lastRequestTime) / 1000);
       const remaining = COOLDOWN_SECONDS - elapsed;
       if (remaining > 0) {
-        return NextResponse.json(
-          {
-            error: "Cooldown active",
-            message: `Please wait ${remaining} seconds before requesting again.`,
-            retryAfterSeconds: remaining,
-          },
-          { status: 429, headers: { "Retry-After": String(remaining) } }
-        );
+        return createApiErrorResponse({
+          error: "rate_limited",
+          message: "Just a moment — your next insight is brewing.",
+          errorCode: INSIGHTS_ERROR_CODES.COOLDOWN,
+          status: 429,
+          retryAfterSeconds: remaining,
+          route: "/api/insights",
+        });
       }
     }
 
-    // Rate limit check (only for generation attempts)
+    // Sustained rate limit check (60 generations per hour)
     const rateLimitResult = await checkRateLimit(
       `insights:rate:${user.id}`,
       USER_RATE_LIMIT,
@@ -227,14 +248,14 @@ export async function POST(req: NextRequest) {
     );
     if (!rateLimitResult.success) {
       const retryAfter = Math.ceil((rateLimitResult.resetAt - Date.now()) / 1000);
-      return NextResponse.json(
-        {
-          error: "Rate limit exceeded",
-          message: `You've reached your hourly limit. Try again in ${Math.ceil(retryAfter / 60)} minutes.`,
-          retryAfterSeconds: retryAfter,
-        },
-        { status: 429, headers: { "Retry-After": String(retryAfter) } }
-      );
+      return createApiErrorResponse({
+        error: "rate_limited",
+        message: `You've reached your hourly limit. Try again in ${Math.ceil(retryAfter / 60)} minutes.`,
+        errorCode: INSIGHTS_ERROR_CODES.RATE_LIMIT,
+        status: 429,
+        retryAfterSeconds: retryAfter,
+        route: "/api/insights",
+      });
     }
 
     // Set cooldown NOW (we're about to generate)
@@ -262,7 +283,13 @@ export async function POST(req: NextRequest) {
     // ========================================
     if (!isRedisAvailable()) {
       console.warn("[Insights] Redis unavailable, failing closed");
-      return NextResponse.json(REDIS_UNAVAILABLE_RESPONSE, { status: 503 });
+      return createApiErrorResponse({
+        error: "service_unavailable",
+        message: "Our cosmic connection is temporarily down. Please try again shortly.",
+        errorCode: INSIGHTS_ERROR_CODES.REDIS_UNAVAILABLE,
+        status: 503,
+        route: "/api/insights",
+      });
     }
 
     // ========================================
@@ -271,7 +298,13 @@ export async function POST(req: NextRequest) {
     const budgetCheck = await checkBudget();
     if (!budgetCheck.allowed) {
       console.warn("[Insights] Budget exceeded, rejecting request");
-      return NextResponse.json(BUDGET_EXCEEDED_RESPONSE, { status: 503 });
+      return createApiErrorResponse({
+        error: "service_unavailable",
+        message: "The cosmic treasury needs to restock. Try again later.",
+        errorCode: INSIGHTS_ERROR_CODES.BUDGET_EXCEEDED,
+        status: 503,
+        route: "/api/insights",
+      });
     }
 
     // P0: Acquire lock with FAIL-CLOSED behavior
@@ -279,7 +312,13 @@ export async function POST(req: NextRequest) {
 
     if (lockResult.redisDown) {
       console.warn("[Insights] Redis unavailable during lock, failing closed");
-      return NextResponse.json(REDIS_UNAVAILABLE_RESPONSE, { status: 503 });
+      return createApiErrorResponse({
+        error: "service_unavailable",
+        message: "Our cosmic connection is temporarily down. Please try again shortly.",
+        errorCode: INSIGHTS_ERROR_CODES.REDIS_UNAVAILABLE,
+        status: 503,
+        route: "/api/insights",
+      });
     }
 
     const lockAcquired = lockResult.acquired;
@@ -305,10 +344,13 @@ export async function POST(req: NextRequest) {
 
       // Still not cached after all retries - return user-friendly response
       console.log(`[Insights] No cached result after ${MAX_RETRIES} retries, returning 503`);
-      return NextResponse.json(
-        { error: "Still generating", message: "Your insight is being created. Please try again in a moment." },
-        { status: 503 }
-      );
+      return createApiErrorResponse({
+        error: "still_generating",
+        message: "Your insight is being created. Please try again in a moment.",
+        errorCode: INSIGHTS_ERROR_CODES.LOCK_BUSY,
+        status: 503,
+        route: "/api/insights",
+      });
     } else {
       console.log(`[Insights] ✓ Lock acquired for ${lockKey}, generating insight...`);
     }
@@ -515,12 +557,12 @@ LUCKY COMPASS RULES:
       console.error("Error releasing lock on failure:", unlockError);
     }
 
-    return NextResponse.json(
-      {
-        error: "Generation failed",
-        message: "We couldn't tune today's insight. Please try again in a moment.",
-      },
-      { status: 500 }
-    );
+    return createApiErrorResponse({
+      error: "generation_failed",
+      message: "We couldn't tune today's insight. Please try again in a moment.",
+      errorCode: INSIGHTS_ERROR_CODES.PROVIDER_ERROR,
+      status: 500,
+      route: "/api/insights",
+    });
   }
 }

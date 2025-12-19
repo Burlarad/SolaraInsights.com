@@ -3,41 +3,23 @@ import { openai, OPENAI_MODELS } from "@/lib/openai/client";
 import { PublicHoroscopeResponse } from "@/types";
 import { getCache, setCache, getDayKey } from "@/lib/cache";
 import { acquireLockFailClosed, releaseLock, REDIS_UNAVAILABLE_RESPONSE } from "@/lib/cache/redis";
-import { checkRateLimit, getClientIP } from "@/lib/cache/rateLimit";
+import { checkRateLimit, checkBurstLimit, getClientIP, createRateLimitResponse } from "@/lib/cache/rateLimit";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
 import { checkBudget, incrementBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai/costControl";
 import { publicHoroscopeSchema, validateRequest } from "@/lib/validation/schemas";
 import { AYREN_MODE_SHORT } from "@/lib/ai/voice";
 
-// Rate limit: 30 requests per minute per IP
-const RATE_LIMIT = 30;
-const RATE_WINDOW_SECONDS = 60;
+// Rate limits (per IP - anonymous endpoint)
+// Human-friendly: cache hits are FREE, only cache misses count toward limits
+const RATE_LIMIT = 60; // 60 requests per hour per IP
+const RATE_WINDOW_SECONDS = 3600; // 1 hour
+const BURST_LIMIT = 10; // Max 10 requests in 10 seconds (anonymous = stricter)
+const BURST_WINDOW = 10;
 
 const PROMPT_VERSION = 2;
 
 export async function POST(req: NextRequest) {
-  // Rate limiting
   const clientIP = getClientIP(req);
-  const rateLimit = await checkRateLimit(
-    `public-horoscope:${clientIP}`,
-    RATE_LIMIT,
-    RATE_WINDOW_SECONDS
-  );
-
-  // Rate limit headers for all responses
-  const rateLimitHeaders: Record<string, string> = {
-    "X-RateLimit-Limit": String(rateLimit.limit),
-    "X-RateLimit-Remaining": String(rateLimit.remaining),
-    "X-RateLimit-Reset": String(Math.ceil(rateLimit.resetAt / 1000)),
-    "X-RateLimit-Backend": rateLimit.backend,
-  };
-
-  if (!rateLimit.success) {
-    return NextResponse.json(
-      { error: "Too many requests", message: "Please wait a moment before trying again." },
-      { status: 429, headers: rateLimitHeaders }
-    );
-  }
 
   let lockKey: string | undefined;
   let lockAcquired = false;
@@ -48,7 +30,7 @@ export async function POST(req: NextRequest) {
     if (!validation.success) {
       return NextResponse.json(
         { error: "Validation failed", message: validation.error },
-        { status: 400, headers: rateLimitHeaders }
+        { status: 400 }
       );
     }
 
@@ -59,14 +41,14 @@ export async function POST(req: NextRequest) {
     const signDisplayName = sign.charAt(0).toUpperCase() + sign.slice(1);
 
     // ========================================
-    // CACHING LAYER
+    // CACHING LAYER (check cache BEFORE rate limiting)
     // ========================================
 
     // Use timezone to compute a day key (public horoscopes refresh daily regardless of timeframe)
     const periodKey = getDayKey(timezone);
     const cacheKey = `publicHoroscope:v1:p${PROMPT_VERSION}:${sign}:${timeframe}:${periodKey}:${targetLanguage}`;
 
-    // Check cache
+    // Check cache - cache hits are FREE (no rate limiting)
     const cachedHoroscope = await getCache<PublicHoroscopeResponse>(cacheKey);
     if (cachedHoroscope) {
       console.log(`[PublicHoroscope] Cache hit for ${cacheKey}`);
@@ -88,10 +70,37 @@ export async function POST(req: NextRequest) {
         timezone,
       });
 
-      return NextResponse.json(cachedHoroscope, { headers: rateLimitHeaders });
+      return NextResponse.json(cachedHoroscope);
     }
 
     console.log(`[PublicHoroscope] Cache miss for ${cacheKey}, generating fresh horoscope...`);
+
+    // ========================================
+    // RATE LIMITING (only on cache miss - cache hits are FREE)
+    // ========================================
+
+    // Burst protection (bot defense - stricter for anonymous)
+    const burstResult = await checkBurstLimit(`pubhoroscope:${clientIP}`, BURST_LIMIT, BURST_WINDOW);
+    if (!burstResult.success) {
+      return NextResponse.json(
+        createRateLimitResponse(BURST_WINDOW, "You're moving too fast — slow down a bit."),
+        { status: 429, headers: { "Retry-After": String(BURST_WINDOW) } }
+      );
+    }
+
+    // Sustained rate limit check
+    const rateLimitResult = await checkRateLimit(
+      `pubhoroscope:rate:${clientIP}`,
+      RATE_LIMIT,
+      RATE_WINDOW_SECONDS
+    );
+    if (!rateLimitResult.success) {
+      const retryAfter = Math.ceil((rateLimitResult.resetAt - Date.now()) / 1000);
+      return NextResponse.json(
+        createRateLimitResponse(retryAfter, "Too many horoscope requests. Please try again later."),
+        { status: 429, headers: { "Retry-After": String(retryAfter) } }
+      );
+    }
 
     // ========================================
     // P0: BUDGET CHECK (before OpenAI call)
@@ -99,7 +108,7 @@ export async function POST(req: NextRequest) {
     const budgetCheck = await checkBudget();
     if (!budgetCheck.allowed) {
       console.warn(`[PublicHoroscope] Budget exceeded, rejecting request`);
-      return NextResponse.json(BUDGET_EXCEEDED_RESPONSE, { status: 503, headers: rateLimitHeaders });
+      return NextResponse.json(BUDGET_EXCEEDED_RESPONSE, { status: 503 });
     }
 
     // Build lock key to prevent stampeding herd
@@ -111,29 +120,36 @@ export async function POST(req: NextRequest) {
     // If Redis is down, fail closed (don't proceed with expensive OpenAI call)
     if (lockResult.redisDown) {
       console.warn(`[PublicHoroscope] Redis unavailable, failing closed`);
-      return NextResponse.json(REDIS_UNAVAILABLE_RESPONSE, { status: 503, headers: rateLimitHeaders });
+      return NextResponse.json(REDIS_UNAVAILABLE_RESPONSE, { status: 503 });
     }
 
     lockAcquired = lockResult.acquired;
 
     if (!lockAcquired) {
       // Another request is already generating this horoscope
+      // PR-2: Retry loop - wait and check cache multiple times
       console.log(`[PublicHoroscope] Lock already held for ${lockKey}, waiting for cached result...`);
 
-      // Wait a bit and check cache again (likely populated by the other request)
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const maxRetries = 3;
+      const retryDelay = 2000; // 2 seconds between retries
 
-      const nowCachedHoroscope = await getCache<PublicHoroscopeResponse>(cacheKey);
-      if (nowCachedHoroscope) {
-        console.log(`[PublicHoroscope] ✓ Found cached result after lock wait`);
-        return NextResponse.json(nowCachedHoroscope, { headers: rateLimitHeaders });
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+
+        const nowCachedHoroscope = await getCache<PublicHoroscopeResponse>(cacheKey);
+        if (nowCachedHoroscope) {
+          console.log(`[PublicHoroscope] ✓ Found cached result after ${attempt} wait(s)`);
+          return NextResponse.json(nowCachedHoroscope);
+        }
+
+        console.log(`[PublicHoroscope] Cache still empty after attempt ${attempt}/${maxRetries}`);
       }
 
-      // Still not cached - return 503 to prevent duplicate generation
-      console.log(`[PublicHoroscope] No cached result after wait, returning 503`);
+      // Still not cached after all retries - return 503
+      console.log(`[PublicHoroscope] No cached result after ${maxRetries} retries, returning 503`);
       return NextResponse.json(
         { error: "Generation in progress", message: "Please try again in a moment." },
-        { status: 503, headers: rateLimitHeaders }
+        { status: 503 }
       );
     } else {
       console.log(`[PublicHoroscope] ✓ Lock acquired for ${lockKey}, generating horoscope...`);
@@ -233,7 +249,7 @@ Follow the Ayren voice rules strictly: 2 paragraphs, non-deterministic wording, 
     }
 
     // Return the horoscope
-    return NextResponse.json(horoscope, { headers: rateLimitHeaders });
+    return NextResponse.json(horoscope);
   } catch (error: any) {
     console.error("Error generating public horoscope:", error);
 
@@ -251,7 +267,7 @@ Follow the Ayren voice rules strictly: 2 paragraphs, non-deterministic wording, 
         error: "Generation failed",
         message: "We couldn't generate the horoscope. Please try again in a moment.",
       },
-      { status: 500, headers: rateLimitHeaders }
+      { status: 500 }
     );
   }
 }

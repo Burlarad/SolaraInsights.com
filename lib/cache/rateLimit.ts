@@ -227,3 +227,35 @@ export function getClientIP(request: Request): string {
   // Fallback
   return "unknown";
 }
+
+/**
+ * Check burst rate limit (short window, strict limit).
+ * Used to block rapid-fire spam/bot attacks.
+ *
+ * @param key - Unique identifier (e.g., "burst:insights:{userId}")
+ * @param limit - Max requests in burst window (e.g., 20)
+ * @param windowSeconds - Short window (e.g., 10 seconds)
+ * @returns Rate limit result
+ */
+export async function checkBurstLimit(
+  key: string,
+  limit: number,
+  windowSeconds: number = 10
+): Promise<RateLimitResult> {
+  return checkRateLimit(`burst:${key}`, limit, windowSeconds);
+}
+
+/**
+ * Standard rate limit response for blocked requests.
+ * Returns user-friendly JSON with retry info.
+ */
+export function createRateLimitResponse(
+  retryAfterSeconds: number,
+  message?: string
+) {
+  return {
+    error: "rate_limited",
+    message: message || "You're moving fast — try again in a few seconds.",
+    retryAfterSeconds,
+  };
+}

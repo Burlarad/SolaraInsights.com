@@ -68,6 +68,27 @@ export function PlacePicker({
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Track the last selected label to avoid overwriting user's selection
+  const selectedLabelRef = useRef<string | null>(null);
+  // Track if user has manually typed (edited the input)
+  const hasUserTypedRef = useRef(false);
+
+  // Sync query with initialValue when it changes asynchronously (e.g., profile loads)
+  useEffect(() => {
+    // Only update if:
+    // 1. initialValue is non-empty
+    // 2. User hasn't manually typed in the field
+    // 3. The current query is empty OR matches the previous selected label (hydration case)
+    if (
+      initialValue &&
+      !hasUserTypedRef.current &&
+      (query === "" || query === selectedLabelRef.current)
+    ) {
+      setQuery(initialValue);
+      selectedLabelRef.current = initialValue;
+    }
+  }, [initialValue]); // Only depend on initialValue, not query
+
   // Debounced search function
   const searchLocations = useCallback(async (searchQuery: string) => {
     if (searchQuery.trim().length < 2) {
@@ -112,14 +133,25 @@ export function PlacePicker({
     const value = e.target.value;
     setQuery(value);
 
+    // Mark that user has typed - this prevents initialValue from overwriting
+    hasUserTypedRef.current = true;
+
     // Clear previous debounce timer
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
     }
 
-    // Clear selection if input is cleared
+    // Clear selection if input is cleared or user edits away from selected label
     if (!value.trim()) {
       setHasSearched(false);
+      selectedLabelRef.current = null;
+      hasUserTypedRef.current = false; // Reset so future initialValue updates can work
+      if (onClear) {
+        onClear();
+      }
+    } else if (value !== selectedLabelRef.current) {
+      // User is typing something different from the selected value
+      // Clear the upstream selection
       if (onClear) {
         onClear();
       }
@@ -137,6 +169,10 @@ export function PlacePicker({
     setCandidates([]);
     setIsOpen(false);
     setHasSearched(false);
+
+    // Track the selected label so we can preserve it
+    selectedLabelRef.current = candidate.displayName;
+    hasUserTypedRef.current = false; // Reset - user made a valid selection
 
     onSelect({
       birth_city: candidate.birth_city,
