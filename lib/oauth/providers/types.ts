@@ -9,12 +9,20 @@ import { SocialProvider } from "@/types";
 
 /**
  * Normalized token response from any provider
+ * Note: userId is required for DB storage (external_user_id NOT NULL)
  */
 export interface NormalizedTokens {
   accessToken: string;
   refreshToken: string | null;
   expiresIn: number | null;
   userId: string | null;
+}
+
+/**
+ * Tokens with guaranteed userId (after fetchUserId enrichment)
+ */
+export interface EnrichedTokens extends NormalizedTokens {
+  userId: string;
 }
 
 /**
@@ -91,6 +99,13 @@ export interface ProviderAdapter {
    * Parse and normalize the token response
    */
   parseTokenResponse(data: Record<string, unknown>): NormalizedTokens;
+
+  /**
+   * Fetch user ID from provider API if not returned in token response.
+   * Optional - only implement for providers that don't return userId in token exchange.
+   * Called automatically by exchangeCodeForTokens if userId is null.
+   */
+  fetchUserId?(accessToken: string): Promise<string>;
 }
 
 /**

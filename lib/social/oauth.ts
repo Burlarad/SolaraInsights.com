@@ -17,6 +17,7 @@ import {
   isProviderEnabled,
   PROVIDER_ADAPTERS,
   NormalizedTokens,
+  EnrichedTokens,
 } from "@/lib/oauth/providers";
 
 // Re-export for backwards compatibility
@@ -72,13 +73,17 @@ export function generateAuthUrl(
 /**
  * Exchange authorization code for tokens
  * Requires code_verifier for PKCE validation
+ *
+ * If the token response doesn't include userId, and the adapter provides
+ * a fetchUserId method, it will be called to populate userId.
+ * This is required because external_user_id is NOT NULL in the database.
  */
 export async function exchangeCodeForTokens(
   provider: SocialProvider,
   code: string,
   redirectUri: string,
   codeVerifier: string
-): Promise<NormalizedTokens> {
+): Promise<EnrichedTokens> {
   const adapter = getProviderAdapter(provider);
   const { clientId, clientSecret } = getOAuthCredentials(provider);
 
@@ -108,7 +113,29 @@ export async function exchangeCodeForTokens(
   }
 
   const data = await response.json();
-  return adapter.parseTokenResponse(data);
+  const tokens = adapter.parseTokenResponse(data);
+
+  // If userId is missing, try to fetch it via provider API
+  let userId = tokens.userId;
+
+  if (!userId && adapter.fetchUserId) {
+    console.log(`[OAuth] Fetching userId for ${provider} via API...`);
+    userId = await adapter.fetchUserId(tokens.accessToken);
+    console.log(`[OAuth] Fetched userId for ${provider}: present=${!!userId}`);
+  }
+
+  // userId is required for DB storage (external_user_id NOT NULL)
+  if (!userId) {
+    throw new Error(
+      `Failed to obtain user ID for ${provider}. ` +
+        `Token exchange didn't return user_id and no fetchUserId method available.`
+    );
+  }
+
+  return {
+    ...tokens,
+    userId,
+  };
 }
 
 /**

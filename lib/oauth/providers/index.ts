@@ -58,5 +58,5 @@ export function isProviderEnabled(provider: SocialProvider): boolean {
 }
 
 // Re-export types and utilities
-export type { ProviderAdapter, NormalizedTokens, ProviderRegistry } from "./types";
+export type { ProviderAdapter, NormalizedTokens, EnrichedTokens, ProviderRegistry } from "./types";
 export { isXOAuthEnabled } from "./x";

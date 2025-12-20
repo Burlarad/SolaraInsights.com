@@ -6,9 +6,74 @@
  * - Facebook doesn't support refresh tokens (uses long-lived tokens)
  * - Instagram supports refresh tokens
  * - Both use standard client_id/client_secret
+ * - Token exchange may not return user_id, so we fetch via Graph API /me
  */
 
 import { ProviderAdapter, NormalizedTokens } from "./types";
+
+/**
+ * Fetch Facebook user ID via Graph API /me endpoint.
+ * Facebook token exchange doesn't reliably return user_id in the response,
+ * so we must call the Graph API to get it.
+ *
+ * @param accessToken - The access token from token exchange
+ * @returns The Facebook user ID
+ * @throws Error if the API call fails or returns no id
+ */
+async function fetchFacebookUserId(accessToken: string): Promise<string> {
+  const response = await fetch(
+    "https://graph.facebook.com/me?fields=id",
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    const status = response.status;
+    console.error(`[Meta OAuth] Graph API /me failed with status: ${status}`);
+    throw new Error(`Failed to fetch Facebook user ID: HTTP ${status}`);
+  }
+
+  const data = await response.json();
+
+  if (!data.id) {
+    console.error("[Meta OAuth] Graph API /me returned no id");
+    throw new Error("Facebook Graph API returned no user ID");
+  }
+
+  return data.id as string;
+}
+
+/**
+ * Fetch Instagram user ID via Instagram Graph API.
+ * Similar to Facebook, but uses Instagram's endpoint.
+ *
+ * @param accessToken - The access token from token exchange
+ * @returns The Instagram user ID
+ * @throws Error if the API call fails or returns no id
+ */
+async function fetchInstagramUserId(accessToken: string): Promise<string> {
+  const response = await fetch(
+    `https://graph.instagram.com/me?fields=id&access_token=${accessToken}`
+  );
+
+  if (!response.ok) {
+    const status = response.status;
+    console.error(`[Meta OAuth] Instagram Graph API /me failed with status: ${status}`);
+    throw new Error(`Failed to fetch Instagram user ID: HTTP ${status}`);
+  }
+
+  const data = await response.json();
+
+  if (!data.id) {
+    console.error("[Meta OAuth] Instagram Graph API /me returned no id");
+    throw new Error("Instagram Graph API returned no user ID");
+  }
+
+  return data.id as string;
+}
 
 /**
  * Facebook OAuth Adapter
@@ -79,6 +144,12 @@ export const facebookAdapter: ProviderAdapter = {
       userId: (data.user_id as string) || null,
     };
   },
+
+  /**
+   * Fetch user ID from Graph API /me if not in token response.
+   * Facebook token exchange often doesn't include user_id.
+   */
+  fetchUserId: fetchFacebookUserId,
 };
 
 /**
@@ -156,4 +227,9 @@ export const instagramAdapter: ProviderAdapter = {
       userId: (data.user_id as string) || null,
     };
   },
+
+  /**
+   * Fetch user ID from Instagram Graph API /me if not in token response.
+   */
+  fetchUserId: fetchInstagramUserId,
 };
