@@ -6,18 +6,41 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useSettings } from "@/providers/SettingsProvider";
-import { supabase } from "@/lib/supabase/client";
-import { getPrimaryFacebookIdentity, getIdentityDisplayName } from "@/lib/social";
-import { User } from "@supabase/supabase-js";
-import { COMMON_TIMEZONES } from "@/lib/timezone";
 import { PlacePicker, PlaceSelection } from "@/components/shared/PlacePicker";
+import { SocialProvider } from "@/types";
+
+// Social provider configuration for display
+const SOCIAL_PROVIDERS: {
+  id: SocialProvider;
+  name: string;
+  color: string;
+  letter: string;
+  enabled: boolean;
+}[] = [
+  { id: "facebook", name: "Facebook", color: "#1877F2", letter: "F", enabled: true },
+  { id: "instagram", name: "Instagram", color: "#E4405F", letter: "I", enabled: false },
+  { id: "tiktok", name: "TikTok", color: "#000000", letter: "T", enabled: false },
+  { id: "x", name: "X (Twitter)", color: "#000000", letter: "X", enabled: false },
+  { id: "reddit", name: "Reddit", color: "#FF4500", letter: "R", enabled: false },
+];
+
+// Social connection status from /api/social/status
+interface SocialConnectionStatus {
+  provider: SocialProvider;
+  status: "connected" | "disconnected" | "needs_reauth";
+  expiresAt: string | null;
+  needsReauth: boolean;
+  hasSummary: boolean;
+}
 
 export default function SettingsPage() {
   const { profile, saveProfile, loading: profileLoading, error: profileError } = useSettings();
 
-  // Local form state
-  const [fullName, setFullName] = useState("");
-  const [preferredName, setPreferredName] = useState("");
+  // Local form state - split name fields
+  const [firstName, setFirstName] = useState("");
+  const [middleName, setMiddleName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [nickname, setNickname] = useState("");
   const [zodiacSign, setZodiacSign] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [birthTime, setBirthTime] = useState("");
@@ -45,15 +68,17 @@ export default function SettingsPage() {
   // Journal state
   const [journalMessage, setJournalMessage] = useState<string | null>(null);
 
-  // Social connections state
-  const [user, setUser] = useState<User | null>(null);
-  const [facebookIdentity, setFacebookIdentity] = useState<any | null>(null);
+  // Social connections state (from /api/social/status)
+  const [socialStatuses, setSocialStatuses] = useState<SocialConnectionStatus[]>([]);
+  const [socialStatusLoading, setSocialStatusLoading] = useState(true);
 
   // Load profile data into form fields
   useEffect(() => {
     if (profile) {
-      setFullName(profile.full_name || "");
-      setPreferredName(profile.preferred_name || "");
+      setFirstName(profile.first_name || "");
+      setMiddleName(profile.middle_name || "");
+      setLastName(profile.last_name || "");
+      setNickname(profile.preferred_name || "");
       setZodiacSign(profile.zodiac_sign || "");
       setBirthDate(profile.birth_date || "");
       setBirthTime(profile.birth_time || "");
@@ -89,18 +114,33 @@ export default function SettingsPage() {
     }
   }, [profile]);
 
-  // Load user and check for Facebook connection
+  // Load social connection status from /api/social/status
   useEffect(() => {
-    const loadUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setUser(user);
-        const fbIdentity = getPrimaryFacebookIdentity(user);
-        setFacebookIdentity(fbIdentity);
+    const loadSocialStatus = async () => {
+      try {
+        const response = await fetch("/api/social/status");
+        if (response.ok) {
+          const data = await response.json();
+          setSocialStatuses(data.connections || []);
+        }
+      } catch (err) {
+        console.error("Failed to load social status:", err);
+      } finally {
+        setSocialStatusLoading(false);
       }
     };
-    loadUser();
+    loadSocialStatus();
   }, []);
+
+  // Helper to get status for a specific provider
+  const getSocialStatus = (provider: SocialProvider): SocialConnectionStatus | undefined => {
+    return socialStatuses.find((s) => s.provider === provider);
+  };
+
+  // Connect handler - uses custom OAuth flow
+  const handleSocialConnect = (provider: SocialProvider) => {
+    window.location.href = `/api/social/oauth/${provider}/connect`;
+  };
 
   const handleSaveChanges = async () => {
     if (!profile) return;
@@ -124,9 +164,12 @@ export default function SettingsPage() {
 
     try {
       // Build update payload with pre-resolved location data
+      // Server will auto-compose full_name from first/middle/last
       const updatePayload: Record<string, any> = {
-        full_name: fullName,
-        preferred_name: preferredName,
+        first_name: firstName.trim() || null,
+        middle_name: middleName.trim() || null,
+        last_name: lastName.trim() || null,
+        preferred_name: nickname.trim() || null,
         zodiac_sign: zodiacSign,
         birth_date: birthDate,
         birth_time: unknownBirthTime ? null : birthTime || null,
@@ -210,20 +253,6 @@ export default function SettingsPage() {
     }
   };
 
-  const handleConnectFacebook = async () => {
-    try {
-      await supabase.auth.signInWithOAuth({
-        provider: "facebook",
-        options: {
-          redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/settings`,
-        },
-      });
-    } catch (err) {
-      console.error("Facebook connection error:", err);
-      alert("Unable to connect Facebook. Please try again.");
-    }
-  };
-
   if (profileLoading) {
     return (
       <div className="max-w-4xl mx-auto px-6 py-12">
@@ -269,26 +298,56 @@ export default function SettingsPage() {
           <section className="space-y-5">
             <h2 className="text-lg md:text-xl font-semibold text-accent-gold">Identity</h2>
 
-            <div className="grid md:grid-cols-2 gap-5">
+            {/* Gentle banner for existing users missing first/last name */}
+            {profile && (!profile.first_name || !profile.last_name) && (
+              <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-800">
+                Please add your first and last name for a more personalized experience.
+              </div>
+            )}
+
+            <div className="grid md:grid-cols-3 gap-5">
               <div className="space-y-2">
-                <Label htmlFor="fullName">Full name</Label>
+                <Label htmlFor="firstName">First name</Label>
                 <Input
-                  id="fullName"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Your full name"
+                  id="firstName"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  placeholder="Jane"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="preferredName">Preferred name</Label>
+                <Label htmlFor="middleName">Middle name</Label>
                 <Input
-                  id="preferredName"
-                  value={preferredName}
-                  onChange={(e) => setPreferredName(e.target.value)}
-                  placeholder="What should we call you?"
+                  id="middleName"
+                  value={middleName}
+                  onChange={(e) => setMiddleName(e.target.value)}
+                  placeholder="Optional"
                 />
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last name</Label>
+                <Input
+                  id="lastName"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  placeholder="Doe"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="nickname">Nickname</Label>
+              <Input
+                id="nickname"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+                placeholder="What should we call you?"
+              />
+              <p className="text-xs text-accent-ink/60">
+                If different from your first name
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -488,109 +547,77 @@ export default function SettingsPage() {
             </div>
 
             <div className="space-y-4">
-              {/* Facebook connection */}
-              <Card className="border-border-subtle">
-                <CardContent className="p-4 sm:p-5">
-                  {/* Mobile: Stack layout | Desktop: Row layout */}
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 rounded-full bg-[#1877F2] flex items-center justify-center text-white font-semibold flex-shrink-0">
-                        F
-                      </div>
-                      <div>
-                        <p className="text-sm md:text-base font-medium">Facebook</p>
-                        {facebookIdentity ? (
-                          <p className="text-xs md:text-sm text-accent-ink/60">
-                            Connected as {getIdentityDisplayName(facebookIdentity)}
-                          </p>
+              {SOCIAL_PROVIDERS.map((provider) => {
+                const status = getSocialStatus(provider.id);
+                const isConnected = status?.status === "connected";
+                const needsReauth = status?.status === "needs_reauth";
+                const isEnabled = provider.enabled;
+
+                return (
+                  <Card
+                    key={provider.id}
+                    className={`border-border-subtle ${!isEnabled ? "opacity-50" : ""}`}
+                  >
+                    <CardContent className="p-4 sm:p-5">
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="w-11 h-11 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0"
+                            style={{ backgroundColor: provider.color }}
+                          >
+                            {provider.letter}
+                          </div>
+                          <div>
+                            <p className="text-sm md:text-base font-medium">{provider.name}</p>
+                            {!isEnabled ? (
+                              <p className="text-xs md:text-sm text-accent-ink/60">Coming soon</p>
+                            ) : socialStatusLoading ? (
+                              <p className="text-xs md:text-sm text-accent-ink/60">Loading...</p>
+                            ) : isConnected ? (
+                              <p className="text-xs md:text-sm text-green-600">Connected</p>
+                            ) : needsReauth ? (
+                              <p className="text-xs md:text-sm text-amber-600">Needs reconnection</p>
+                            ) : (
+                              <p className="text-xs md:text-sm text-accent-ink/60">Not connected</p>
+                            )}
+                          </div>
+                        </div>
+                        {isEnabled ? (
+                          <Button
+                            variant="outline"
+                            onClick={() => handleSocialConnect(provider.id)}
+                            className="w-full sm:w-auto min-h-[44px]"
+                          >
+                            {needsReauth ? "Reconnect" : isConnected ? "Reconnect" : "Connect"}
+                          </Button>
                         ) : (
-                          <p className="text-xs md:text-sm text-accent-ink/60">Not connected</p>
+                          <Button
+                            variant="outline"
+                            disabled
+                            className="w-full sm:w-auto min-h-[44px]"
+                          >
+                            Coming Soon
+                          </Button>
                         )}
                       </div>
-                    </div>
-                    <Button
-                      variant="outline"
-                      onClick={handleConnectFacebook}
-                      className="w-full sm:w-auto min-h-[44px]"
-                    >
-                      {facebookIdentity ? "Reconnect" : "Connect"}
-                    </Button>
-                  </div>
 
-                  {facebookIdentity && (
-                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-border-subtle/60">
-                      <span className="text-sm text-accent-ink/80">
-                        Use to improve experience
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-accent-ink/60">ON</span>
-                        {/* TODO: Wire this to actual preference in profile */}
-                        <div className="w-11 h-7 bg-accent-gold rounded-full flex items-center px-1">
-                          <div className="w-5 h-5 bg-white rounded-full ml-auto"></div>
+                      {isEnabled && isConnected && (
+                        <div className="flex items-center justify-between mt-4 pt-4 border-t border-border-subtle/60">
+                          <span className="text-sm text-accent-ink/80">
+                            Use to improve experience
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-accent-ink/60">ON</span>
+                            <div className="w-11 h-7 bg-accent-gold rounded-full flex items-center px-1">
+                              <div className="w-5 h-5 bg-white rounded-full ml-auto"></div>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Placeholder for other social providers */}
-              <Card className="border-border-subtle opacity-50">
-                <CardContent className="p-4 sm:p-5">
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 rounded-full bg-black flex items-center justify-center text-white font-semibold flex-shrink-0">
-                        T
-                      </div>
-                      <div>
-                        <p className="text-sm md:text-base font-medium">TikTok</p>
-                        <p className="text-xs md:text-sm text-accent-ink/60">Coming soon</p>
-                      </div>
-                    </div>
-                    <Button variant="outline" disabled className="w-full sm:w-auto min-h-[44px]">
-                      Coming Soon
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-border-subtle opacity-50">
-                <CardContent className="p-4 sm:p-5">
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 rounded-full bg-black flex items-center justify-center text-white font-semibold flex-shrink-0">
-                        X
-                      </div>
-                      <div>
-                        <p className="text-sm md:text-base font-medium">X (Twitter)</p>
-                        <p className="text-xs md:text-sm text-accent-ink/60">Coming soon</p>
-                      </div>
-                    </div>
-                    <Button variant="outline" disabled className="w-full sm:w-auto min-h-[44px]">
-                      Coming Soon
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-border-subtle opacity-50">
-                <CardContent className="p-4 sm:p-5">
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 rounded-full bg-[#FF4500] flex items-center justify-center text-white font-semibold flex-shrink-0">
-                        R
-                      </div>
-                      <div>
-                        <p className="text-sm md:text-base font-medium">Reddit</p>
-                        <p className="text-xs md:text-sm text-accent-ink/60">Coming soon</p>
-                      </div>
-                    </div>
-                    <Button variant="outline" disabled className="w-full sm:w-auto min-h-[44px]">
-                      Coming Soon
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
 
               <p className="text-xs md:text-sm text-accent-ink/50 leading-relaxed">
                 Social insights are optional and help us better understand your unique

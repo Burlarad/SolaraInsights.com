@@ -4,8 +4,11 @@
 
 export interface Profile {
   id: string; // uuid, references auth.users.id
-  full_name: string | null;
-  preferred_name: string | null;
+  first_name: string | null;
+  middle_name: string | null;
+  last_name: string | null;
+  full_name: string | null; // Auto-composed from first + middle + last
+  preferred_name: string | null; // UI label: "Nickname"
   email: string;
   birth_date: string | null; // ISO date string
   birth_time: string | null; // HH:MM format
@@ -42,8 +45,11 @@ export interface Profile {
 }
 
 export interface ProfileUpdate {
-  full_name?: string | null;
-  preferred_name?: string | null;
+  first_name?: string | null;
+  middle_name?: string | null;
+  last_name?: string | null;
+  full_name?: string | null; // Auto-composed by server when first/last provided
+  preferred_name?: string | null; // UI label: "Nickname"
   birth_date?: string | null;
   birth_time?: string | null;
   birth_city?: string | null;
@@ -390,7 +396,10 @@ export interface Connection {
   id: string;
   owner_user_id: string;
   linked_profile_id: string | null;
-  name: string;
+  first_name: string | null;
+  middle_name: string | null;
+  last_name: string | null;
+  name: string; // Auto-composed from first + middle + last
   relationship_type: string;
   birth_date: string | null; // ISO date string
   birth_time: string | null; // HH:MM format

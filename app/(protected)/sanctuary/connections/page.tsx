@@ -72,7 +72,9 @@ export default function ConnectionsPage() {
   // Edit mode state
   const [editingCardId, setEditingCardId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({
-    name: "",
+    first_name: "",
+    middle_name: "",
+    last_name: "",
     relationship_type: "",
     birth_date: "",
     birth_time: "",
@@ -99,7 +101,9 @@ export default function ConnectionsPage() {
   const [spaceSheetConnectionName, setSpaceSheetConnectionName] = useState("");
 
   // Add connection form state
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [middleName, setMiddleName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [relationshipType, setRelationshipType] = useState("Partner");
   const [birthDate, setBirthDate] = useState("");
   const [birthTime, setBirthTime] = useState("");
@@ -341,7 +345,9 @@ export default function ConnectionsPage() {
 
       // Build request body with optional birth location
       const requestBody: Record<string, unknown> = {
-        name,
+        first_name: firstName,
+        middle_name: middleName || null,
+        last_name: lastName,
         relationship_type: relationshipType,
         birth_date: birthDate || null,
         birth_time: unknownBirthTime ? null : birthTime || null,
@@ -375,7 +381,9 @@ export default function ConnectionsPage() {
       setNotesMap((prev) => ({ ...prev, [newConnection.id]: "" }));
 
       // Clear form
-      setName("");
+      setFirstName("");
+      setMiddleName("");
+      setLastName("");
       setRelationshipType("Partner");
       setBirthDate("");
       setBirthTime("");
@@ -490,7 +498,9 @@ export default function ConnectionsPage() {
     e.stopPropagation();
     setEditingCardId(connection.id);
     setEditForm({
-      name: connection.name,
+      first_name: connection.first_name || "",
+      middle_name: connection.middle_name || "",
+      last_name: connection.last_name || "",
       relationship_type: connection.relationship_type,
       birth_date: connection.birth_date || "",
       birth_time: connection.birth_time || "",
@@ -540,7 +550,9 @@ export default function ConnectionsPage() {
 
       const updatePayload: Record<string, unknown> = {
         id: connectionId,
-        name: editForm.name,
+        first_name: editForm.first_name,
+        middle_name: editForm.middle_name || null,
+        last_name: editForm.last_name,
         relationship_type: editForm.relationship_type,
       };
 
@@ -854,11 +866,34 @@ export default function ConnectionsPage() {
 
                             <div className="grid gap-4 sm:grid-cols-2">
                               <div className="space-y-2">
-                                <Label>Name</Label>
+                                <Label>First name</Label>
                                 <Input
-                                  value={editForm.name}
+                                  value={editForm.first_name}
                                   onChange={(e) =>
-                                    setEditForm({ ...editForm, name: e.target.value })
+                                    setEditForm({ ...editForm, first_name: e.target.value })
+                                  }
+                                  required
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label>Last name</Label>
+                                <Input
+                                  value={editForm.last_name}
+                                  onChange={(e) =>
+                                    setEditForm({ ...editForm, last_name: e.target.value })
+                                  }
+                                  required
+                                />
+                              </div>
+                            </div>
+
+                            <div className="grid gap-4 sm:grid-cols-2">
+                              <div className="space-y-2">
+                                <Label>Middle name (optional)</Label>
+                                <Input
+                                  value={editForm.middle_name}
+                                  onChange={(e) =>
+                                    setEditForm({ ...editForm, middle_name: e.target.value })
                                   }
                                 />
                               </div>
@@ -1099,14 +1134,38 @@ export default function ConnectionsPage() {
                   </div>
                 )}
 
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName">First name</Label>
+                    <Input
+                      id="firstName"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      placeholder="First"
+                      required
+                      disabled={isAddingConnection}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName">Last name</Label>
+                    <Input
+                      id="lastName"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      placeholder="Last"
+                      required
+                      disabled={isAddingConnection}
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
+                  <Label htmlFor="middleName">Middle name (optional)</Label>
                   <Input
-                    id="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Their name"
-                    required
+                    id="middleName"
+                    value={middleName}
+                    onChange={(e) => setMiddleName(e.target.value)}
+                    placeholder="Middle"
                     disabled={isAddingConnection}
                   />
                 </div>

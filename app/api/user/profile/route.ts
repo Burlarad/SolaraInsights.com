@@ -28,6 +28,53 @@ export async function PATCH(req: NextRequest) {
     // Parse request body
     const updates = await req.json();
 
+    // Check if this is an onboarding completion request
+    const isOnboardingCompletion = updates.is_onboarded === true;
+
+    // If onboarding, require first_name and last_name
+    if (isOnboardingCompletion) {
+      if (!updates.first_name?.trim()) {
+        return NextResponse.json(
+          { error: "ValidationFailed", message: "First name is required." },
+          { status: 400 }
+        );
+      }
+      if (!updates.last_name?.trim()) {
+        return NextResponse.json(
+          { error: "ValidationFailed", message: "Last name is required." },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Auto-compose full_name when first_name and last_name are provided
+    // Only compose if at least first_name or last_name is being updated
+    const hasNameUpdate =
+      updates.first_name !== undefined ||
+      updates.middle_name !== undefined ||
+      updates.last_name !== undefined;
+
+    if (hasNameUpdate) {
+      // Get current profile to merge with updates
+      const { data: currentProfile } = await supabase
+        .from("profiles")
+        .select("first_name, middle_name, last_name")
+        .eq("id", user.id)
+        .single();
+
+      // Merge current values with updates
+      const firstName = (updates.first_name !== undefined ? updates.first_name : currentProfile?.first_name) || "";
+      const middleName = (updates.middle_name !== undefined ? updates.middle_name : currentProfile?.middle_name) || "";
+      const lastName = (updates.last_name !== undefined ? updates.last_name : currentProfile?.last_name) || "";
+
+      // Only compose full_name if we have at least first or last name
+      if (firstName.trim() || lastName.trim()) {
+        const nameParts = [firstName.trim(), middleName.trim(), lastName.trim()].filter(Boolean);
+        updates.full_name = nameParts.join(" ");
+      }
+      // Don't wipe full_name if first/last are missing - keep legacy value
+    }
+
     // Auto-calculate zodiac sign if birth_date is provided
     if (updates.birth_date) {
       const sign = getZodiacSign(updates.birth_date);

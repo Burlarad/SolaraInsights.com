@@ -149,7 +149,9 @@ export async function POST(req: NextRequest) {
     // Parse request body
     const body = await req.json();
     const {
-      name,
+      first_name,
+      middle_name,
+      last_name,
       relationship_type,
       birth_date,
       birth_time,
@@ -161,12 +163,24 @@ export async function POST(req: NextRequest) {
       linked_profile_id,
     } = body;
 
-    if (!name || !relationship_type) {
+    // Validate required fields
+    if (!first_name?.trim() || !last_name?.trim()) {
       return NextResponse.json(
-        { error: "Bad request", message: "Name and relationship type are required." },
+        { error: "Bad request", message: "First name and last name are required." },
         { status: 400 }
       );
     }
+
+    if (!relationship_type) {
+      return NextResponse.json(
+        { error: "Bad request", message: "Relationship type is required." },
+        { status: 400 }
+      );
+    }
+
+    // Compose name from split fields (server-side)
+    const nameParts = [first_name.trim(), middle_name?.trim(), last_name.trim()].filter(Boolean);
+    const composedName = nameParts.join(" ");
 
     // Compute timezone from coordinates if provided
     let timezone: string | null = null;
@@ -187,7 +201,7 @@ export async function POST(req: NextRequest) {
     if (!linked_profile_id) {
       // Only resolve if not explicitly provided
       resolvedProfileId = await resolveProfileFromConnection(admin, user.id, {
-        name,
+        name: composedName,
         birth_date: birth_date || null,
         birth_time: birth_time || null,
         birth_city: birth_city || null,
@@ -196,7 +210,7 @@ export async function POST(req: NextRequest) {
       });
 
       if (resolvedProfileId) {
-        console.log(`[Connections] Resolved profile ${resolvedProfileId} for connection "${name}"`);
+        console.log(`[Connections] Resolved profile ${resolvedProfileId} for connection "${composedName}"`);
       }
     }
 
@@ -206,7 +220,10 @@ export async function POST(req: NextRequest) {
       .insert({
         owner_user_id: user.id,
         linked_profile_id: linked_profile_id || resolvedProfileId || null,
-        name,
+        first_name: first_name.trim(),
+        middle_name: middle_name?.trim() || null,
+        last_name: last_name.trim(),
+        name: composedName,
         relationship_type,
         birth_date: birth_date || null,
         birth_time: birth_time || null,
@@ -316,15 +333,34 @@ export async function PATCH(req: NextRequest) {
       updated_at: new Date().toISOString(),
     };
 
-    // Always-allowed fields
-    if (body.name !== undefined) {
-      if (typeof body.name !== "string" || body.name.trim().length === 0) {
+    // Handle split name fields (always allowed)
+    const hasNameUpdate =
+      body.first_name !== undefined ||
+      body.middle_name !== undefined ||
+      body.last_name !== undefined;
+
+    if (hasNameUpdate) {
+      // Merge with existing values
+      const firstName = body.first_name !== undefined ? body.first_name : existing.first_name;
+      const middleName = body.middle_name !== undefined ? body.middle_name : existing.middle_name;
+      const lastName = body.last_name !== undefined ? body.last_name : existing.last_name;
+
+      // Validate first and last name are present
+      if (!firstName?.trim() || !lastName?.trim()) {
         return NextResponse.json(
-          { error: "Bad request", message: "Name must be a non-empty string." },
+          { error: "Bad request", message: "First name and last name are required." },
           { status: 400 }
         );
       }
-      updateData.name = body.name.trim();
+
+      // Store split fields
+      updateData.first_name = firstName.trim();
+      updateData.middle_name = middleName?.trim() || null;
+      updateData.last_name = lastName.trim();
+
+      // Compose name from split fields
+      const nameParts = [firstName.trim(), middleName?.trim(), lastName.trim()].filter(Boolean);
+      updateData.name = nameParts.join(" ");
     }
 
     if (body.relationship_type !== undefined) {
@@ -408,18 +444,19 @@ export async function PATCH(req: NextRequest) {
         }
       }
 
-      // Re-attempt linking if birth data changed and still unlinked
+      // Re-attempt linking if birth data or name changed and still unlinked
       const birthFieldsChanged =
         body.birth_date !== undefined ||
         body.birth_city !== undefined ||
         body.birth_region !== undefined ||
         body.birth_country !== undefined ||
-        body.name !== undefined;
+        hasNameUpdate;
 
       if (birthFieldsChanged) {
         // Build the connection data for matching (use new values if provided, else existing)
+        // Use composed name from updateData if name was updated, else existing.name
         const matchData = {
-          name: (body.name !== undefined ? body.name.trim() : existing.name),
+          name: (updateData.name as string) || existing.name,
           birth_date: (body.birth_date !== undefined ? body.birth_date : existing.birth_date) || null,
           birth_time: (body.birth_time !== undefined ? body.birth_time : existing.birth_time) || null,
           birth_city: (body.birth_city !== undefined ? body.birth_city : existing.birth_city) || null,

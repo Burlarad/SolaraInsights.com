@@ -37,6 +37,8 @@ export function normalizedMatch(a: string | null | undefined, b: string | null |
  */
 interface ProfileCandidate {
   id: string;
+  first_name: string | null;
+  last_name: string | null;
   preferred_name: string | null;
   full_name: string | null;
   birth_date: string | null;
@@ -62,7 +64,10 @@ interface ConnectionMatchData {
  * Attempt to resolve a profile from connection data.
  *
  * Match criteria (ALL must match):
- * 1. Name matches preferred_name OR full_name (normalized)
+ * 1. Name matches any of (normalized):
+ *    - preferred_name (Nickname)
+ *    - full_name
+ *    - first_name + last_name (middle name ignored)
  * 2. Birth date matches exactly
  * 3. Birth city matches (normalized)
  * 4. Birth country matches (normalized)
@@ -87,7 +92,7 @@ export async function resolveProfileFromConnection(
   // Query profiles with matching birth date (exact match required)
   const { data: candidates, error } = await adminClient
     .from("profiles")
-    .select("id, preferred_name, full_name, birth_date, birth_time, birth_city, birth_region, birth_country")
+    .select("id, first_name, last_name, preferred_name, full_name, birth_date, birth_time, birth_city, birth_region, birth_country")
     .eq("birth_date", connectionData.birth_date)
     .neq("id", ownerId); // Exclude self
 
@@ -103,10 +108,15 @@ export async function resolveProfileFromConnection(
 
   // Filter candidates by all criteria
   const matches = candidates.filter((profile: ProfileCandidate) => {
-    // Name must match preferred_name OR full_name
+    // Build first+last composed name (ignoring middle name)
+    const firstLastParts = [profile.first_name, profile.last_name].filter(Boolean);
+    const firstLastComposed = firstLastParts.join(" ");
+
+    // Name must match preferred_name OR full_name OR first+last composed
     const nameMatches =
       normalizeForMatch(profile.preferred_name) === normalizedName ||
-      normalizeForMatch(profile.full_name) === normalizedName;
+      normalizeForMatch(profile.full_name) === normalizedName ||
+      normalizeForMatch(firstLastComposed) === normalizedName;
 
     if (!nameMatches) return false;
 

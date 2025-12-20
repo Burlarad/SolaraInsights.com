@@ -13,9 +13,11 @@ export default function OnboardingPage() {
   const router = useRouter();
   const { profile, loading: profileLoading, saveProfile } = useSettings();
 
-  // Form state
-  const [fullName, setFullName] = useState("");
-  const [preferredName, setPreferredName] = useState("");
+  // Form state - split name fields
+  const [firstName, setFirstName] = useState("");
+  const [middleName, setMiddleName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [nickname, setNickname] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [birthTime, setBirthTime] = useState("");
 
@@ -29,8 +31,10 @@ export default function OnboardingPage() {
   // Initialize form with existing profile data
   useEffect(() => {
     if (profile) {
-      setFullName(profile.full_name || "");
-      setPreferredName(profile.preferred_name || "");
+      setFirstName(profile.first_name || "");
+      setMiddleName(profile.middle_name || "");
+      setLastName(profile.last_name || "");
+      setNickname(profile.preferred_name || "");
       setBirthDate(profile.birth_date || "");
       setBirthTime(profile.birth_time || "");
 
@@ -85,9 +89,13 @@ export default function OnboardingPage() {
     setError(null);
 
     try {
-      // Validate required fields
-      if (!fullName.trim()) {
-        throw new Error("Full name is required");
+      // Validate required fields - first and last name required for onboarding
+      if (!firstName.trim()) {
+        throw new Error("First name is required");
+      }
+
+      if (!lastName.trim()) {
+        throw new Error("Last name is required");
       }
 
       if (!birthDate) {
@@ -98,10 +106,12 @@ export default function OnboardingPage() {
         throw new Error("Please select your birth location from the search results");
       }
 
-      // Save profile with pre-resolved location data
+      // Save profile with split name fields - server will compose full_name
       await saveProfile({
-        full_name: fullName.trim(),
-        preferred_name: preferredName.trim() || null,
+        first_name: firstName.trim(),
+        middle_name: middleName.trim() || null,
+        last_name: lastName.trim(),
+        preferred_name: nickname.trim() || null,
         birth_date: birthDate,
         birth_time: birthTime || null,
         // Pre-resolved location from PlacePicker
@@ -161,33 +171,60 @@ export default function OnboardingPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Full Name */}
-            <div className="space-y-2">
-              <Label htmlFor="fullName">
-                Full Name <span className="text-danger-soft">*</span>
-              </Label>
-              <Input
-                id="fullName"
-                type="text"
-                placeholder="Jane Doe"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-              />
+            {/* Name Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">
+                  First name <span className="text-danger-soft">*</span>
+                </Label>
+                <Input
+                  id="firstName"
+                  type="text"
+                  placeholder="Jane"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="middleName">Middle name</Label>
+                <Input
+                  id="middleName"
+                  type="text"
+                  placeholder="Optional"
+                  value={middleName}
+                  onChange={(e) => setMiddleName(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="lastName">
+                  Last name <span className="text-danger-soft">*</span>
+                </Label>
+                <Input
+                  id="lastName"
+                  type="text"
+                  placeholder="Doe"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  required
+                />
+              </div>
             </div>
 
-            {/* Preferred Name */}
+            {/* Nickname */}
             <div className="space-y-2">
-              <Label htmlFor="preferredName">Preferred Name (optional)</Label>
+              <Label htmlFor="nickname">Nickname (optional)</Label>
               <Input
-                id="preferredName"
+                id="nickname"
                 type="text"
                 placeholder="What should we call you?"
-                value={preferredName}
-                onChange={(e) => setPreferredName(e.target.value)}
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
               />
               <p className="text-xs text-accent-ink/60">
-                If different from your full name
+                If different from your first name
               </p>
             </div>
 
