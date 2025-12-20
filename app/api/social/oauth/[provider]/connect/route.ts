@@ -72,9 +72,11 @@ export async function GET(
 
     if (!user) {
       // Redirect to login with return URL
+      // Use NEXT_PUBLIC_SITE_URL to avoid internal port exposure in containerized environments
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
       const returnUrl = `/api/social/oauth/${provider}/connect`;
       return NextResponse.redirect(
-        new URL(`/sign-in?returnUrl=${encodeURIComponent(returnUrl)}`, req.url)
+        new URL(`/sign-in?returnUrl=${encodeURIComponent(returnUrl)}`, baseUrl)
       );
     }
 
