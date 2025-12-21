@@ -42,6 +42,12 @@ export interface Profile {
   location_for_charity: string | null;
   latitude: number | null;
   longitude: number | null;
+
+  // Social sync tracking
+  last_social_sync_at: string | null; // timestamptz
+  last_social_sync_local_date: string | null; // DATE in user's local_timezone
+  social_sync_status: "idle" | "syncing" | "success" | "error" | null;
+  social_sync_error: string | null;
 }
 
 export interface ProfileUpdate {

@@ -15,6 +15,7 @@ import { AYREN_MODE_SHORT, PRO_SOCIAL_NUDGE_INSTRUCTION, HUMOR_INSTRUCTION, LOW_
 import { parseMetadataFromSummary, getSummaryTextOnly } from "@/lib/social/summarize";
 import { normalizeInsight } from "@/lib/insights/normalizeInsight";
 import { createApiErrorResponse, generateRequestId, INSIGHTS_ERROR_CODES } from "@/lib/api/errorResponse";
+import { isUserSocialStale, triggerSocialSyncFireAndForget } from "@/lib/social/staleness";
 
 // Bump to v3 to invalidate legacy cached insights that may be missing fields
 const PROMPT_VERSION = 3;
@@ -154,6 +155,30 @@ export async function POST(req: NextRequest) {
     // Build cache and lock keys
     const cacheKey = buildInsightCacheKey(user.id, timeframe, periodKey, targetLanguage, PROMPT_VERSION);
     const lockKey = buildInsightLockKey(user.id, timeframe, periodKey, PROMPT_VERSION);
+
+    // ========================================
+    // SOCIAL SYNC STALE CHECK (fire-and-forget)
+    // Only for "today" timeframe to avoid duplicate syncs
+    // ========================================
+    if (timeframe === "today") {
+      const cronSecret = process.env.CRON_SECRET;
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+      const cookieHeader = req.headers.get("cookie") || undefined;
+
+      // Check staleness using admin client (needs service role for social_accounts)
+      const isStale = await isUserSocialStale(
+        user.id,
+        effectiveTimezone,
+        profile.last_social_sync_local_date,
+        admin
+      );
+
+      if (isStale) {
+        // Fire and forget - don't await completion
+        // Uses CRON_SECRET if available, otherwise forwards cookies for session auth
+        void triggerSocialSyncFireAndForget(user.id, baseUrl, cronSecret, cookieHeader);
+      }
+    }
 
     // ========================================
     // CACHE CHECK FIRST (before rate limiting)
