@@ -19,6 +19,9 @@ const VALID_PROVIDERS: SocialProvider[] = [
   "reddit",
 ];
 
+// Debug logging - enable via OAUTH_DEBUG_LOGS=true when wiring new providers
+const debug = process.env.OAUTH_DEBUG_LOGS === "true";
+
 /**
  * GET /api/social/oauth/[provider]/connect
  *
@@ -109,6 +112,11 @@ export async function GET(
     // Generate authorization URL with PKCE challenge
     const redirectUri = getCallbackUrl(provider);
     const authUrl = generateAuthUrl(provider, redirectUri, state, pkce.challenge);
+
+    if (debug) {
+      console.log(`[OAuth Debug] [${provider}] redirectUri: ${redirectUri}`);
+      console.log(`[OAuth Debug] [${provider}] authUrl: ${authUrl.toString()}`);
+    }
 
     // Redirect to provider's authorization page
     return NextResponse.redirect(authUrl);

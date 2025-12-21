@@ -18,9 +18,8 @@ const VALID_PROVIDERS: SocialProvider[] = [
   "reddit",
 ];
 
-// =============================================================================
-// TODO: REMOVE DEBUG LOGGING AFTER OAUTH STABILIZES
-// =============================================================================
+// Debug logging - enable via OAUTH_DEBUG_LOGS=true when wiring new providers
+const debug = process.env.OAUTH_DEBUG_LOGS === "true";
 
 /**
  * GET /api/social/oauth/[provider]/callback
@@ -53,20 +52,22 @@ export async function GET(
     const cookieStore = await cookies();
     const stateCookie = cookieStore.get("social_oauth_state");
 
-    // A) Callback entry log
-    console.log(`[OAuth Debug] [${requestId}] === CALLBACK ENTRY ===`);
-    console.log(`[OAuth Debug] [${requestId}] provider: ${provider}`);
-    console.log(`[OAuth Debug] [${requestId}] code present: ${!!code}`);
-    console.log(`[OAuth Debug] [${requestId}] state present: ${!!state}`);
-    console.log(`[OAuth Debug] [${requestId}] error param: ${error || "(none)"}`);
-    console.log(`[OAuth Debug] [${requestId}] state cookie present: ${!!stateCookie}`);
-    console.log(`[OAuth Debug] [${requestId}] NEXT_PUBLIC_SITE_URL: ${process.env.NEXT_PUBLIC_SITE_URL || "(not set, using localhost)"}`);
-    console.log(`[OAuth Debug] [${requestId}] SOCIAL_TOKEN_ENCRYPTION_KEY set: ${!!process.env.SOCIAL_TOKEN_ENCRYPTION_KEY}`);
-    console.log(`[OAuth Debug] [${requestId}] SUPABASE_SERVICE_ROLE_KEY set: ${!!process.env.SUPABASE_SERVICE_ROLE_KEY}`);
+    // A) Callback entry log (verbose - gated)
+    if (debug) {
+      console.log(`[OAuth Debug] [${requestId}] === CALLBACK ENTRY ===`);
+      console.log(`[OAuth Debug] [${requestId}] provider: ${provider}`);
+      console.log(`[OAuth Debug] [${requestId}] code present: ${!!code}`);
+      console.log(`[OAuth Debug] [${requestId}] state present: ${!!state}`);
+      console.log(`[OAuth Debug] [${requestId}] error param: ${error || "(none)"}`);
+      console.log(`[OAuth Debug] [${requestId}] state cookie present: ${!!stateCookie}`);
+      console.log(`[OAuth Debug] [${requestId}] NEXT_PUBLIC_SITE_URL: ${process.env.NEXT_PUBLIC_SITE_URL || "(not set, using localhost)"}`);
+      console.log(`[OAuth Debug] [${requestId}] SOCIAL_TOKEN_ENCRYPTION_KEY set: ${!!process.env.SOCIAL_TOKEN_ENCRYPTION_KEY}`);
+      console.log(`[OAuth Debug] [${requestId}] SUPABASE_SERVICE_ROLE_KEY set: ${!!process.env.SUPABASE_SERVICE_ROLE_KEY}`);
+    }
 
     // Validate provider
     if (!VALID_PROVIDERS.includes(provider)) {
-      console.log(`[OAuth Debug] [${requestId}] EXIT: invalid_provider`);
+      if (debug) console.log(`[OAuth Debug] [${requestId}] EXIT: invalid_provider`);
       return NextResponse.redirect(
         new URL(`/connect-social?error=invalid_provider`, baseUrl)
       );
@@ -74,7 +75,7 @@ export async function GET(
 
     // Check if provider is enabled
     if (!isProviderEnabled(provider)) {
-      console.log(`[OAuth Debug] [${requestId}] EXIT: provider_disabled`);
+      if (debug) console.log(`[OAuth Debug] [${requestId}] EXIT: provider_disabled`);
       return NextResponse.redirect(
         new URL(`/connect-social?error=provider_disabled&provider=${provider}`, baseUrl)
       );
@@ -82,8 +83,9 @@ export async function GET(
 
     // Check for OAuth errors from provider
     if (error) {
-      console.log(`[OAuth Debug] [${requestId}] EXIT: provider_error - ${error}`);
-      console.error(`[OAuth Callback] Provider error for ${provider}:`, error, errorDescription);
+      // Always log provider errors (minimal safe info)
+      console.error(`[OAuth Callback] [${requestId}] ${provider}: provider_error - ${error}`);
+      if (debug) console.log(`[OAuth Debug] [${requestId}] error_description: ${errorDescription}`);
 
       // Quiet error - map to "needs_reauth" behavior
       if (error === "access_denied") {
@@ -99,7 +101,8 @@ export async function GET(
 
     // Validate code and state presence
     if (!code || !state) {
-      console.log(`[OAuth Debug] [${requestId}] EXIT: missing_params (code: ${!!code}, state: ${!!state})`);
+      console.error(`[OAuth Callback] [${requestId}] ${provider}: missing_params`);
+      if (debug) console.log(`[OAuth Debug] [${requestId}] code: ${!!code}, state: ${!!state}`);
       return NextResponse.redirect(
         new URL(`/connect-social?error=missing_params&provider=${provider}`, baseUrl)
       );
@@ -107,7 +110,7 @@ export async function GET(
 
     // Verify state from cookie
     if (!stateCookie) {
-      console.log(`[OAuth Debug] [${requestId}] EXIT: state_expired (no cookie)`);
+      console.error(`[OAuth Callback] [${requestId}] ${provider}: state_expired (no cookie)`);
       return NextResponse.redirect(
         new URL(`/connect-social?error=state_expired&provider=${provider}`, baseUrl)
       );
@@ -123,7 +126,7 @@ export async function GET(
     try {
       storedState = JSON.parse(stateCookie.value);
     } catch {
-      console.log(`[OAuth Debug] [${requestId}] EXIT: invalid_state (parse error)`);
+      console.error(`[OAuth Callback] [${requestId}] ${provider}: invalid_state (parse error)`);
       return NextResponse.redirect(
         new URL(`/connect-social?error=invalid_state&provider=${provider}`, baseUrl)
       );
@@ -131,7 +134,7 @@ export async function GET(
 
     // Validate state matches
     if (storedState.state !== state || storedState.provider !== provider) {
-      console.log(`[OAuth Debug] [${requestId}] EXIT: state_mismatch`);
+      console.error(`[OAuth Callback] [${requestId}] ${provider}: state_mismatch`);
       return NextResponse.redirect(
         new URL(`/connect-social?error=state_mismatch&provider=${provider}`, baseUrl)
       );
@@ -140,16 +143,18 @@ export async function GET(
     // Check state hasn't expired (10 minutes)
     const stateAgeMs = Date.now() - storedState.timestamp;
     if (stateAgeMs > 10 * 60 * 1000) {
-      console.log(`[OAuth Debug] [${requestId}] EXIT: state_expired (age: ${Math.round(stateAgeMs / 1000)}s)`);
+      console.error(`[OAuth Callback] [${requestId}] ${provider}: state_expired (age: ${Math.round(stateAgeMs / 1000)}s)`);
       return NextResponse.redirect(
         new URL(`/connect-social?error=state_expired&provider=${provider}`, baseUrl)
       );
     }
 
-    // B) State validation success log
-    console.log(`[OAuth Debug] [${requestId}] state validated: true`);
-    console.log(`[OAuth Debug] [${requestId}] storedState.userId present: ${!!storedState.userId}`);
-    console.log(`[OAuth Debug] [${requestId}] state age: ${Math.round(stateAgeMs / 1000)}s`);
+    // B) State validation success log (verbose - gated)
+    if (debug) {
+      console.log(`[OAuth Debug] [${requestId}] state validated: true`);
+      console.log(`[OAuth Debug] [${requestId}] storedState.userId present: ${!!storedState.userId}`);
+      console.log(`[OAuth Debug] [${requestId}] state age: ${Math.round(stateAgeMs / 1000)}s`);
+    }
 
     // Clear the state cookie
     cookieStore.delete("social_oauth_state");
@@ -157,12 +162,11 @@ export async function GET(
     // Retrieve PKCE verifier from cookie
     const codeVerifier = await retrieveCodeVerifier(provider, state);
 
-    // C) PKCE retrieval log
-    console.log(`[OAuth Debug] [${requestId}] pkceVerifier found: ${!!codeVerifier}`);
+    // C) PKCE retrieval log (verbose - gated)
+    if (debug) console.log(`[OAuth Debug] [${requestId}] pkceVerifier found: ${!!codeVerifier}`);
 
     if (!codeVerifier) {
-      console.log(`[OAuth Debug] [${requestId}] EXIT: needs_reauth (pkce missing)`);
-      console.error(`[OAuth Callback] PKCE verifier missing for ${provider}`);
+      console.error(`[OAuth Callback] [${requestId}] ${provider}: needs_reauth (pkce missing)`);
       return NextResponse.redirect(
         new URL(`/connect-social?error=needs_reauth&provider=${provider}`, baseUrl)
       );
@@ -170,31 +174,35 @@ export async function GET(
 
     // Exchange code for tokens with PKCE verifier
     const redirectUri = getCallbackUrl(provider);
-    console.log(`[OAuth Debug] [${requestId}] attempting token exchange...`);
-    console.log(`[OAuth Debug] [${requestId}] redirectUri for exchange: ${redirectUri}`);
+    if (debug) {
+      console.log(`[OAuth Debug] [${requestId}] attempting token exchange...`);
+      console.log(`[OAuth Debug] [${requestId}] redirectUri for exchange: ${redirectUri}`);
+    }
 
     let tokens;
     try {
       tokens = await exchangeCodeForTokens(provider, code, redirectUri, codeVerifier);
 
-      // D) Token exchange success log
-      console.log(`[OAuth Debug] [${requestId}] token exchange: SUCCESS`);
-      console.log(`[OAuth Debug] [${requestId}] tokens.userId present: ${!!tokens.userId}`);
-      console.log(`[OAuth Debug] [${requestId}] tokens.expiresIn present: ${!!tokens.expiresIn}`);
-      console.log(`[OAuth Debug] [${requestId}] tokens.refreshToken present: ${!!tokens.refreshToken}`);
+      // D) Token exchange success log (verbose - gated)
+      if (debug) {
+        console.log(`[OAuth Debug] [${requestId}] token exchange: SUCCESS`);
+        console.log(`[OAuth Debug] [${requestId}] tokens.userId present: ${!!tokens.userId}`);
+        console.log(`[OAuth Debug] [${requestId}] tokens.expiresIn present: ${!!tokens.expiresIn}`);
+        console.log(`[OAuth Debug] [${requestId}] tokens.refreshToken present: ${!!tokens.refreshToken}`);
+      }
     } catch (tokenError: any) {
-      console.log(`[OAuth Debug] [${requestId}] EXIT: token_exchange_failed`);
-      console.log(`[OAuth Debug] [${requestId}] token exchange error: ${tokenError.message}`);
+      // Always log token exchange failures (minimal safe info)
+      console.error(`[OAuth Callback] [${requestId}] ${provider}: token_exchange_failed - ${tokenError.message}`);
       throw tokenError; // Re-throw to hit the catch block
     }
 
     // Encrypt tokens before storing
-    console.log(`[OAuth Debug] [${requestId}] encrypting tokens...`);
+    if (debug) console.log(`[OAuth Debug] [${requestId}] encrypting tokens...`);
     const accessTokenEncrypted = encryptToken(tokens.accessToken);
     const refreshTokenEncrypted = tokens.refreshToken
       ? encryptToken(tokens.refreshToken)
       : null;
-    console.log(`[OAuth Debug] [${requestId}] encryption: SUCCESS`);
+    if (debug) console.log(`[OAuth Debug] [${requestId}] encryption: SUCCESS`);
 
     // Calculate token expiry time
     const tokenExpiresAt = tokens.expiresIn
@@ -202,11 +210,11 @@ export async function GET(
       : null;
 
     // Store tokens in social_accounts vault using service role
-    console.log(`[OAuth Debug] [${requestId}] creating service client...`);
+    if (debug) console.log(`[OAuth Debug] [${requestId}] creating service client...`);
     const supabase = createServiceSupabaseClient();
-    console.log(`[OAuth Debug] [${requestId}] service client: SUCCESS`);
+    if (debug) console.log(`[OAuth Debug] [${requestId}] service client: SUCCESS`);
 
-    console.log(`[OAuth Debug] [${requestId}] upserting to social_accounts...`);
+    if (debug) console.log(`[OAuth Debug] [${requestId}] upserting to social_accounts...`);
     const { error: upsertError } = await supabase
       .from("social_accounts")
       .upsert(
@@ -225,15 +233,14 @@ export async function GET(
 
     // E) DB upsert log
     if (upsertError) {
-      console.log(`[OAuth Debug] [${requestId}] EXIT: database_error`);
-      console.log(`[OAuth Debug] [${requestId}] upsert error: ${upsertError.message}`);
-      console.error("[OAuth Callback] Database error:", upsertError);
+      // Always log database errors (minimal safe info)
+      console.error(`[OAuth Callback] [${requestId}] ${provider}: database_error - ${upsertError.message}`);
       return NextResponse.redirect(
         new URL(`/connect-social?error=database_error&provider=${provider}`, baseUrl)
       );
     }
 
-    console.log(`[OAuth Debug] [${requestId}] db upsert: SUCCESS`);
+    if (debug) console.log(`[OAuth Debug] [${requestId}] db upsert: SUCCESS`);
 
     // Trigger initial sync (fire and forget)
     const syncUrl = `${baseUrl}/api/social/sync`;
@@ -248,21 +255,19 @@ export async function GET(
         provider,
       }),
     }).catch((err) => {
-      console.error("[OAuth Callback] Failed to trigger sync:", err);
+      console.error("[OAuth Callback] Failed to trigger sync:", err.message);
     });
 
     // Success!
-    console.log(`[OAuth Debug] [${requestId}] === CALLBACK SUCCESS ===`);
+    if (debug) console.log(`[OAuth Debug] [${requestId}] === CALLBACK SUCCESS ===`);
 
     // Redirect to success page
     return NextResponse.redirect(
       new URL(`/connect-social?success=true&provider=${provider}`, baseUrl)
     );
   } catch (error: any) {
-    // F) Catch-all error log
-    console.log(`[OAuth Debug] [${requestId}] EXIT: exception`);
-    console.log(`[OAuth Debug] [${requestId}] exception message: ${error.message}`);
-    console.error("[OAuth Callback] Error:", error.message);
+    // F) Catch-all error log - always log (minimal safe info)
+    console.error(`[OAuth Callback] [${requestId}] exception: ${error.message}`);
 
     // Quiet error - don't leak details
     return NextResponse.redirect(
