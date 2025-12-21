@@ -230,19 +230,30 @@ ${JSON.stringify(summaryResult.metadata)}
       );
 
     if (summaryError) {
-      console.error("[SocialSync] Failed to save summary:", summaryError);
+      // Log full Supabase error structure (safe - no tokens/secrets)
+      console.error("[SocialSync] Summary upsert failed:", {
+        code: summaryError.code,
+        message: summaryError.message,
+        details: summaryError.details,
+        hint: summaryError.hint,
+      });
+
+      // Store code + message for diagnosis without needing logs
+      const errorDetail = summaryError.code
+        ? `[${summaryError.code}] ${summaryError.message}`
+        : summaryError.message || "Unknown error";
 
       // Record error on profile
       await supabase
         .from("profiles")
         .update({
           social_sync_status: "error",
-          social_sync_error: `Summary write failed: ${summaryError.message}`,
+          social_sync_error: `Summary write failed: ${errorDetail}`,
         })
         .eq("id", userId);
 
       return NextResponse.json(
-        { error: "Failed to save summary", details: summaryError.message },
+        { error: "Failed to save summary", code: summaryError.code, details: summaryError.message },
         { status: 500 }
       );
     }
