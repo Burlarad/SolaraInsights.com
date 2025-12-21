@@ -510,10 +510,11 @@ export interface SocialSummary {
   user_id: string;
   provider: SocialProvider;
   summary: string;
-  prompt_version: number;
-  model_version: string | null;
-  last_collected_at: string;
+  window_days: number;
+  posts_count: number;
+  last_fetched_at: string;
   created_at: string;
+  updated_at: string;
 }
 
 // Response type for social status API

@@ -168,7 +168,7 @@ export async function GET(req: NextRequest) {
             .select("*")
             .eq("user_id", userId)
             .eq("provider", "facebook")
-            .order("last_collected_at", { ascending: false })
+            .order("last_fetched_at", { ascending: false })
             .limit(1)
             .maybeSingle();
 

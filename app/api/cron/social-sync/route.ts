@@ -61,11 +61,11 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // Get all summaries that were collected in the last 6 hours (don't need re-sync)
+    // Get all summaries that were fetched in the last 6 hours (don't need re-sync)
     const { data: recentSummaries, error: summariesError } = await supabase
       .from("social_summaries")
       .select("user_id, provider")
-      .gte("last_collected_at", sixHoursAgo);
+      .gte("last_fetched_at", sixHoursAgo);
 
     if (summariesError) {
       console.error("[CronSocialSync] Failed to fetch summaries:", summariesError);

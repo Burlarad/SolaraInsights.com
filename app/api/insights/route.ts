@@ -304,7 +304,7 @@ export async function POST(req: NextRequest) {
       .from("social_summaries")
       .select("provider, summary")
       .eq("user_id", user.id)
-      .order("last_collected_at", { ascending: false });
+      .order("last_fetched_at", { ascending: false });
 
     // Parse metadata from first summary (if any) for humor/nudge decisions
     const socialMetadata = socialSummaries && socialSummaries.length > 0

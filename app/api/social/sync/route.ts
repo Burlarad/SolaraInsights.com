@@ -4,7 +4,7 @@ import { SocialProvider } from "@/types";
 import { decryptToken, encryptToken } from "@/lib/social/crypto";
 import { refreshAccessToken } from "@/lib/social/oauth";
 import { fetchSocialContent } from "@/lib/social/fetchers";
-import { generateSocialSummary, SOCIAL_SUMMARY_PROMPT_VERSION } from "@/lib/social/summarize";
+import { generateSocialSummary } from "@/lib/social/summarize";
 
 /**
  * POST /api/social/sync
@@ -220,9 +220,9 @@ ${JSON.stringify(summaryResult.metadata)}
           user_id: userId,
           provider,
           summary: summaryWithMetadata,
-          prompt_version: SOCIAL_SUMMARY_PROMPT_VERSION,
-          model_version: summaryResult.modelVersion,
-          last_collected_at: new Date().toISOString(),
+          posts_count: fetchedContent.postCount,
+          window_days: 30, // Default window for recent posts
+          last_fetched_at: new Date().toISOString(),
         },
         {
           onConflict: "user_id,provider",
@@ -231,8 +231,18 @@ ${JSON.stringify(summaryResult.metadata)}
 
     if (summaryError) {
       console.error("[SocialSync] Failed to save summary:", summaryError);
+
+      // Record error on profile
+      await supabase
+        .from("profiles")
+        .update({
+          social_sync_status: "error",
+          social_sync_error: `Summary write failed: ${summaryError.message}`,
+        })
+        .eq("id", userId);
+
       return NextResponse.json(
-        { error: "Failed to save summary" },
+        { error: "Failed to save summary", details: summaryError.message },
         { status: 500 }
       );
     }
