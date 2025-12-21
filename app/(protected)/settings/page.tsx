@@ -19,7 +19,7 @@ const SOCIAL_PROVIDERS: {
 }[] = [
   { id: "facebook", name: "Facebook", color: "#1877F2", letter: "F", enabled: true },
   { id: "instagram", name: "Instagram", color: "#E4405F", letter: "I", enabled: false },
-  { id: "tiktok", name: "TikTok", color: "#000000", letter: "T", enabled: false },
+  { id: "tiktok", name: "TikTok", color: "#000000", letter: "T", enabled: true },
   { id: "x", name: "X (Twitter)", color: "#000000", letter: "X", enabled: false },
   { id: "reddit", name: "Reddit", color: "#FF4500", letter: "R", enabled: false },
 ];

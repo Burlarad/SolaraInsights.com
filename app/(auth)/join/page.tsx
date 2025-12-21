@@ -225,12 +225,14 @@ export default function JoinPage() {
                   F
                 </button>
 
-                {/* TikTok - Stub (TODO) */}
+                {/* TikTok - Connect for Social Insights */}
                 <button
                   type="button"
-                  onClick={() => setError("TikTok sign-up coming soon")}
+                  onClick={() => {
+                    window.location.href = "/api/social/oauth/tiktok/connect?return_to=/join";
+                  }}
                   className="w-12 h-12 rounded-full bg-black hover:bg-gray-800 transition-colors flex items-center justify-center text-white font-semibold"
-                  title="Sign up with TikTok (Coming Soon)"
+                  title="Connect TikTok for Social Insights"
                 >
                   T
                 </button>

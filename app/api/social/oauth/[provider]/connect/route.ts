@@ -37,6 +37,9 @@ export async function GET(
     const { provider: providerParam } = await params;
     const provider = providerParam as SocialProvider;
 
+    // Get return_to from query params (for redirecting back after OAuth)
+    const returnTo = req.nextUrl.searchParams.get("return_to");
+
     // Validate provider
     if (!VALID_PROVIDERS.includes(provider)) {
       return NextResponse.json(
@@ -96,6 +99,7 @@ export async function GET(
       provider,
       userId: user.id,
       timestamp: Date.now(),
+      returnTo: returnTo || null, // Store return_to for callback redirect
     });
 
     cookieStore.set("social_oauth_state", stateData, {

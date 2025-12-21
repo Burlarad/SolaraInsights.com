@@ -121,6 +121,7 @@ export async function GET(
       provider: SocialProvider;
       userId: string;
       timestamp: number;
+      returnTo?: string | null;
     };
 
     try {
@@ -261,10 +262,12 @@ export async function GET(
     // Success!
     if (debug) console.log(`[OAuth Debug] [${requestId}] === CALLBACK SUCCESS ===`);
 
-    // Redirect to success page
-    return NextResponse.redirect(
-      new URL(`/connect-social?success=true&provider=${provider}`, baseUrl)
-    );
+    // Redirect to return_to page if specified, otherwise connect-social
+    const successRedirect = storedState.returnTo
+      ? `${storedState.returnTo}?social=connected&provider=${provider}`
+      : `/connect-social?success=true&provider=${provider}`;
+
+    return NextResponse.redirect(new URL(successRedirect, baseUrl));
   } catch (error: any) {
     // F) Catch-all error log - always log (minimal safe info)
     console.error(`[OAuth Callback] [${requestId}] exception: ${error.message}`);
