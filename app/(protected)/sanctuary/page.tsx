@@ -289,6 +289,20 @@ export default function SanctuaryInsightsPage() {
         </div>
       )}
 
+      {/* Safety guard: prevent blank state when loading=false, insight=null, error=null */}
+      {!loading && !insight && !error && (
+        <Card className="border-border-subtle bg-accent-muted/20">
+          <CardContent className="p-8 text-center space-y-4">
+            <p className="text-accent-ink/70">
+              We're having trouble loading your insight. This might be a temporary issue.
+            </p>
+            <Button variant="outline" onClick={() => loadInsight()}>
+              Try again
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Content - only show when we have data and no errors */}
       {insight && !loading && !error && (
         <div className="grid lg:grid-cols-3 gap-6">

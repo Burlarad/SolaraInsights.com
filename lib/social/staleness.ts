@@ -92,12 +92,13 @@ export function buildSocialSyncLockKey(userId: string): string {
  *
  * Uses Redis lock to prevent duplicate triggers within a window.
  * Does NOT wait for sync completion - just fires the request.
+ * Fully wrapped in try/catch to prevent any unhandled promise rejections.
  *
  * @param userId - User's UUID
  * @param baseUrl - Base URL for the sync endpoint
  * @param cronSecret - CRON_SECRET for authorization (optional for self-sync)
  * @param cookieHeader - Cookie header to forward for session auth (optional)
- * @returns true if sync was triggered, false if skipped (locked)
+ * @returns true if sync was triggered, false if skipped (locked or error)
  */
 export async function triggerSocialSyncFireAndForget(
   userId: string,
@@ -107,54 +108,63 @@ export async function triggerSocialSyncFireAndForget(
 ): Promise<boolean> {
   const lockKey = buildSocialSyncLockKey(userId);
 
-  // Try to acquire lock (10 minute TTL - gives sync time to complete)
-  const lockAcquired = await acquireLock(lockKey, 600);
+  try {
+    // Try to acquire lock (10 minute TTL - gives sync time to complete)
+    const lockAcquired = await acquireLock(lockKey, 600);
 
-  if (!lockAcquired) {
-    console.log(`[SocialStaleness] Sync already in progress for ${userId}, skipping`);
+    if (!lockAcquired) {
+      console.log(`[SocialStaleness] Sync already in progress for ${userId}, skipping`);
+      return false;
+    }
+
+    console.log(`[SocialStaleness] Triggering fire-and-forget sync for ${userId}`);
+
+    // Fire and forget - don't await the full response
+    const syncUrl = `${baseUrl}/api/social/sync-user`;
+
+    // Build headers based on auth mode
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+
+    if (cronSecret) {
+      // Server-to-server call with CRON_SECRET
+      headers["Authorization"] = `Bearer ${cronSecret}`;
+    }
+
+    if (cookieHeader) {
+      // Forward cookies for session auth
+      headers["Cookie"] = cookieHeader;
+    }
+
+    // Fire the request - use .then/.catch to ensure no unhandled rejections
+    fetch(syncUrl, {
+      method: "POST",
+      headers,
+      body: cronSecret ? JSON.stringify({ userId }) : "{}",
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          const error = await response.text().catch(() => "unknown");
+          console.error(`[SocialStaleness] Sync failed for ${userId}:`, error);
+        } else {
+          console.log(`[SocialStaleness] Sync completed for ${userId}`);
+        }
+      })
+      .catch((error) => {
+        console.error(`[SocialStaleness] Sync request failed for ${userId}:`, error?.message || error);
+      })
+      .finally(() => {
+        // Release lock after sync completes (or fails) - wrapped in its own catch
+        releaseLock(lockKey).catch((releaseErr) => {
+          console.warn(`[SocialStaleness] Failed to release lock for ${userId}:`, releaseErr?.message || releaseErr);
+        });
+      });
+
+    return true;
+  } catch (error: any) {
+    // Catch any synchronous errors (e.g., acquireLock throwing)
+    console.error(`[SocialStaleness] Error triggering sync for ${userId}:`, error?.message || error);
     return false;
   }
-
-  console.log(`[SocialStaleness] Triggering fire-and-forget sync for ${userId}`);
-
-  // Fire and forget - don't await the full response
-  const syncUrl = `${baseUrl}/api/social/sync-user`;
-
-  // Build headers based on auth mode
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
-
-  if (cronSecret) {
-    // Server-to-server call with CRON_SECRET
-    headers["Authorization"] = `Bearer ${cronSecret}`;
-  }
-
-  if (cookieHeader) {
-    // Forward cookies for session auth
-    headers["Cookie"] = cookieHeader;
-  }
-
-  fetch(syncUrl, {
-    method: "POST",
-    headers,
-    body: cronSecret ? JSON.stringify({ userId }) : "{}",
-  })
-    .then(async (response) => {
-      if (!response.ok) {
-        const error = await response.text().catch(() => "unknown");
-        console.error(`[SocialStaleness] Sync failed for ${userId}:`, error);
-      } else {
-        console.log(`[SocialStaleness] Sync triggered successfully for ${userId}`);
-      }
-    })
-    .catch((error) => {
-      console.error(`[SocialStaleness] Sync request failed for ${userId}:`, error.message);
-    })
-    .finally(async () => {
-      // Release lock after sync completes (or fails)
-      await releaseLock(lockKey);
-    });
-
-  return true;
 }

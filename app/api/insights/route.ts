@@ -79,12 +79,19 @@ export async function POST(req: NextRequest) {
   // Capture user ID for use in error handler
   const userId = user.id;
 
-  // Track user activity (non-blocking)
-  const admin = createAdminSupabaseClient();
-  void touchLastSeen(admin, user.id, 30);
-
   // Declare periodKey outside try block so it's accessible in error handler
   let periodKey: string | undefined;
+
+  // Create admin client safely - if service role key is missing, we'll skip admin features
+  let admin: ReturnType<typeof createAdminSupabaseClient> | null = null;
+  try {
+    admin = createAdminSupabaseClient();
+    // Track user activity (non-blocking)
+    void touchLastSeen(admin, user.id, 30);
+  } catch (adminError) {
+    console.warn("[Insights] Admin client unavailable, skipping activity tracking:", adminError);
+    // Continue without admin features - insights should still work
+  }
 
   try {
     // ========================================
@@ -159,24 +166,30 @@ export async function POST(req: NextRequest) {
     // ========================================
     // SOCIAL SYNC STALE CHECK (fire-and-forget)
     // Only for "today" timeframe to avoid duplicate syncs
+    // Wrapped in try/catch to never block insights generation
     // ========================================
-    if (timeframe === "today") {
-      const cronSecret = process.env.CRON_SECRET;
-      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-      const cookieHeader = req.headers.get("cookie") || undefined;
+    if (timeframe === "today" && admin) {
+      try {
+        const cronSecret = process.env.CRON_SECRET;
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+        const cookieHeader = req.headers.get("cookie") || undefined;
 
-      // Check staleness using admin client (needs service role for social_accounts)
-      const isStale = await isUserSocialStale(
-        user.id,
-        effectiveTimezone,
-        profile.last_social_sync_local_date,
-        admin
-      );
+        // Check staleness using admin client (needs service role for social_accounts)
+        const isStale = await isUserSocialStale(
+          user.id,
+          effectiveTimezone,
+          profile.last_social_sync_local_date,
+          admin
+        );
 
-      if (isStale) {
-        // Fire and forget - don't await completion
-        // Uses CRON_SECRET if available, otherwise forwards cookies for session auth
-        void triggerSocialSyncFireAndForget(user.id, baseUrl, cronSecret, cookieHeader);
+        if (isStale) {
+          // Fire and forget - don't await completion
+          // Uses CRON_SECRET if available, otherwise forwards cookies for session auth
+          void triggerSocialSyncFireAndForget(user.id, baseUrl, cronSecret, cookieHeader);
+        }
+      } catch (staleSyncError) {
+        // Log and continue - social sync failure should never block insights
+        console.warn("[Insights] Social stale check failed, skipping:", staleSyncError);
       }
     }
 
