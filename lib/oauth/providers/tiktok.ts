@@ -11,7 +11,7 @@ import { ProviderAdapter, NormalizedTokens } from "./types";
 
 export const tiktokAdapter: ProviderAdapter = {
   provider: "tiktok",
-  authorizeUrl: "https://www.tiktok.com/v2/auth/authorize/",
+  authorizeUrl: "https://www.tiktok.com/v2/auth/authorize",
   tokenUrl: "https://open.tiktokapis.com/v2/oauth/token/",
 
   // MVP: Only request user.info.basic (auto-approved in TikTok sandbox)
