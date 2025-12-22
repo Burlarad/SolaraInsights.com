@@ -107,13 +107,34 @@ function SanctuaryContent() {
   // Handle social insights toggle
   const handleToggleSocialInsights = async (enabled: boolean) => {
     try {
+      if (enabled) {
+        // When turning ON, check for connected providers first
+        const response = await fetch("/api/social/status");
+        if (response.ok) {
+          const data = await response.json();
+          const connectedCount = data.connections.filter(
+            (c: { status: string }) => c.status === "connected"
+          ).length;
+
+          if (connectedCount === 0) {
+            // No connected providers - just open modal, don't persist yet
+            // Persistence will happen via OAuth callback on first connection
+            setShowSocialModal(true);
+            return;
+          }
+          // Has connected providers - persist enabled=true immediately
+        }
+      }
+
+      // Persist the toggle state
       await fetch("/api/user/social-insights", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ enabled }),
       });
       // Refresh profile to get updated values
-      refreshProfile();
+      await refreshProfile();
+
       // If toggled OFF, close modal immediately
       if (!enabled) {
         setShowSocialModal(false);
@@ -301,6 +322,30 @@ function SanctuaryContent() {
         </div>
         <div>Sanctuary insights</div>
       </div>
+
+      {/* Social Insights toggle - only show when OFF */}
+      {profile && !profile.social_insights_enabled && (
+        <Card className="border-border-subtle bg-amber-50/50">
+          <CardContent className="p-4 flex items-center justify-between gap-4">
+            <div className="flex-1">
+              <p className="text-sm font-medium text-accent-ink">Social Insights Paused</p>
+              <p className="text-xs text-accent-ink/70 mt-1">
+                Turn on Social Insights to enhance your readings with patterns from your connected accounts.
+              </p>
+            </div>
+            <button
+              onClick={() => handleToggleSocialInsights(true)}
+              className="flex items-center gap-2 flex-shrink-0"
+              aria-label="Enable social insights"
+            >
+              <span className="text-xs text-accent-ink/60">OFF</span>
+              <div className="w-11 h-7 rounded-full flex items-center px-1 transition-colors bg-gray-300">
+                <div className="w-5 h-5 bg-white rounded-full transition-transform translate-x-0"></div>
+              </div>
+            </button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Greeting card */}
       <GreetingCard

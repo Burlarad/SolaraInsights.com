@@ -2,7 +2,8 @@
 
 import { TogglePills } from "@/components/shared/TogglePills";
 
-const TIMEFRAME_OPTIONS = ["Today", "Week", "Month", "Year"];
+// Only Today and Year available for subscribers
+const TIMEFRAME_OPTIONS = ["Today", "Year"];
 
 interface TimeframeToggleProps {
   value: string;

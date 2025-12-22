@@ -95,6 +95,20 @@ export async function POST(req: NextRequest) {
 
   try {
     // ========================================
+    // TIMEFRAME VALIDATION (reject week/month)
+    // ========================================
+    const ALLOWED_TIMEFRAMES = ["today", "year"];
+    if (!ALLOWED_TIMEFRAMES.includes(timeframe)) {
+      return createApiErrorResponse({
+        error: "Invalid timeframe",
+        message: "Only 'today' and 'year' insights are available. Week and month insights are not supported.",
+        errorCode: INSIGHTS_ERROR_CODES.INVALID_TIMEFRAME,
+        status: 400,
+        route: "/api/insights",
+      });
+    }
+
+    // ========================================
     // PROFILE VALIDATION (before cache check)
     // ========================================
 
