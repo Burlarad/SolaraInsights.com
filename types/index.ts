@@ -48,6 +48,11 @@ export interface Profile {
   last_social_sync_local_date: string | null; // DATE in user's local_timezone
   social_sync_status: "idle" | "syncing" | "success" | "error" | null;
   social_sync_error: string | null;
+
+  // Social insights toggle
+  social_insights_enabled: boolean;
+  social_insights_activated_at: string | null;
+  social_connect_prompt_dismissed_at: string | null; // Legacy, may be deprecated
 }
 
 export interface ProfileUpdate {
@@ -525,6 +530,7 @@ export interface SocialStatusResponse {
     expiresAt: string | null;
     needsReauth: boolean;
     hasSummary: boolean;
+    isConfigured: boolean; // True if OAuth credentials are set for this provider
   }[];
 }
 

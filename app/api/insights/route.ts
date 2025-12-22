@@ -166,9 +166,10 @@ export async function POST(req: NextRequest) {
     // ========================================
     // SOCIAL SYNC STALE CHECK (fire-and-forget)
     // Only for "today" timeframe to avoid duplicate syncs
+    // Only when social_insights_enabled is true
     // Wrapped in try/catch to never block insights generation
     // ========================================
-    if (timeframe === "today" && admin) {
+    if (timeframe === "today" && admin && profile.social_insights_enabled) {
       try {
         const cronSecret = process.env.CRON_SECRET;
         const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
@@ -299,12 +300,17 @@ export async function POST(req: NextRequest) {
     // Set cooldown NOW (we're about to generate)
     await setCache(cooldownKey, Date.now(), COOLDOWN_SECONDS);
 
-    // Optionally load all social summaries for the user (if any exist)
-    const { data: socialSummaries } = await supabase
-      .from("social_summaries")
-      .select("provider, summary")
-      .eq("user_id", user.id)
-      .order("last_fetched_at", { ascending: false });
+    // Load social summaries only when social_insights is enabled
+    // This gates the entire social context feature on the user's preference
+    let socialSummaries: { provider: string; summary: string }[] | null = null;
+    if (profile.social_insights_enabled) {
+      const { data } = await supabase
+        .from("social_summaries")
+        .select("provider, summary")
+        .eq("user_id", user.id)
+        .order("last_fetched_at", { ascending: false });
+      socialSummaries = data;
+    }
 
     // Parse metadata from first summary (if any) for humor/nudge decisions
     const socialMetadata = socialSummaries && socialSummaries.length > 0

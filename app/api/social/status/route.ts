@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createServiceSupabaseClient } from "@/lib/supabase/service";
 import { SocialProvider, SocialStatusResponse } from "@/types";
+import { isOAuthConfigured } from "@/lib/social/oauth";
+import { isProviderEnabled } from "@/lib/oauth/providers";
 
 // All supported providers (5 only - YouTube and LinkedIn removed)
 const ALL_PROVIDERS: SocialProvider[] = [
@@ -84,12 +86,16 @@ export async function GET(req: NextRequest) {
         const expiresAt = account?.expires_at || null;
         const needsReauth = isConnected && expiresAt ? new Date(expiresAt) < now : false;
 
+        // Check if OAuth is configured AND provider is enabled
+        const isConfigured = isProviderEnabled(provider) && isOAuthConfigured(provider);
+
         return {
           provider,
           status: isConnected ? (needsReauth ? "needs_reauth" : "connected") : "disconnected",
           expiresAt,
           needsReauth,
           hasSummary: providersWithSummaries.has(provider),
+          isConfigured,
         };
       }),
     };

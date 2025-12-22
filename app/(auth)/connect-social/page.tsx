@@ -90,8 +90,8 @@ function ConnectSocialContent() {
   };
 
   const handleConnect = (provider: SocialProvider) => {
-    // Redirect to OAuth connect endpoint
-    window.location.href = `/api/social/oauth/${provider}/connect`;
+    // Redirect to OAuth connect endpoint with return_to for post-OAuth redirect
+    window.location.href = `/api/social/oauth/${provider}/connect?return_to=/connect-social`;
   };
 
   const handleDisconnect = async (provider: SocialProvider) => {

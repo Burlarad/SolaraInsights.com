@@ -31,10 +31,11 @@ interface SocialConnectionStatus {
   expiresAt: string | null;
   needsReauth: boolean;
   hasSummary: boolean;
+  isConfigured: boolean;
 }
 
 export default function SettingsPage() {
-  const { profile, saveProfile, loading: profileLoading, error: profileError } = useSettings();
+  const { profile, saveProfile, refreshProfile, loading: profileLoading, error: profileError } = useSettings();
 
   // Local form state - split name fields
   const [firstName, setFirstName] = useState("");
@@ -71,6 +72,7 @@ export default function SettingsPage() {
   // Social connections state (from /api/social/status)
   const [socialStatuses, setSocialStatuses] = useState<SocialConnectionStatus[]>([]);
   const [socialStatusLoading, setSocialStatusLoading] = useState(true);
+  const [socialInsightsToggling, setSocialInsightsToggling] = useState(false);
 
   // Load profile data into form fields
   useEffect(() => {
@@ -137,9 +139,27 @@ export default function SettingsPage() {
     return socialStatuses.find((s) => s.provider === provider);
   };
 
-  // Connect handler - uses custom OAuth flow
+  // Connect handler - uses custom OAuth flow with return_to for post-OAuth redirect
   const handleSocialConnect = (provider: SocialProvider) => {
-    window.location.href = `/api/social/oauth/${provider}/connect`;
+    window.location.href = `/api/social/oauth/${provider}/connect?return_to=/settings`;
+  };
+
+  // Toggle social insights enabled/disabled
+  const handleToggleSocialInsights = async (enabled: boolean) => {
+    setSocialInsightsToggling(true);
+    try {
+      await fetch("/api/user/social-insights", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled }),
+      });
+      // Refresh profile to get updated values
+      await refreshProfile();
+    } catch (err) {
+      console.error("Failed to toggle social insights:", err);
+    } finally {
+      setSocialInsightsToggling(false);
+    }
   };
 
   const handleSaveChanges = async () => {
@@ -535,9 +555,33 @@ export default function SettingsPage() {
           {/* Social Insights / Social Personalization */}
           <section className="space-y-5 pt-6 border-t border-border-subtle/60">
             <div>
-              <h2 className="text-lg md:text-xl font-semibold text-accent-gold">
-                Social Insights
-              </h2>
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg md:text-xl font-semibold text-accent-gold">
+                  Social Insights
+                </h2>
+                {/* Master toggle for social insights */}
+                <button
+                  onClick={() => handleToggleSocialInsights(!profile.social_insights_enabled)}
+                  disabled={socialInsightsToggling}
+                  className="flex items-center gap-2"
+                  aria-label={profile.social_insights_enabled ? "Disable social insights" : "Enable social insights"}
+                >
+                  <span className="text-xs text-accent-ink/60">
+                    {profile.social_insights_enabled ? "ON" : "OFF"}
+                  </span>
+                  <div
+                    className={`w-11 h-7 rounded-full flex items-center px-1 transition-colors ${
+                      profile.social_insights_enabled ? "bg-accent-gold" : "bg-gray-300"
+                    } ${socialInsightsToggling ? "opacity-50" : ""}`}
+                  >
+                    <div
+                      className={`w-5 h-5 bg-white rounded-full transition-transform ${
+                        profile.social_insights_enabled ? "translate-x-4" : "translate-x-0"
+                      }`}
+                    ></div>
+                  </div>
+                </button>
+              </div>
               <p className="text-sm md:text-base text-accent-ink/60 leading-relaxed mt-1">
                 Social insights can use your connected accounts to improve personalization
                 in your Sanctuary. If you choose, Solara can gently read patterns from your

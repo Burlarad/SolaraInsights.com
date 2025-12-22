@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,8 +9,28 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase/client";
 
-export default function SignInPage() {
+/**
+ * Validate returnUrl for open redirect protection.
+ * Only allows relative paths starting with "/" that don't redirect to external domains.
+ */
+function isValidReturnUrl(url: string | null): url is string {
+  if (!url) return false;
+  // Must start with "/" and not start with "//" (protocol-relative URL)
+  if (!url.startsWith("/") || url.startsWith("//")) return false;
+  // Must not contain protocol indicators
+  if (url.toLowerCase().includes("http:") || url.toLowerCase().includes("https:")) return false;
+  // Must not contain encoded slashes that could bypass checks
+  if (url.includes("%2f") || url.includes("%2F")) return false;
+  return true;
+}
+
+function SignInContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Get returnUrl from query params with security validation
+  const returnUrlParam = searchParams.get("returnUrl");
+  const returnUrl = isValidReturnUrl(returnUrlParam) ? returnUrlParam : "/sanctuary";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -39,8 +59,8 @@ export default function SignInPage() {
       }
 
       if (data.user) {
-        // Redirect to sanctuary on success
-        router.push("/sanctuary");
+        // Redirect to returnUrl (validated) or sanctuary on success
+        router.push(returnUrl);
         router.refresh();
       }
     } catch (err) {
@@ -57,7 +77,8 @@ export default function SignInPage() {
       await supabase.auth.signInWithOAuth({
         provider: "facebook",
         options: {
-          redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/sanctuary`,
+          // Use validated returnUrl for OAuth redirect
+          redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}${returnUrl}`,
         },
       });
     } catch (err) {
@@ -188,5 +209,21 @@ export default function SignInPage() {
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense
+      fallback={
+        <Card className="border-border-subtle">
+          <CardContent className="p-12 text-center text-accent-ink/60">
+            Loading...
+          </CardContent>
+        </Card>
+      }
+    >
+      <SignInContent />
+    </Suspense>
   );
 }

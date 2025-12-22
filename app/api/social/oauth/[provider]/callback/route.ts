@@ -22,6 +22,51 @@ const VALID_PROVIDERS: SocialProvider[] = [
 const debug = process.env.OAUTH_DEBUG_LOGS === "true";
 
 /**
+ * Validate return_to URL for open redirect protection.
+ * Only allows internal paths that are safe to redirect to.
+ */
+function isValidReturnTo(returnTo: string | null | undefined): returnTo is string {
+  if (!returnTo) return false;
+  // Must start with "/" (relative path)
+  if (!returnTo.startsWith("/")) return false;
+  // Must not be protocol-relative URL (//)
+  if (returnTo.startsWith("//")) return false;
+  // Must not contain protocol indicators
+  if (returnTo.toLowerCase().includes("http:") || returnTo.toLowerCase().includes("https:")) return false;
+  // Must not contain :// anywhere (catches all protocols)
+  if (returnTo.includes("://")) return false;
+  // Must not contain backslash (prevents /\evil.com tricks)
+  if (returnTo.includes("\\")) return false;
+  // Must not contain encoded slashes that could bypass checks
+  if (returnTo.includes("%2f") || returnTo.includes("%2F")) return false;
+  return true;
+}
+
+/**
+ * Build a redirect URL, preferring returnTo if valid, otherwise falling back to /connect-social.
+ * Appends query params properly (using ? or & as needed).
+ */
+function buildRedirectUrl(
+  returnTo: string | null | undefined,
+  params: Record<string, string>,
+  baseUrl: string
+): URL {
+  // Determine base path
+  const basePath = isValidReturnTo(returnTo) ? returnTo : "/connect-social";
+
+  // Build query string
+  const queryString = Object.entries(params)
+    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+    .join("&");
+
+  // Append query params properly
+  const separator = basePath.includes("?") ? "&" : "?";
+  const fullPath = `${basePath}${separator}${queryString}`;
+
+  return new URL(fullPath, baseUrl);
+}
+
+/**
  * GET /api/social/oauth/[provider]/callback
  *
  * Handles the OAuth callback from the provider.
@@ -37,6 +82,9 @@ export async function GET(
   // Generate short request ID for log correlation
   const requestId = crypto.randomUUID().slice(0, 8);
 
+  // Best-effort returnTo for catch block (extracted from cookie if possible)
+  let earlyReturnTo: string | null = null;
+
   try {
     const { provider: providerParam } = await params;
     const provider = providerParam as SocialProvider;
@@ -51,6 +99,17 @@ export async function GET(
     // Get cookies early for entry logging
     const cookieStore = await cookies();
     const stateCookie = cookieStore.get("social_oauth_state");
+
+    // Try to extract returnTo early for error redirect paths
+    // This is a best-effort parse - if it fails, we'll use null (fallback to /connect-social)
+    if (stateCookie) {
+      try {
+        const parsed = JSON.parse(stateCookie.value);
+        earlyReturnTo = parsed.returnTo || null;
+      } catch {
+        // Ignore parse errors - earlyReturnTo stays null
+      }
+    }
 
     // A) Callback entry log (verbose - gated)
     if (debug) {
@@ -69,7 +128,7 @@ export async function GET(
     if (!VALID_PROVIDERS.includes(provider)) {
       if (debug) console.log(`[OAuth Debug] [${requestId}] EXIT: invalid_provider`);
       return NextResponse.redirect(
-        new URL(`/connect-social?error=invalid_provider`, baseUrl)
+        buildRedirectUrl(earlyReturnTo, { error: "invalid_provider" }, baseUrl)
       );
     }
 
@@ -77,7 +136,7 @@ export async function GET(
     if (!isProviderEnabled(provider)) {
       if (debug) console.log(`[OAuth Debug] [${requestId}] EXIT: provider_disabled`);
       return NextResponse.redirect(
-        new URL(`/connect-social?error=provider_disabled&provider=${provider}`, baseUrl)
+        buildRedirectUrl(earlyReturnTo, { error: "provider_disabled", provider }, baseUrl)
       );
     }
 
@@ -90,12 +149,12 @@ export async function GET(
       // Quiet error - map to "needs_reauth" behavior
       if (error === "access_denied") {
         return NextResponse.redirect(
-          new URL(`/connect-social?error=access_denied&provider=${provider}`, baseUrl)
+          buildRedirectUrl(earlyReturnTo, { error: "access_denied", provider }, baseUrl)
         );
       }
 
       return NextResponse.redirect(
-        new URL(`/connect-social?error=needs_reauth&provider=${provider}`, baseUrl)
+        buildRedirectUrl(earlyReturnTo, { error: "needs_reauth", provider }, baseUrl)
       );
     }
 
@@ -104,15 +163,16 @@ export async function GET(
       console.error(`[OAuth Callback] [${requestId}] ${provider}: missing_params`);
       if (debug) console.log(`[OAuth Debug] [${requestId}] code: ${!!code}, state: ${!!state}`);
       return NextResponse.redirect(
-        new URL(`/connect-social?error=missing_params&provider=${provider}`, baseUrl)
+        buildRedirectUrl(earlyReturnTo, { error: "missing_params", provider }, baseUrl)
       );
     }
 
     // Verify state from cookie
     if (!stateCookie) {
+      // No cookie = no returnTo available, will fallback to /connect-social
       console.error(`[OAuth Callback] [${requestId}] ${provider}: state_expired (no cookie)`);
       return NextResponse.redirect(
-        new URL(`/connect-social?error=state_expired&provider=${provider}`, baseUrl)
+        buildRedirectUrl(null, { error: "state_expired", provider }, baseUrl)
       );
     }
 
@@ -127,9 +187,10 @@ export async function GET(
     try {
       storedState = JSON.parse(stateCookie.value);
     } catch {
+      // Parse failed - earlyReturnTo attempt already failed, fallback to /connect-social
       console.error(`[OAuth Callback] [${requestId}] ${provider}: invalid_state (parse error)`);
       return NextResponse.redirect(
-        new URL(`/connect-social?error=invalid_state&provider=${provider}`, baseUrl)
+        buildRedirectUrl(null, { error: "invalid_state", provider }, baseUrl)
       );
     }
 
@@ -137,7 +198,7 @@ export async function GET(
     if (storedState.state !== state || storedState.provider !== provider) {
       console.error(`[OAuth Callback] [${requestId}] ${provider}: state_mismatch`);
       return NextResponse.redirect(
-        new URL(`/connect-social?error=state_mismatch&provider=${provider}`, baseUrl)
+        buildRedirectUrl(storedState.returnTo, { error: "state_mismatch", provider }, baseUrl)
       );
     }
 
@@ -146,7 +207,7 @@ export async function GET(
     if (stateAgeMs > 10 * 60 * 1000) {
       console.error(`[OAuth Callback] [${requestId}] ${provider}: state_expired (age: ${Math.round(stateAgeMs / 1000)}s)`);
       return NextResponse.redirect(
-        new URL(`/connect-social?error=state_expired&provider=${provider}`, baseUrl)
+        buildRedirectUrl(storedState.returnTo, { error: "state_expired", provider }, baseUrl)
       );
     }
 
@@ -169,7 +230,7 @@ export async function GET(
     if (!codeVerifier) {
       console.error(`[OAuth Callback] [${requestId}] ${provider}: needs_reauth (pkce missing)`);
       return NextResponse.redirect(
-        new URL(`/connect-social?error=needs_reauth&provider=${provider}`, baseUrl)
+        buildRedirectUrl(storedState.returnTo, { error: "needs_reauth", provider }, baseUrl)
       );
     }
 
@@ -237,11 +298,30 @@ export async function GET(
       // Always log database errors (minimal safe info)
       console.error(`[OAuth Callback] [${requestId}] ${provider}: database_error - ${upsertError.message}`);
       return NextResponse.redirect(
-        new URL(`/connect-social?error=database_error&provider=${provider}`, baseUrl)
+        buildRedirectUrl(storedState.returnTo, { error: "database_error", provider }, baseUrl)
       );
     }
 
     if (debug) console.log(`[OAuth Debug] [${requestId}] db upsert: SUCCESS`);
+
+    // Activate social insights on first connection (deferred persistence model)
+    // Only set enabled=true and activated_at if not already set
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("social_insights_enabled, social_insights_activated_at")
+      .eq("id", storedState.userId)
+      .single();
+
+    if (profile && !profile.social_insights_activated_at) {
+      await supabase
+        .from("profiles")
+        .update({
+          social_insights_enabled: true,
+          social_insights_activated_at: new Date().toISOString(),
+        })
+        .eq("id", storedState.userId);
+      if (debug) console.log(`[OAuth Debug] [${requestId}] social insights activated: first connection`);
+    }
 
     // Trigger initial sync (fire and forget)
     const syncUrl = `${baseUrl}/api/social/sync`;
@@ -262,19 +342,26 @@ export async function GET(
     // Success!
     if (debug) console.log(`[OAuth Debug] [${requestId}] === CALLBACK SUCCESS ===`);
 
-    // Redirect to return_to page if specified, otherwise connect-social
-    const successRedirect = storedState.returnTo
-      ? `${storedState.returnTo}?social=connected&provider=${provider}`
-      : `/connect-social?success=true&provider=${provider}`;
-
-    return NextResponse.redirect(new URL(successRedirect, baseUrl));
+    // Redirect to return_to page if valid, otherwise connect-social
+    // Use different success params based on destination
+    if (isValidReturnTo(storedState.returnTo)) {
+      return NextResponse.redirect(
+        buildRedirectUrl(storedState.returnTo, { social: "connected", provider }, baseUrl)
+      );
+    } else {
+      // Fallback: use success=true for /connect-social (backward compat)
+      return NextResponse.redirect(
+        buildRedirectUrl(null, { success: "true", provider }, baseUrl)
+      );
+    }
   } catch (error: any) {
     // F) Catch-all error log - always log (minimal safe info)
     console.error(`[OAuth Callback] [${requestId}] exception: ${error.message}`);
 
     // Quiet error - don't leak details
+    // Use earlyReturnTo if available (best effort), otherwise fallback
     return NextResponse.redirect(
-      new URL(`/connect-social?error=needs_reauth`, baseUrl)
+      buildRedirectUrl(earlyReturnTo, { error: "needs_reauth" }, baseUrl)
     );
   }
 }

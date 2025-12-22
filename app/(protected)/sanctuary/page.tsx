@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useCallback, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,8 +9,9 @@ import { SanctuaryTabs } from "@/components/sanctuary/SanctuaryTabs";
 import { TimeframeToggle } from "@/components/sanctuary/TimeframeToggle";
 import { GreetingCard } from "@/components/sanctuary/GreetingCard";
 import { EmotionalCadenceTimeline } from "@/components/sanctuary/EmotionalCadenceTimeline";
+import { SocialConnectModal } from "@/components/sanctuary/SocialConnectModal";
 import { useSettings } from "@/providers/SettingsProvider";
-import { SanctuaryInsight, Timeframe } from "@/types";
+import { SanctuaryInsight, Timeframe, SocialProvider } from "@/types";
 import { findTarotCard } from "@/lib/tarot";
 import { findRune } from "@/lib/runes";
 import { pickRotatingMessage, getErrorCategory, type ApiErrorResponse } from "@/lib/ui/pickRotatingMessage";
@@ -23,9 +24,10 @@ interface ErrorInfo {
   status: number;
 }
 
-export default function SanctuaryInsightsPage() {
+function SanctuaryContent() {
   const router = useRouter();
-  const { profile, loading: profileLoading, error: profileError } = useSettings();
+  const searchParams = useSearchParams();
+  const { profile, loading: profileLoading, error: profileError, refreshProfile } = useSettings();
 
   const [timeframe, setTimeframe] = useState<Timeframe>("today");
   const [insight, setInsight] = useState<SanctuaryInsight | null>(null);
@@ -39,6 +41,87 @@ export default function SanctuaryInsightsPage() {
   const [isSavingJournal, setIsSavingJournal] = useState(false);
   const [journalSavedMessage, setJournalSavedMessage] = useState<string | null>(null);
   const [journalError, setJournalError] = useState<string | null>(null);
+
+  // Social connect modal state
+  const [showSocialModal, setShowSocialModal] = useState(false);
+  const [justConnectedProvider, setJustConnectedProvider] = useState<SocialProvider | null>(null);
+  const [hasCheckedModalConditions, setHasCheckedModalConditions] = useState(false);
+
+  // Check for OAuth return params (social=connected&provider=xxx)
+  const socialParam = searchParams.get("social");
+  const providerParam = searchParams.get("provider") as SocialProvider | null;
+
+  // Handle OAuth return and modal display logic (deferred persistence model)
+  useEffect(() => {
+    if (profileLoading || hasCheckedModalConditions) return;
+    if (!profile) return;
+
+    // If returning from OAuth, show modal with "connect another?" copy
+    // The callback route already activated social_insights_enabled
+    if (socialParam === "connected" && providerParam) {
+      setJustConnectedProvider(providerParam);
+      setShowSocialModal(true);
+      // Clean URL without reload
+      window.history.replaceState({}, "", "/sanctuary");
+      // Refresh profile to get the updated enabled state from callback
+      refreshProfile();
+    }
+    // If social insights not yet activated, check if there are connectable providers
+    // This is the "activation" flow - modal shows but nothing persists until first connect
+    else if (!profile.social_insights_activated_at) {
+      checkForConnectableProviders();
+    }
+
+    setHasCheckedModalConditions(true);
+  }, [profile, profileLoading, socialParam, providerParam, hasCheckedModalConditions, refreshProfile]);
+
+  // Check if there are connectable providers that aren't connected
+  const checkForConnectableProviders = async () => {
+    try {
+      const response = await fetch("/api/social/status");
+      if (response.ok) {
+        const data = await response.json();
+        const hasConnectable = data.connections.some(
+          (c: { isConfigured: boolean; status: string }) =>
+            c.isConfigured && c.status === "disconnected"
+        );
+        if (hasConnectable) {
+          setShowSocialModal(true);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to check social status:", err);
+    }
+  };
+
+  // Handle modal done - deferred persistence means we just close
+  // If user connected at least one provider, social_insights is already enabled by callback
+  // If user closed without connecting, nothing was persisted (feature stays off)
+  const handleModalDone = async () => {
+    setShowSocialModal(false);
+    setJustConnectedProvider(null);
+    // Refresh profile to ensure we have latest state
+    await refreshProfile();
+  };
+
+  // Handle social insights toggle
+  const handleToggleSocialInsights = async (enabled: boolean) => {
+    try {
+      await fetch("/api/user/social-insights", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled }),
+      });
+      // Refresh profile to get updated values
+      refreshProfile();
+      // If toggled OFF, close modal immediately
+      if (!enabled) {
+        setShowSocialModal(false);
+      }
+    } catch (err) {
+      console.error("Failed to toggle social insights:", err);
+    }
+  };
 
   const loadInsight = useCallback(async () => {
     setLoading(true);
@@ -536,6 +619,32 @@ export default function SanctuaryInsightsPage() {
           </div>
         </div>
       )}
+
+      {/* Social Connect Modal */}
+      <SocialConnectModal
+        open={showSocialModal}
+        onOpenChange={setShowSocialModal}
+        onDone={handleModalDone}
+        justConnectedProvider={justConnectedProvider}
+      />
     </div>
+  );
+}
+
+export default function SanctuaryInsightsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="max-w-7xl mx-auto px-6 py-12">
+          <div className="animate-pulse space-y-8">
+            <div className="h-8 bg-accent-muted rounded w-1/4"></div>
+            <div className="h-24 bg-accent-muted rounded"></div>
+            <div className="h-12 bg-accent-muted rounded w-1/2"></div>
+          </div>
+        </div>
+      }
+    >
+      <SanctuaryContent />
+    </Suspense>
   );
 }

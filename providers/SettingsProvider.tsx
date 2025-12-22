@@ -91,6 +91,10 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         location_for_charity: null,
         latitude: null,
         longitude: null,
+
+        // Social insights defaults (deferred persistence - starts OFF)
+        social_insights_enabled: false,
+        social_insights_activated_at: null,
       };
 
       const { data: createdProfile, error: createError } = await supabase
