@@ -92,17 +92,16 @@ async function fetchInstagramContent(accessToken: string): Promise<FetchedConten
 }
 
 /**
- * Fetch TikTok profile and stats for a user
- * Uses scopes: user.info.basic, user.info.profile, user.info.stats
+ * Fetch TikTok profile for a user
+ * MVP: Uses only user.info.basic scope (auto-approved in sandbox)
+ * TODO: Add user.info.profile and user.info.stats after portal approval
  */
 async function fetchTikTokContent(accessToken: string): Promise<FetchedContent> {
-  // Get user info with profile and stats fields
-  // Fields available per scope:
-  // - user.info.basic: display_name, avatar_url
-  // - user.info.profile: bio_description, profile_deep_link, is_verified, username
-  // - user.info.stats: follower_count, following_count, likes_count, video_count
+  // MVP: Only request fields available with user.info.basic scope
+  // - user.info.basic: display_name, avatar_url, open_id
+  // Future (after approval): username, bio_description, is_verified, follower_count, etc.
   const userResponse = await fetch(
-    "https://open.tiktokapis.com/v2/user/info/?fields=display_name,username,bio_description,is_verified,follower_count,following_count,likes_count,video_count",
+    "https://open.tiktokapis.com/v2/user/info/?fields=display_name,avatar_url",
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -121,45 +120,21 @@ async function fetchTikTokContent(accessToken: string): Promise<FetchedContent> 
     throw new Error("No user data returned from TikTok");
   }
 
-  // Build content from profile info and stats
+  // Build content from basic profile info only
   const contentParts: string[] = [];
 
   if (user.display_name) {
-    contentParts.push(`Display Name: ${user.display_name}`);
+    contentParts.push(`TikTok User: ${user.display_name}`);
   }
 
-  if (user.bio_description) {
-    contentParts.push(`Bio: ${user.bio_description}`);
-  }
-
-  if (user.is_verified !== undefined) {
-    contentParts.push(`Verified: ${user.is_verified ? "Yes" : "No"}`);
-  }
-
-  // Add stats for context
-  const stats: string[] = [];
-  if (user.follower_count !== undefined) {
-    stats.push(`${user.follower_count.toLocaleString()} followers`);
-  }
-  if (user.following_count !== undefined) {
-    stats.push(`${user.following_count.toLocaleString()} following`);
-  }
-  if (user.likes_count !== undefined) {
-    stats.push(`${user.likes_count.toLocaleString()} likes`);
-  }
-  if (user.video_count !== undefined) {
-    stats.push(`${user.video_count.toLocaleString()} videos`);
-  }
-
-  if (stats.length > 0) {
-    contentParts.push(`Stats: ${stats.join(", ")}`);
-  }
-
-  const content = contentParts.join("\n\n");
+  // MVP: Minimal content for AI summary
+  const content = contentParts.length > 0
+    ? contentParts.join("\n\n")
+    : "TikTok account connected";
 
   return {
     content,
-    handle: user.username ? `@${user.username}` : null,
+    handle: user.display_name || null, // No @username without user.info.profile scope
     postCount: 1, // Profile counts as 1 item
   };
 }

@@ -4,7 +4,7 @@
  * TikTok-specific OAuth quirks:
  * - Uses `client_key` instead of `client_id`
  * - Returns `open_id` instead of `user_id`
- * - Scopes must match exactly: user.info.basic, user.info.profile, user.info.stats
+ * - MVP: Only user.info.basic scope (auto-approved in sandbox)
  */
 
 import { ProviderAdapter, NormalizedTokens } from "./types";
@@ -14,8 +14,9 @@ export const tiktokAdapter: ProviderAdapter = {
   authorizeUrl: "https://www.tiktok.com/v2/auth/authorize/",
   tokenUrl: "https://open.tiktokapis.com/v2/oauth/token/",
 
-  // Scopes must match TikTok portal submission exactly - NO video.list
-  scopes: ["user.info.basic", "user.info.profile", "user.info.stats"],
+  // MVP: Only request user.info.basic (auto-approved in TikTok sandbox)
+  // TODO: Add user.info.profile and user.info.stats after portal approval
+  scopes: ["user.info.basic"],
 
   clientIdEnvKey: "TIKTOK_CLIENT_KEY",
   clientSecretEnvKey: "TIKTOK_CLIENT_SECRET",
