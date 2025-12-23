@@ -52,7 +52,6 @@ export interface Profile {
   // Social insights toggle
   social_insights_enabled: boolean;
   social_insights_activated_at: string | null;
-  social_connect_prompt_dismissed_at: string | null; // Legacy, may be deprecated
 }
 
 export interface ProfileUpdate {

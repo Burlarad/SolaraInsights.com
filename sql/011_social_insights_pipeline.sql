@@ -1,73 +1,14 @@
 -- ============================================================================
--- SOCIAL INSIGHTS PIPELINE - Complete Schema
+-- SOCIAL SUMMARIES TABLE
 -- ============================================================================
 -- Run this migration in Supabase SQL Editor.
--- This creates/updates social_connections and social_summaries tables
--- with full schema for the Social Insights pipeline.
+-- Creates/updates social_summaries table for storing AI-generated social content summaries.
+--
+-- NOTE: social_connections table was removed in migration 015.
+-- Token storage is now handled by social_accounts (see 013_social_accounts_vault.sql).
 
 -- ============================================================================
--- 1. CREATE social_connections TABLE (IF NOT EXISTS)
--- ============================================================================
-
-CREATE TABLE IF NOT EXISTS public.social_connections (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  provider TEXT NOT NULL,
-  handle TEXT,
-  provider_user_id TEXT,
-  status TEXT NOT NULL DEFAULT 'disconnected',
-  last_ingested_at TIMESTAMPTZ,
-  last_error TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-
-  -- Unique constraint: one connection per user per provider
-  CONSTRAINT social_connections_user_provider_unique UNIQUE (user_id, provider),
-
-  -- Status must be one of the allowed values
-  CONSTRAINT social_connections_status_check CHECK (
-    status IN ('disconnected', 'connected', 'processing', 'ready', 'failed')
-  ),
-
-  -- Provider must be one of the allowed values
-  CONSTRAINT social_connections_provider_check CHECK (
-    provider IN ('facebook', 'instagram', 'tiktok', 'x', 'youtube', 'linkedin', 'reddit')
-  )
-);
-
--- Add columns if they don't exist (for existing tables)
-DO $$
-BEGIN
-  -- Add status column if missing
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name = 'social_connections' AND column_name = 'status'
-  ) THEN
-    ALTER TABLE public.social_connections ADD COLUMN status TEXT NOT NULL DEFAULT 'disconnected';
-    ALTER TABLE public.social_connections ADD CONSTRAINT social_connections_status_check CHECK (
-      status IN ('disconnected', 'connected', 'processing', 'ready', 'failed')
-    );
-  END IF;
-
-  -- Add last_ingested_at column if missing
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name = 'social_connections' AND column_name = 'last_ingested_at'
-  ) THEN
-    ALTER TABLE public.social_connections ADD COLUMN last_ingested_at TIMESTAMPTZ;
-  END IF;
-
-  -- Add last_error column if missing
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name = 'social_connections' AND column_name = 'last_error'
-  ) THEN
-    ALTER TABLE public.social_connections ADD COLUMN last_error TEXT;
-  END IF;
-END $$;
-
--- ============================================================================
--- 2. CREATE social_summaries TABLE (IF NOT EXISTS)
+-- 1. CREATE social_summaries TABLE (IF NOT EXISTS)
 -- ============================================================================
 
 CREATE TABLE IF NOT EXISTS public.social_summaries (
@@ -85,7 +26,7 @@ CREATE TABLE IF NOT EXISTS public.social_summaries (
 
   -- Provider must be one of the allowed values
   CONSTRAINT social_summaries_provider_check CHECK (
-    provider IN ('facebook', 'instagram', 'tiktok', 'x', 'youtube', 'linkedin', 'reddit')
+    provider IN ('facebook', 'instagram', 'tiktok', 'x', 'reddit')
   )
 );
 
@@ -118,54 +59,20 @@ BEGIN
 END $$;
 
 -- ============================================================================
--- 3. CREATE INDEXES
+-- 2. CREATE INDEXES
 -- ============================================================================
-
-CREATE INDEX IF NOT EXISTS idx_social_connections_user_provider
-  ON public.social_connections(user_id, provider);
 
 CREATE INDEX IF NOT EXISTS idx_social_summaries_user_provider
   ON public.social_summaries(user_id, provider);
 
 -- ============================================================================
--- 4. ENABLE RLS
+-- 3. ENABLE RLS
 -- ============================================================================
 
-ALTER TABLE public.social_connections ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.social_summaries ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================================
--- 5. RLS POLICIES FOR social_connections
--- ============================================================================
-
--- Drop existing policies first (for idempotency)
-DROP POLICY IF EXISTS "Users can view their own social connections" ON public.social_connections;
-DROP POLICY IF EXISTS "Users can insert their own social connections" ON public.social_connections;
-DROP POLICY IF EXISTS "Users can update their own social connections" ON public.social_connections;
-DROP POLICY IF EXISTS "Users can delete their own social connections" ON public.social_connections;
-
-CREATE POLICY "Users can view their own social connections"
-  ON public.social_connections
-  FOR SELECT
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can insert their own social connections"
-  ON public.social_connections
-  FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can update their own social connections"
-  ON public.social_connections
-  FOR UPDATE
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can delete their own social connections"
-  ON public.social_connections
-  FOR DELETE
-  USING (auth.uid() = user_id);
-
--- ============================================================================
--- 6. RLS POLICIES FOR social_summaries
+-- 4. RLS POLICIES FOR social_summaries
 -- ============================================================================
 
 -- Drop existing policies first (for idempotency)
@@ -199,7 +106,7 @@ CREATE POLICY "Users can delete their own social summaries"
   USING (auth.uid() = user_id);
 
 -- ============================================================================
--- 7. LINKED PROFILE ACCESS POLICY FOR social_summaries
+-- 5. LINKED PROFILE ACCESS POLICY FOR social_summaries
 -- ============================================================================
 -- Allow users to view social summaries of their linked connections
 -- (for Space Between feature)
@@ -226,12 +133,6 @@ CREATE POLICY "Users can view linked profile social summaries"
 -- VERIFICATION QUERIES (run after migration to confirm)
 -- ============================================================================
 --
--- Check social_connections table:
--- SELECT column_name, data_type, is_nullable
--- FROM information_schema.columns
--- WHERE table_name = 'social_connections'
--- ORDER BY ordinal_position;
---
 -- Check social_summaries table:
 -- SELECT column_name, data_type, is_nullable
 -- FROM information_schema.columns
@@ -240,9 +141,9 @@ CREATE POLICY "Users can view linked profile social summaries"
 --
 -- Check indexes:
 -- SELECT indexname FROM pg_indexes
--- WHERE tablename IN ('social_connections', 'social_summaries');
+-- WHERE tablename = 'social_summaries';
 --
 -- Check policies:
 -- SELECT policyname, tablename FROM pg_policies
--- WHERE tablename IN ('social_connections', 'social_summaries');
+-- WHERE tablename = 'social_summaries';
 --

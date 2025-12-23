@@ -43,7 +43,7 @@ function isValidReturnTo(returnTo: string | null | undefined): returnTo is strin
 }
 
 /**
- * Build a redirect URL, preferring returnTo if valid, otherwise falling back to /connect-social.
+ * Build a redirect URL, preferring returnTo if valid, otherwise falling back to /settings.
  * Appends query params properly (using ? or & as needed).
  */
 function buildRedirectUrl(
@@ -51,8 +51,8 @@ function buildRedirectUrl(
   params: Record<string, string>,
   baseUrl: string
 ): URL {
-  // Determine base path
-  const basePath = isValidReturnTo(returnTo) ? returnTo : "/connect-social";
+  // Determine base path - default to /settings if no valid returnTo
+  const basePath = isValidReturnTo(returnTo) ? returnTo : "/settings";
 
   // Build query string
   const queryString = Object.entries(params)
@@ -101,7 +101,7 @@ export async function GET(
     const stateCookie = cookieStore.get("social_oauth_state");
 
     // Try to extract returnTo early for error redirect paths
-    // This is a best-effort parse - if it fails, we'll use null (fallback to /connect-social)
+    // This is a best-effort parse - if it fails, we'll use null (fallback to /settings)
     if (stateCookie) {
       try {
         const parsed = JSON.parse(stateCookie.value);
@@ -169,7 +169,7 @@ export async function GET(
 
     // Verify state from cookie
     if (!stateCookie) {
-      // No cookie = no returnTo available, will fallback to /connect-social
+      // No cookie = no returnTo available, will fallback to /settings
       console.error(`[OAuth Callback] [${requestId}] ${provider}: state_expired (no cookie)`);
       return NextResponse.redirect(
         buildRedirectUrl(null, { error: "state_expired", provider }, baseUrl)
@@ -187,7 +187,7 @@ export async function GET(
     try {
       storedState = JSON.parse(stateCookie.value);
     } catch {
-      // Parse failed - earlyReturnTo attempt already failed, fallback to /connect-social
+      // Parse failed - earlyReturnTo attempt already failed, fallback to /settings
       console.error(`[OAuth Callback] [${requestId}] ${provider}: invalid_state (parse error)`);
       return NextResponse.redirect(
         buildRedirectUrl(null, { error: "invalid_state", provider }, baseUrl)
@@ -342,18 +342,10 @@ export async function GET(
     // Success!
     if (debug) console.log(`[OAuth Debug] [${requestId}] === CALLBACK SUCCESS ===`);
 
-    // Redirect to return_to page if valid, otherwise connect-social
-    // Use different success params based on destination
-    if (isValidReturnTo(storedState.returnTo)) {
-      return NextResponse.redirect(
-        buildRedirectUrl(storedState.returnTo, { social: "connected", provider }, baseUrl)
-      );
-    } else {
-      // Fallback: use success=true for /connect-social (backward compat)
-      return NextResponse.redirect(
-        buildRedirectUrl(null, { success: "true", provider }, baseUrl)
-      );
-    }
+    // Redirect to return_to page if valid, otherwise /settings
+    return NextResponse.redirect(
+      buildRedirectUrl(storedState.returnTo, { social: "connected", provider }, baseUrl)
+    );
   } catch (error: any) {
     // F) Catch-all error log - always log (minimal safe info)
     console.error(`[OAuth Callback] [${requestId}] exception: ${error.message}`);

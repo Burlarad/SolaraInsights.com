@@ -125,18 +125,9 @@ export default function OnboardingPage() {
         onboarding_completed_at: new Date().toISOString(),
       } as any);
 
-      // Determine next step based on auth method
-      // If user has no OAuth providers connected, show social-connect page
-      // Otherwise, go straight to sanctuary
-      const hasEmailOnly = profile?.email && !profile?.full_name?.includes("facebook");
-
-      if (hasEmailOnly) {
-        // Email-only user - offer optional social connect
-        router.push("/connect-social");
-      } else {
-        // Social user or skip social connect - go to sanctuary
-        router.push("/sanctuary");
-      }
+      // All users go to sanctuary after onboarding
+      // Social connect is now handled via Settings or Sanctuary modal
+      router.push("/sanctuary");
     } catch (err: any) {
       console.error("Onboarding error:", err);
       setError(err.message || "Failed to save profile. Please try again.");

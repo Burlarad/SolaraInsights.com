@@ -9,7 +9,6 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
  * Body:
  *   { enabled: boolean } - Turn social insights on or off
  *   { activatedAt: true } - First-time activation (sets enabled=true + activated_at timestamp)
- *   { dismissPrompt: true } - Dismiss the social connect modal (legacy)
  */
 export async function POST(req: NextRequest) {
   try {
@@ -26,7 +25,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { enabled, activatedAt, dismissPrompt } = body;
+    const { enabled, activatedAt } = body;
 
     // Build update object based on what was provided
     const updates: Record<string, unknown> = {};
@@ -61,11 +60,6 @@ export async function POST(req: NextRequest) {
           updates.social_insights_activated_at = new Date().toISOString();
         }
       }
-    }
-
-    // Legacy: support dismissPrompt for backwards compatibility
-    if (dismissPrompt === true) {
-      updates.social_connect_prompt_dismissed_at = new Date().toISOString();
     }
 
     if (Object.keys(updates).length === 0) {

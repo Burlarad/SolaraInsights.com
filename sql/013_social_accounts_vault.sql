@@ -2,7 +2,7 @@
 -- SOCIAL ACCOUNTS VAULT MIGRATION
 -- ============================================================================
 -- Creates social_accounts as the canonical token vault for Social Insights.
--- This replaces token storage in social_connections.
+-- This is the single source of truth for OAuth tokens (encrypted at rest).
 -- Run this migration in Supabase SQL Editor.
 
 -- ============================================================================
