@@ -1,0 +1,60 @@
+
+> solara-insights@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.5.9
+   - Local:        http://localhost:3000
+   - Network:      http://10.0.0.171:3000
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+ ✓ Ready in 1355ms
+ ○ Compiling / ...
+ ✓ Compiled / in 1255ms (1003 modules)
+ GET / 200 in 1778ms
+ ✓ Compiled in 231ms (438 modules)
+ ✓ Compiled /sanctuary in 326ms (1131 modules)
+ GET /sanctuary 200 in 1648ms
+ GET /sanctuary 200 in 478ms
+ ⚠ Cross origin request detected from dev.solarainsights.com to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+ ✓ Compiled /api/insights in 410ms (1663 modules)
+[Insights] ✗ Cache miss for insight:v1:p3:e8a23f35-ef35-4d34-971c-fad6550c70ad:daily:2025-12-22:en
+(node:37520) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[Cache] Redis connected successfully.
+[RateLimit] Redis ping: OK
+[Insights] ✓ Lock acquired for lock:insight:p3:e8a23f35-ef35-4d34-971c-fad6550c70ad:daily:2025-12-22, generating insight...
+ ✓ Compiled /settings in 227ms (1680 modules)
+ GET /settings 200 in 339ms
+ GET /settings 200 in 33ms
+ ✓ Compiled /api/social/status in 229ms (1689 modules)
+ GET /api/social/status 200 in 855ms
+ GET /api/social/status 200 in 662ms
+ ✓ Compiled /api/social/oauth/[provider]/connect in 177ms (1692 modules)
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[OAuth Debug] [tiktok] redirectUri: https://dev.solarainsights.com/api/social/oauth/tiktok/callback
+[OAuth Debug] [tiktok] authUrl: https://www.tiktok.com/v2/auth/authorize?client_key=sbawj8fkb8x05wdkza&redirect_uri=https%3A%2F%2Fdev.solarainsights.com%2Fapi%2Fsocial%2Foauth%2Ftiktok%2Fcallback&response_type=code&scope=user.info.basic&state=2a55fe276a755816c143ed106e24bc8aa19ee719aee014ab4a53cb8cdad1ec16&code_challenge=BeG6mviwY0ojTF5pFgIbzHkeFt8fuPB36n41Id86npc&code_challenge_method=S256
+ GET /api/social/oauth/tiktok/connect?return_to=/settings 307 in 715ms
+ GET /settings 200 in 446ms
+[CostControl] Budget updated: +$0.015107 → $0.2835 total today
+[Insights] ✓ Lock released for lock:insight:p3:e8a23f35-ef35-4d34-971c-fad6550c70ad:daily:2025-12-22
+ POST /api/insights 200 in 22951ms
+ GET /api/social/status 200 in 305ms
+[OAuth Debug] [tiktok] redirectUri: https://dev.solarainsights.com/api/social/oauth/tiktok/callback
+[OAuth Debug] [tiktok] authUrl: https://www.tiktok.com/v2/auth/authorize?client_key=sbawj8fkb8x05wdkza&redirect_uri=https%3A%2F%2Fdev.solarainsights.com%2Fapi%2Fsocial%2Foauth%2Ftiktok%2Fcallback&response_type=code&scope=user.info.basic&state=8ac73ccb7a53b2a02583b7e507100b9c64382fe62dcc6fa292f8b938ec0fe754&code_challenge=-qSdihf0gehoe4tmNJ0MXEAykFgG0iqnV0bl41-cu_M&code_challenge_method=S256
+ GET /api/social/oauth/tiktok/connect?return_to=/settings 307 in 131ms
+ ✓ Compiled /_not-found in 261ms (1122 modules)
+ HEAD /api/social/oauth/tiktok/callback/tiktok-developers-site-verification=CfbvACM7G2xMSSmxzZxL5pr76DJhTDm4.txt 404 in 548ms
+ ✓ Compiled / in 132ms (697 modules)
+ GET / 200 in 497ms
+ GET /settings 200 in 546ms
+ ✓ Compiled /api/social/status in 134ms (723 modules)
+ GET /api/social/status 200 in 594ms
+ GET /api/social/status 200 in 765ms
+ ✓ Compiled /api/social/oauth/[provider]/connect in 83ms (727 modules)
+[OAuth Debug] [tiktok] redirectUri: https://dev.solarainsights.com/api/social/oauth/tiktok/callback
+[OAuth Debug] [tiktok] authUrl: https://www.tiktok.com/v2/auth/authorize?client_key=sbawj8fkb8x05wdkza&redirect_uri=https%3A%2F%2Fdev.solarainsights.com%2Fapi%2Fsocial%2Foauth%2Ftiktok%2Fcallback&response_type=code&scope=user.info.basic&state=7cae5d3a11abee1bf16ab8803a91c22193f81e07f050e753690372054bf28713&code_challenge=1GXqvQI34JsQGQ7k0-MUUi0myzV8MjmJ4TEPtVGlAyI&code_challenge_method=S256
+ GET /api/social/oauth/tiktok/connect?return_to=/settings 307 in 300ms
+ HEAD /api/social/oauth/tiktok/connect?return_to=/settings 307 in 21ms
+ HEAD /api/social/oauth/tiktok/connect?return_to=/settings 307 in 16ms

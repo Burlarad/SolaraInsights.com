@@ -5,6 +5,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useSettings } from "@/providers/SettingsProvider";
 import { PlacePicker, PlaceSelection } from "@/components/shared/PlacePicker";
 import { SocialProvider } from "@/types";
@@ -72,7 +80,11 @@ export default function SettingsPage() {
   // Social connections state (from /api/social/status)
   const [socialStatuses, setSocialStatuses] = useState<SocialConnectionStatus[]>([]);
   const [socialStatusLoading, setSocialStatusLoading] = useState(true);
-  const [socialInsightsToggling, setSocialInsightsToggling] = useState(false);
+
+  // Disconnect confirmation dialog state
+  const [pendingDisconnectProvider, setPendingDisconnectProvider] = useState<SocialProvider | null>(null);
+  const [isDisconnecting, setIsDisconnecting] = useState(false);
+  const [disconnectSuccess, setDisconnectSuccess] = useState<string | null>(null);
 
   // Load profile data into form fields
   useEffect(() => {
@@ -144,21 +156,59 @@ export default function SettingsPage() {
     window.location.href = `/api/social/oauth/${provider}/connect?return_to=/settings`;
   };
 
-  // Toggle social insights enabled/disabled
-  const handleToggleSocialInsights = async (enabled: boolean) => {
-    setSocialInsightsToggling(true);
+  // Helper to count connected providers
+  const getConnectedCount = (): number => {
+    return socialStatuses.filter((s) => s.status === "connected").length;
+  };
+
+  // Helper to get provider display name
+  const getProviderName = (providerId: SocialProvider): string => {
+    return SOCIAL_PROVIDERS.find((p) => p.id === providerId)?.name || providerId;
+  };
+
+  // Disconnect handler - called after confirmation
+  const handleDisconnect = async () => {
+    if (!pendingDisconnectProvider) return;
+
+    setIsDisconnecting(true);
     try {
-      await fetch("/api/user/social-insights", {
+      const response = await fetch("/api/social/revoke", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ enabled }),
+        body: JSON.stringify({ provider: pendingDisconnectProvider }),
       });
-      // Refresh profile to get updated values
-      await refreshProfile();
+
+      if (response.ok) {
+        const providerName = getProviderName(pendingDisconnectProvider);
+        setDisconnectSuccess(`Disconnected from ${providerName}`);
+        // Refresh status and profile
+        const statusResponse = await fetch("/api/social/status");
+        if (statusResponse.ok) {
+          const data = await statusResponse.json();
+          setSocialStatuses(data.connections || []);
+        }
+        await refreshProfile();
+        // Auto-clear success message after 3 seconds
+        setTimeout(() => setDisconnectSuccess(null), 3000);
+      } else {
+        console.error("Failed to disconnect:", await response.text());
+      }
     } catch (err) {
-      console.error("Failed to toggle social insights:", err);
+      console.error("Failed to disconnect:", err);
     } finally {
-      setSocialInsightsToggling(false);
+      setIsDisconnecting(false);
+      setPendingDisconnectProvider(null);
+    }
+  };
+
+  // Toggle handler for per-provider connect/disconnect
+  const handleProviderToggle = (provider: SocialProvider, isCurrentlyConnected: boolean) => {
+    if (isCurrentlyConnected) {
+      // Show confirmation dialog before disconnecting
+      setPendingDisconnectProvider(provider);
+    } else {
+      // Start OAuth connect flow
+      handleSocialConnect(provider);
     }
   };
 
@@ -559,36 +609,29 @@ export default function SettingsPage() {
                 <h2 className="text-lg md:text-xl font-semibold text-accent-gold">
                   Social Insights
                 </h2>
-                {/* Master toggle for social insights */}
-                <button
-                  onClick={() => handleToggleSocialInsights(!profile.social_insights_enabled)}
-                  disabled={socialInsightsToggling}
-                  className="flex items-center gap-2"
-                  aria-label={profile.social_insights_enabled ? "Disable social insights" : "Enable social insights"}
+                {/* Derived status indicator (not a toggle) */}
+                <span
+                  className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+                    getConnectedCount() > 0
+                      ? "bg-green-100 text-green-700"
+                      : "bg-gray-100 text-gray-500"
+                  }`}
                 >
-                  <span className="text-xs text-accent-ink/60">
-                    {profile.social_insights_enabled ? "ON" : "OFF"}
-                  </span>
-                  <div
-                    className={`w-11 h-7 rounded-full flex items-center px-1 transition-colors ${
-                      profile.social_insights_enabled ? "bg-accent-gold" : "bg-gray-300"
-                    } ${socialInsightsToggling ? "opacity-50" : ""}`}
-                  >
-                    <div
-                      className={`w-5 h-5 bg-white rounded-full transition-transform ${
-                        profile.social_insights_enabled ? "translate-x-4" : "translate-x-0"
-                      }`}
-                    ></div>
-                  </div>
-                </button>
+                  {getConnectedCount() > 0 ? "Active" : "Inactive"}
+                </span>
               </div>
               <p className="text-sm md:text-base text-accent-ink/60 leading-relaxed mt-1">
-                Social insights can use your connected accounts to improve personalization
-                in your Sanctuary. If you choose, Solara can gently read patterns from your
-                connected social accounts to better understand your emotional tone and daily
-                rhythms. We will never post for you.
+                Connect your social accounts to help Solara understand your emotional tone
+                and daily rhythms. We will never post for you.
               </p>
             </div>
+
+            {/* Success message */}
+            {disconnectSuccess && (
+              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
+                {disconnectSuccess}
+              </div>
+            )}
 
             <div className="space-y-4">
               {SOCIAL_PROVIDERS.map((provider) => {
@@ -603,7 +646,7 @@ export default function SettingsPage() {
                     className={`border-border-subtle ${!isEnabled ? "opacity-50" : ""}`}
                   >
                     <CardContent className="p-4 sm:p-5">
-                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div
                             className="w-11 h-11 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0"
@@ -617,47 +660,55 @@ export default function SettingsPage() {
                               <p className="text-xs md:text-sm text-accent-ink/60">Coming soon</p>
                             ) : socialStatusLoading ? (
                               <p className="text-xs md:text-sm text-accent-ink/60">Loading...</p>
-                            ) : isConnected ? (
-                              <p className="text-xs md:text-sm text-green-600">Connected</p>
                             ) : needsReauth ? (
                               <p className="text-xs md:text-sm text-amber-600">Needs reconnection</p>
+                            ) : isConnected ? (
+                              <p className="text-xs md:text-sm text-green-600">Connected</p>
                             ) : (
                               <p className="text-xs md:text-sm text-accent-ink/60">Not connected</p>
                             )}
                           </div>
                         </div>
+
+                        {/* Per-provider toggle or Coming Soon */}
                         {isEnabled ? (
-                          <Button
-                            variant="outline"
-                            onClick={() => handleSocialConnect(provider.id)}
-                            className="w-full sm:w-auto min-h-[44px]"
-                          >
-                            {needsReauth ? "Reconnect" : isConnected ? "Reconnect" : "Connect"}
-                          </Button>
+                          needsReauth ? (
+                            // Show Reconnect button for needs_reauth state
+                            <Button
+                              variant="outline"
+                              onClick={() => handleSocialConnect(provider.id)}
+                              className="min-h-[44px]"
+                            >
+                              Reconnect
+                            </Button>
+                          ) : (
+                            // Connect/Disconnect toggle
+                            <button
+                              onClick={() => handleProviderToggle(provider.id, isConnected)}
+                              disabled={socialStatusLoading}
+                              className="flex items-center gap-2"
+                              aria-label={isConnected ? `Disconnect ${provider.name}` : `Connect ${provider.name}`}
+                            >
+                              <span className="text-xs text-accent-ink/60">
+                                {isConnected ? "ON" : "OFF"}
+                              </span>
+                              <div
+                                className={`w-11 h-7 rounded-full flex items-center px-1 transition-colors ${
+                                  isConnected ? "bg-accent-gold" : "bg-gray-300"
+                                } ${socialStatusLoading ? "opacity-50" : ""}`}
+                              >
+                                <div
+                                  className={`w-5 h-5 bg-white rounded-full transition-transform ${
+                                    isConnected ? "translate-x-4" : "translate-x-0"
+                                  }`}
+                                ></div>
+                              </div>
+                            </button>
+                          )
                         ) : (
-                          <Button
-                            variant="outline"
-                            disabled
-                            className="w-full sm:w-auto min-h-[44px]"
-                          >
-                            Coming Soon
-                          </Button>
+                          <span className="text-xs text-accent-ink/40">Coming Soon</span>
                         )}
                       </div>
-
-                      {isEnabled && isConnected && (
-                        <div className="flex items-center justify-between mt-4 pt-4 border-t border-border-subtle/60">
-                          <span className="text-sm text-accent-ink/80">
-                            Use to improve experience
-                          </span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs text-accent-ink/60">ON</span>
-                            <div className="w-11 h-7 bg-accent-gold rounded-full flex items-center px-1">
-                              <div className="w-5 h-5 bg-white rounded-full ml-auto"></div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
                     </CardContent>
                   </Card>
                 );
@@ -842,6 +893,40 @@ export default function SettingsPage() {
           Changes settle softly—return anytime to tune your details at your own rhythm.
         </p>
       </div>
+
+      {/* Disconnect Confirmation Dialog */}
+      <Dialog
+        open={!!pendingDisconnectProvider}
+        onOpenChange={(open) => !open && setPendingDisconnectProvider(null)}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              Disconnect {pendingDisconnectProvider ? getProviderName(pendingDisconnectProvider) : ""}?
+            </DialogTitle>
+            <DialogDescription>
+              This will stop pulling signals from {pendingDisconnectProvider ? getProviderName(pendingDisconnectProvider) : "this account"}.
+              You can reconnect anytime.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => setPendingDisconnectProvider(null)}
+              disabled={isDisconnecting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDisconnect}
+              disabled={isDisconnecting}
+            >
+              {isDisconnecting ? "Disconnecting..." : "Disconnect"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

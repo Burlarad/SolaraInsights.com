@@ -8,6 +8,9 @@ import { isValidProvider } from "@/lib/social/summarize";
  *
  * Revokes a social connection by deleting tokens from social_accounts
  * and removing the associated summary.
+ *
+ * If this was the last connected provider, also sets social_insights_enabled=false
+ * so Sanctuary can re-prompt the user later.
  */
 export async function POST(req: NextRequest) {
   const requestId = crypto.randomUUID().slice(0, 8);
@@ -67,12 +70,35 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.log(`[SocialRevoke:${requestId}] Successfully revoked ${provider}`);
+    // Check how many connected accounts remain
+    const { data: remainingAccounts, error: countError } = await serviceSupabase
+      .from("social_accounts")
+      .select("provider")
+      .eq("user_id", user.id);
+
+    const remainingConnectedCount = countError ? 0 : (remainingAccounts?.length || 0);
+
+    // If no accounts remain, disable social insights so Sanctuary can re-prompt
+    if (remainingConnectedCount === 0) {
+      console.log(`[SocialRevoke:${requestId}] Last provider disconnected, disabling social insights`);
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ social_insights_enabled: false })
+        .eq("id", user.id);
+
+      if (updateError) {
+        console.error(`[SocialRevoke:${requestId}] Failed to disable social insights:`, updateError);
+        // Non-fatal - continue with success response
+      }
+    }
+
+    console.log(`[SocialRevoke:${requestId}] Successfully revoked ${provider}, ${remainingConnectedCount} accounts remain`);
 
     return NextResponse.json({
       success: true,
       provider,
       status: "disconnected",
+      remainingConnectedCount,
     });
   } catch (error: any) {
     console.error(`[SocialRevoke:${requestId}] Unexpected error:`, error.message);
