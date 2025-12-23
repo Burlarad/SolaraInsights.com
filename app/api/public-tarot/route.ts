@@ -6,6 +6,7 @@ import { isRedisAvailable, REDIS_UNAVAILABLE_RESPONSE } from "@/lib/cache/redis"
 import { trackAiUsage } from "@/lib/ai/trackUsage";
 import { checkBudget, incrementBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai/costControl";
 import { publicTarotSchema, validateRequest } from "@/lib/validation/schemas";
+import { logTokenAudit } from "@/lib/ai/tokenAudit";
 import { AYREN_MODE_SHORT } from "@/lib/ai/voice";
 import {
   VALID_CARD_IDS,
@@ -325,6 +326,18 @@ CRITICAL: Use ONLY card IDs from the provided list. Any invalid ID will cause a 
 
     // P0: Increment daily budget counter
     void incrementBudget(OPENAI_MODELS.horoscope, totalInputTokens, totalOutputTokens);
+
+    // Token audit logging
+    logTokenAudit({
+      route: "/api/public-tarot",
+      featureLabel: "Home • Public Tarot",
+      model: OPENAI_MODELS.horoscope,
+      cacheStatus: "miss",
+      promptVersion: PROMPT_VERSION,
+      inputTokens: totalInputTokens,
+      outputTokens: totalOutputTokens,
+      language: targetLanguage,
+    });
 
     // Cache for idempotency
     await setCache(idempotencyKey, reading, IDEMPOTENCY_TTL);

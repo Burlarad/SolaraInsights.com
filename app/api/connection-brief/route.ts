@@ -10,6 +10,7 @@ import { trackAiUsage } from "@/lib/ai/trackUsage";
 import { checkBudget, incrementBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai/costControl";
 import { AYREN_MODE_SHORT, PRO_SOCIAL_NUDGE_INSTRUCTION, HUMOR_INSTRUCTION, LOW_SIGNAL_GUARDRAIL } from "@/lib/ai/voice";
 import { parseMetadataFromSummary, getSummaryTextOnly } from "@/lib/social/summarize";
+import { logTokenAudit } from "@/lib/ai/tokenAudit";
 
 // Human-friendly rate limits for connection briefs (only on cache miss)
 // Connections page may load many cards at once, so limits are generous
@@ -325,7 +326,7 @@ Ways to show up bullets must:
 Return the JSON object now.`;
 
     const completion = await openai.chat.completions.create({
-      model: OPENAI_MODELS.insights,
+      model: OPENAI_MODELS.connectionBrief,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
@@ -344,7 +345,7 @@ Return the JSON object now.`;
     void trackAiUsage({
       featureLabel: "Connections • Daily Brief",
       route: "/api/connection-brief",
-      model: OPENAI_MODELS.insights,
+      model: OPENAI_MODELS.connectionBrief,
       promptVersion: PROMPT_VERSION,
       cacheStatus: "miss",
       inputTokens: completion.usage?.prompt_tokens || 0,
@@ -358,10 +359,23 @@ Return the JSON object now.`;
     });
 
     void incrementBudget(
-      OPENAI_MODELS.insights,
+      OPENAI_MODELS.connectionBrief,
       completion.usage?.prompt_tokens || 0,
       completion.usage?.completion_tokens || 0
     );
+
+    // Token audit logging
+    logTokenAudit({
+      route: "/api/connection-brief",
+      featureLabel: "Connections • Daily Brief",
+      model: OPENAI_MODELS.connectionBrief,
+      cacheStatus: "miss",
+      promptVersion: PROMPT_VERSION,
+      inputTokens: completion.usage?.prompt_tokens || 0,
+      outputTokens: completion.usage?.completion_tokens || 0,
+      language,
+      timeframe: "today",
+    });
 
     // Parse response
     let briefContent: {
@@ -404,7 +418,7 @@ Return the JSON object now.`;
         local_date: localDate,
         language,
         prompt_version: PROMPT_VERSION,
-        model_version: OPENAI_MODELS.insights,
+        model_version: OPENAI_MODELS.connectionBrief,
         title: briefContent.title,
         shared_vibe: briefContent.shared_vibe,
         ways_to_show_up: briefContent.ways_to_show_up,

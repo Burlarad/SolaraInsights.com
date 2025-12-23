@@ -10,6 +10,7 @@ import { getUserPeriodKeys, buildInsightCacheKey, buildInsightLockKey } from "@/
 import { getEffectiveTimezone, isValidBirthTimezone } from "@/lib/location/detection";
 import { touchLastSeen } from "@/lib/activity/touchLastSeen";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
+import { logTokenAudit } from "@/lib/ai/tokenAudit";
 import { checkBudget, incrementBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai/costControl";
 import { AYREN_MODE_SHORT, PRO_SOCIAL_NUDGE_INSTRUCTION, HUMOR_INSTRUCTION, LOW_SIGNAL_GUARDRAIL } from "@/lib/ai/voice";
 import { parseMetadataFromSummary, getSummaryTextOnly } from "@/lib/social/summarize";
@@ -216,11 +217,17 @@ export async function POST(req: NextRequest) {
     if (cachedInsight) {
       console.log(`[Insights] ✓ Cache hit for ${cacheKey}`);
 
+      // Select model for tracking (matches generation model)
+      const cachedModel = timeframe === "year"
+        ? OPENAI_MODELS.yearlyInsights
+        : OPENAI_MODELS.dailyInsights;
+      const cachedFeatureLabel = timeframe === "year" ? "Sanctuary • Yearly Insight" : "Sanctuary • Daily Light";
+
       // Track cache hit (no tokens consumed)
       void trackAiUsage({
-        featureLabel: "Sanctuary • Daily Light",
+        featureLabel: cachedFeatureLabel,
         route: "/api/insights",
-        model: OPENAI_MODELS.insights,
+        model: cachedModel,
         promptVersion: PROMPT_VERSION,
         cacheStatus: "hit",
         inputTokens: 0,
@@ -521,9 +528,16 @@ LUCKY COMPASS RULES:
 - Labels should be one of: ROOT (grounding), PATH (direction), BLOOM (growth)
 - Power words should be inspiring single words relevant to this period`;
 
+    // Select model based on timeframe:
+    // - "today" → gpt-4.1-mini (daily, cheap)
+    // - "year" → gpt-5.1 (premium, cached for full year)
+    const selectedModel = timeframe === "year"
+      ? OPENAI_MODELS.yearlyInsights
+      : OPENAI_MODELS.dailyInsights;
+
     // Call OpenAI
     const completion = await openai.chat.completions.create({
-      model: OPENAI_MODELS.insights,
+      model: selectedModel,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
@@ -539,10 +553,11 @@ LUCKY COMPASS RULES:
     }
 
     // Track cache miss (tokens consumed)
+    const featureLabel = timeframe === "year" ? "Sanctuary • Yearly Insight" : "Sanctuary • Daily Light";
     void trackAiUsage({
-      featureLabel: "Sanctuary • Daily Light",
+      featureLabel,
       route: "/api/insights",
-      model: OPENAI_MODELS.insights,
+      model: selectedModel,
       promptVersion: PROMPT_VERSION,
       cacheStatus: "miss",
       inputTokens: completion.usage?.prompt_tokens || 0,
@@ -555,9 +570,22 @@ LUCKY COMPASS RULES:
       timezone: effectiveTimezone,
     });
 
+    // Token audit logging
+    logTokenAudit({
+      route: "/api/insights",
+      featureLabel,
+      model: selectedModel,
+      cacheStatus: "miss",
+      promptVersion: PROMPT_VERSION,
+      inputTokens: completion.usage?.prompt_tokens || 0,
+      outputTokens: completion.usage?.completion_tokens || 0,
+      language: targetLanguage,
+      timeframe,
+    });
+
     // P0: Increment daily budget counter
     void incrementBudget(
-      OPENAI_MODELS.insights,
+      selectedModel,
       completion.usage?.prompt_tokens || 0,
       completion.usage?.completion_tokens || 0
     );

@@ -7,6 +7,7 @@ import { checkRateLimit, checkBurstLimit, getClientIP, createRateLimitResponse }
 import { trackAiUsage } from "@/lib/ai/trackUsage";
 import { checkBudget, incrementBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai/costControl";
 import { publicHoroscopeSchema, validateRequest } from "@/lib/validation/schemas";
+import { logTokenAudit } from "@/lib/ai/tokenAudit";
 import { AYREN_MODE_SHORT } from "@/lib/ai/voice";
 
 // Rate limits (per IP - anonymous endpoint)
@@ -229,6 +230,19 @@ Follow the Ayren voice rules strictly: 2 paragraphs, non-deterministic wording, 
       completion.usage?.prompt_tokens || 0,
       completion.usage?.completion_tokens || 0
     );
+
+    // Token audit logging
+    logTokenAudit({
+      route: "/api/public-horoscope",
+      featureLabel: "Home • Public Horoscope",
+      model: OPENAI_MODELS.horoscope,
+      cacheStatus: "miss",
+      promptVersion: PROMPT_VERSION,
+      inputTokens: completion.usage?.prompt_tokens || 0,
+      outputTokens: completion.usage?.completion_tokens || 0,
+      language: targetLanguage,
+      timeframe,
+    });
 
     // Parse and validate the JSON response
     let horoscope: PublicHoroscopeResponse;

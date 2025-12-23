@@ -7,6 +7,8 @@
 
 import { openai, OPENAI_MODELS } from "@/lib/openai/client";
 import { SocialProvider } from "@/types";
+import { logTokenAudit } from "@/lib/ai/tokenAudit";
+import { trackAiUsage } from "@/lib/ai/trackUsage";
 
 // Current prompt version - increment when prompt changes significantly
 export const SOCIAL_SUMMARY_PROMPT_VERSION = 1;
@@ -191,6 +193,30 @@ Generate the JSON response now using the exact format specified.`;
       ? parsed.metadata.humorStyle
       : "unknown") as SocialHumorStyle,
   };
+
+  // Token audit logging
+  logTokenAudit({
+    route: "/api/social-insights",
+    featureLabel: "Social • Summary",
+    model: OPENAI_MODELS.fast,
+    cacheStatus: "miss",
+    promptVersion: SOCIAL_SUMMARY_PROMPT_VERSION,
+    inputTokens: completion.usage?.prompt_tokens || 0,
+    outputTokens: completion.usage?.completion_tokens || 0,
+  });
+
+  // Track AI usage for analytics
+  void trackAiUsage({
+    featureLabel: "Social • Summary",
+    route: "/api/social-insights",
+    model: OPENAI_MODELS.fast,
+    promptVersion: SOCIAL_SUMMARY_PROMPT_VERSION,
+    cacheStatus: "miss",
+    inputTokens: completion.usage?.prompt_tokens || 0,
+    outputTokens: completion.usage?.completion_tokens || 0,
+    totalTokens: completion.usage?.total_tokens || 0,
+    userId: null, // User ID not available at this layer
+  });
 
   return {
     summary: parsed.summary?.trim() || responseContent.trim(),

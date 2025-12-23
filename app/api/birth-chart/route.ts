@@ -13,6 +13,7 @@ import { checkRateLimit, checkBurstLimit, createRateLimitResponse } from "@/lib/
 import { AYREN_MODE_SOULPRINT_LONG } from "@/lib/ai/voice";
 import { validateBirthChartInsight, validateBatchedTabDeepDives, TAB_DEEP_DIVE_KEYS } from "@/lib/validation/schemas";
 import { isValidBirthTimezone } from "@/lib/location/detection";
+import { logTokenAudit } from "@/lib/ai/tokenAudit";
 
 // Must match SOUL_PATH_SCHEMA_VERSION from lib/soulPath/storage.ts
 // Incremented when placements structure changes
@@ -317,7 +318,7 @@ Language: ${language}`;
     console.log(`[BirthChart] Generating ${tabs.length} tab deep dives...`);
 
     const completion = await openai.chat.completions.create({
-      model: OPENAI_MODELS.insights,
+      model: OPENAI_MODELS.birthChart,
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: systemPrompt },
@@ -338,10 +339,21 @@ Language: ${language}`;
 
     // P0: Increment daily budget counter
     void incrementBudget(
-      OPENAI_MODELS.insights,
+      OPENAI_MODELS.birthChart,
       completion.usage?.prompt_tokens || 0,
       completion.usage?.completion_tokens || 0
     );
+
+    // Token audit logging (tab deep dives)
+    logTokenAudit({
+      route: "/api/birth-chart",
+      featureLabel: "Soul Print • Tab Deep Dives",
+      model: OPENAI_MODELS.birthChart,
+      cacheStatus: "miss",
+      promptVersion: TAB_DEEPDIVE_VERSION,
+      inputTokens: completion.usage?.prompt_tokens || 0,
+      outputTokens: completion.usage?.completion_tokens || 0,
+    });
 
     // Add promptVersion to each tab if not present
     for (const key of tabs) {
@@ -660,7 +672,7 @@ export async function POST() {
       void trackAiUsage({
         featureLabel: "Soul Print • Narrative",
         route: "/api/birth-chart",
-        model: OPENAI_MODELS.insights,
+        model: OPENAI_MODELS.birthChart,
         promptVersion: PROMPT_VERSION,
         cacheStatus: "hit",
         inputTokens: 0,
@@ -704,7 +716,7 @@ export async function POST() {
           void trackAiUsage({
             featureLabel: "Soul Print • Tab Deep Dives",
             route: "/api/birth-chart",
-            model: OPENAI_MODELS.insights,
+            model: OPENAI_MODELS.birthChart,
             promptVersion: TAB_DEEPDIVE_VERSION,
             cacheStatus: "miss",
             inputTokens: deepDiveResult.tokens.input,
@@ -850,7 +862,7 @@ export async function POST() {
     console.log("[BirthChart] Calling OpenAI for Soul Path interpretation...");
 
     const completion = await openai.chat.completions.create({
-      model: OPENAI_MODELS.insights,
+      model: OPENAI_MODELS.birthChart,
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: SOUL_PATH_SYSTEM_PROMPT },
@@ -865,7 +877,7 @@ export async function POST() {
     void trackAiUsage({
       featureLabel: "Soul Print • Narrative",
       route: "/api/birth-chart",
-      model: OPENAI_MODELS.insights,
+      model: OPENAI_MODELS.birthChart,
       promptVersion: PROMPT_VERSION,
       cacheStatus: "miss",
       inputTokens: completion.usage?.prompt_tokens || 0,
@@ -880,10 +892,22 @@ export async function POST() {
 
     // P0: Increment daily budget counter
     void incrementBudget(
-      OPENAI_MODELS.insights,
+      OPENAI_MODELS.birthChart,
       completion.usage?.prompt_tokens || 0,
       completion.usage?.completion_tokens || 0
     );
+
+    // Token audit logging (main narrative)
+    logTokenAudit({
+      route: "/api/birth-chart",
+      featureLabel: "Soul Print • Narrative",
+      model: OPENAI_MODELS.birthChart,
+      cacheStatus: "miss",
+      promptVersion: PROMPT_VERSION,
+      inputTokens: completion.usage?.prompt_tokens || 0,
+      outputTokens: completion.usage?.completion_tokens || 0,
+      language: targetLanguage,
+    });
 
     if (!responseContent) {
       console.error("[BirthChart] OpenAI returned empty response");
@@ -957,7 +981,7 @@ export async function POST() {
         void trackAiUsage({
           featureLabel: "Soul Print • Tab Deep Dives",
           route: "/api/birth-chart",
-          model: OPENAI_MODELS.insights,
+          model: OPENAI_MODELS.birthChart,
           promptVersion: TAB_DEEPDIVE_VERSION,
           cacheStatus: "miss",
           inputTokens: deepDiveResult.tokens.input,
@@ -981,7 +1005,7 @@ export async function POST() {
         insight,
         PROMPT_VERSION,
         targetLanguage,
-        OPENAI_MODELS.insights
+        OPENAI_MODELS.birthChart
       );
     } catch (parseError) {
       console.error("[BirthChart] Failed to parse OpenAI response:", parseError);

@@ -9,7 +9,28 @@ import { touchLastSeen } from "@/lib/activity/touchLastSeen";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
 import { checkBudget, incrementBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai/costControl";
 import { AYREN_MODE_SOULPRINT_LONG } from "@/lib/ai/voice";
+import { logTokenAudit } from "@/lib/ai/tokenAudit";
 import { parseMetadataFromSummary, getSummaryTextOnly } from "@/lib/social/summarize";
+
+/**
+ * Get the current quarter key (e.g., "2025Q1")
+ * Used for quarterly refresh of Space Between reports
+ */
+function getQuarterKey(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const quarter = Math.ceil((now.getMonth() + 1) / 3);
+  return `${year}Q${quarter}`;
+}
+
+/**
+ * Get the quarter key for a specific date
+ */
+function getQuarterKeyFromDate(date: Date): string {
+  const year = date.getFullYear();
+  const quarter = Math.ceil((date.getMonth() + 1) / 3);
+  return `${year}Q${quarter}`;
+}
 
 // Space Between specific instruction blocks (allow 2 nudges/humor vs 1 for daily content)
 const SPACE_BETWEEN_NUDGE_INSTRUCTION = `
@@ -147,24 +168,36 @@ export async function POST(req: NextRequest) {
     }
 
     const language = profile.language || "en";
+    const currentQuarter = getQuarterKey();
 
     // ========================================
-    // CHECK DB FOR EXISTING REPORT (STONE TABLET)
+    // CHECK DB FOR EXISTING REPORT (QUARTERLY REFRESH)
     // ========================================
+    // Space Between reports refresh quarterly to incorporate evolving dynamics
     const { data: existingReport } = await supabase
       .from("space_between_reports")
       .select("*")
       .eq("connection_id", connectionId)
       .eq("language", language)
       .eq("prompt_version", PROMPT_VERSION)
-      .single();
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
     if (existingReport) {
-      console.log(`[SpaceBetween] Found existing stone tablet for ${connectionId}`);
-      return NextResponse.json(existingReport);
-    }
+      // Check if report is from current quarter
+      const reportDate = new Date(existingReport.created_at);
+      const reportQuarter = getQuarterKeyFromDate(reportDate);
 
-    console.log(`[SpaceBetween] No existing report for ${connectionId}, generating stone tablet...`);
+      if (reportQuarter === currentQuarter) {
+        console.log(`[SpaceBetween] Found current-quarter report for ${connectionId} (${currentQuarter})`);
+        return NextResponse.json(existingReport);
+      }
+
+      console.log(`[SpaceBetween] Existing report is from ${reportQuarter}, current quarter is ${currentQuarter} - regenerating`);
+    } else {
+      console.log(`[SpaceBetween] No existing report for ${connectionId}, generating new report...`);
+    }
 
     // ========================================
     // RATE LIMITING (only on new generation - existing reports are FREE)
@@ -301,7 +334,7 @@ export async function POST(req: NextRequest) {
     // ========================================
     // ACQUIRE LOCK
     // ========================================
-    lockKey = `lock:spacebetween:v${PROMPT_VERSION}:${connectionId}:${language}`;
+    lockKey = `lock:spacebetween:v${PROMPT_VERSION}:${connectionId}:${language}:${currentQuarter}`;
     const lockResult = await acquireLockFailClosed(lockKey, 120); // 2 min timeout for long generation
 
     if (lockResult.redisDown) {
@@ -475,8 +508,8 @@ Return the JSON object now.`;
       outputTokens: completion.usage?.completion_tokens || 0,
       totalTokens: completion.usage?.total_tokens || 0,
       userId: user.id,
-      timeframe: "permanent",
-      periodKey: "stone_tablet",
+      timeframe: "quarterly",
+      periodKey: currentQuarter,
       language,
       timezone: profile.timezone || null,
     });
@@ -486,6 +519,19 @@ Return the JSON object now.`;
       completion.usage?.prompt_tokens || 0,
       completion.usage?.completion_tokens || 0
     );
+
+    // Token audit logging
+    logTokenAudit({
+      route: "/api/connection-space-between",
+      featureLabel: "Connections • Space Between",
+      model: OPENAI_MODELS.deep,
+      cacheStatus: "miss",
+      promptVersion: PROMPT_VERSION,
+      inputTokens: completion.usage?.prompt_tokens || 0,
+      outputTokens: completion.usage?.completion_tokens || 0,
+      language,
+      timeframe: "quarterly",
+    });
 
     // Parse response
     let reportContent: {

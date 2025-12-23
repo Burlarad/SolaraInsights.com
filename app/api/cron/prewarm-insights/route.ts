@@ -24,6 +24,7 @@ import { SanctuaryInsight } from "@/types";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
 import { checkBudget, incrementBudget } from "@/lib/ai/costControl";
 import { AYREN_MODE_SHORT } from "@/lib/ai/voice";
+import { logTokenAudit } from "@/lib/ai/tokenAudit";
 import { isValidBirthTimezone } from "@/lib/location/detection";
 
 const PROMPT_VERSION = 2;
@@ -265,7 +266,7 @@ LUCKY COMPASS RULES:
 
           // Call OpenAI
           const completion = await openai.chat.completions.create({
-            model: OPENAI_MODELS.insights,
+            model: OPENAI_MODELS.dailyInsights,
             messages: [
               { role: "system", content: systemPrompt },
               { role: "user", content: userPrompt },
@@ -284,7 +285,7 @@ LUCKY COMPASS RULES:
           void trackAiUsage({
             featureLabel: "Sanctuary • Daily Light (Prewarm)",
             route: "/api/cron/prewarm-insights",
-            model: OPENAI_MODELS.insights,
+            model: OPENAI_MODELS.dailyInsights,
             promptVersion: PROMPT_VERSION,
             cacheStatus: "miss",
             inputTokens: completion.usage?.prompt_tokens || 0,
@@ -299,10 +300,23 @@ LUCKY COMPASS RULES:
 
           // P0: Increment daily budget counter
           void incrementBudget(
-            OPENAI_MODELS.insights,
+            OPENAI_MODELS.dailyInsights,
             completion.usage?.prompt_tokens || 0,
             completion.usage?.completion_tokens || 0
           );
+
+          // Token audit logging
+          logTokenAudit({
+            route: "/api/cron/prewarm-insights",
+            featureLabel: "Sanctuary • Daily Light (Prewarm)",
+            model: OPENAI_MODELS.dailyInsights,
+            cacheStatus: "miss",
+            promptVersion: PROMPT_VERSION,
+            inputTokens: completion.usage?.prompt_tokens || 0,
+            outputTokens: completion.usage?.completion_tokens || 0,
+            language,
+            timeframe: "today",
+          });
 
           // Parse response
           const insight: SanctuaryInsight = JSON.parse(responseContent);

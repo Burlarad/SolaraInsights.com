@@ -19,6 +19,7 @@ import { touchLastSeen } from "@/lib/activity/touchLastSeen";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
 import { checkBudget, incrementBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai/costControl";
 import { AYREN_MODE_SHORT } from "@/lib/ai/voice";
+import { logTokenAudit } from "@/lib/ai/tokenAudit";
 
 // Rate limits for connection insight (per user)
 // Human-friendly: cache hits are FREE, only cache misses count
@@ -158,7 +159,7 @@ export async function POST(req: NextRequest) {
       void trackAiUsage({
         featureLabel: "Connections • Insight",
         route: "/api/connection-insight",
-        model: OPENAI_MODELS.insights,
+        model: OPENAI_MODELS.connectionBrief,
         promptVersion: PROMPT_VERSION,
         cacheStatus: "hit",
         inputTokens: 0,
@@ -358,7 +359,7 @@ Follow Ayren voice rules: non-deterministic wording, calm-power close, practical
 
     // Call OpenAI
     const completion = await openai.chat.completions.create({
-      model: OPENAI_MODELS.insights,
+      model: OPENAI_MODELS.connectionBrief,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
@@ -377,7 +378,7 @@ Follow Ayren voice rules: non-deterministic wording, calm-power close, practical
     void trackAiUsage({
       featureLabel: "Connections • Insight",
       route: "/api/connection-insight",
-      model: OPENAI_MODELS.insights,
+      model: OPENAI_MODELS.connectionBrief,
       promptVersion: PROMPT_VERSION,
       cacheStatus: "miss",
       inputTokens: completion.usage?.prompt_tokens || 0,
@@ -392,10 +393,23 @@ Follow Ayren voice rules: non-deterministic wording, calm-power close, practical
 
     // P0: Increment daily budget counter
     void incrementBudget(
-      OPENAI_MODELS.insights,
+      OPENAI_MODELS.connectionBrief,
       completion.usage?.prompt_tokens || 0,
       completion.usage?.completion_tokens || 0
     );
+
+    // Token audit logging
+    logTokenAudit({
+      route: "/api/connection-insight",
+      featureLabel: "Connections • Insight",
+      model: OPENAI_MODELS.connectionBrief,
+      cacheStatus: "miss",
+      promptVersion: PROMPT_VERSION,
+      inputTokens: completion.usage?.prompt_tokens || 0,
+      outputTokens: completion.usage?.completion_tokens || 0,
+      language,
+      timeframe: requestTimeframe,
+    });
 
     // Parse and validate the JSON response
     let insight: ConnectionInsight;

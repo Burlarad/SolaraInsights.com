@@ -9,6 +9,7 @@ import {
   publicCompatibilitySchema,
   validateRequest,
 } from "@/lib/validation/schemas";
+import { logTokenAudit } from "@/lib/ai/tokenAudit";
 import { AYREN_MODE_SHORT } from "@/lib/ai/voice";
 import { createAdminSupabaseClient } from "@/lib/supabase/server";
 import { checkRateLimit, checkBurstLimit, getClientIP, createRateLimitResponse } from "@/lib/cache/rateLimit";
@@ -379,6 +380,17 @@ Make each section substantive and specific to this particular sign combination.`
 
     // P0: Increment daily budget counter
     void incrementBudget(OPENAI_MODELS.horoscope, inputTokens, outputTokens);
+
+    // Token audit logging
+    logTokenAudit({
+      route: "/api/public-compatibility",
+      featureLabel: "Home • Public Compatibility",
+      model: OPENAI_MODELS.horoscope,
+      cacheStatus: "miss",
+      promptVersion: PROMPT_VERSION,
+      inputTokens,
+      outputTokens,
+    });
 
     const response: PublicCompatibilityResponse = {
       ...content,

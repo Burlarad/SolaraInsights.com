@@ -15,6 +15,10 @@ const PRICING_TABLE: Record<string, ModelPricing> = {
     input: 0.15,
     output: 0.6,
   },
+  "gpt-4o": {
+    input: 2.5,
+    output: 10.0,
+  },
   "gpt-4.1-mini": {
     input: 0.4,
     output: 1.6,

@@ -5,33 +5,33 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { Profile } from "@/types";
 
 /**
- * Check if paywall bypass is enabled for development/testing.
- * SAFETY: Only works in dev environments, never in production.
+ * Check if dev paywall bypass is enabled.
+ * HARD SAFETY: Only works in development, never in production.
  */
-function isPaywallDisabled(): boolean {
-  const paywallDisabled = process.env.PAYWALL_DISABLED === "true";
+function isDevPaywallBypassed(): boolean {
+  const bypass = process.env.DEV_PAYWALL_BYPASS === "true";
 
-  if (!paywallDisabled) return false;
+  if (!bypass) return false;
 
-  // SAFETY CHECK 1: Never bypass in production NODE_ENV
+  // HARD SAFETY 1: Never in production NODE_ENV
   if (process.env.NODE_ENV === "production") {
-    console.warn("[PAYWALL] PAYWALL_DISABLED ignored - NODE_ENV is production");
+    console.warn("[PAYWALL] DEV_PAYWALL_BYPASS ignored - NODE_ENV is production");
     return false;
   }
 
-  // SAFETY CHECK 2: Never bypass if pointing to production URL
+  // HARD SAFETY 2: Never on production domain
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
-  if (siteUrl.includes("solarainsights.com")) {
-    console.warn("[PAYWALL] PAYWALL_DISABLED ignored - NEXT_PUBLIC_SITE_URL is production");
+  if (siteUrl === "https://solarainsights.com") {
+    console.warn("[PAYWALL] DEV_PAYWALL_BYPASS ignored - production domain");
     return false;
   }
 
   return true;
 }
 
-// Log warning on module load if paywall is disabled
-if (isPaywallDisabled()) {
-  console.warn("⚠️  [PAYWALL] PAYWALL_DISABLED=true - Payment and onboarding gates BYPASSED for dev/testing");
+// Log on module load if bypass is active
+if (isDevPaywallBypassed()) {
+  console.warn("⚠️  [PAYWALL] DEV_PAYWALL_BYPASS=true - Payment gates BYPASSED for dev");
 }
 
 export default async function ProtectedLayout({
@@ -64,12 +64,12 @@ export default async function ProtectedLayout({
 
   const typedProfile = profile as Profile;
 
-  // Check if paywall bypass is active (dev/testing only)
-  const bypassPaywall = isPaywallDisabled();
+  // Check if dev bypass is active
+  const devBypass = isDevPaywallBypassed();
 
   // Check if user has paid access (membership_plan + subscription_status)
   const isPaid =
-    bypassPaywall || // DEV BYPASS
+    devBypass || // DEV BYPASS
     typedProfile.role === "admin" ||
     typedProfile.is_comped === true ||
     (typedProfile.membership_plan !== "none" &&
@@ -82,8 +82,8 @@ export default async function ProtectedLayout({
   }
 
   // If paid but not onboarded, redirect to welcome or onboarding
-  // BYPASS: Skip onboarding check if paywall is disabled
-  const isReady = bypassPaywall || typedProfile.is_onboarded === true;
+  // DEV BYPASS: Skip onboarding check too
+  const isReady = devBypass || typedProfile.is_onboarded === true;
 
   if (!isReady) {
     // If they have started onboarding, go to onboarding
@@ -98,13 +98,13 @@ export default async function ProtectedLayout({
   // User is authenticated, paid, and onboarded - allow access
   return (
     <>
-      {bypassPaywall && (
+      {devBypass && (
         <div className="fixed top-0 left-0 right-0 z-[9999] bg-orange-500 text-white text-center py-1 text-sm font-semibold">
-          DEV MODE: Paywall + Onboarding gates DISABLED (PAYWALL_DISABLED=true)
+          DEV MODE: Payment + Onboarding gates BYPASSED (DEV_PAYWALL_BYPASS=true)
         </div>
       )}
       <NavBar />
-      <main className={`${bypassPaywall ? "pt-28" : "pt-20"} min-h-screen`}>
+      <main className={`${devBypass ? "pt-28" : "pt-20"} min-h-screen`}>
         {children}
       </main>
       <Footer />
