@@ -4,6 +4,36 @@ import { Footer } from "@/components/layout/Footer";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { Profile } from "@/types";
 
+/**
+ * Check if paywall bypass is enabled for development/testing.
+ * SAFETY: Only works in dev environments, never in production.
+ */
+function isPaywallDisabled(): boolean {
+  const paywallDisabled = process.env.PAYWALL_DISABLED === "true";
+
+  if (!paywallDisabled) return false;
+
+  // SAFETY CHECK 1: Never bypass in production NODE_ENV
+  if (process.env.NODE_ENV === "production") {
+    console.warn("[PAYWALL] PAYWALL_DISABLED ignored - NODE_ENV is production");
+    return false;
+  }
+
+  // SAFETY CHECK 2: Never bypass if pointing to production URL
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
+  if (siteUrl.includes("solarainsights.com")) {
+    console.warn("[PAYWALL] PAYWALL_DISABLED ignored - NEXT_PUBLIC_SITE_URL is production");
+    return false;
+  }
+
+  return true;
+}
+
+// Log warning on module load if paywall is disabled
+if (isPaywallDisabled()) {
+  console.warn("⚠️  [PAYWALL] PAYWALL_DISABLED=true - Payment and onboarding gates BYPASSED for dev/testing");
+}
+
 export default async function ProtectedLayout({
   children,
 }: {
@@ -34,8 +64,12 @@ export default async function ProtectedLayout({
 
   const typedProfile = profile as Profile;
 
+  // Check if paywall bypass is active (dev/testing only)
+  const bypassPaywall = isPaywallDisabled();
+
   // Check if user has paid access (membership_plan + subscription_status)
   const isPaid =
+    bypassPaywall || // DEV BYPASS
     typedProfile.role === "admin" ||
     typedProfile.is_comped === true ||
     (typedProfile.membership_plan !== "none" &&
@@ -48,7 +82,8 @@ export default async function ProtectedLayout({
   }
 
   // If paid but not onboarded, redirect to welcome or onboarding
-  const isReady = typedProfile.is_onboarded === true;
+  // BYPASS: Skip onboarding check if paywall is disabled
+  const isReady = bypassPaywall || typedProfile.is_onboarded === true;
 
   if (!isReady) {
     // If they have started onboarding, go to onboarding
@@ -63,8 +98,13 @@ export default async function ProtectedLayout({
   // User is authenticated, paid, and onboarded - allow access
   return (
     <>
+      {bypassPaywall && (
+        <div className="fixed top-0 left-0 right-0 z-[9999] bg-orange-500 text-white text-center py-1 text-sm font-semibold">
+          DEV MODE: Paywall + Onboarding gates DISABLED (PAYWALL_DISABLED=true)
+        </div>
+      )}
       <NavBar />
-      <main className="pt-20 min-h-screen">
+      <main className={`${bypassPaywall ? "pt-28" : "pt-20"} min-h-screen`}>
         {children}
       </main>
       <Footer />
