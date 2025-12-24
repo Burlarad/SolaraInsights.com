@@ -86,6 +86,20 @@ export default function SettingsPage() {
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const [disconnectSuccess, setDisconnectSuccess] = useState<string | null>(null);
 
+  // Hibernate modal state
+  const [showHibernateModal, setShowHibernateModal] = useState(false);
+  const [hibernatePassword, setHibernatePassword] = useState("");
+  const [hibernateConfirmText, setHibernateConfirmText] = useState("");
+  const [isHibernating, setIsHibernating] = useState(false);
+  const [hibernateError, setHibernateError] = useState<string | null>(null);
+
+  // Delete account modal state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
   // Load profile data into form fields
   useEffect(() => {
     if (profile) {
@@ -321,6 +335,96 @@ export default function SettingsPage() {
       setJournalMessage("Failed to delete journal.");
       setTimeout(() => setJournalMessage(null), 3000);
     }
+  };
+
+  const handleHibernateAccount = async () => {
+    if (hibernateConfirmText !== "HIBERNATE") {
+      setHibernateError("Please type HIBERNATE to confirm.");
+      return;
+    }
+    if (!hibernatePassword) {
+      setHibernateError("Password is required.");
+      return;
+    }
+
+    setIsHibernating(true);
+    setHibernateError(null);
+
+    try {
+      const response = await fetch("/api/account/hibernate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          password: hibernatePassword,
+          confirmText: hibernateConfirmText,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to hibernate account");
+      }
+
+      // Redirect to welcome page with hibernated param
+      window.location.href = "/welcome?hibernated=true";
+    } catch (err: any) {
+      setHibernateError(err.message || "Failed to hibernate account");
+    } finally {
+      setIsHibernating(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== "DELETE") {
+      setDeleteError("Please type DELETE to confirm.");
+      return;
+    }
+    if (!deletePassword) {
+      setDeleteError("Password is required.");
+      return;
+    }
+
+    setIsDeleting(true);
+    setDeleteError(null);
+
+    try {
+      const response = await fetch("/api/account/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          password: deletePassword,
+          confirmText: deleteConfirmText,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to delete account");
+      }
+
+      // Redirect to home page after deletion
+      window.location.href = "/?deleted=true";
+    } catch (err: any) {
+      setDeleteError(err.message || "Failed to delete account");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const resetHibernateModal = () => {
+    setShowHibernateModal(false);
+    setHibernatePassword("");
+    setHibernateConfirmText("");
+    setHibernateError(null);
+  };
+
+  const resetDeleteModal = () => {
+    setShowDeleteModal(false);
+    setDeletePassword("");
+    setDeleteConfirmText("");
+    setDeleteError(null);
   };
 
   if (profileLoading) {
@@ -743,7 +847,11 @@ export default function SettingsPage() {
                 Pause your subscription while keeping your data safe. You can reactivate
                 anytime.
               </p>
-              <Button variant="outline" className="w-full sm:w-auto min-h-[44px]">
+              <Button
+                variant="outline"
+                className="w-full sm:w-auto min-h-[44px]"
+                onClick={() => setShowHibernateModal(true)}
+              >
                 Hibernate account
               </Button>
             </div>
@@ -754,7 +862,11 @@ export default function SettingsPage() {
                 Permanently delete your account and all associated data. This action
                 cannot be undone.
               </p>
-              <Button variant="destructive" className="w-full sm:w-auto min-h-[44px]">
+              <Button
+                variant="destructive"
+                className="w-full sm:w-auto min-h-[44px]"
+                onClick={() => setShowDeleteModal(true)}
+              >
                 Delete account
               </Button>
             </div>
@@ -923,6 +1035,117 @@ export default function SettingsPage() {
               disabled={isDisconnecting}
             >
               {isDisconnecting ? "Disconnecting..." : "Disconnect"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Hibernate Account Dialog */}
+      <Dialog open={showHibernateModal} onOpenChange={(open) => !open && resetHibernateModal()}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Hibernate your account</DialogTitle>
+            <DialogDescription>
+              Hibernating pauses your subscription and locks access to Solara.
+              Your data will be preserved and you can reactivate anytime.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="hibernatePassword">Enter your password</Label>
+              <Input
+                id="hibernatePassword"
+                type="password"
+                value={hibernatePassword}
+                onChange={(e) => setHibernatePassword(e.target.value)}
+                placeholder="Your password"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="hibernateConfirm">
+                Type <span className="font-semibold">HIBERNATE</span> to confirm
+              </Label>
+              <Input
+                id="hibernateConfirm"
+                value={hibernateConfirmText}
+                onChange={(e) => setHibernateConfirmText(e.target.value.toUpperCase())}
+                placeholder="HIBERNATE"
+              />
+            </div>
+            {hibernateError && (
+              <p className="text-sm text-danger-soft">{hibernateError}</p>
+            )}
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={resetHibernateModal}
+              disabled={isHibernating}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="default"
+              onClick={handleHibernateAccount}
+              disabled={isHibernating || hibernateConfirmText !== "HIBERNATE"}
+            >
+              {isHibernating ? "Hibernating..." : "Hibernate account"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Account Dialog */}
+      <Dialog open={showDeleteModal} onOpenChange={(open) => !open && resetDeleteModal()}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-danger-soft">Delete your account</DialogTitle>
+            <DialogDescription>
+              This action is permanent and cannot be undone. All your data including
+              your profile, journal entries, connections, and insights will be deleted.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="deletePassword">Enter your password</Label>
+              <Input
+                id="deletePassword"
+                type="password"
+                value={deletePassword}
+                onChange={(e) => setDeletePassword(e.target.value)}
+                placeholder="Your password"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="deleteConfirm">
+                Type <span className="font-semibold text-danger-soft">DELETE</span> to confirm
+              </Label>
+              <Input
+                id="deleteConfirm"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value.toUpperCase())}
+                placeholder="DELETE"
+                className="border-danger-soft/50 focus:border-danger-soft"
+              />
+            </div>
+            {deleteError && (
+              <p className="text-sm text-danger-soft">{deleteError}</p>
+            )}
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={resetDeleteModal}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteAccount}
+              disabled={isDeleting || deleteConfirmText !== "DELETE"}
+            >
+              {isDeleting ? "Deleting..." : "Delete account"}
             </Button>
           </DialogFooter>
         </DialogContent>

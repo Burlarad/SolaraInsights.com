@@ -52,6 +52,11 @@ export interface Profile {
   // Social insights toggle
   social_insights_enabled: boolean;
   social_insights_activated_at: string | null;
+
+  // Account hibernation
+  is_hibernated: boolean;
+  hibernated_at: string | null;
+  reactivated_at: string | null;
 }
 
 export interface ProfileUpdate {

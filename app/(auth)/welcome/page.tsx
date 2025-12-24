@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,14 +10,21 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/lib/supabase/client";
 import { useSettings } from "@/providers/SettingsProvider";
 
-export default function WelcomePage() {
+function WelcomeContent() {
   const router = useRouter();
-  const { profile, loading: profileLoading } = useSettings();
+  const searchParams = useSearchParams();
+  const isHibernated = searchParams.get("hibernated") === "true";
+  const { profile, loading: profileLoading, refreshProfile } = useSettings();
   const [method, setMethod] = useState<"social" | "email" | null>(null);
 
   // Email setup state
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  // Reactivation state
+  const [reactivatePassword, setReactivatePassword] = useState("");
+  const [isReactivating, setIsReactivating] = useState(false);
+  const [reactivateError, setReactivateError] = useState<string | null>(null);
 
   // Social personalization state (for each provider)
   const [facebookPersonalization, setFacebookPersonalization] = useState(true);
@@ -25,9 +32,9 @@ export default function WelcomePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Check membership status
+  // Check membership status (skip if hibernated - they're here to reactivate)
   useEffect(() => {
-    if (!profileLoading && profile) {
+    if (!profileLoading && profile && !isHibernated) {
       const hasActiveMembership =
         (profile.membership_plan === "individual" || profile.membership_plan === "family") &&
         (profile.subscription_status === "trialing" || profile.subscription_status === "active");
@@ -37,7 +44,39 @@ export default function WelcomePage() {
         router.push("/join");
       }
     }
-  }, [profile, profileLoading, router]);
+  }, [profile, profileLoading, router, isHibernated]);
+
+  const handleReactivate = async () => {
+    if (!reactivatePassword) {
+      setReactivateError("Please enter your password.");
+      return;
+    }
+
+    setIsReactivating(true);
+    setReactivateError(null);
+
+    try {
+      const response = await fetch("/api/account/reactivate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: reactivatePassword }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to reactivate account");
+      }
+
+      // Refresh profile and redirect to sanctuary
+      await refreshProfile();
+      router.push("/sanctuary");
+    } catch (err: any) {
+      setReactivateError(err.message || "Failed to reactivate account");
+    } finally {
+      setIsReactivating(false);
+    }
+  };
 
   const handleSocialConnect = async (provider: "facebook") => {
     setIsLoading(true);
@@ -104,6 +143,59 @@ export default function WelcomePage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <p className="text-accent-ink/60">Loading...</p>
+      </div>
+    );
+  }
+
+  // Hibernated account reactivation UI
+  if (isHibernated) {
+    return (
+      <div className="max-w-2xl mx-auto">
+        <Card className="border-border-subtle">
+          <CardHeader>
+            <CardTitle className="text-2xl text-center">
+              Welcome back
+            </CardTitle>
+            <p className="text-center text-sm text-accent-ink/60 mt-2">
+              Your account is currently hibernated. Enter your password to reactivate
+              and resume your subscription.
+            </p>
+          </CardHeader>
+          <CardContent>
+            {reactivateError && (
+              <div className="mb-4 p-3 rounded-lg bg-danger-soft/20 border border-danger-soft text-sm text-accent-ink">
+                {reactivateError}
+              </div>
+            )}
+
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="reactivatePassword">Your password</Label>
+                <Input
+                  id="reactivatePassword"
+                  type="password"
+                  placeholder="Enter your password"
+                  value={reactivatePassword}
+                  onChange={(e) => setReactivatePassword(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleReactivate()}
+                />
+              </div>
+
+              <Button
+                variant="gold"
+                onClick={handleReactivate}
+                disabled={isReactivating || !reactivatePassword}
+                className="w-full"
+              >
+                {isReactivating ? "Reactivating..." : "Reactivate my account"}
+              </Button>
+
+              <p className="text-xs text-center text-accent-ink/50">
+                Your subscription billing will resume once reactivated.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -293,5 +385,19 @@ export default function WelcomePage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function WelcomePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-[400px]">
+          <p className="text-accent-ink/60">Loading...</p>
+        </div>
+      }
+    >
+      <WelcomeContent />
+    </Suspense>
   );
 }

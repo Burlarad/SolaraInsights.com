@@ -64,6 +64,11 @@ export default async function ProtectedLayout({
 
   const typedProfile = profile as Profile;
 
+  // Hibernation gate: If account is hibernated, redirect to reactivation page
+  if (typedProfile.is_hibernated === true) {
+    redirect("/welcome?hibernated=true");
+  }
+
   // Check if dev bypass is active
   const devBypass = isDevPaywallBypassed();
 
