@@ -55,6 +55,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Delete from social_accounts using service role (RLS blocks regular users)
+    // NOTE: social_identities is intentionally preserved - it maintains the
+    // external_user_id → user_id mapping for Meta Data Deletion compliance
     const serviceSupabase = createServiceSupabaseClient();
     const { error: deleteAccountError } = await serviceSupabase
       .from("social_accounts")
