@@ -2,13 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient, createAdminSupabaseClient } from "@/lib/supabase/server";
 import { stripe } from "@/lib/stripe/client";
 import { Profile } from "@/types";
+import { isOAuthOnly } from "@/lib/auth/helpers";
+import { verifyReauth, clearReauth } from "@/lib/auth/reauth";
 
 /**
  * POST /api/account/hibernate
  * Hibernates the user's account:
- * 1. Verifies password
- * 2. Pauses Stripe billing (if subscription exists)
- * 3. Sets is_hibernated = true
+ * - Password users: Verifies password + confirmation text
+ * - OAuth-only users: Verifies reauth_ok cookie from recent OAuth flow
+ * Then:
+ * 1. Pauses Stripe billing (if subscription exists)
+ * 2. Sets is_hibernated = true
  */
 export async function POST(req: NextRequest) {
   try {
@@ -28,33 +32,55 @@ export async function POST(req: NextRequest) {
     // Parse request body
     const { password, confirmText } = await req.json();
 
-    // Validate confirmation text
-    if (confirmText !== "HIBERNATE") {
+    // Validate confirmation text (trim whitespace, case-insensitive compare via uppercase)
+    const normalizedConfirm = (confirmText || "").trim().toUpperCase();
+    if (normalizedConfirm !== "HIBERNATE") {
       return NextResponse.json(
         { error: "ConfirmationFailed", message: "Please type HIBERNATE to confirm." },
         { status: 400 }
       );
     }
 
-    // Verify password
-    if (!password) {
-      return NextResponse.json(
-        { error: "PasswordRequired", message: "Password is required to hibernate your account." },
-        { status: 400 }
-      );
-    }
+    // Verify identity based on auth type
+    const userIsOAuthOnly = isOAuthOnly(user);
 
-    // Re-authenticate to verify password
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: user.email!,
-      password,
-    });
+    if (userIsOAuthOnly) {
+      // OAuth-only users: verify reauth_ok cookie
+      const reauthValid = await verifyReauth(user.id, "hibernate");
 
-    if (signInError) {
-      return NextResponse.json(
-        { error: "InvalidPassword", message: "Incorrect password. Please try again." },
-        { status: 401 }
-      );
+      if (!reauthValid) {
+        return NextResponse.json(
+          {
+            error: "ReauthRequired",
+            message: "Please re-authenticate with your social provider to continue.",
+          },
+          { status: 401 }
+        );
+      }
+
+      console.log(`[Hibernate] OAuth-only user ${user.id} verified via reauth`);
+    } else {
+      // Password users: verify password
+      if (!password) {
+        return NextResponse.json(
+          { error: "PasswordRequired", message: "Password is required to hibernate your account." },
+          { status: 400 }
+        );
+      }
+
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email!,
+        password,
+      });
+
+      if (signInError) {
+        return NextResponse.json(
+          { error: "InvalidPassword", message: "Incorrect password. Please try again." },
+          { status: 401 }
+        );
+      }
+
+      console.log(`[Hibernate] Password user ${user.id} verified via password`);
     }
 
     // Get user's profile to check subscription
@@ -117,6 +143,11 @@ export async function POST(req: NextRequest) {
     }
 
     console.log(`[Hibernate] Account hibernated for user: ${user.id}`);
+
+    // Clear reauth cookie if it was used
+    if (userIsOAuthOnly) {
+      await clearReauth();
+    }
 
     return NextResponse.json({
       success: true,

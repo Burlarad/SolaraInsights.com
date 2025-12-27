@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +17,8 @@ import {
 import { useSettings } from "@/providers/SettingsProvider";
 import { PlacePicker, PlaceSelection } from "@/components/shared/PlacePicker";
 import { SocialProvider } from "@/types";
+import { supabase } from "@/lib/supabase/client";
+import { hasPasswordCredential, getPrimaryOAuthProvider } from "@/lib/auth/helpers";
 
 // Social provider configuration for display
 const SOCIAL_PROVIDERS: {
@@ -44,6 +47,16 @@ interface SocialConnectionStatus {
 
 export default function SettingsPage() {
   const { profile, saveProfile, refreshProfile, loading: profileLoading, error: profileError } = useSettings();
+  const searchParams = useSearchParams();
+
+  // Auth type state
+  const [userHasPassword, setUserHasPassword] = useState(true); // Default to true until loaded
+  const [primaryOAuthProvider, setPrimaryOAuthProvider] = useState<string | null>(null);
+  const [authTypeLoading, setAuthTypeLoading] = useState(true);
+
+  // Reauth state
+  const [isReauthenticating, setIsReauthenticating] = useState(false);
+  const [reauthError, setReauthError] = useState<string | null>(null);
 
   // Local form state - split name fields
   const [firstName, setFirstName] = useState("");
@@ -99,6 +112,36 @@ export default function SettingsPage() {
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  // Detect auth type on mount
+  useEffect(() => {
+    const detectAuthType = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        setUserHasPassword(hasPasswordCredential(user));
+        setPrimaryOAuthProvider(getPrimaryOAuthProvider(user));
+      } catch (err) {
+        console.error("Failed to detect auth type:", err);
+      } finally {
+        setAuthTypeLoading(false);
+      }
+    };
+    detectAuthType();
+  }, []);
+
+  // Handle reauth_success query param - auto-open modal after successful reauth
+  useEffect(() => {
+    const reauthSuccess = searchParams.get("reauth_success");
+    if (reauthSuccess === "delete") {
+      setShowDeleteModal(true);
+      // Clear attempt counter on successful reauth
+      sessionStorage.removeItem("oauth_reauth_attempts_delete");
+    } else if (reauthSuccess === "hibernate") {
+      setShowHibernateModal(true);
+      sessionStorage.removeItem("oauth_reauth_attempts_hibernate");
+    }
+    // Note: We don't clear query param from URL - we use it to know reauth was successful
+  }, [searchParams]);
 
   // Load profile data into form fields
   useEffect(() => {
@@ -168,6 +211,58 @@ export default function SettingsPage() {
   // Connect handler - uses custom OAuth flow with return_to for post-OAuth redirect
   const handleSocialConnect = (provider: SocialProvider) => {
     window.location.href = `/api/social/oauth/${provider}/connect?return_to=/settings`;
+  };
+
+  // Reauth handler for OAuth-only users
+  const startReauth = async (intent: "delete" | "hibernate" | "reactivate") => {
+    if (!primaryOAuthProvider) {
+      setReauthError("No linked social provider found.");
+      return;
+    }
+
+    // Loop prevention: check sessionStorage for attempts
+    const attemptKey = `oauth_reauth_attempts_${intent}`;
+    const attempts = parseInt(sessionStorage.getItem(attemptKey) || "0", 10);
+    if (attempts >= 2) {
+      setReauthError("Too many verification attempts. Please try again later.");
+      return;
+    }
+    sessionStorage.setItem(attemptKey, String(attempts + 1));
+
+    setIsReauthenticating(true);
+    setReauthError(null);
+
+    try {
+      const response = await fetch("/api/auth/reauth/prepare", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ intent, provider: primaryOAuthProvider }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to start reauth");
+      }
+
+      // Redirect to OAuth provider
+      window.location.href = data.redirectUrl;
+    } catch (err: any) {
+      setReauthError(err.message || "Failed to start re-authentication");
+      setIsReauthenticating(false);
+    }
+  };
+
+  // Check if we have a valid reauth for a specific intent (from URL param)
+  const hasReauthForIntent = (intent: "delete" | "hibernate" | "reactivate"): boolean => {
+    const reauthSuccess = searchParams.get("reauth_success");
+    return reauthSuccess === intent;
+  };
+
+  // Get display name for primary OAuth provider
+  const getProviderDisplayName = (): string => {
+    if (!primaryOAuthProvider) return "your account";
+    return primaryOAuthProvider.charAt(0).toUpperCase() + primaryOAuthProvider.slice(1);
   };
 
   // Helper to count connected providers
@@ -338,11 +433,13 @@ export default function SettingsPage() {
   };
 
   const handleHibernateAccount = async () => {
-    if (hibernateConfirmText !== "HIBERNATE") {
+    const trimmedConfirm = hibernateConfirmText.trim();
+    if (trimmedConfirm !== "HIBERNATE") {
       setHibernateError("Please type HIBERNATE to confirm.");
       return;
     }
-    if (!hibernatePassword) {
+    // Password required only for password users
+    if (userHasPassword && !hibernatePassword) {
       setHibernateError("Password is required.");
       return;
     }
@@ -355,16 +452,24 @@ export default function SettingsPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          password: hibernatePassword,
-          confirmText: hibernateConfirmText,
+          password: userHasPassword ? hibernatePassword : undefined,
+          confirmText: trimmedConfirm,
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
+        // If reauth expired or invalid, show error
+        if (data.error === "ReauthRequired") {
+          setHibernateError("Your verification has expired. Please verify again.");
+          return;
+        }
         throw new Error(data.message || "Failed to hibernate account");
       }
+
+      // Clear attempt counter on success
+      sessionStorage.removeItem("oauth_reauth_attempts_hibernate");
 
       // Redirect to welcome page with hibernated param
       window.location.href = "/welcome?hibernated=true";
@@ -376,11 +481,13 @@ export default function SettingsPage() {
   };
 
   const handleDeleteAccount = async () => {
-    if (deleteConfirmText !== "DELETE") {
+    const trimmedConfirm = deleteConfirmText.trim();
+    if (trimmedConfirm !== "DELETE") {
       setDeleteError("Please type DELETE to confirm.");
       return;
     }
-    if (!deletePassword) {
+    // Password required only for password users
+    if (userHasPassword && !deletePassword) {
       setDeleteError("Password is required.");
       return;
     }
@@ -393,16 +500,24 @@ export default function SettingsPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          password: deletePassword,
-          confirmText: deleteConfirmText,
+          password: userHasPassword ? deletePassword : undefined,
+          confirmText: trimmedConfirm,
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
+        // If reauth expired or invalid, show error
+        if (data.error === "ReauthRequired") {
+          setDeleteError("Your verification has expired. Please verify again.");
+          return;
+        }
         throw new Error(data.message || "Failed to delete account");
       }
+
+      // Clear attempt counter on success
+      sessionStorage.removeItem("oauth_reauth_attempts_delete");
 
       // Redirect to home page after deletion
       window.location.href = "/?deleted=true";
@@ -560,52 +675,90 @@ export default function SettingsPage() {
             </div>
           </section>
 
-          {/* Change Password */}
+          {/* Password Section - differs based on auth type */}
           <section className="space-y-5 pt-6 border-t border-border-subtle/60">
             <h2 className="text-lg md:text-xl font-semibold text-accent-gold">
-              Change password
+              {userHasPassword ? "Change password" : "Create password"}
             </h2>
 
-            <div className="space-y-5 max-w-md">
-              <div className="space-y-2">
-                <Label htmlFor="currentPassword">Current password</Label>
-                <Input
-                  id="currentPassword"
-                  type="password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                />
+            {authTypeLoading ? (
+              <p className="text-sm text-accent-ink/60">Loading...</p>
+            ) : userHasPassword ? (
+              // Password users: show change password form
+              <div className="space-y-5 max-w-md">
+                <div className="space-y-2">
+                  <Label htmlFor="currentPassword">Current password</Label>
+                  <Input
+                    id="currentPassword"
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">New password</Label>
+                  <Input
+                    id="newPassword"
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm new password</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                </div>
+
+                <Button variant="gold" onClick={handleChangePassword} className="min-h-[44px]">
+                  Change password
+                </Button>
+
+                <p className="text-xs md:text-sm text-accent-ink/60 leading-relaxed">
+                  After changing your password, you&apos;ll be signed out and need to sign
+                  in again.
+                </p>
               </div>
+            ) : (
+              // OAuth-only users: show create password option
+              <div className="space-y-5 max-w-md">
+                <p className="text-sm text-accent-ink/70 leading-relaxed">
+                  You signed up with {primaryOAuthProvider ? primaryOAuthProvider.charAt(0).toUpperCase() + primaryOAuthProvider.slice(1) : "a social account"}.
+                  Add a password to also sign in with email.
+                </p>
 
-              <div className="space-y-2">
-                <Label htmlFor="newPassword">New password</Label>
-                <Input
-                  id="newPassword"
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">New password</Label>
+                  <Input
+                    id="newPassword"
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="At least 8 characters"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm password</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                </div>
+
+                <Button variant="gold" onClick={handleChangePassword} className="min-h-[44px]">
+                  Create password
+                </Button>
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm new password</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
-              </div>
-
-              <Button variant="gold" onClick={handleChangePassword} className="min-h-[44px]">
-                Change password
-              </Button>
-
-              <p className="text-xs md:text-sm text-accent-ink/60 leading-relaxed">
-                After changing your password, you&apos;ll be signed out and need to sign
-                in again.
-              </p>
-            </div>
+            )}
           </section>
 
           {/* Birth Details */}
@@ -1051,16 +1204,20 @@ export default function SettingsPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="hibernatePassword">Enter your password</Label>
-              <Input
-                id="hibernatePassword"
-                type="password"
-                value={hibernatePassword}
-                onChange={(e) => setHibernatePassword(e.target.value)}
-                placeholder="Your password"
-              />
-            </div>
+            {/* Password field only for password users */}
+            {userHasPassword && (
+              <div className="space-y-2">
+                <Label htmlFor="hibernatePassword">Enter your password</Label>
+                <Input
+                  id="hibernatePassword"
+                  type="password"
+                  value={hibernatePassword}
+                  onChange={(e) => setHibernatePassword(e.target.value)}
+                  placeholder="Your password"
+                />
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="hibernateConfirm">
                 Type <span className="font-semibold">HIBERNATE</span> to confirm
@@ -1075,22 +1232,39 @@ export default function SettingsPage() {
             {hibernateError && (
               <p className="text-sm text-danger-soft">{hibernateError}</p>
             )}
+            {reauthError && (
+              <p className="text-sm text-danger-soft">{reauthError}</p>
+            )}
           </div>
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button
               variant="outline"
               onClick={resetHibernateModal}
-              disabled={isHibernating}
+              disabled={isHibernating || isReauthenticating}
+              className="w-full sm:w-auto"
             >
               Cancel
             </Button>
-            <Button
-              variant="default"
-              onClick={handleHibernateAccount}
-              disabled={isHibernating || hibernateConfirmText !== "HIBERNATE"}
-            >
-              {isHibernating ? "Hibernating..." : "Hibernate account"}
-            </Button>
+            {/* OAuth-only users: show "Confirm with Provider" if not yet verified */}
+            {!userHasPassword && !hasReauthForIntent("hibernate") ? (
+              <Button
+                variant="default"
+                onClick={() => startReauth("hibernate")}
+                disabled={isReauthenticating || hibernateConfirmText.trim() !== "HIBERNATE"}
+                className="w-full sm:w-auto"
+              >
+                {isReauthenticating ? "Redirecting..." : `Confirm with ${getProviderDisplayName()}`}
+              </Button>
+            ) : (
+              <Button
+                variant="default"
+                onClick={handleHibernateAccount}
+                disabled={isHibernating || hibernateConfirmText.trim() !== "HIBERNATE"}
+                className="w-full sm:w-auto"
+              >
+                {isHibernating ? "Hibernating..." : "Hibernate account"}
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1106,16 +1280,20 @@ export default function SettingsPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="deletePassword">Enter your password</Label>
-              <Input
-                id="deletePassword"
-                type="password"
-                value={deletePassword}
-                onChange={(e) => setDeletePassword(e.target.value)}
-                placeholder="Your password"
-              />
-            </div>
+            {/* Password field only for password users */}
+            {userHasPassword && (
+              <div className="space-y-2">
+                <Label htmlFor="deletePassword">Enter your password</Label>
+                <Input
+                  id="deletePassword"
+                  type="password"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  placeholder="Your password"
+                />
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="deleteConfirm">
                 Type <span className="font-semibold text-danger-soft">DELETE</span> to confirm
@@ -1131,22 +1309,39 @@ export default function SettingsPage() {
             {deleteError && (
               <p className="text-sm text-danger-soft">{deleteError}</p>
             )}
+            {reauthError && (
+              <p className="text-sm text-danger-soft">{reauthError}</p>
+            )}
           </div>
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button
               variant="outline"
               onClick={resetDeleteModal}
-              disabled={isDeleting}
+              disabled={isDeleting || isReauthenticating}
+              className="w-full sm:w-auto"
             >
               Cancel
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDeleteAccount}
-              disabled={isDeleting || deleteConfirmText !== "DELETE"}
-            >
-              {isDeleting ? "Deleting..." : "Delete account"}
-            </Button>
+            {/* OAuth-only users: show "Confirm with Provider" if not yet verified */}
+            {!userHasPassword && !hasReauthForIntent("delete") ? (
+              <Button
+                variant="destructive"
+                onClick={() => startReauth("delete")}
+                disabled={isReauthenticating || deleteConfirmText.trim() !== "DELETE"}
+                className="w-full sm:w-auto"
+              >
+                {isReauthenticating ? "Redirecting..." : `Confirm with ${getProviderDisplayName()}`}
+              </Button>
+            ) : (
+              <Button
+                variant="destructive"
+                onClick={handleDeleteAccount}
+                disabled={isDeleting || deleteConfirmText.trim() !== "DELETE"}
+                className="w-full sm:w-auto"
+              >
+                {isDeleting ? "Deleting..." : "Delete account"}
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
