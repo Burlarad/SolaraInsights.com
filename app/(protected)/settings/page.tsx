@@ -73,10 +73,20 @@ export default function SettingsPage() {
   const [birthPlaceDisplay, setBirthPlaceDisplay] = useState("");
   const [displayTimezone, setDisplayTimezone] = useState("");
 
+  // Credentials section state
+  const [userEmail, setUserEmail] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [isUpdatingEmail, setIsUpdatingEmail] = useState(false);
+  const [emailUpdateSuccess, setEmailUpdateSuccess] = useState<string | null>(null);
+  const [emailUpdateError, setEmailUpdateError] = useState<string | null>(null);
+
   // Password change
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [passwordUpdateSuccess, setPasswordUpdateSuccess] = useState<string | null>(null);
+  const [passwordUpdateError, setPasswordUpdateError] = useState<string | null>(null);
 
   // Preferences
   const [emailNotifications, setEmailNotifications] = useState(true);
@@ -120,6 +130,7 @@ export default function SettingsPage() {
         const { data: { user } } = await supabase.auth.getUser();
         setUserHasPassword(hasPasswordCredential(user));
         setPrimaryOAuthProvider(getPrimaryOAuthProvider(user));
+        setUserEmail(user?.email || "");
       } catch (err) {
         console.error("Failed to detect auth type:", err);
       } finally {
@@ -374,9 +385,90 @@ export default function SettingsPage() {
     }
   };
 
-  const handleChangePassword = () => {
-    // TODO: Implement password change via Supabase
-    console.log("Password change not yet implemented");
+  const handleUpdateEmail = async () => {
+    if (!newEmail || newEmail === userEmail) {
+      setEmailUpdateError("Please enter a different email address.");
+      return;
+    }
+
+    // Basic email validation
+    if (!newEmail.includes("@") || !newEmail.includes(".")) {
+      setEmailUpdateError("Please enter a valid email address.");
+      return;
+    }
+
+    setIsUpdatingEmail(true);
+    setEmailUpdateError(null);
+    setEmailUpdateSuccess(null);
+
+    try {
+      const { error } = await supabase.auth.updateUser({ email: newEmail });
+
+      if (error) {
+        throw error;
+      }
+
+      setEmailUpdateSuccess("Check your new email to confirm the change.");
+      setNewEmail("");
+    } catch (err: any) {
+      console.error("Email update error:", err);
+      setEmailUpdateError(err.message || "Failed to update email. Please try again.");
+    } finally {
+      setIsUpdatingEmail(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    // Validation
+    if (!newPassword || !confirmPassword) {
+      setPasswordUpdateError("Please fill in all password fields.");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordUpdateError("Passwords don't match.");
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setPasswordUpdateError("Password must be at least 8 characters.");
+      return;
+    }
+
+    setIsUpdatingPassword(true);
+    setPasswordUpdateError(null);
+    setPasswordUpdateSuccess(null);
+
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+
+      if (error) {
+        throw error;
+      }
+
+      // Clear form and show success
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setPasswordUpdateSuccess(
+        userHasPassword
+          ? "Password updated successfully."
+          : "Password created! You can now sign in with email and password."
+      );
+
+      // If this was an OAuth-only user, they now have a password
+      if (!userHasPassword) {
+        setUserHasPassword(true);
+      }
+
+      // Clear success message after 5 seconds
+      setTimeout(() => setPasswordUpdateSuccess(null), 5000);
+    } catch (err: any) {
+      console.error("Password update error:", err);
+      setPasswordUpdateError(err.message || "Failed to update password. Please try again.");
+    } finally {
+      setIsUpdatingPassword(false);
+    }
   };
 
   const handleExportJournal = async () => {
@@ -639,11 +731,40 @@ export default function SettingsPage() {
               </p>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={profile.email} disabled />
+              <Input
+                id="email"
+                type="email"
+                value={userEmail || profile.email}
+                disabled
+                className="bg-gray-50"
+              />
+              <div className="flex gap-2">
+                <Input
+                  type="email"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                  placeholder="Enter new email address"
+                  className="flex-1"
+                />
+                <Button
+                  variant="outline"
+                  onClick={handleUpdateEmail}
+                  disabled={isUpdatingEmail || !newEmail}
+                  className="min-h-[44px]"
+                >
+                  {isUpdatingEmail ? "Updating..." : "Update"}
+                </Button>
+              </div>
+              {emailUpdateSuccess && (
+                <p className="text-xs text-green-600">{emailUpdateSuccess}</p>
+              )}
+              {emailUpdateError && (
+                <p className="text-xs text-danger-soft">{emailUpdateError}</p>
+              )}
               <p className="text-xs text-accent-ink/60">
-                Contact support to change your email address
+                You&apos;ll receive a confirmation email at your new address.
               </p>
             </div>
 
@@ -687,22 +808,13 @@ export default function SettingsPage() {
               // Password users: show change password form
               <div className="space-y-5 max-w-md">
                 <div className="space-y-2">
-                  <Label htmlFor="currentPassword">Current password</Label>
-                  <Input
-                    id="currentPassword"
-                    type="password"
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                  />
-                </div>
-
-                <div className="space-y-2">
                   <Label htmlFor="newPassword">New password</Label>
                   <Input
                     id="newPassword"
                     type="password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="At least 8 characters"
                   />
                 </div>
 
@@ -716,13 +828,24 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                <Button variant="gold" onClick={handleChangePassword} className="min-h-[44px]">
-                  Change password
+                {passwordUpdateSuccess && (
+                  <p className="text-sm text-green-600">{passwordUpdateSuccess}</p>
+                )}
+                {passwordUpdateError && (
+                  <p className="text-sm text-danger-soft">{passwordUpdateError}</p>
+                )}
+
+                <Button
+                  variant="gold"
+                  onClick={handleChangePassword}
+                  disabled={isUpdatingPassword}
+                  className="min-h-[44px]"
+                >
+                  {isUpdatingPassword ? "Updating..." : "Change password"}
                 </Button>
 
                 <p className="text-xs md:text-sm text-accent-ink/60 leading-relaxed">
-                  After changing your password, you&apos;ll be signed out and need to sign
-                  in again.
+                  Your session will remain active after changing your password.
                 </p>
               </div>
             ) : (
@@ -754,8 +877,20 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                <Button variant="gold" onClick={handleChangePassword} className="min-h-[44px]">
-                  Create password
+                {passwordUpdateSuccess && (
+                  <p className="text-sm text-green-600">{passwordUpdateSuccess}</p>
+                )}
+                {passwordUpdateError && (
+                  <p className="text-sm text-danger-soft">{passwordUpdateError}</p>
+                )}
+
+                <Button
+                  variant="gold"
+                  onClick={handleChangePassword}
+                  disabled={isUpdatingPassword}
+                  className="min-h-[44px]"
+                >
+                  {isUpdatingPassword ? "Creating..." : "Create password"}
                 </Button>
               </div>
             )}
