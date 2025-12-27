@@ -67,9 +67,9 @@ function WelcomeContent() {
         throw new Error(data.message || "Failed to reactivate account");
       }
 
-      // Refresh profile and redirect to sanctuary
+      // Refresh profile and redirect to sanctuary with success message
       await refreshProfile();
-      router.push("/sanctuary");
+      router.push("/sanctuary?reactivated=true");
     } catch (err: any) {
       setReactivateError(err.message || "Failed to reactivate account");
     } finally {

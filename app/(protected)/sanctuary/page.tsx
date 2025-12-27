@@ -47,9 +47,25 @@ function SanctuaryContent() {
   const [justConnectedProvider, setJustConnectedProvider] = useState<SocialProvider | null>(null);
   const [hasCheckedModalConditions, setHasCheckedModalConditions] = useState(false);
 
+  // Reactivation toast state
+  const [reactivatedToast, setReactivatedToast] = useState(false);
+
   // Check for OAuth return params (social=connected&provider=xxx)
   const socialParam = searchParams.get("social");
   const providerParam = searchParams.get("provider") as SocialProvider | null;
+  const reactivatedParam = searchParams.get("reactivated");
+
+  // Handle reactivation toast
+  useEffect(() => {
+    if (reactivatedParam === "true") {
+      setReactivatedToast(true);
+      // Clean URL without reload
+      window.history.replaceState({}, "", "/sanctuary");
+      // Auto-hide after 5 seconds
+      const timer = setTimeout(() => setReactivatedToast(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [reactivatedParam]);
 
   // Handle OAuth return and modal display logic (deferred persistence model)
   useEffect(() => {
@@ -315,6 +331,13 @@ function SanctuaryContent() {
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12 space-y-8">
+      {/* Reactivation toast */}
+      {reactivatedToast && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg animate-in fade-in slide-in-from-top-2 duration-300">
+          Reactivated — welcome back.
+        </div>
+      )}
+
       {/* Timezone info */}
       <div className="flex items-center justify-between text-xs text-accent-ink/60">
         <div>

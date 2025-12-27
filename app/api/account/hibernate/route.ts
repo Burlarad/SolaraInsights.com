@@ -99,11 +99,11 @@ export async function POST(req: NextRequest) {
 
     const typedProfile = profile as Pick<Profile, "stripe_subscription_id" | "is_hibernated">;
 
-    // Check if already hibernated
+    // Check if already hibernated - must reactivate first
     if (typedProfile.is_hibernated) {
       return NextResponse.json(
-        { error: "AlreadyHibernated", message: "Your account is already hibernated." },
-        { status: 400 }
+        { error: "HIBERNATED", message: "Reactivate first." },
+        { status: 403 }
       );
     }
 

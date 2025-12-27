@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -46,8 +46,14 @@ interface SocialConnectionStatus {
 }
 
 export default function SettingsPage() {
+  const router = useRouter();
   const { profile, saveProfile, refreshProfile, loading: profileLoading, error: profileError } = useSettings();
   const searchParams = useSearchParams();
+
+  // Reactivation state (for hibernated accounts)
+  const [reactivatePassword, setReactivatePassword] = useState("");
+  const [isReactivating, setIsReactivating] = useState(false);
+  const [reactivateError, setReactivateError] = useState<string | null>(null);
 
   // Auth type state
   const [userHasPassword, setUserHasPassword] = useState(true); // Default to true until loaded
@@ -634,6 +640,54 @@ export default function SettingsPage() {
     setDeleteError(null);
   };
 
+  // Reactivate handler for hibernated accounts
+  const handleReactivate = async () => {
+    // Password required only for password users
+    if (userHasPassword && !reactivatePassword) {
+      setReactivateError("Password is required.");
+      return;
+    }
+
+    // OAuth-only users need reauth first
+    if (!userHasPassword && !hasReauthForIntent("reactivate")) {
+      startReauth("reactivate");
+      return;
+    }
+
+    setIsReactivating(true);
+    setReactivateError(null);
+
+    try {
+      const response = await fetch("/api/account/reactivate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          password: userHasPassword ? reactivatePassword : undefined,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (data.error === "ReauthRequired") {
+          setReactivateError("Your verification has expired. Please verify again.");
+          return;
+        }
+        throw new Error(data.message || "Failed to reactivate account");
+      }
+
+      // Clear attempt counter on success
+      sessionStorage.removeItem("oauth_reauth_attempts_reactivate");
+
+      // Redirect to sanctuary with success message
+      router.push("/sanctuary?reactivated=true");
+    } catch (err: any) {
+      setReactivateError(err.message || "Failed to reactivate account");
+    } finally {
+      setIsReactivating(false);
+    }
+  };
+
   if (profileLoading) {
     return (
       <div className="max-w-4xl mx-auto px-6 py-12">
@@ -658,6 +712,78 @@ export default function SettingsPage() {
             <Button variant="outline" onClick={() => window.location.reload()}>
               Try again
             </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Hibernate gate: show only reactivation UI when hibernated
+  if (profile.is_hibernated) {
+    return (
+      <div className="max-w-xl mx-auto px-4 sm:px-6 py-12">
+        <Card className="border-border-subtle">
+          <CardContent className="p-6 sm:p-8 space-y-6">
+            <div className="text-center space-y-2">
+              <h1 className="text-2xl font-bold text-accent-ink">Account Hibernated</h1>
+              <p className="text-sm text-accent-ink/60">
+                Your account is currently hibernated. Reactivate to access settings and resume your subscription.
+              </p>
+            </div>
+
+            {authTypeLoading ? (
+              <p className="text-sm text-center text-accent-ink/60">Loading...</p>
+            ) : (
+              <div className="space-y-4">
+                {/* Password field for password users */}
+                {userHasPassword && (
+                  <div className="space-y-2">
+                    <Label htmlFor="reactivatePassword">Enter your password</Label>
+                    <Input
+                      id="reactivatePassword"
+                      type="password"
+                      value={reactivatePassword}
+                      onChange={(e) => setReactivatePassword(e.target.value)}
+                      placeholder="Your password"
+                      onKeyDown={(e) => e.key === "Enter" && handleReactivate()}
+                    />
+                  </div>
+                )}
+
+                {/* OAuth-only users info */}
+                {!userHasPassword && (
+                  <p className="text-sm text-accent-ink/70 text-center">
+                    You&apos;ll verify with {getProviderDisplayName()} to reactivate.
+                  </p>
+                )}
+
+                {reactivateError && (
+                  <p className="text-sm text-danger-soft text-center">{reactivateError}</p>
+                )}
+                {reauthError && (
+                  <p className="text-sm text-danger-soft text-center">{reauthError}</p>
+                )}
+
+                <Button
+                  variant="gold"
+                  onClick={handleReactivate}
+                  disabled={isReactivating || isReauthenticating || (userHasPassword && !reactivatePassword)}
+                  className="w-full min-h-[48px]"
+                >
+                  {isReauthenticating
+                    ? "Redirecting..."
+                    : isReactivating
+                    ? "Reactivating..."
+                    : userHasPassword
+                    ? "Reactivate my account"
+                    : `Reactivate with ${getProviderDisplayName()}`}
+                </Button>
+
+                <p className="text-xs text-center text-accent-ink/50">
+                  Your subscription billing will resume once reactivated.
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

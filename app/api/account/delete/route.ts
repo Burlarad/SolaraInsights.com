@@ -27,6 +27,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Check if account is hibernated - must reactivate first
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_hibernated")
+      .eq("id", user.id)
+      .single();
+
+    if (profile?.is_hibernated) {
+      return NextResponse.json(
+        { error: "HIBERNATED", message: "Reactivate first." },
+        { status: 403 }
+      );
+    }
+
     // Parse request body
     const { password, confirmText } = await req.json();
 
