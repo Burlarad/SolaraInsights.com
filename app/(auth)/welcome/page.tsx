@@ -9,6 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/lib/supabase/client";
 import { useSettings } from "@/providers/SettingsProvider";
+import { hasActiveMembership } from "@/lib/membership/status";
+import { setupOauthSession } from "@/lib/auth/oauthSession";
+import { getOauthCallbackUrl } from "@/lib/url/base";
 
 function WelcomeContent() {
   const router = useRouter();
@@ -35,11 +38,7 @@ function WelcomeContent() {
   // Check membership status (skip if hibernated - they're here to reactivate)
   useEffect(() => {
     if (!profileLoading && profile && !isHibernated) {
-      const hasActiveMembership =
-        (profile.membership_plan === "individual" || profile.membership_plan === "family") &&
-        (profile.subscription_status === "trialing" || profile.subscription_status === "active");
-
-      if (!hasActiveMembership) {
+      if (!hasActiveMembership(profile)) {
         // No active membership - redirect to join
         router.push("/join");
       }
@@ -88,10 +87,17 @@ function WelcomeContent() {
         sessionStorage.setItem("facebookPersonalization", facebookPersonalization.toString());
       }
 
+      // Set up OAuth session state using shared helper
+      setupOauthSession("/onboarding", `auto_connect:${provider}`);
+
+      // Get callback URL using shared helper
+      const redirectTo = getOauthCallbackUrl();
+      console.log(`[Welcome] OAuth redirectTo: ${redirectTo}`);
+
       await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/onboarding`,
+          redirectTo,
         },
       });
     } catch (err: any) {

@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase/client";
+import { setupOauthSession } from "@/lib/auth/oauthSession";
+import { getOauthCallbackUrl } from "@/lib/url/base";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -65,10 +67,17 @@ export default function SignUpPage() {
 
   const handleFacebookSignUp = async () => {
     try {
+      // Set up OAuth session state using shared helper
+      setupOauthSession("/join", "auto_connect:facebook");
+
+      // Get callback URL using shared helper
+      const redirectTo = getOauthCallbackUrl();
+      console.log(`[SignUp] OAuth redirectTo: ${redirectTo}`);
+
       await supabase.auth.signInWithOAuth({
         provider: "facebook",
         options: {
-          redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/join`,
+          redirectTo,
         },
       });
     } catch (err) {

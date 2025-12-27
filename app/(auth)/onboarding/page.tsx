@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useSettings } from "@/providers/SettingsProvider";
 import { PlacePicker, PlaceSelection } from "@/components/shared/PlacePicker";
+import { hasActiveMembership } from "@/lib/membership/status";
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -66,11 +67,7 @@ export default function OnboardingPage() {
   // Check membership and onboarding status
   useEffect(() => {
     if (!profileLoading && profile) {
-      const hasActiveMembership =
-        (profile.membership_plan === "individual" || profile.membership_plan === "family") &&
-        (profile.subscription_status === "trialing" || profile.subscription_status === "active");
-
-      if (!hasActiveMembership) {
+      if (!hasActiveMembership(profile)) {
         // No active membership - redirect to join
         router.push("/join");
         return;

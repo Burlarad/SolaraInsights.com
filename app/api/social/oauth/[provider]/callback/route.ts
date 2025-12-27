@@ -9,6 +9,7 @@ import {
 import { isProviderEnabled } from "@/lib/oauth/providers";
 import { retrieveCodeVerifier } from "@/lib/oauth/pkce";
 import { encryptToken } from "@/lib/social/crypto";
+import { toSafeInternalPath } from "@/lib/validation/internalUrl";
 
 const VALID_PROVIDERS: SocialProvider[] = [
   "facebook",
@@ -22,27 +23,6 @@ const VALID_PROVIDERS: SocialProvider[] = [
 const debug = process.env.OAUTH_DEBUG_LOGS === "true";
 
 /**
- * Validate return_to URL for open redirect protection.
- * Only allows internal paths that are safe to redirect to.
- */
-function isValidReturnTo(returnTo: string | null | undefined): returnTo is string {
-  if (!returnTo) return false;
-  // Must start with "/" (relative path)
-  if (!returnTo.startsWith("/")) return false;
-  // Must not be protocol-relative URL (//)
-  if (returnTo.startsWith("//")) return false;
-  // Must not contain protocol indicators
-  if (returnTo.toLowerCase().includes("http:") || returnTo.toLowerCase().includes("https:")) return false;
-  // Must not contain :// anywhere (catches all protocols)
-  if (returnTo.includes("://")) return false;
-  // Must not contain backslash (prevents /\evil.com tricks)
-  if (returnTo.includes("\\")) return false;
-  // Must not contain encoded slashes that could bypass checks
-  if (returnTo.includes("%2f") || returnTo.includes("%2F")) return false;
-  return true;
-}
-
-/**
  * Build a redirect URL, preferring returnTo if valid, otherwise falling back to /settings.
  * Appends query params properly (using ? or & as needed).
  */
@@ -51,8 +31,8 @@ function buildRedirectUrl(
   params: Record<string, string>,
   baseUrl: string
 ): URL {
-  // Determine base path - default to /settings if no valid returnTo
-  const basePath = isValidReturnTo(returnTo) ? returnTo : "/settings";
+  // Use shared validation helper with /settings as fallback
+  const basePath = toSafeInternalPath(returnTo, "/settings");
 
   // Build query string
   const queryString = Object.entries(params)
@@ -303,6 +283,30 @@ export async function GET(
     }
 
     if (debug) console.log(`[OAuth Debug] [${requestId}] db upsert: SUCCESS`);
+
+    // Upsert into social_identities for Meta Data Deletion compliance
+    // This mapping persists even if user disconnects (unlike social_accounts)
+    if (tokens.userId) {
+      const { error: identityError } = await supabase
+        .from("social_identities")
+        .upsert(
+          {
+            user_id: storedState.userId,
+            provider,
+            external_user_id: tokens.userId,
+          },
+          {
+            onConflict: "user_id,provider",
+          }
+        );
+
+      if (identityError) {
+        // Log but don't fail - social_identities is for compliance, not critical path
+        console.warn(`[OAuth Callback] [${requestId}] ${provider}: social_identities upsert failed - ${identityError.message}`);
+      } else if (debug) {
+        console.log(`[OAuth Debug] [${requestId}] social_identities upsert: SUCCESS`);
+      }
+    }
 
     // Activate social insights on first connection (deferred persistence model)
     // Only set enabled=true and activated_at if not already set

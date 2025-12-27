@@ -6,6 +6,7 @@ import Link from "next/link";
 import Script from "next/script";
 import { Card, CardContent } from "@/components/ui/card";
 import { useSettings } from "@/providers/SettingsProvider";
+import { hasActiveMembership } from "@/lib/membership/status";
 
 // Stripe Pricing Table configuration from environment
 const STRIPE_PRICING_TABLE_ID = process.env.NEXT_PUBLIC_STRIPE_PRICING_TABLE_ID;
@@ -17,15 +18,9 @@ export default function JoinPage() {
 
   // Check if user already has active membership
   useEffect(() => {
-    if (!profileLoading && profile) {
-      const hasActiveMembership =
-        (profile.membership_plan === "individual" || profile.membership_plan === "family") &&
-        (profile.subscription_status === "trialing" || profile.subscription_status === "active");
-
-      if (hasActiveMembership) {
-        // Already has membership - redirect
-        router.push("/sanctuary");
-      }
+    if (!profileLoading && hasActiveMembership(profile)) {
+      // Already has membership - redirect
+      router.push("/sanctuary");
     }
   }, [profile, profileLoading, router]);
 

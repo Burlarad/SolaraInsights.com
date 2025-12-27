@@ -8,29 +8,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase/client";
-
-/**
- * Validate returnUrl for open redirect protection.
- * Only allows relative paths starting with "/" that don't redirect to external domains.
- */
-function isValidReturnUrl(url: string | null): url is string {
-  if (!url) return false;
-  // Must start with "/" and not start with "//" (protocol-relative URL)
-  if (!url.startsWith("/") || url.startsWith("//")) return false;
-  // Must not contain protocol indicators
-  if (url.toLowerCase().includes("http:") || url.toLowerCase().includes("https:")) return false;
-  // Must not contain encoded slashes that could bypass checks
-  if (url.includes("%2f") || url.includes("%2F")) return false;
-  return true;
-}
+import { toSafeInternalPath } from "@/lib/validation/internalUrl";
+import { setupOauthSession } from "@/lib/auth/oauthSession";
+import { getOauthCallbackUrl } from "@/lib/url/base";
 
 function SignInContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   // Get returnUrl from query params with security validation
-  const returnUrlParam = searchParams.get("returnUrl");
-  const returnUrl = isValidReturnUrl(returnUrlParam) ? returnUrlParam : "/sanctuary";
+  const returnUrl = toSafeInternalPath(searchParams.get("returnUrl"));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -74,11 +61,17 @@ function SignInContent() {
 
   const handleFacebookSignIn = async () => {
     try {
+      // Set up OAuth session state using shared helper
+      setupOauthSession(returnUrl, "auto_connect:facebook");
+
+      // Get callback URL using shared helper
+      const redirectTo = getOauthCallbackUrl();
+      console.log(`[SignIn] OAuth redirectTo: ${redirectTo}`);
+
       await supabase.auth.signInWithOAuth({
         provider: "facebook",
         options: {
-          // Use validated returnUrl for OAuth redirect
-          redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}${returnUrl}`,
+          redirectTo,
         },
       });
     } catch (err) {
