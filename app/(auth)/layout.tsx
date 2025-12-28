@@ -20,7 +20,9 @@ export default function AuthLayout({
 
       {/* Auth content */}
       <main className="flex-1 flex items-center justify-center px-6 pb-12">
-        <div className="w-full max-w-md">
+        {/* Use max-w-4xl to accommodate Stripe Pricing Table on /join */}
+        {/* Individual pages use their own width constraints (e.g., Card) */}
+        <div className="w-full max-w-4xl">
           {children}
         </div>
       </main>

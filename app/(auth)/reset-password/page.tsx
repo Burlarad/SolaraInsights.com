@@ -309,8 +309,10 @@ function ResetPasswordLoading() {
 // Default export wrapped in Suspense for useSearchParams
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<ResetPasswordLoading />}>
-      <ResetPasswordContent />
-    </Suspense>
+    <div className="max-w-md mx-auto">
+      <Suspense fallback={<ResetPasswordLoading />}>
+        <ResetPasswordContent />
+      </Suspense>
+    </div>
   );
 }

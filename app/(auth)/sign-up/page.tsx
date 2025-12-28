@@ -87,6 +87,7 @@ export default function SignUpPage() {
   };
 
   return (
+    <div className="max-w-md mx-auto">
     <Card className="border-border-subtle">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl text-center">Create your account</CardTitle>
@@ -171,14 +172,27 @@ export default function SignUpPage() {
           <div className="flex-1 border-t border-border-subtle"></div>
         </div>
 
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full"
-          onClick={handleFacebookSignUp}
-        >
-          Continue with Facebook
-        </Button>
+        <div className="space-y-3">
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={handleFacebookSignUp}
+          >
+            Continue with Facebook
+          </Button>
+
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={() => {
+              window.location.href = "/api/auth/login/tiktok?return_to=/join";
+            }}
+          >
+            Continue with TikTok
+          </Button>
+        </div>
 
         <div className="mt-6 text-center text-sm">
           <span className="text-accent-ink/60">Already have an account? </span>
@@ -188,5 +202,6 @@ export default function SignUpPage() {
         </div>
       </CardContent>
     </Card>
+    </div>
   );
 }

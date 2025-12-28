@@ -9,8 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase/client";
 import { toSafeInternalPath } from "@/lib/validation/internalUrl";
-import { setupOauthSession } from "@/lib/auth/oauthSession";
 import { getOauthCallbackUrl } from "@/lib/url/base";
+import { SocialConsentModal } from "@/components/auth/SocialConsentModal";
+import { persistOauthContext } from "@/lib/auth/socialConsent";
 
 function SignInContent() {
   const router = useRouter();
@@ -18,10 +19,38 @@ function SignInContent() {
 
   // Get returnUrl from query params with security validation
   const returnUrl = toSafeInternalPath(searchParams.get("returnUrl"));
+
+  // OAuth error from callback redirect
+  const oauthError = searchParams.get("error");
+  const oauthProvider = searchParams.get("provider");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Consent modal state
+  const [consentModalOpen, setConsentModalOpen] = useState(false);
+  const [pendingProvider, setPendingProvider] = useState<"facebook" | "tiktok" | null>(null);
+
+  // Map OAuth error codes to user-friendly messages
+  const getOAuthErrorMessage = (code: string, provider: string): string => {
+    const messages: Record<string, string> = {
+      access_denied: `${provider} authorization was denied or canceled.`,
+      missing_params: `Missing authorization data from ${provider}.`,
+      state_expired: `Session expired. Please try again.`,
+      invalid_state: `Invalid session. Please try again.`,
+      state_mismatch: `Security check failed. Please try again.`,
+      pkce_missing: `Security verification failed. Please try again.`,
+      no_user_id: `Could not retrieve your ${provider} account info.`,
+      user_creation_failed: `Failed to create account. Please try again.`,
+      session_failed: `Failed to establish session. Please try again.`,
+      oauth_error: `An error occurred with ${provider} sign-in.`,
+      provider_disabled: `${provider} sign-in is currently unavailable.`,
+      not_configured: `${provider} sign-in is not configured.`,
+    };
+    return messages[code] || `Sign-in failed: ${code}`;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,25 +88,53 @@ function SignInContent() {
     }
   };
 
-  const handleFacebookSignIn = async () => {
-    try {
-      // Set up OAuth session state using shared helper
-      setupOauthSession(returnUrl, "auto_connect:facebook");
+  // Open consent modal for provider
+  const handleProviderClick = (provider: "facebook" | "tiktok") => {
+    setError(null);
+    setPendingProvider(provider);
+    setConsentModalOpen(true);
+  };
 
-      // Get callback URL using shared helper
+  // Handle OAuth after consent
+  const handleConsentContinue = async (consentChecked: boolean) => {
+    if (!pendingProvider) return;
+
+    const provider = pendingProvider;
+    setConsentModalOpen(false);
+    setPendingProvider(null);
+
+    // Persist OAuth context - for sign-in, still go to /onboarding per routing rule
+    persistOauthContext({
+      nextPath: "/onboarding",
+      provider,
+      consentChecked,
+    });
+
+    if (provider === "tiktok") {
+      // TikTok uses custom OAuth flow
+      window.location.href = "/api/auth/login/tiktok?return_to=/onboarding";
+      return;
+    }
+
+    // Supabase OAuth for Facebook
+    try {
       const redirectTo = getOauthCallbackUrl();
       console.log(`[SignIn] OAuth redirectTo: ${redirectTo}`);
 
       await supabase.auth.signInWithOAuth({
         provider: "facebook",
-        options: {
-          redirectTo,
-        },
+        options: { redirectTo },
       });
     } catch (err) {
       console.error("Facebook sign in error:", err);
       setError("Unable to sign in with Facebook. Please try again.");
     }
+  };
+
+  // Close consent modal
+  const handleConsentClose = () => {
+    setConsentModalOpen(false);
+    setPendingProvider(null);
   };
 
   return (
@@ -89,6 +146,16 @@ function SignInContent() {
         </p>
       </CardHeader>
       <CardContent>
+        {/* OAuth error from redirect */}
+        {oauthError && oauthProvider && (
+          <div className="mb-4 p-3 rounded-lg bg-danger-soft/20 border border-danger-soft text-sm text-accent-ink">
+            {getOAuthErrorMessage(oauthError, oauthProvider)}
+            <span className="block mt-1 text-xs text-accent-ink/50">
+              Error code: {oauthError}
+            </span>
+          </div>
+        )}
+
         {error && (
           <div className="mb-4 p-3 rounded-lg bg-danger-soft/20 border border-danger-soft text-sm text-accent-ink">
             {error}
@@ -99,24 +166,22 @@ function SignInContent() {
         <div className="space-y-3 mb-6">
           <p className="text-center text-sm text-accent-ink/60">Sign in with</p>
           <div className="flex items-center justify-center gap-3">
-            {/* Facebook - Wired */}
+            {/* Facebook */}
             <button
               type="button"
-              onClick={handleFacebookSignIn}
+              onClick={() => handleProviderClick("facebook")}
               className="w-12 h-12 rounded-full bg-[#1877F2] hover:bg-[#166FE5] transition-colors flex items-center justify-center text-white font-semibold"
               title="Sign in with Facebook"
             >
               F
             </button>
 
-            {/* TikTok - Connect for Social Insights */}
+            {/* TikTok */}
             <button
               type="button"
-              onClick={() => {
-                window.location.href = "/api/social/oauth/tiktok/connect?return_to=/sign-in";
-              }}
+              onClick={() => handleProviderClick("tiktok")}
               className="w-12 h-12 rounded-full bg-black hover:bg-gray-800 transition-colors flex items-center justify-center text-white font-semibold"
-              title="Connect TikTok for Social Insights"
+              title="Sign in with TikTok"
             >
               T
             </button>
@@ -201,22 +266,33 @@ function SignInContent() {
           </Link>
         </div>
       </CardContent>
+
+      {/* Social Consent Modal */}
+      <SocialConsentModal
+        provider={pendingProvider || "facebook"}
+        isOpen={consentModalOpen}
+        defaultChecked={true}
+        onContinue={handleConsentContinue}
+        onClose={handleConsentClose}
+      />
     </Card>
   );
 }
 
 export default function SignInPage() {
   return (
-    <Suspense
-      fallback={
-        <Card className="border-border-subtle">
-          <CardContent className="p-12 text-center text-accent-ink/60">
-            Loading...
-          </CardContent>
-        </Card>
-      }
-    >
-      <SignInContent />
-    </Suspense>
+    <div className="max-w-md mx-auto">
+      <Suspense
+        fallback={
+          <Card className="border-border-subtle">
+            <CardContent className="p-12 text-center text-accent-ink/60">
+              Loading...
+            </CardContent>
+          </Card>
+        }
+      >
+        <SignInContent />
+      </Suspense>
+    </div>
   );
 }

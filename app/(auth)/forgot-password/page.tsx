@@ -46,6 +46,7 @@ export default function ForgotPasswordPage() {
 
   if (isSubmitted) {
     return (
+      <div className="max-w-md mx-auto">
       <Card className="border-border-subtle">
         <CardHeader className="space-y-1">
           <div className="text-center mb-4">
@@ -66,10 +67,12 @@ export default function ForgotPasswordPage() {
           </div>
         </CardContent>
       </Card>
+      </div>
     );
   }
 
   return (
+    <div className="max-w-md mx-auto">
     <Card className="border-border-subtle">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl text-center">Reset your password</CardTitle>
@@ -114,5 +117,6 @@ export default function ForgotPasswordPage() {
         </div>
       </CardContent>
     </Card>
+    </div>
   );
 }
