@@ -2,9 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient, createAdminSupabaseClient } from "@/lib/supabase/server";
 import { Connection, DailyBrief } from "@/types";
 import { touchLastSeen } from "@/lib/activity/touchLastSeen";
-import { getDayKey } from "@/lib/cache";
+import { getDayKey } from "@/lib/cache/redis";
 import { resolveProfileFromConnection } from "@/lib/connections/profileMatch";
+import { checkRateLimit, createRateLimitResponse } from "@/lib/cache/rateLimit";
 import tzLookup from "tz-lookup";
+
+// Rate limiting configuration
+const RATE_LIMITS = {
+  create: { limit: 30, window: 3600 },   // 30 per hour for POST
+  update: { limit: 30, window: 3600 },   // 30 per hour for PATCH
+  delete: { limit: 10, window: 3600 },   // 10 per hour for DELETE
+};
 
 // Helper to compute timezone from coordinates and validate it's not UTC/GMT
 function computeTimezone(lat: number, lon: number): string | null {
@@ -139,6 +147,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "Unauthorized", message: "Please sign in to add connections." },
         { status: 401 }
+      );
+    }
+
+    // Rate limiting: 30 creations per hour
+    const rateLimitResult = await checkRateLimit(
+      `connections:create:${user.id}`,
+      RATE_LIMITS.create.limit,
+      RATE_LIMITS.create.window
+    );
+    if (!rateLimitResult.success) {
+      const retryAfter = Math.ceil((rateLimitResult.resetAt - Date.now()) / 1000);
+      return NextResponse.json(
+        createRateLimitResponse(retryAfter, `You've reached the limit for adding connections. Try again in ${Math.ceil(retryAfter / 60)} minutes.`),
+        { status: 429, headers: { "Retry-After": String(retryAfter) } }
       );
     }
 
@@ -278,6 +300,20 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json(
         { error: "Unauthorized", message: "Please sign in to update connections." },
         { status: 401 }
+      );
+    }
+
+    // Rate limiting: 30 updates per hour
+    const rateLimitResult = await checkRateLimit(
+      `connections:update:${user.id}`,
+      RATE_LIMITS.update.limit,
+      RATE_LIMITS.update.window
+    );
+    if (!rateLimitResult.success) {
+      const retryAfter = Math.ceil((rateLimitResult.resetAt - Date.now()) / 1000);
+      return NextResponse.json(
+        createRateLimitResponse(retryAfter, `You've reached the limit for updating connections. Try again in ${Math.ceil(retryAfter / 60)} minutes.`),
+        { status: 429, headers: { "Retry-After": String(retryAfter) } }
       );
     }
 
@@ -512,6 +548,20 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json(
         { error: "Unauthorized", message: "Please sign in to delete connections." },
         { status: 401 }
+      );
+    }
+
+    // Rate limiting: 10 deletions per hour
+    const rateLimitResult = await checkRateLimit(
+      `connections:delete:${user.id}`,
+      RATE_LIMITS.delete.limit,
+      RATE_LIMITS.delete.window
+    );
+    if (!rateLimitResult.success) {
+      const retryAfter = Math.ceil((rateLimitResult.resetAt - Date.now()) / 1000);
+      return NextResponse.json(
+        createRateLimitResponse(retryAfter, `You've reached the limit for deleting connections. Try again in ${Math.ceil(retryAfter / 60)} minutes.`),
+        { status: 429, headers: { "Retry-After": String(retryAfter) } }
       );
     }
 

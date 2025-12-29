@@ -10,6 +10,10 @@ import { isProviderEnabled } from "@/lib/oauth/providers";
 import { retrieveCodeVerifier } from "@/lib/oauth/pkce";
 import { encryptToken } from "@/lib/social/crypto";
 import { toSafeInternalPath } from "@/lib/validation/internalUrl";
+import {
+  checkSocialConnectLimit,
+  SOCIAL_RATE_LIMIT_MESSAGE,
+} from "@/lib/social/socialRateLimit";
 
 const VALID_PROVIDERS: SocialProvider[] = [
   "facebook",
@@ -196,6 +200,16 @@ export async function GET(
       console.log(`[OAuth Debug] [${requestId}] state validated: true`);
       console.log(`[OAuth Debug] [${requestId}] storedState.userId present: ${!!storedState.userId}`);
       console.log(`[OAuth Debug] [${requestId}] state age: ${Math.round(stateAgeMs / 1000)}s`);
+    }
+
+    // Check rate limit for social connections (5/day per user)
+    // Protects against reconnect exploit that triggers OpenAI costs
+    const rateLimitResult = await checkSocialConnectLimit(storedState.userId);
+    if (!rateLimitResult.allowed) {
+      console.warn(`[OAuth Callback] [${requestId}] ${provider}: rate_limited (user ${storedState.userId})`);
+      return NextResponse.redirect(
+        buildRedirectUrl(storedState.returnTo, { error: "rate_limited", provider }, baseUrl)
+      );
     }
 
     // Clear the state cookie

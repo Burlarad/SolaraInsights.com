@@ -1,8 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { deleteAccountCore } from "@/lib/account/deleteAccountCore";
 import { isOAuthOnly } from "@/lib/auth/helpers";
 import { verifyReauth } from "@/lib/auth/reauth";
+
+/**
+ * App-specific cookies that should be cleared on account deletion.
+ * These are in addition to any sb-* Supabase auth cookies.
+ */
+const APP_COOKIES_TO_CLEAR = [
+  "reauth_ok",
+  "reauth_intent",
+  "tiktok_login_state",
+  "social_oauth_state",
+  "facebook_reauth_state",
+  "tiktok_reauth_state",
+  "google_reauth_state",
+];
 
 /**
  * POST /api/account/delete
@@ -11,10 +26,13 @@ import { verifyReauth } from "@/lib/auth/reauth";
  * - OAuth-only users: Verifies reauth_ok cookie from recent OAuth flow
  *
  * This is irreversible. All data is permanently deleted.
+ *
+ * After deletion, all auth cookies are cleared server-side to ensure
+ * the user is immediately logged out.
  */
 export async function POST(req: NextRequest) {
   try {
-    // Get authenticated user
+    // Get authenticated user and capture userId FIRST
     const supabase = await createServerSupabaseClient();
     const {
       data: { user },
@@ -27,11 +45,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Store userId before any operations that might invalidate the session
+    const userId = user.id;
+
     // Check if account is hibernated - must reactivate first
     const { data: profile } = await supabase
       .from("profiles")
       .select("is_hibernated")
-      .eq("id", user.id)
+      .eq("id", userId)
       .single();
 
     if (profile?.is_hibernated) {
@@ -58,7 +79,7 @@ export async function POST(req: NextRequest) {
 
     if (userIsOAuthOnly) {
       // OAuth-only users: verify reauth_ok cookie
-      const reauthValid = await verifyReauth(user.id, "delete");
+      const reauthValid = await verifyReauth(userId, "delete");
 
       if (!reauthValid) {
         return NextResponse.json(
@@ -70,7 +91,7 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      console.log(`[Delete Account] OAuth-only user ${user.id} verified via reauth`);
+      console.log(`[Delete Account] OAuth-only user ${userId} verified via reauth`);
     } else {
       // Password users: verify password
       if (!password) {
@@ -92,12 +113,20 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      console.log(`[Delete Account] Password user ${user.id} verified via password`);
+      console.log(`[Delete Account] Password user ${userId} verified via password`);
     }
 
-    // Use shared deletion logic
+    // Attempt server-side signOut before deletion (best effort, don't rely on it)
+    try {
+      await supabase.auth.signOut();
+      console.log(`[Delete Account] Server-side signOut completed for ${userId}`);
+    } catch (signOutError) {
+      console.warn(`[Delete Account] Server-side signOut failed (continuing):`, signOutError);
+    }
+
+    // Execute account deletion
     const result = await deleteAccountCore({
-      userId: user.id,
+      userId,
       source: "user_request",
     });
 
@@ -109,10 +138,56 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    return NextResponse.json({
+    console.log(`[Delete Account] Account deleted successfully for ${userId}`);
+
+    // Build response with cookie-clearing headers
+    const response = NextResponse.json({
       success: true,
       message: "Your account has been permanently deleted.",
     });
+
+    // Prevent caching of this response
+    response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
+    response.headers.set("Pragma", "no-cache");
+
+    // Clear all Supabase auth cookies (sb-*) and app cookies
+    const cookieStore = await cookies();
+    const allCookies = cookieStore.getAll();
+
+    for (const cookie of allCookies) {
+      // Clear any Supabase auth cookies
+      if (cookie.name.startsWith("sb-")) {
+        response.cookies.set(cookie.name, "", {
+          path: "/",
+          maxAge: 0,
+          expires: new Date(0),
+        });
+        console.log(`[Delete Account] Cleared cookie: ${cookie.name}`);
+      }
+
+      // Clear PKCE verifier cookies
+      if (cookie.name.startsWith("oauth_pkce_")) {
+        response.cookies.set(cookie.name, "", {
+          path: "/",
+          maxAge: 0,
+          expires: new Date(0),
+        });
+        console.log(`[Delete Account] Cleared cookie: ${cookie.name}`);
+      }
+    }
+
+    // Clear known app cookies explicitly
+    for (const cookieName of APP_COOKIES_TO_CLEAR) {
+      response.cookies.set(cookieName, "", {
+        path: "/",
+        maxAge: 0,
+        expires: new Date(0),
+      });
+    }
+
+    console.log(`[Delete Account] All auth cookies cleared for deleted user ${userId}`);
+
+    return response;
   } catch (error: any) {
     console.error("[Delete Account] Error:", error);
     return NextResponse.json(

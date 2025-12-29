@@ -9,6 +9,7 @@ import { openai, OPENAI_MODELS } from "@/lib/openai/client";
 import { SocialProvider } from "@/types";
 import { logTokenAudit } from "@/lib/ai/tokenAudit";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
+import { checkBudget } from "@/lib/ai/costControl";
 
 // Current prompt version - increment when prompt changes significantly
 export const SOCIAL_SUMMARY_PROMPT_VERSION = 1;
@@ -69,6 +70,12 @@ export async function generateSocialSummary(
 
   if (payload.trim().length < 100) {
     throw new Error("Payload too short. Please provide at least 100 characters of content.");
+  }
+
+  // Defense-in-depth: Check budget before making OpenAI call
+  const budgetCheck = await checkBudget();
+  if (!budgetCheck.allowed) {
+    throw new Error("Service temporarily unavailable: budget exceeded");
   }
 
   const systemPrompt = `You are a compassionate observer who reads social media content to understand someone's communication style, interests, and emotional patterns.

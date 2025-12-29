@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase/client";
 import { getOauthCallbackUrl } from "@/lib/url/base";
 import { SocialConsentModal } from "@/components/auth/SocialConsentModal";
-import { persistOauthContext, setCheckoutSessionCookie } from "@/lib/auth/socialConsent";
+import { persistOauthContext, setCheckoutSessionCookie, getCheckoutSessionId } from "@/lib/auth/socialConsent";
 
 /**
  * WelcomeContent - Client Component for Account Registration
@@ -56,7 +56,7 @@ export function WelcomeContent({ initialSessionId }: WelcomeContentProps) {
 
   // Consent modal state
   const [consentModalOpen, setConsentModalOpen] = useState(false);
-  const [pendingProvider, setPendingProvider] = useState<"facebook" | "tiktok" | null>(null);
+  const [pendingProvider, setPendingProvider] = useState<"facebook" | "tiktok" | "x" | null>(null);
 
   // Check if user already has a session
   useEffect(() => {
@@ -81,8 +81,17 @@ export function WelcomeContent({ initialSessionId }: WelcomeContentProps) {
   }, [hasSession, router]);
 
   // Redirect if no session_id (didn't come from Stripe)
+  // BUT: Check cookie first - it may have been preserved from a failed OAuth attempt
   useEffect(() => {
     if (sessionId === "" && !sessionLoading && hasSession === false) {
+      // Check if we have a checkout session cookie (preserved from OAuth attempt)
+      const cookieSessionId = getCheckoutSessionId();
+      if (cookieSessionId && cookieSessionId.startsWith("cs_")) {
+        // Restore session_id to URL so page works normally
+        // This handles the case where OAuth failed and user returned to /welcome
+        router.replace(`/welcome?session_id=${encodeURIComponent(cookieSessionId)}`);
+        return;
+      }
       router.replace("/join");
     }
   }, [sessionLoading, hasSession, sessionId, router]);
@@ -114,7 +123,7 @@ export function WelcomeContent({ initialSessionId }: WelcomeContentProps) {
   }, [resendCooldown]);
 
   // Open consent modal for provider
-  const handleProviderClick = (provider: "facebook" | "tiktok") => {
+  const handleProviderClick = (provider: "facebook" | "tiktok" | "x") => {
     setError(null);
     setPendingProvider(provider);
     setConsentModalOpen(true);
@@ -139,6 +148,12 @@ export function WelcomeContent({ initialSessionId }: WelcomeContentProps) {
     if (provider === "tiktok") {
       // TikTok uses custom OAuth flow - pass consent via cookie (already set by persistOauthContext)
       window.location.href = "/api/auth/login/tiktok?return_to=/onboarding";
+      return;
+    }
+
+    if (provider === "x") {
+      // X uses custom OAuth flow - pass consent via cookie (already set by persistOauthContext)
+      window.location.href = "/api/auth/login/x?return_to=/onboarding";
       return;
     }
 
@@ -340,15 +355,17 @@ export function WelcomeContent({ initialSessionId }: WelcomeContentProps) {
                 R
               </button>
 
-              {/* X - Coming Soon */}
+              {/* X OAuth disabled - requires X Basic tier ($100/mo)
+                  To re-enable: uncomment this and set X_OAUTH_ENABLED=true
               <button
                 type="button"
-                onClick={() => setError("X coming soon")}
-                className="w-12 h-12 rounded-full bg-black hover:bg-gray-800 transition-colors flex items-center justify-center text-white font-semibold opacity-50"
-                title="X (Coming Soon)"
+                onClick={() => handleProviderClick("x")}
+                className="w-12 h-12 rounded-full bg-black hover:bg-gray-800 transition-colors flex items-center justify-center text-white font-semibold"
+                title="Continue with X"
               >
                 X
               </button>
+              */}
             </div>
           </div>
 

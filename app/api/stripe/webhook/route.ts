@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { stripe, STRIPE_CONFIG } from "@/lib/stripe/client";
 import { createAdminSupabaseClient } from "@/lib/supabase/server";
 import { resend, RESEND_CONFIG } from "@/lib/resend/client";
+import { welcomeEmail } from "@/lib/email/templates";
 
 type MembershipPlan = "individual" | "family";
 
@@ -211,15 +212,18 @@ async function handleCheckoutCompleted(
     // User was not authenticated (Pricing Table flow) - find or create by email
     console.log(`[Webhook] No metadata.userId, finding/creating user by email...`);
 
-    // First, try to find existing user by email
-    const { data: existingUsers } = await supabase.auth.admin.listUsers();
-    const existingUser = existingUsers?.users.find(u => u.email === email);
+    // First, check profiles table (faster than listing all auth users)
+    const { data: existingProfile } = await supabase
+      .from("profiles")
+      .select("id")
+      .ilike("email", email)
+      .single();
 
-    if (existingUser) {
-      console.log(`[Webhook] Found existing user: ${existingUser.id}`);
-      profileUserId = existingUser.id;
+    if (existingProfile) {
+      console.log(`[Webhook] Found existing profile: ${existingProfile.id}`);
+      profileUserId = existingProfile.id;
     } else {
-      // Create new user with random password (they'll set it in /welcome)
+      // Try to create new user - if user already exists in auth, this will fail
       console.log(`[Webhook] Creating new user for email: ${email}`);
       const randomPassword = Math.random().toString(36).slice(-16) + Math.random().toString(36).slice(-16);
 
@@ -229,14 +233,33 @@ async function handleCheckoutCompleted(
         email_confirm: true, // Auto-confirm since they paid
       });
 
-      if (createError || !newUser.user) {
-        const error = `Failed to create user: ${createError?.message || "Unknown error"}`;
+      if (createError) {
+        // User might exist in auth but not profiles - look them up
+        if (createError.message.includes("already") || createError.message.includes("exists")) {
+          console.log(`[Webhook] User exists in auth, looking up...`);
+          const { data: existingUsers } = await supabase.auth.admin.listUsers();
+          const existingUser = existingUsers?.users.find(u => u.email === email);
+          if (existingUser) {
+            console.log(`[Webhook] Found existing auth user: ${existingUser.id}`);
+            profileUserId = existingUser.id;
+          } else {
+            const error = `User exists but lookup failed`;
+            console.error(`[Webhook] ${error}`);
+            return { success: false, error };
+          }
+        } else {
+          const error = `Failed to create user: ${createError.message}`;
+          console.error(`[Webhook] ${error}`);
+          return { success: false, error };
+        }
+      } else if (!newUser.user) {
+        const error = `Failed to create user: Unknown error`;
         console.error(`[Webhook] ${error}`);
         return { success: false, error };
+      } else {
+        console.log(`[Webhook] Created new user: ${newUser.user.id}`);
+        profileUserId = newUser.user.id;
       }
-
-      console.log(`[Webhook] Created new user: ${newUser.user.id}`);
-      profileUserId = newUser.user.id;
     }
   }
 
@@ -372,45 +395,13 @@ async function sendWelcomeEmail(email: string, plan: MembershipPlan) {
       process.env.NEXT_PUBLIC_APP_URL ||
       "http://localhost:3000";
 
+    const emailTemplate = welcomeEmail(plan, appUrl);
     await resend.emails.send({
       from: RESEND_CONFIG.fromEmail,
       to: email,
       subject: "Your Solara Sanctuary membership is active",
-      html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #D4AF37; text-align: center;">Welcome to Solara</h1>
-
-          <p>Your ${plan === "family" ? "Family" : "Individual"} membership is now active.</p>
-
-          <p>Your 7-day free trial has begun. During this time, you'll have full access to:</p>
-
-          <ul>
-            <li>Daily, weekly, monthly, and yearly insights</li>
-            <li>Complete birth chart analysis</li>
-            <li>Relationship insights</li>
-            <li>Journaling with guided prompts</li>
-            ${plan === "family" ? "<li>Up to 5 family member profiles</li>" : ""}
-          </ul>
-
-          <p style="text-align: center; margin: 32px 0;">
-            <a
-              href="${appUrl}/welcome"
-              style="background-color: #D4AF37; color: #1A1A1A; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600;"
-            >
-              Finish setting up your Sanctuary
-            </a>
-          </p>
-
-          <p style="color: #666; font-size: 14px;">
-            A portion of your subscription supports families through the Solara Foundation.
-          </p>
-
-          <p style="color: #666; font-size: 14px;">
-            Stay luminous,<br />
-            The Solara Team
-          </p>
-        </div>
-      `,
+      html: emailTemplate.html,
+      text: emailTemplate.text,
     });
 
     console.log(`[Webhook] Welcome email sent to ${email}`);

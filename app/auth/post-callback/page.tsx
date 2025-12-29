@@ -7,6 +7,11 @@ import {
   getOauthAttempts,
   incrementOauthAttempts,
 } from "@/lib/auth/oauthSession";
+import {
+  getOauthConsent,
+  getOauthContext,
+  clearOauthContext,
+} from "@/lib/auth/socialConsent";
 
 /**
  * Check if a provider is already connected for Social Insights.
@@ -52,27 +57,37 @@ export default function PostCallbackPage() {
 
   useEffect(() => {
     async function handlePostCallback() {
-      // Read from sessionStorage
-      const storedNext = sessionStorage.getItem("oauth_next");
-      const postAction = sessionStorage.getItem("oauth_post_action");
+      // Read from sessionStorage (with cookie fallback via helper)
+      const context = getOauthContext();
+      const storedNext = context.next || sessionStorage.getItem("oauth_next");
+      const postAction = context.postAction || sessionStorage.getItem("oauth_post_action");
+      const provider = context.provider || (postAction?.startsWith("auto_connect:") ? postAction.replace("auto_connect:", "") : null);
       const attemptCount = getOauthAttempts();
 
       console.log(`[PostCallback] oauth_next: ${storedNext || "(not set)"}`);
       console.log(`[PostCallback] oauth_post_action: ${postAction || "(not set)"}`);
+      console.log(`[PostCallback] oauth_provider: ${provider || "(not set)"}`);
       console.log(`[PostCallback] oauth_connect_attempts: ${attemptCount}`);
 
-      // Clear immediately to prevent loops
+      // Check consent for the provider
+      const hasConsent = provider ? getOauthConsent(provider) : false;
+      console.log(`[PostCallback] consent for ${provider}: ${hasConsent}`);
+
+      // Clear OAuth context to prevent loops
       sessionStorage.removeItem("oauth_next");
       sessionStorage.removeItem("oauth_post_action");
+      if (provider) {
+        clearOauthContext(provider);
+      }
 
-      // Validate destination using shared helper
-      const destination = toSafeInternalPath(storedNext);
+      // Validate destination using shared helper (default to /onboarding)
+      const destination = toSafeInternalPath(storedNext, "/onboarding");
       console.log(`[PostCallback] Validated destination: ${destination}`);
 
-      // Check for auto-connect action
-      if (postAction && postAction.startsWith("auto_connect:")) {
-        const provider = postAction.replace("auto_connect:", "");
-        console.log(`[PostCallback] Auto-connect requested for provider: ${provider}`);
+      // Check for auto-connect action - ONLY if consent was given
+      if (hasConsent && postAction && postAction.startsWith("auto_connect:")) {
+        const connectProvider = postAction.replace("auto_connect:", "");
+        console.log(`[PostCallback] Auto-connect requested for provider: ${connectProvider} (consent: true)`);
 
         // Guard against infinite loops - max 1 attempt
         if (attemptCount >= 1) {
@@ -83,23 +98,23 @@ export default function PostCallbackPage() {
 
         // Check if already connected
         setStatus("Checking Social Insights...");
-        const alreadyConnected = await checkProviderConnected(provider);
+        const alreadyConnected = await checkProviderConnected(connectProvider);
 
         if (alreadyConnected) {
-          console.log(`[PostCallback] Provider ${provider} already connected, skipping auto-connect`);
+          console.log(`[PostCallback] Provider ${connectProvider} already connected, skipping auto-connect`);
           router.replace(destination);
           return;
         }
 
         // Not connected - trigger connect flow
-        console.log(`[PostCallback] Provider ${provider} not connected, redirecting to connect flow`);
+        console.log(`[PostCallback] Provider ${connectProvider} not connected, redirecting to connect flow`);
         setStatus("Connecting Social Insights...");
 
         // Increment attempt counter before redirecting
         incrementOauthAttempts();
 
         // Build connect URL with return_to pointing to final destination
-        const connectUrl = `/api/social/oauth/${provider}/connect?return_to=${encodeURIComponent(destination)}`;
+        const connectUrl = `/api/social/oauth/${connectProvider}/connect?return_to=${encodeURIComponent(destination)}`;
         console.log(`[PostCallback] Redirecting to: ${connectUrl}`);
 
         // Use window.location for full navigation (not router.push)
@@ -108,7 +123,10 @@ export default function PostCallbackPage() {
         return;
       }
 
-      // No auto-connect action, proceed to destination
+      // No auto-connect action (or consent not given), proceed to destination
+      if (!hasConsent && postAction) {
+        console.log(`[PostCallback] Consent not given, skipping auto-connect`);
+      }
       router.replace(destination);
     }
 

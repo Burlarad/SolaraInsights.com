@@ -16,20 +16,22 @@ import { createAdminSupabaseClient } from "@/lib/supabase/server";
 import { openai, OPENAI_MODELS } from "@/lib/openai/client";
 import { getTarotCardNames } from "@/lib/tarot";
 import { getRuneNames } from "@/lib/runes";
-import { getCache, setCache, acquireLock, releaseLock } from "@/lib/cache/redis";
+import { getCache, setCache, acquireLock, releaseLock, getDayKey } from "@/lib/cache/redis";
 import { buildInsightCacheKey, buildInsightLockKey } from "@/lib/timezone/periodKeys";
 import { toZonedTime, format } from "date-fns-tz";
 import { addDays } from "date-fns";
-import { SanctuaryInsight } from "@/types";
+import { SanctuaryInsight, Connection } from "@/types";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
 import { checkBudget, incrementBudget } from "@/lib/ai/costControl";
-import { AYREN_MODE_SHORT } from "@/lib/ai/voice";
+import { AYREN_MODE_SHORT, PRO_SOCIAL_NUDGE_INSTRUCTION, HUMOR_INSTRUCTION, LOW_SIGNAL_GUARDRAIL } from "@/lib/ai/voice";
 import { logTokenAudit } from "@/lib/ai/tokenAudit";
 import { isValidBirthTimezone } from "@/lib/location/detection";
 
 const PROMPT_VERSION = 2;
+const BRIEF_PROMPT_VERSION = 1; // Must match /api/connection-brief
 const PREWARM_WINDOW_HOURS = 3; // Pre-warm if within 3 hours of midnight
 const MAX_USERS_PER_RUN = 500; // Safety cap to avoid timeouts
+const BRIEF_ACTIVITY_WINDOW_DAYS = 3; // Only prewarm briefs for users active in last 3 days
 
 export async function GET(req: NextRequest) {
   // Auth: Check x-cron-secret header
@@ -50,6 +52,12 @@ export async function GET(req: NextRequest) {
     skippedLocked: 0,
     skippedInvalidTz: 0, // PR2: Users with missing/UTC timezone
     errors: 0,
+    // Connection brief stats
+    briefCandidates: 0, // Users eligible for brief prewarming (active in last 3 days)
+    briefsWarmed: 0,
+    briefsSkippedCached: 0,
+    briefsSkippedLocked: 0,
+    briefErrors: 0,
   };
 
   try {
@@ -326,6 +334,229 @@ LUCKY COMPASS RULES:
 
           stats.warmed++;
           console.log(`[Prewarm] ✓ Warmed insight for user ${userId} (${tomorrowPeriodKey})`);
+
+          // ========================================
+          // PREWARM CONNECTION BRIEFS
+          // Only for users active in last 3 days
+          // ========================================
+          const lastSeenAt = profile.last_seen_at ? new Date(profile.last_seen_at) : null;
+          const threeDaysAgo = new Date(Date.now() - BRIEF_ACTIVITY_WINDOW_DAYS * 24 * 60 * 60 * 1000);
+
+          if (lastSeenAt && lastSeenAt >= threeDaysAgo) {
+            stats.briefCandidates++;
+
+            // Load all connections for this user
+            const { data: connections } = await admin
+              .from("connections")
+              .select("id, name, relationship_type")
+              .eq("owner_user_id", userId);
+
+            if (connections && connections.length > 0) {
+              console.log(`[Prewarm] Processing ${connections.length} connection briefs for user ${userId}`);
+
+              // Calculate tomorrow's local date for briefs
+              const tomorrowLocalDate = format(tomorrow, "yyyy-MM-dd", { timeZone: timezone });
+
+              for (const connection of connections) {
+                try {
+                  // Check if brief already exists for tomorrow
+                  const { data: existingBrief } = await admin
+                    .from("daily_briefs")
+                    .select("id")
+                    .eq("connection_id", connection.id)
+                    .eq("local_date", tomorrowLocalDate)
+                    .eq("language", language)
+                    .eq("prompt_version", BRIEF_PROMPT_VERSION)
+                    .single();
+
+                  if (existingBrief) {
+                    stats.briefsSkippedCached++;
+                    continue;
+                  }
+
+                  // Try to acquire lock for this brief
+                  const briefLockKey = `lock:dailybrief:v${BRIEF_PROMPT_VERSION}:${connection.id}:${tomorrowLocalDate}:${language}`;
+                  const briefLockAcquired = await acquireLock(briefLockKey, 60);
+
+                  if (!briefLockAcquired) {
+                    stats.briefsSkippedLocked++;
+                    continue;
+                  }
+
+                  try {
+                    // Budget check before each brief
+                    const briefBudgetCheck = await checkBudget();
+                    if (!briefBudgetCheck.allowed) {
+                      console.warn(`[Prewarm] Budget exceeded during brief generation, stopping`);
+                      await releaseLock(briefLockKey);
+                      break; // Stop all brief generation for this user
+                    }
+
+                    // Generate brief using same logic as /api/connection-brief
+                    const getToneGuidance = (type: string): string => {
+                      const t = type.toLowerCase();
+                      if (t === "partner") {
+                        return "Warm, affectionate tone is appropriate. May reference closeness and partnership.";
+                      } else if (t === "friend" || t === "colleague") {
+                        return "Warm, platonic tone. Never romance-coded. Focus on mutual support and camaraderie.";
+                      } else if (t === "parent" || t === "child" || t === "sibling") {
+                        return "Family-appropriate tone. Focus on unconditional bonds and care.";
+                      }
+                      return "Warm, neutral tone. Default to friend-safe content.";
+                    };
+
+                    const toneGuidance = getToneGuidance(connection.relationship_type);
+                    const connectionName = connection.name;
+
+                    const briefSystemPrompt = `${AYREN_MODE_SHORT}
+${PRO_SOCIAL_NUDGE_INSTRUCTION}
+${HUMOR_INSTRUCTION}
+${LOW_SIGNAL_GUARDRAIL}
+
+You are generating a DAILY CONNECTION BRIEF - a light, general "weather report" for the connection today.
+
+CONTEXT:
+This is a ${connection.relationship_type} connection with ${connectionName}.
+
+TONE GUIDANCE:
+${toneGuidance}
+
+NAMING RULES (STRICT):
+- Always use "you" when referring to the person reading this
+- Always use "${connectionName}" when referring to the other person
+- NEVER use "Person 1", "Person 2", or any impersonal labels
+- Use "you and ${connectionName}" phrasing throughout
+
+SAFETY RULES (STRICT):
+- This is a GENERAL "weather report" - NOT a detailed analysis
+- Never claim to know ${connectionName}'s private thoughts or feelings
+- Never be creepy, coercive, or manipulative
+- Never give advice to manipulate or trigger ${connectionName}
+- Keep it uplifting and general
+- Use "may," "might," "could" — not "will" or "is"
+
+OUTPUT FORMAT:
+Return ONLY valid JSON:
+{
+  "title": "Today with ${connectionName}",
+  "shared_vibe": "2-4 sentences describing the shared energy today. General, warm, non-invasive. Like a weather report for the connection.",
+  "ways_to_show_up": [
+    "Action-verb bullet 1 (e.g., 'Listen for what isn't being said')",
+    "Action-verb bullet 2 (e.g., 'Share a small appreciation')",
+    "Action-verb bullet 3 (e.g., 'Give space when needed')"
+  ],
+  "nudge": "Optional single line micro-nudge, or null if not needed. Must be gentle, never pushy."
+}`;
+
+                    const briefUserPrompt = `Generate a daily connection brief for ${connectionName} (${connection.relationship_type}).
+
+The brief should feel like a gentle morning weather report for the connection - light, warm, and supportive.
+
+Ways to show up bullets must:
+- Start with an action verb
+- Be completable in 10 minutes or less
+- Be appropriate for a ${connection.relationship_type} relationship
+
+Return the JSON object now.`;
+
+                    const briefCompletion = await openai.chat.completions.create({
+                      model: OPENAI_MODELS.connectionBrief,
+                      messages: [
+                        { role: "system", content: briefSystemPrompt },
+                        { role: "user", content: briefUserPrompt },
+                      ],
+                      temperature: 0.75,
+                      response_format: { type: "json_object" },
+                    });
+
+                    const briefResponseContent = briefCompletion.choices[0]?.message?.content;
+
+                    if (!briefResponseContent) {
+                      throw new Error("No response from OpenAI for brief");
+                    }
+
+                    // Track usage
+                    void trackAiUsage({
+                      featureLabel: "Connections • Daily Brief (Prewarm)",
+                      route: "/api/cron/prewarm-insights",
+                      model: OPENAI_MODELS.connectionBrief,
+                      promptVersion: BRIEF_PROMPT_VERSION,
+                      cacheStatus: "miss",
+                      inputTokens: briefCompletion.usage?.prompt_tokens || 0,
+                      outputTokens: briefCompletion.usage?.completion_tokens || 0,
+                      totalTokens: briefCompletion.usage?.total_tokens || 0,
+                      userId,
+                      timeframe: "today",
+                      periodKey: tomorrowLocalDate,
+                      language,
+                      timezone,
+                    });
+
+                    void incrementBudget(
+                      OPENAI_MODELS.connectionBrief,
+                      briefCompletion.usage?.prompt_tokens || 0,
+                      briefCompletion.usage?.completion_tokens || 0
+                    );
+
+                    logTokenAudit({
+                      route: "/api/cron/prewarm-insights",
+                      featureLabel: "Connections • Daily Brief (Prewarm)",
+                      model: OPENAI_MODELS.connectionBrief,
+                      cacheStatus: "miss",
+                      promptVersion: BRIEF_PROMPT_VERSION,
+                      inputTokens: briefCompletion.usage?.prompt_tokens || 0,
+                      outputTokens: briefCompletion.usage?.completion_tokens || 0,
+                      language,
+                      timeframe: "today",
+                    });
+
+                    // Parse response
+                    const briefContent = JSON.parse(briefResponseContent);
+
+                    // Validate required fields
+                    if (!briefContent.title || !briefContent.shared_vibe || !Array.isArray(briefContent.ways_to_show_up)) {
+                      throw new Error("Missing required fields in brief AI response");
+                    }
+
+                    // Ensure exactly 3 ways_to_show_up
+                    while (briefContent.ways_to_show_up.length < 3) {
+                      briefContent.ways_to_show_up.push("Be present and attentive");
+                    }
+                    briefContent.ways_to_show_up = briefContent.ways_to_show_up.slice(0, 3);
+
+                    // Save to database
+                    const { error: saveError } = await admin
+                      .from("daily_briefs")
+                      .insert({
+                        connection_id: connection.id,
+                        owner_user_id: userId,
+                        local_date: tomorrowLocalDate,
+                        language,
+                        prompt_version: BRIEF_PROMPT_VERSION,
+                        model_version: OPENAI_MODELS.connectionBrief,
+                        title: briefContent.title,
+                        shared_vibe: briefContent.shared_vibe,
+                        ways_to_show_up: briefContent.ways_to_show_up,
+                        nudge: briefContent.nudge || null,
+                      });
+
+                    if (saveError) {
+                      console.error(`[Prewarm] Failed to save brief for connection ${connection.id}:`, saveError.message);
+                    } else {
+                      stats.briefsWarmed++;
+                    }
+                  } finally {
+                    await releaseLock(briefLockKey);
+                  }
+                } catch (briefError: any) {
+                  console.error(`[Prewarm] Brief generation failed for connection ${connection.id}:`, briefError.message);
+                  stats.briefErrors++;
+                }
+              }
+
+              console.log(`[Prewarm] Generated ${stats.briefsWarmed} briefs for user ${userId}`);
+            }
+          }
         } catch (genError: any) {
           console.error(`[Prewarm] Generation failed for user ${userId}:`, genError.message);
           stats.errors++;
@@ -343,6 +574,13 @@ LUCKY COMPASS RULES:
     if (stats.skippedInvalidTz > 0) {
       console.log(
         `[Prewarm] Note: ${stats.skippedInvalidTz} users skipped due to missing/UTC timezone (need to update birth location)`
+      );
+    }
+
+    // Log brief stats separately for clarity
+    if (stats.briefCandidates > 0) {
+      console.log(
+        `[Prewarm] Connection briefs: ${stats.briefsWarmed} warmed, ${stats.briefsSkippedCached} cached, ${stats.briefsSkippedLocked} locked, ${stats.briefErrors} errors`
       );
     }
 

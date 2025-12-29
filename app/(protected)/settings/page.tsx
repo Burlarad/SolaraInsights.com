@@ -18,9 +18,14 @@ import { useSettings } from "@/providers/SettingsProvider";
 import { PlacePicker, PlaceSelection } from "@/components/shared/PlacePicker";
 import { SocialProvider } from "@/types";
 import { supabase } from "@/lib/supabase/client";
-import { hasPasswordCredential, getPrimaryOAuthProvider } from "@/lib/auth/helpers";
+import { hasPasswordCredential, getPrimaryOAuthProvider, getPrimaryProvider, isCustomOAuthUser } from "@/lib/auth/helpers";
+import { hasPlaceholderEmail } from "@/lib/auth/placeholder";
 
 // Social provider configuration for display
+// X OAuth disabled - requires X Basic tier ($100/mo) for /users/me endpoint
+// To re-enable: set NEXT_PUBLIC_X_OAUTH_ENABLED=true in .env/.env.local
+const isXEnabled = process.env.NEXT_PUBLIC_X_OAUTH_ENABLED === "true";
+
 const SOCIAL_PROVIDERS: {
   id: SocialProvider;
   name: string;
@@ -31,7 +36,7 @@ const SOCIAL_PROVIDERS: {
   { id: "facebook", name: "Facebook", color: "#1877F2", letter: "F", enabled: true },
   { id: "instagram", name: "Instagram", color: "#E4405F", letter: "I", enabled: false },
   { id: "tiktok", name: "TikTok", color: "#000000", letter: "T", enabled: true },
-  { id: "x", name: "X (Twitter)", color: "#000000", letter: "X", enabled: false },
+  { id: "x", name: "X (Twitter)", color: "#000000", letter: "X", enabled: isXEnabled },
   { id: "reddit", name: "Reddit", color: "#FF4500", letter: "R", enabled: false },
 ];
 
@@ -59,6 +64,7 @@ export default function SettingsPage() {
   const [userHasPassword, setUserHasPassword] = useState(true); // Default to true until loaded
   const [primaryOAuthProvider, setPrimaryOAuthProvider] = useState<string | null>(null);
   const [authTypeLoading, setAuthTypeLoading] = useState(true);
+  const [userHasPlaceholderEmail, setUserHasPlaceholderEmail] = useState(false);
 
   // Reauth state
   const [isReauthenticating, setIsReauthenticating] = useState(false);
@@ -135,8 +141,11 @@ export default function SettingsPage() {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         setUserHasPassword(hasPasswordCredential(user));
-        setPrimaryOAuthProvider(getPrimaryOAuthProvider(user));
+        // Use getPrimaryProvider which includes custom OAuth (TikTok)
+        setPrimaryOAuthProvider(getPrimaryProvider(user));
         setUserEmail(user?.email || "");
+        // Check if user has placeholder email (TikTok users)
+        setUserHasPlaceholderEmail(hasPlaceholderEmail(user));
       } catch (err) {
         console.error("Failed to detect auth type:", err);
       } finally {
@@ -146,19 +155,105 @@ export default function SettingsPage() {
     detectAuthType();
   }, []);
 
-  // Handle reauth_success query param - auto-open modal after successful reauth
+  // Handle reauth_success query param - auto-execute action after successful OAuth reauth
+  // User already typed DELETE/HIBERNATE and authenticated with OAuth before redirect
+  // Server verifies reauth_ok cookie, so we can proceed immediately
   useEffect(() => {
     const reauthSuccess = searchParams.get("reauth_success");
-    if (reauthSuccess === "delete") {
+
+    const executePostReauthDelete = async () => {
       setShowDeleteModal(true);
-      // Clear attempt counter on successful reauth
+      setIsDeleting(true);
+      setDeleteError(null);
       sessionStorage.removeItem("oauth_reauth_attempts_delete");
-    } else if (reauthSuccess === "hibernate") {
+
+      try {
+        const response = await fetch("/api/account/delete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            // No password for OAuth users, confirmText already validated pre-OAuth
+            confirmText: "DELETE",
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          if (data.error === "ReauthRequired") {
+            setDeleteError("Your verification has expired. Please verify again.");
+            setIsDeleting(false);
+            return;
+          }
+          throw new Error(data.message || "Failed to delete account");
+        }
+
+        // Sign out and redirect
+        try {
+          await supabase.auth.signOut();
+        } catch (signOutError) {
+          console.error("[Delete Account] SignOut failed:", signOutError);
+        }
+
+        window.location.href = "/?deleted=true";
+      } catch (err: any) {
+        setDeleteError(err.message || "Failed to delete account");
+        setIsDeleting(false);
+      }
+    };
+
+    const executePostReauthHibernate = async () => {
       setShowHibernateModal(true);
+      setIsHibernating(true);
+      setHibernateError(null);
       sessionStorage.removeItem("oauth_reauth_attempts_hibernate");
+
+      try {
+        const response = await fetch("/api/account/hibernate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            // No password for OAuth users, confirmText already validated pre-OAuth
+            confirmText: "HIBERNATE",
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          if (data.error === "ReauthRequired") {
+            setHibernateError("Your verification has expired. Please verify again.");
+            setIsHibernating(false);
+            return;
+          }
+          throw new Error(data.message || "Failed to hibernate account");
+        }
+
+        // Redirect to welcome page with hibernated param
+        window.location.href = "/welcome?hibernated=true";
+      } catch (err: any) {
+        setHibernateError(err.message || "Failed to hibernate account");
+        setIsHibernating(false);
+      }
+    };
+
+    if (reauthSuccess === "delete") {
+      executePostReauthDelete();
+    } else if (reauthSuccess === "hibernate") {
+      executePostReauthHibernate();
     }
-    // Note: We don't clear query param from URL - we use it to know reauth was successful
   }, [searchParams]);
+
+  // Handle refresh=1 query param - refresh data and clean URL
+  useEffect(() => {
+    const shouldRefresh = searchParams.get("refresh") === "1";
+    if (shouldRefresh) {
+      // Refresh profile data
+      refreshProfile();
+      // Clean URL by removing refresh param
+      router.replace("/settings");
+    }
+  }, [searchParams, refreshProfile, router]);
 
   // Load profile data into form fields
   useEffect(() => {
@@ -446,7 +541,13 @@ export default function SettingsPage() {
     setPasswordUpdateSuccess(null);
 
     try {
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      // Update password AND set has_password metadata flag
+      // The metadata flag is needed for OAuth users who add a password
+      // (they don't have an "email" identity, only the OAuth identity)
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+        data: { has_password: true },
+      });
 
       if (error) {
         throw error;
@@ -616,6 +717,14 @@ export default function SettingsPage() {
 
       // Clear attempt counter on success
       sessionStorage.removeItem("oauth_reauth_attempts_delete");
+
+      // Sign out to clear session cookies before redirecting
+      try {
+        await supabase.auth.signOut();
+      } catch (signOutError) {
+        console.error("[Delete Account] SignOut failed:", signOutError);
+        // Continue with redirect even if signOut fails
+      }
 
       // Redirect to home page after deletion
       window.location.href = "/?deleted=true";
@@ -859,30 +968,59 @@ export default function SettingsPage() {
 
             <div className="space-y-3">
               <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={userEmail || profile.email}
-                disabled
-                className="bg-gray-50"
-              />
-              <div className="flex gap-2">
-                <Input
-                  type="email"
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                  placeholder="Enter new email address"
-                  className="flex-1"
-                />
-                <Button
-                  variant="outline"
-                  onClick={handleUpdateEmail}
-                  disabled={isUpdatingEmail || !newEmail}
-                  className="min-h-[44px]"
-                >
-                  {isUpdatingEmail ? "Updating..." : "Update"}
-                </Button>
-              </div>
+              {userHasPlaceholderEmail ? (
+                <>
+                  {/* Placeholder email users - show "Add email" prompt */}
+                  <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-800">
+                    Add a real email address to receive updates and enable password reset.
+                  </div>
+                  <div className="flex gap-2">
+                    <Input
+                      type="email"
+                      value={newEmail}
+                      onChange={(e) => setNewEmail(e.target.value)}
+                      placeholder="Enter your email address"
+                      className="flex-1"
+                    />
+                    <Button
+                      variant="gold"
+                      onClick={handleUpdateEmail}
+                      disabled={isUpdatingEmail || !newEmail}
+                      className="min-h-[44px]"
+                    >
+                      {isUpdatingEmail ? "Adding..." : "Add email"}
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Normal users - show current email and update option */}
+                  <Input
+                    id="email"
+                    type="email"
+                    value={userEmail || profile.email}
+                    disabled
+                    className="bg-gray-50"
+                  />
+                  <div className="flex gap-2">
+                    <Input
+                      type="email"
+                      value={newEmail}
+                      onChange={(e) => setNewEmail(e.target.value)}
+                      placeholder="Enter new email address"
+                      className="flex-1"
+                    />
+                    <Button
+                      variant="outline"
+                      onClick={handleUpdateEmail}
+                      disabled={isUpdatingEmail || !newEmail}
+                      className="min-h-[44px]"
+                    >
+                      {isUpdatingEmail ? "Updating..." : "Update"}
+                    </Button>
+                  </div>
+                </>
+              )}
               {emailUpdateSuccess && (
                 <p className="text-xs text-green-600">{emailUpdateSuccess}</p>
               )}
@@ -930,6 +1068,17 @@ export default function SettingsPage() {
 
             {authTypeLoading ? (
               <p className="text-sm text-accent-ink/60">Loading...</p>
+            ) : userHasPlaceholderEmail ? (
+              // Placeholder email users (TikTok): must add email first
+              <div className="space-y-4 max-w-md">
+                <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-800">
+                  Add a real email address above before creating a password.
+                </div>
+                <p className="text-sm text-accent-ink/70 leading-relaxed">
+                  You signed in with {primaryOAuthProvider ? primaryOAuthProvider.charAt(0).toUpperCase() + primaryOAuthProvider.slice(1) : "a social account"}.
+                  Once you add an email, you can create a password to sign in with email.
+                </p>
+              </div>
             ) : userHasPassword ? (
               // Password users: show change password form
               <div className="space-y-5 max-w-md">
@@ -975,7 +1124,7 @@ export default function SettingsPage() {
                 </p>
               </div>
             ) : (
-              // OAuth-only users: show create password option
+              // OAuth-only users with real email: show create password option
               <div className="space-y-5 max-w-md">
                 <p className="text-sm text-accent-ink/70 leading-relaxed">
                   You signed up with {primaryOAuthProvider ? primaryOAuthProvider.charAt(0).toUpperCase() + primaryOAuthProvider.slice(1) : "a social account"}.

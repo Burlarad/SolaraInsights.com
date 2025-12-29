@@ -100,6 +100,12 @@ export async function exchangeCodeForTokens(
     clientSecret,
   });
 
+  if (process.env.OAUTH_DEBUG_LOGS === "true") {
+    console.log(`[OAuth] Token exchange for ${provider}:`);
+    console.log(`[OAuth]   - tokenUrl: ${adapter.tokenUrl}`);
+    console.log(`[OAuth]   - redirectUri: ${redirectUri}`);
+  }
+
   const response = await fetch(adapter.tokenUrl, {
     method: "POST",
     headers,
@@ -108,7 +114,7 @@ export async function exchangeCodeForTokens(
 
   if (!response.ok) {
     const error = await response.text();
-    console.error(`[OAuth] Token exchange failed for ${provider}:`, error);
+    console.error(`[OAuth] Token exchange failed for ${provider}: ${response.status}`);
     throw new Error(`Failed to exchange code for tokens: ${error}`);
   }
 
@@ -119,9 +125,7 @@ export async function exchangeCodeForTokens(
   let userId = tokens.userId;
 
   if (!userId && adapter.fetchUserId) {
-    console.log(`[OAuth] Fetching userId for ${provider} via API...`);
     userId = await adapter.fetchUserId(tokens.accessToken);
-    console.log(`[OAuth] Fetched userId for ${provider}: present=${!!userId}`);
   }
 
   // userId is required for DB storage (external_user_id NOT NULL)

@@ -74,6 +74,7 @@ export async function GET(req: NextRequest) {
       flow: string;
       timestamp: number;
       returnTo: string;
+      checkoutSessionId: string | null; // Preserved from OAuth initiation
     };
 
     try {
@@ -214,12 +215,23 @@ export async function GET(req: NextRequest) {
       if (debug) console.log(`[TikTok Login] [${requestId}] Profile created`);
     }
 
-    // Claim Stripe checkout session if cookie exists (links payment to this user by ID)
-    const checkoutCookie = cookieStore.get("solara_checkout_session");
-    if (checkoutCookie?.value?.startsWith("cs_")) {
-      console.log(`[TikTok Login] [${requestId}] Found checkout session cookie, claiming...`);
-      const claimResult = await claimCheckoutSession(checkoutCookie.value, userId, admin);
+    // Claim Stripe checkout session if preserved in state (links payment to this user by ID)
+    // NOTE: We read from state instead of cookie because client-set cookies may not survive
+    // cross-site redirects from TikTok back to our domain (SameSite issues)
+    const checkoutSessionId = storedState.checkoutSessionId;
+    let checkoutClaimed = false; // Track if claim succeeded for cookie clearing
+    if (checkoutSessionId?.startsWith("cs_")) {
+      console.log(`[TikTok Login] [${requestId}] Found checkout session in state: ${checkoutSessionId.slice(0, 20)}...`);
+      const claimResult = await claimCheckoutSession(checkoutSessionId, userId, admin);
       console.log(`[TikTok Login] [${requestId}] Claim result: ${JSON.stringify(claimResult)}`);
+      checkoutClaimed = claimResult.claimed;
+
+      if (!claimResult.claimed) {
+        console.warn(`[TikTok Login] [${requestId}] Checkout claim failed: ${claimResult.reason}`);
+        // Continue anyway - Stripe webhook may still process it, and /onboarding will poll
+      }
+    } else {
+      console.log(`[TikTok Login] [${requestId}] No checkout session in state (user may have existing membership)`);
     }
 
     // Only store tokens and enable social insights if user consented
@@ -350,12 +362,15 @@ export async function GET(req: NextRequest) {
 
     const response = NextResponse.redirect(redirectUrl);
 
-    // Clear checkout session cookie (it's been claimed or doesn't exist)
-    response.cookies.set("solara_checkout_session", "", {
-      path: "/",
-      maxAge: 0,
-      expires: new Date(0),
-    });
+    // Only clear checkout session cookie if claim succeeded
+    // If claim failed, preserve cookie so onboarding can poll and retry
+    if (checkoutClaimed) {
+      response.cookies.set("solara_checkout_session", "", {
+        path: "/",
+        maxAge: 0,
+        expires: new Date(0),
+      });
+    }
 
     return response;
   } catch (error: any) {

@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { openai, OPENAI_MODELS } from "@/lib/openai/client";
 import { PublicHoroscopeResponse } from "@/types";
-import { getCache, setCache, getDayKey } from "@/lib/cache";
-import { acquireLockFailClosed, releaseLock, REDIS_UNAVAILABLE_RESPONSE } from "@/lib/cache/redis";
+import { getCache, setCache, getDayKey, acquireLockFailClosed, releaseLock, REDIS_UNAVAILABLE_RESPONSE } from "@/lib/cache/redis";
 import { checkRateLimit, checkBurstLimit, getClientIP, createRateLimitResponse } from "@/lib/cache/rateLimit";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
 import { checkBudget, incrementBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai/costControl";

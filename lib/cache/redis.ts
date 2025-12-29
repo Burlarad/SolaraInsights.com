@@ -246,3 +246,103 @@ export const REDIS_UNAVAILABLE_RESPONSE = {
   error: "Service unavailable",
   message: "Please try again in a moment.",
 };
+
+// ========================================
+// Period Key Helpers (timezone-aware cache keys)
+// ========================================
+
+/**
+ * Convert a Date to a local date string in a given timezone.
+ * Returns YYYY-MM-DD format.
+ */
+function toLocalDateString(date: Date, timezone: string): string {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: timezone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  return formatter.format(date);
+}
+
+/**
+ * Get the ISO week number (Monday start) for a date in a given timezone.
+ * Returns "YYYY-Www" (e.g., "2025-W12").
+ */
+function toLocalWeekString(date: Date, timezone: string): string {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: timezone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+
+  const year = parseInt(parts.find((p) => p.type === "year")?.value || "0");
+  const month = parseInt(parts.find((p) => p.type === "month")?.value || "0");
+  const day = parseInt(parts.find((p) => p.type === "day")?.value || "0");
+
+  const localDate = new Date(year, month - 1, day);
+  const startOfYear = new Date(year, 0, 1);
+  const dayOfYear = Math.floor((localDate.getTime() - startOfYear.getTime()) / 86400000) + 1;
+  const dayOfWeek = localDate.getDay() || 7;
+  const weekNumber = Math.ceil((dayOfYear - dayOfWeek + 10) / 7);
+
+  return `${year}-W${String(weekNumber).padStart(2, "0")}`;
+}
+
+/**
+ * Get the local month string for a date in a given timezone.
+ * Returns "YYYY-MM" (e.g., "2025-03").
+ */
+function toLocalMonthString(date: Date, timezone: string): string {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: timezone,
+    year: "numeric",
+    month: "2-digit",
+  });
+  return formatter.format(date);
+}
+
+/**
+ * Get the local year string for a date in a given timezone.
+ * Returns "YYYY" (e.g., "2025").
+ */
+function toLocalYearString(date: Date, timezone: string): string {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: timezone,
+    year: "numeric",
+  });
+  return formatter.format(date);
+}
+
+/**
+ * Get a cache key for a specific day in a timezone.
+ * Example: "day:2025-03-15"
+ */
+export function getDayKey(timezone: string, date: Date = new Date()): string {
+  return `day:${toLocalDateString(date, timezone)}`;
+}
+
+/**
+ * Get a cache key for a specific week in a timezone.
+ * Example: "week:2025-W12"
+ */
+export function getWeekKey(timezone: string, date: Date = new Date()): string {
+  return `week:${toLocalWeekString(date, timezone)}`;
+}
+
+/**
+ * Get a cache key for a specific month in a timezone.
+ * Example: "month:2025-03"
+ */
+export function getMonthKey(timezone: string, date: Date = new Date()): string {
+  return `month:${toLocalMonthString(date, timezone)}`;
+}
+
+/**
+ * Get a cache key for a specific year in a timezone.
+ * Example: "year:2025"
+ */
+export function getYearKey(timezone: string, date: Date = new Date()): string {
+  return `year:${toLocalYearString(date, timezone)}`;
+}

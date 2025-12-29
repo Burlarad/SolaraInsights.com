@@ -96,8 +96,10 @@ function ResetPasswordContent() {
 
     try {
       // Update the user's password using the recovery session
+      // Also set has_password metadata flag to ensure hasPasswordCredential() returns true
       const { data, error: updateError } = await supabase.auth.updateUser({
         password: newPassword,
+        data: { has_password: true },
       });
 
       if (updateError) {

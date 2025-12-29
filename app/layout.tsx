@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Crimson_Pro } from "next/font/google";
 import { SettingsProvider } from "@/providers/SettingsProvider";
+import { HashTokenHandler } from "@/components/auth/HashTokenHandler";
 import "./globals.css";
 
 const inter = Inter({
@@ -32,7 +33,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${crimsonPro.variable}`}>
       <body>
-        <SettingsProvider>{children}</SettingsProvider>
+        <SettingsProvider>
+          <HashTokenHandler />
+          {children}
+        </SettingsProvider>
       </body>
     </html>
   );

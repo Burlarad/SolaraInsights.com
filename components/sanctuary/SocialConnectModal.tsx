@@ -15,6 +15,8 @@ import { SocialProvider } from "@/types";
 import { cn } from "@/lib/utils";
 
 // Provider configuration (only connectable ones)
+// Note: X OAuth disabled - requires X Basic tier ($100/mo) for /users/me endpoint
+// The API filters by isConfigured, so X won't show when X_OAUTH_ENABLED=false
 const PROVIDERS: {
   id: SocialProvider;
   name: string;

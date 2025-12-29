@@ -5,6 +5,8 @@ import { decryptToken, encryptToken } from "@/lib/social/crypto";
 import { refreshAccessToken } from "@/lib/social/oauth";
 import { fetchSocialContent } from "@/lib/social/fetchers";
 import { generateSocialSummary } from "@/lib/social/summarize";
+import { checkBudget, incrementBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai/costControl";
+import { OPENAI_MODELS } from "@/lib/openai/client";
 
 /**
  * POST /api/social/sync
@@ -188,6 +190,16 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // Check budget before generating AI summary
+    const budgetCheck = await checkBudget();
+    if (!budgetCheck.allowed) {
+      console.warn(`[SocialSync] Budget exceeded for ${provider}, skipping AI summary`);
+      return NextResponse.json(
+        { error: "Service temporarily unavailable", code: "BUDGET_EXCEEDED" },
+        { status: 503 }
+      );
+    }
+
     // Generate AI summary
     let summaryResult;
     try {
@@ -196,6 +208,9 @@ export async function POST(req: NextRequest) {
         fetchedContent.content,
         fetchedContent.handle || undefined
       );
+
+      // Increment budget after successful generation
+      await incrementBudget(OPENAI_MODELS.fast, summaryResult.inputTokens, summaryResult.outputTokens);
     } catch (summaryErr: any) {
       console.error("[SocialSync] Summary generation failed:", summaryErr.message);
 

@@ -186,15 +186,17 @@ function SignInContent() {
               T
             </button>
 
-            {/* X/Twitter - Stub (TODO) */}
+            {/* X OAuth disabled - requires X Basic tier ($100/mo)
+                To re-enable: uncomment this and set X_OAUTH_ENABLED=true
             <button
               type="button"
-              onClick={() => setError("X sign-in coming soon")}
+              onClick={() => handleProviderClick("x")}
               className="w-12 h-12 rounded-full bg-black hover:bg-gray-800 transition-colors flex items-center justify-center text-white font-semibold"
-              title="Sign in with X (Coming Soon)"
+              title="Sign in with X"
             >
               X
             </button>
+            */}
 
             {/* Reddit - Stub (TODO) */}
             <button

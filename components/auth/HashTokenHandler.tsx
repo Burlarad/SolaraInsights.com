@@ -48,28 +48,45 @@ export function HashTokenHandler() {
     console.log("[HashTokenHandler] Detected access_token in URL hash on:", pathname);
     setProcessing(true);
 
-    // Parse the hash fragment
+    // Parse ALL tokens from the hash fragment
     const hashParams = new URLSearchParams(hash.substring(1));
-    const accessToken = hashParams.get("access_token");
+    const access_token = hashParams.get("access_token");
+    const refresh_token = hashParams.get("refresh_token");
 
-    if (!accessToken) {
-      console.error("[HashTokenHandler] No access_token found in hash");
+    // Both tokens are required to establish a session
+    if (!access_token || !refresh_token) {
+      console.error("[HashTokenHandler] Missing required tokens in hash", {
+        hasAccessToken: !!access_token,
+        hasRefreshToken: !!refresh_token,
+      });
+      window.history.replaceState(null, "", pathname);
+      router.push("/sign-in?error=auth_failed");
       setProcessing(false);
       return;
     }
 
-    // Let Supabase handle the session from the hash
+    // Explicitly set the session using parsed tokens
     const handleHashTokens = async () => {
       try {
-        // Wait a moment for Supabase to process the hash tokens
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        console.log("[HashTokenHandler] Calling setSession with parsed tokens...");
 
-        // Check if we now have a session
-        const { data: { user }, error } = await supabase.auth.getUser();
+        // EXPLICITLY set the session - don't rely on auto-detection
+        const { data, error: sessionError } = await supabase.auth.setSession({
+          access_token,
+          refresh_token,
+        });
 
-        if (error || !user) {
-          console.error("[HashTokenHandler] Failed to get user after hash processing:", error?.message);
-          // Clear the hash and redirect to sign-in
+        if (sessionError) {
+          console.error("[HashTokenHandler] setSession failed:", sessionError.message);
+          window.history.replaceState(null, "", pathname);
+          router.push("/sign-in?error=auth_failed");
+          return;
+        }
+
+        const user = data.user;
+
+        if (!user) {
+          console.error("[HashTokenHandler] No user returned from setSession");
           window.history.replaceState(null, "", pathname);
           router.push("/sign-in?error=auth_failed");
           return;

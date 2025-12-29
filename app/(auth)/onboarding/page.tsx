@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,10 +9,15 @@ import { Button } from "@/components/ui/button";
 import { useSettings } from "@/providers/SettingsProvider";
 import { PlacePicker, PlaceSelection } from "@/components/shared/PlacePicker";
 import { hasActiveMembership } from "@/lib/membership/status";
+import {
+  hasCheckoutSessionCookie,
+  getCheckoutSessionId,
+  clearCheckoutSessionCookie,
+} from "@/lib/auth/socialConsent";
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { profile, loading: profileLoading, saveProfile } = useSettings();
+  const { profile, loading: profileLoading, saveProfile, refreshProfile } = useSettings();
 
   // Form state - split name fields
   const [firstName, setFirstName] = useState("");
@@ -28,6 +33,46 @@ export default function OnboardingPage() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Payment waiting state (for webhook race condition)
+  const [isWaitingForPayment, setIsWaitingForPayment] = useState(false);
+  const [paymentTimedOut, setPaymentTimedOut] = useState(false);
+  const [claimAttempted, setClaimAttempted] = useState(false);
+
+  // Try claiming checkout session immediately on mount (fallback if callback claim failed)
+  useEffect(() => {
+    const tryClaimSession = async () => {
+      const sessionId = getCheckoutSessionId();
+      if (!sessionId || claimAttempted) return;
+
+      setClaimAttempted(true);
+      console.log("[Onboarding] Attempting to claim checkout session:", sessionId.slice(0, 10) + "...");
+
+      try {
+        const res = await fetch("/api/stripe/claim-session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sessionId }),
+        });
+
+        const result = await res.json();
+        console.log("[Onboarding] Claim result:", result);
+
+        if (result.success && result.claimed) {
+          // Session claimed successfully - refresh profile to get updated membership
+          clearCheckoutSessionCookie();
+          if (refreshProfile) {
+            await refreshProfile();
+          }
+        }
+      } catch (err) {
+        console.error("[Onboarding] Claim attempt failed:", err);
+        // Will fall back to polling
+      }
+    };
+
+    tryClaimSession();
+  }, [claimAttempted, refreshProfile]);
 
   // Initialize form with existing profile data
   useEffect(() => {
@@ -67,18 +112,61 @@ export default function OnboardingPage() {
   // Check membership and onboarding status
   useEffect(() => {
     if (!profileLoading && profile) {
-      if (!hasActiveMembership(profile)) {
-        // No active membership - redirect to join
-        router.push("/join");
+      // Already onboarded - redirect to sanctuary
+      if (profile.is_onboarded) {
+        router.push("/sanctuary");
         return;
       }
 
-      if (profile.is_onboarded) {
-        // Already onboarded - redirect to sanctuary
-        router.push("/sanctuary");
+      // Check if user has active membership
+      if (hasActiveMembership(profile)) {
+        // Clear checkout cookie since membership is now active
+        clearCheckoutSessionCookie();
+        setIsWaitingForPayment(false);
+        return; // Proceed with onboarding form
+      }
+
+      // No active membership - check if we should wait for webhook
+      if (hasCheckoutSessionCookie()) {
+        // User just came from checkout - wait for webhook to process
+        setIsWaitingForPayment(true);
+      } else if (!isWaitingForPayment) {
+        // No checkout session and not already waiting - redirect to join
+        router.push("/join");
       }
     }
-  }, [profile, profileLoading, router]);
+  }, [profile, profileLoading, router, isWaitingForPayment]);
+
+  // Poll for membership activation while waiting for payment
+  useEffect(() => {
+    if (!isWaitingForPayment || paymentTimedOut) return;
+
+    const startTime = Date.now();
+    const maxWaitTime = 30000; // 30 seconds
+    const pollInterval = 2000; // 2 seconds
+
+    const pollForMembership = async () => {
+      const elapsed = Date.now() - startTime;
+
+      if (elapsed >= maxWaitTime) {
+        // Timeout - redirect to join with message
+        setPaymentTimedOut(true);
+        setIsWaitingForPayment(false);
+        clearCheckoutSessionCookie();
+        router.push("/join?error=payment_pending");
+        return;
+      }
+
+      // Refresh profile to check for membership
+      if (refreshProfile) {
+        await refreshProfile();
+      }
+    };
+
+    const timer = setInterval(pollForMembership, pollInterval);
+
+    return () => clearInterval(timer);
+  }, [isWaitingForPayment, paymentTimedOut, refreshProfile, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,6 +224,29 @@ export default function OnboardingPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <p className="text-accent-ink/60">Loading...</p>
+      </div>
+    );
+  }
+
+  // Show waiting UI while polling for membership activation
+  if (isWaitingForPayment) {
+    return (
+      <div className="max-w-md mx-auto">
+        <Card className="border-border-subtle">
+          <CardHeader>
+            <CardTitle className="text-2xl text-center">
+              Confirming your payment...
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-12 h-12 rounded-full border-4 border-accent-gold/30 border-t-accent-gold animate-spin" />
+              <p className="text-center text-accent-ink/60">
+                We're confirming your subscription. This usually takes just a few seconds.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }

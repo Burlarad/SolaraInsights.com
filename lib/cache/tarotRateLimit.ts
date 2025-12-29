@@ -14,7 +14,7 @@
 
 import { NextRequest } from "next/server";
 import { checkRateLimit, getClientIP } from "./rateLimit";
-import { getCache, setCache } from "@/lib/cache";
+import { getCache, setCache } from "@/lib/cache/redis";
 import { cookies } from "next/headers";
 
 // Cooldown: 10 seconds between draws

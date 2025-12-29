@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient, createAdminSupabaseClient } from "@/lib/supabase/server";
 import { openai, OPENAI_MODELS } from "@/lib/openai/client";
-import { getCache, setCache, getDayKey } from "@/lib/cache";
+import { getCache, setCache, getDayKey, acquireLockFailClosed, releaseLock, isRedisAvailable, REDIS_UNAVAILABLE_RESPONSE } from "@/lib/cache/redis";
 
 /**
  * Legacy connection insight format (this endpoint is deprecated)
@@ -13,7 +13,6 @@ interface ConnectionInsight {
   communication: string;
   careSuggestions: string;
 }
-import { acquireLockFailClosed, releaseLock, isRedisAvailable, REDIS_UNAVAILABLE_RESPONSE } from "@/lib/cache/redis";
 import { checkRateLimit, checkBurstLimit, createRateLimitResponse } from "@/lib/cache/rateLimit";
 import { touchLastSeen } from "@/lib/activity/touchLastSeen";
 import { trackAiUsage } from "@/lib/ai/trackUsage";

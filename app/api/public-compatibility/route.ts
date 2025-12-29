@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { openai, OPENAI_MODELS } from "@/lib/openai/client";
 import { PublicCompatibilityContent, PublicCompatibilityResponse } from "@/types";
-import { getCache, setCache } from "@/lib/cache";
-import { isRedisAvailable, REDIS_UNAVAILABLE_RESPONSE } from "@/lib/cache/redis";
+import { getCache, setCache, isRedisAvailable, REDIS_UNAVAILABLE_RESPONSE } from "@/lib/cache/redis";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
 import { checkBudget, incrementBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai/costControl";
 import {

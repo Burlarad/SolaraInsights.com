@@ -34,6 +34,7 @@ export interface Profile {
   role: "user" | "admin";
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
+  stripe_email: string | null; // Email from Stripe checkout (for billing display)
   subscription_status: "active" | "canceled" | "past_due" | "trialing" | null;
   subscription_start_date: string | null;
   subscription_end_date: string | null;

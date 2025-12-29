@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createServerSupabaseClient, createAdminSupabaseClient } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
+import { claimCheckoutSession } from "@/lib/stripe/claimCheckoutSession";
 
 /**
  * Get the correct base URL for redirects.
@@ -86,6 +87,68 @@ export async function GET(request: NextRequest) {
 
       console.log(`[AuthCallback] Session established for user: ${data.user?.id}`);
 
+      // Track if checkout claim succeeded (for conditional cookie clearing)
+      let checkoutClaimed = false;
+
+      // Ensure profile exists (prevents bounce to /join due to missing profile)
+      // This is critical for OAuth flows where Supabase creates auth user but not profile
+      if (data.user) {
+        const { data: existingProfile } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("id", data.user.id)
+          .single();
+
+        if (!existingProfile) {
+          console.log(`[AuthCallback] Creating minimal profile for user: ${data.user.id}`);
+
+          // Detect timezone from request headers if possible
+          const timezone = Intl.DateTimeFormat().resolvedOptions?.().timeZone || "America/Los_Angeles";
+
+          const { error: insertError } = await supabase.from("profiles").insert({
+            id: data.user.id,
+            email: data.user.email || "",
+            timezone,
+            language: "en",
+            is_onboarded: false,
+            social_insights_enabled: false,
+            is_hibernated: false,
+            role: "user",
+            membership_plan: "none",
+          });
+
+          if (insertError) {
+            console.error(`[AuthCallback] Profile creation failed:`, insertError.message);
+            // Continue anyway - SettingsProvider will create profile as fallback
+          } else {
+            console.log(`[AuthCallback] Profile created successfully`);
+          }
+        }
+
+        // Claim Stripe checkout session if cookie is present
+        // This links the payment to the current user by ID (not email)
+        const cookieStore = await cookies();
+        const checkoutSessionCookie = cookieStore.get("solara_checkout_session");
+
+        if (checkoutSessionCookie?.value?.startsWith("cs_")) {
+          console.log(`[AuthCallback] Found checkout session cookie, attempting to claim...`);
+
+          const adminSupabase = createAdminSupabaseClient();
+          const claimResult = await claimCheckoutSession(
+            checkoutSessionCookie.value,
+            data.user.id,
+            adminSupabase
+          );
+
+          console.log(`[AuthCallback] Claim result: ${JSON.stringify(claimResult)}`);
+          checkoutClaimed = claimResult.claimed;
+
+          if (!claimResult.claimed) {
+            console.warn(`[AuthCallback] Checkout claim failed: ${claimResult.reason}`);
+          }
+        }
+      }
+
       // Handle recovery flow - redirect to reset password page
       if (type === "recovery") {
         console.log(`[AuthCallback] Recovery flow - redirecting to /reset-password`);
@@ -152,10 +215,45 @@ export async function GET(request: NextRequest) {
         }
       }
 
+      // Check for `next` query param (used by magiclink flows from complete-signup/resend)
+      // SECURITY: Allowlist-only to prevent open redirect attacks
+      const ALLOWED_NEXT = new Set([
+        "/onboarding",
+        "/set-password",
+        "/settings?refresh=1",
+        "/sanctuary",
+        "/welcome",
+      ]);
+
+      const nextPath = requestUrl.searchParams.get("next");
+      if (nextPath) {
+        // Defense-in-depth: reject obviously malicious patterns
+        const isMalicious = nextPath.includes("://") || nextPath.startsWith("//") || nextPath.includes("\\");
+
+        if (!isMalicious && ALLOWED_NEXT.has(nextPath)) {
+          console.log(`[AuthCallback] Magiclink flow - redirecting to: ${nextPath}`);
+          return NextResponse.redirect(new URL(nextPath, baseUrl));
+        }
+        console.warn(`[AuthCallback] Rejected next param (not in allowlist): ${nextPath}`);
+      }
+
       // For OAuth flows, redirect to post-callback page which reads destination from sessionStorage
       // This works around Supabase stripping query params from redirectTo
       console.log(`[AuthCallback] SUCCESS - Redirecting to /auth/post-callback on ${baseUrl}`);
-      return NextResponse.redirect(new URL("/auth/post-callback", baseUrl));
+
+      const response = NextResponse.redirect(new URL("/auth/post-callback", baseUrl));
+
+      // Only clear checkout session cookie if claim succeeded
+      // If claim failed, preserve cookie so onboarding can poll and retry
+      if (checkoutClaimed) {
+        response.cookies.set("solara_checkout_session", "", {
+          path: "/",
+          maxAge: 0,
+          expires: new Date(0),
+        });
+      }
+
+      return response;
     } catch (err) {
       console.error("[AuthCallback] Unexpected error:", err);
       return NextResponse.redirect(

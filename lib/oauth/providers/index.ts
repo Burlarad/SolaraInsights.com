@@ -57,6 +57,21 @@ export function isProviderEnabled(provider: SocialProvider): boolean {
   return true;
 }
 
+/**
+ * Check if OAuth is configured for a provider (credentials are set)
+ */
+export function isOAuthConfigured(provider: SocialProvider): boolean {
+  const adapter = PROVIDER_ADAPTERS[provider];
+  if (!adapter) {
+    return false;
+  }
+
+  const clientId = process.env[adapter.clientIdEnvKey];
+  const clientSecret = process.env[adapter.clientSecretEnvKey];
+
+  return Boolean(clientId && clientSecret);
+}
+
 // Re-export types and utilities
 export type { ProviderAdapter, NormalizedTokens, EnrichedTokens, ProviderRegistry } from "./types";
 export { isXOAuthEnabled } from "./x";

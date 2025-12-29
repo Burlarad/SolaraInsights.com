@@ -65,6 +65,34 @@ export async function verifyReauth(
 }
 
 /**
+ * Set the reauth_ok cookie after successful OAuth reauth
+ * Cookie is valid for 5 minutes
+ */
+export async function setReauth(
+  userId: string,
+  intent: "delete" | "hibernate" | "reactivate",
+  provider: string = "unknown"
+): Promise<void> {
+  const cookieStore = await cookies();
+  const data: ReauthData = {
+    intent,
+    userId,
+    provider,
+    completedAt: Date.now(),
+  };
+
+  cookieStore.set("reauth_ok", JSON.stringify(data), {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 5 * 60, // 5 minutes in seconds
+    path: "/",
+  });
+
+  console.log(`[Reauth] Set reauth_ok for user ${userId}, intent: ${intent}`);
+}
+
+/**
  * Clear the reauth_ok cookie after use
  * Call this after a successful sensitive operation
  */

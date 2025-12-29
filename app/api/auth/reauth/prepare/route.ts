@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { isOAuthOnly, getLinkedOAuthProviders } from "@/lib/auth/helpers";
 import { cookies } from "next/headers";
+import { generateAuthUrl, generateOAuthState } from "@/lib/social/oauth";
+import { generatePKCEPair, storeCodeVerifier } from "@/lib/oauth/pkce";
+
+// Custom OAuth providers (not supported by Supabase natively)
+const CUSTOM_OAUTH_PROVIDERS = ["tiktok", "x"];
 
 /**
  * POST /api/auth/reauth/prepare
@@ -68,16 +73,40 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Check if this is a custom OAuth provider (like TikTok)
+    const isCustomProvider = CUSTOM_OAUTH_PROVIDERS.includes(provider);
+
     // Verify provider is linked to user
-    const linkedProviders = getLinkedOAuthProviders(user);
-    if (!linkedProviders.includes(provider)) {
-      return NextResponse.json(
-        {
-          error: "ProviderNotLinked",
-          message: `Provider ${provider} is not linked to your account.`,
-        },
-        { status: 400 }
-      );
+    if (isCustomProvider) {
+      // For custom OAuth providers, check social_identities table
+      const { data: identity } = await supabase
+        .from("social_identities")
+        .select("external_user_id")
+        .eq("user_id", user.id)
+        .eq("provider", provider)
+        .single();
+
+      if (!identity) {
+        return NextResponse.json(
+          {
+            error: "ProviderNotLinked",
+            message: `Provider ${provider} is not linked to your account.`,
+          },
+          { status: 400 }
+        );
+      }
+    } else {
+      // For Supabase-native providers, check user.identities
+      const linkedProviders = getLinkedOAuthProviders(user);
+      if (!linkedProviders.includes(provider)) {
+        return NextResponse.json(
+          {
+            error: "ProviderNotLinked",
+            message: `Provider ${provider} is not linked to your account.`,
+          },
+          { status: 400 }
+        );
+      }
     }
 
     // Set reauth_intent cookie
@@ -102,27 +131,63 @@ export async function POST(req: NextRequest) {
     // Get base URL for redirect
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || req.nextUrl.origin;
 
-    // Build Supabase OAuth URL
-    // We redirect back to our callback which will detect the reauth_intent cookie
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: provider as any,
-      options: {
-        redirectTo: `${baseUrl}/auth/callback?type=reauth`,
-        skipBrowserRedirect: true, // We return URL, client redirects
-      },
-    });
+    let redirectUrl: string;
 
-    if (error || !data.url) {
-      console.error("[Reauth/Prepare] OAuth URL generation failed:", error);
-      return NextResponse.json(
-        { error: "OAuthFailed", message: "Failed to generate OAuth URL." },
-        { status: 500 }
-      );
+    if (isCustomProvider) {
+      // For custom OAuth (TikTok), build URL using our custom OAuth system
+      const pkce = generatePKCEPair();
+      const state = generateOAuthState();
+
+      // Store state with reauth flow marker
+      const stateData = JSON.stringify({
+        state,
+        provider,
+        flow: "reauth",
+        userId: user.id,
+        intent: intent as ReauthIntent,
+        timestamp: Date.now(),
+      });
+
+      cookieStore.set(`${provider}_reauth_state`, stateData, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: INTENT_COOKIE_MAX_AGE,
+        path: "/",
+      });
+
+      // Store PKCE verifier
+      await storeCodeVerifier(provider, state, pkce.verifier);
+
+      // Build OAuth URL with reauth-specific callback
+      const callbackUrl = `${baseUrl}/api/auth/reauth/${provider}/callback`;
+      redirectUrl = generateAuthUrl(provider, callbackUrl, state, pkce.challenge);
+
+      console.log(`[Reauth/Prepare] Custom OAuth URL generated for ${provider}`);
+    } else {
+      // For Supabase-native providers, use Supabase OAuth
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: provider as any,
+        options: {
+          redirectTo: `${baseUrl}/auth/callback?type=reauth`,
+          skipBrowserRedirect: true,
+        },
+      });
+
+      if (error || !data.url) {
+        console.error("[Reauth/Prepare] OAuth URL generation failed:", error);
+        return NextResponse.json(
+          { error: "OAuthFailed", message: "Failed to generate OAuth URL." },
+          { status: 500 }
+        );
+      }
+
+      redirectUrl = data.url;
     }
 
     return NextResponse.json({
       success: true,
-      redirectUrl: data.url,
+      redirectUrl,
     });
   } catch (error: any) {
     console.error("[Reauth/Prepare] Error:", error);
