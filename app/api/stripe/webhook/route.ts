@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomBytes } from "crypto";
 import Stripe from "stripe";
 import { stripe, STRIPE_CONFIG } from "@/lib/stripe/client";
 import { createAdminSupabaseClient } from "@/lib/supabase/server";
@@ -225,7 +226,7 @@ async function handleCheckoutCompleted(
     } else {
       // Try to create new user - if user already exists in auth, this will fail
       console.log(`[Webhook] Creating new user for email: ${email}`);
-      const randomPassword = Math.random().toString(36).slice(-16) + Math.random().toString(36).slice(-16);
+      const randomPassword = randomBytes(32).toString("hex");
 
       const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
         email,

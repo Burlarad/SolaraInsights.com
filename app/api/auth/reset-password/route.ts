@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminSupabaseClient } from "@/lib/supabase/server";
 import { resend, RESEND_CONFIG, isResendConfigured } from "@/lib/resend/client";
 import { passwordResetEmail } from "@/lib/email/templates";
+import { checkRateLimit } from "@/lib/cache/rateLimit";
 
 /**
  * Custom password reset endpoint that uses Resend for email delivery.
@@ -37,6 +38,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "Invalid email format" },
         { status: 400 }
+      );
+    }
+
+    // Rate limit: 1 request per 60 seconds per email
+    const rateLimitKey = `reset-password:${email.toLowerCase()}`;
+    const rateLimitResult = await checkRateLimit(rateLimitKey, 1, 60);
+
+    if (!rateLimitResult.success) {
+      console.log(`[ResetPassword:${requestId}] Rate limited for email: ${email}`);
+      return NextResponse.json(
+        { error: "Please wait before requesting another reset email" },
+        { status: 429 }
       );
     }
 

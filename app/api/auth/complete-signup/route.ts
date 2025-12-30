@@ -4,6 +4,7 @@ import { createAdminSupabaseClient } from "@/lib/supabase/server";
 import { resend, RESEND_CONFIG, isResendConfigured } from "@/lib/resend/client";
 import { verificationEmail, signInEmail } from "@/lib/email/templates";
 import { claimCheckoutSession } from "@/lib/stripe/claimCheckoutSession";
+import { checkRateLimit } from "@/lib/cache/rateLimit";
 
 /**
  * POST /api/auth/complete-signup
@@ -58,6 +59,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "Invalid email format" },
         { status: 400, headers: { "Cache-Control": "no-store" } }
+      );
+    }
+
+    // Rate limit: 5 requests per hour (3600 seconds) per email
+    const rateLimitKey = `complete-signup:${email.toLowerCase()}`;
+    const rateLimitResult = await checkRateLimit(rateLimitKey, 5, 3600);
+
+    if (!rateLimitResult.success) {
+      console.log(`[CompleteSignup:${requestId}] Rate limited for email: ${email}`);
+      return NextResponse.json(
+        { error: "Too many signup attempts. Please try again later." },
+        { status: 429, headers: { "Cache-Control": "no-store" } }
       );
     }
 
