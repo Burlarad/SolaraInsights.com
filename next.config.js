@@ -10,6 +10,12 @@ const nextConfig = {
   },
 
   webpack: (config, { isServer }) => {
+    // Force @ alias at webpack level for consistent resolution across all environments
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      "@": path.resolve(__dirname),
+    };
+
     // Externalize swisseph native addon on server builds so webpack doesn't try to bundle the .node binary
     if (isServer) {
       config.externals = config.externals || [];
