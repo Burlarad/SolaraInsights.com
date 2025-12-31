@@ -1,0 +1,712 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "saved": "Saved",
+    "submit": "Submit",
+    "back": "Back",
+    "next": "Next",
+    "delete": "Delete",
+    "deleting": "Deleting...",
+    "error": "Something went wrong",
+    "tryAgain": "Try again",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "optional": "Optional",
+    "required": "Required",
+    "or": "or",
+    "and": "and",
+    "on": "On",
+    "off": "Off",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "goToSettings": "Go to Settings",
+    "learnMore": "Learn more",
+    "viewAll": "View all",
+    "showMore": "Show more",
+    "showLess": "Show less",
+    "masterNumber": "Master Number"
+  },
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "learn": "Learn",
+    "sanctuary": "Sanctuary",
+    "settings": "Settings",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out"
+  },
+  "auth": {
+    "signIn": {
+      "title": "Welcome back",
+      "subtitle": "Sign in to access your sanctuary",
+      "signInWith": "Sign in with",
+      "orSignInWithEmail": "Or sign in with email",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "password": "Password",
+      "forgot": "Forgot?",
+      "signingIn": "Signing in...",
+      "signInButton": "Sign in",
+      "noAccount": "Don't have an account?",
+      "createAccount": "Create account",
+      "signInError": "We couldn't sign you in with those details. Please check your email and password, or reset your password.",
+      "unexpectedError": "An unexpected error occurred. Please try again.",
+      "comingSoon": "{provider} sign-in coming soon"
+    },
+    "signUp": {
+      "title": "Create your account",
+      "subtitle": "Begin your journey into the light",
+      "fullName": "Full name",
+      "namePlaceholder": "Your name",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "password": "Password",
+      "passwordPlaceholder": "At least 8 characters",
+      "confirmPassword": "Confirm password",
+      "creatingAccount": "Creating account...",
+      "createAccountButton": "Create account",
+      "terms": "By signing up, you agree to our Terms of Service and Privacy Policy. A portion of your subscription supports families through the Solara Foundation.",
+      "or": "or",
+      "continueWithFacebook": "Continue with Facebook",
+      "continueWithTikTok": "Continue with TikTok",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "passwordsDontMatch": "Passwords don't match. Please try again.",
+      "passwordTooShort": "Password must be at least 8 characters long."
+    },
+    "forgotPassword": {
+      "title": "Reset your password",
+      "subtitle": "Enter your email and we'll send you a reset link",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "sending": "Sending...",
+      "sendResetLink": "Send reset link",
+      "backToSignIn": "Back to sign in",
+      "checkEmail": {
+        "title": "Check your email",
+        "message": "We've sent a password reset link to <strong>{email}</strong>. Click the link in the email to create a new password."
+      }
+    },
+    "resetPassword": {
+      "title": "Set new password",
+      "subtitle": "Enter your new password below",
+      "verifying": "Verifying your reset link...",
+      "newPassword": "New password",
+      "newPasswordPlaceholder": "At least 8 characters",
+      "confirmPassword": "Confirm new password",
+      "confirmPasswordPlaceholder": "Re-enter your password",
+      "updating": "Updating password...",
+      "updatePassword": "Update password",
+      "backToSignIn": "Back to sign in",
+      "linkExpired": {
+        "title": "Link expired",
+        "message": "This reset link has expired or is invalid. Please request a new one.",
+        "noCodeMessage": "No reset link detected. Please request a password reset from the login page.",
+        "requestNewLink": "Request new reset link"
+      },
+      "success": {
+        "title": "Password updated",
+        "message": "Your password has been updated successfully. You can now sign in with your new password.",
+        "continueToSignIn": "Continue to sign in",
+        "redirecting": "You will be redirected automatically in a few seconds..."
+      },
+      "sessionRequired": {
+        "title": "Session required",
+        "message": "Please use the reset link from your email to access this page.",
+        "requestResetLink": "Request reset link"
+      }
+    },
+    "setPassword": {
+      "title": "Set your password",
+      "subtitle": "Create a password for your Solara account",
+      "settingPasswordFor": "Setting password for",
+      "password": "Password",
+      "passwordPlaceholder": "At least 8 characters",
+      "confirmPassword": "Confirm password",
+      "confirmPasswordPlaceholder": "Re-enter your password",
+      "settingPassword": "Setting password...",
+      "continueToOnboarding": "Continue to onboarding",
+      "errors": {
+        "enterBoth": "Please enter and confirm your password",
+        "dontMatch": "Passwords do not match",
+        "tooShort": "Password must be at least 8 characters"
+      }
+    },
+    "verifyEmail": {
+      "title": "Verify Your Email",
+      "subtitle": "We sent a verification link to your email",
+      "resend": "Resend verification email"
+    }
+  },
+  "onboarding": {
+    "welcome": "Welcome to Solara",
+    "letsGetStarted": "Let's get started",
+    "tellUsAbout": "Tell us about yourself",
+    "pageTitle": "Complete your Sanctuary profile",
+    "pageSubtitle": "We'll use this information to generate your personalized insights",
+    "firstName": "First name",
+    "middleName": "Middle name",
+    "lastName": "Last name",
+    "nickname": "Nickname (optional)",
+    "nicknamePlaceholder": "What should we call you?",
+    "nicknameHint": "If different from your first name",
+    "birthDetails": "Birth Details",
+    "birthDate": "Birth Date",
+    "birthTime": "Time of Birth (optional)",
+    "birthTimeUnknown": "I don't know my birth time",
+    "birthTimeHint": "If you don't know your exact birth time, you can skip now and add it later for more accurate charts and personalization.",
+    "birthPlace": "Place of Birth",
+    "searchPlace": "Search for your birth city...",
+    "timezone": "Timezone: {timezone}",
+    "locationHint": "Start typing to search, then select from the results",
+    "locationWarning": "Please search and select your birth location from the dropdown to continue.",
+    "saving": "Saving your birth signature...",
+    "continue": "Continue",
+    "skip": "Skip for now",
+    "complete": "Complete setup",
+    "settingsNote": "You can always update these details later in Settings",
+    "confirmingPayment": "Confirming your payment...",
+    "confirmingPaymentMessage": "We're confirming your subscription. This usually takes just a few seconds.",
+    "errors": {
+      "firstNameRequired": "First name is required",
+      "lastNameRequired": "Last name is required",
+      "birthDateRequired": "Birth date is required",
+      "locationRequired": "Please select your birth location from the search results",
+      "saveFailed": "Failed to save profile. Please try again."
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Update your preferred name, sign, and natal coordinates",
+    "identity": {
+      "title": "Identity",
+      "firstName": "First name",
+      "middleName": "Middle name",
+      "lastName": "Last name",
+      "nickname": "Nickname",
+      "nicknameHint": "If different from your first name",
+      "birthNameHint": "Your birth name is used for numerology calculations",
+      "nameMissingBanner": "Please add your first and last name for a more personalized experience."
+    },
+    "email": {
+      "title": "Email",
+      "addEmailBanner": "Add a real email address to receive updates and enable password reset.",
+      "placeholder": "your@email.com"
+    },
+    "password": {
+      "title": "Password",
+      "current": "Current password",
+      "new": "New password",
+      "confirm": "Confirm new password",
+      "change": "Change password",
+      "placeholder": "Your password"
+    },
+    "birthDetails": {
+      "title": "Birth Details",
+      "date": "Birth date",
+      "time": "Birth time",
+      "timeUnknown": "I don't know my birth time",
+      "place": "Birth place",
+      "timezone": "Timezone"
+    },
+    "zodiac": {
+      "title": "Zodiac Sign",
+      "select": "Select your sign"
+    },
+    "language": {
+      "title": "Language",
+      "select": "Select language"
+    },
+    "social": {
+      "title": "Social Insights",
+      "description": "Connect your social accounts for personalized insights",
+      "connect": "Connect",
+      "disconnect": "Disconnect",
+      "connected": "Connected"
+    },
+    "dangerZone": {
+      "title": "Danger Zone",
+      "hibernate": "Hibernate Account",
+      "hibernateDescription": "Temporarily deactivate your account. You can reactivate anytime.",
+      "delete": "Delete Account",
+      "deleteDescription": "Permanently delete your account and all data. This cannot be undone.",
+      "confirmDelete": "Are you sure you want to delete your account?",
+      "typeToConfirm": "Type DELETE to confirm"
+    },
+    "saveChanges": "Save changes",
+    "verificationExpired": "Your verification has expired. Please verify again."
+  },
+  "sanctuary": {
+    "greeting": {
+      "title": "Quiet clarity, {name}.",
+      "defaultName": "Friend",
+      "defaultMessage": "Your daily insights are being prepared by the cosmos."
+    },
+    "tabs": {
+      "insights": "Insights",
+      "astrology": "Astrology",
+      "numerology": "Numerology",
+      "connections": "Connections"
+    },
+    "timeframes": {
+      "today": "Today",
+      "week": "Week",
+      "month": "Month",
+      "year": "Year"
+    },
+    "insights": {
+      "title": "Your Sanctuary",
+      "label": "Sanctuary insights",
+      "tuning": "Tuning your insights...",
+      "ready": "Your insights are ready.",
+      "localTimezone": "Local timezone",
+      "greeting": "Welcome back",
+      "sunriseGuidance": "Sunrise guidance",
+      "energeticRhythm": "Your energetic rhythm for {timeframe}",
+      "coreThemesFor": "{timeframe}'s core themes",
+      "focusFor": "Focus for {timeframe}",
+      "personalNarrative": "Personal Narrative",
+      "coreThemes": "Core Themes",
+      "focusForPeriod": "Focus for this period",
+      "journalPrompt": "Journal Prompt",
+      "tarot": {
+        "title": "Tarot Card",
+        "label": "TAROT OVERVIEW — DAILY DRAW",
+        "yourCard": "Your Card",
+        "matchError": "We had trouble matching this tarot card to our deck."
+      },
+      "luckyCompass": {
+        "title": "Lucky Compass",
+        "label": "LUCKY COMPASS — DAILY LUCK + LIGHT MARKERS",
+        "numbers": "{timeframe}'s numbers",
+        "powerWords": "POWER WORDS",
+        "handwrittenNote": "A HANDWRITTEN NOTE"
+      },
+      "emotionalCadence": {
+        "title": "Emotional Cadence",
+        "label": "EMOTIONAL CADENCE — DAILY RHYTHM",
+        "dawn": "Dawn",
+        "midday": "Midday",
+        "dusk": "Dusk",
+        "evening": "Evening",
+        "midnight": "Midnight",
+        "morning": "Morning"
+      },
+      "dailyReflection": {
+        "title": "Daily reflection",
+        "subtitle": "Let your notes stay private and gentle.",
+        "placeholder": "A few words for your sky today…",
+        "saveHint": "Press ⌘+Enter or Ctrl+Enter to save"
+      },
+      "errors": {
+        "profileLoadError": "We had trouble loading your profile. Please try again, or contact support if this continues.",
+        "insightLoadError": "We're having trouble loading your insight. This might be a temporary issue.",
+        "birthSignatureRequired": "Tune your birth signature",
+        "journalSaveError": "Unable to save. Please try again."
+      },
+      "socialInsights": {
+        "paused": "Social Insights Paused",
+        "pausedDescription": "Turn on Social Insights to enhance your readings with patterns from your connected accounts."
+      },
+      "reactivated": "Reactivated — welcome back."
+    }
+  },
+  "numerology": {
+    "title": "Your Numbers",
+    "subtitle": "The Math Behind Your Life",
+    "calculating": "Calculating your numbers...",
+    "systems": {
+      "pythagorean": "Pythagorean",
+      "chaldean": "Chaldean"
+    },
+    "errors": {
+      "nameRequired": "Name Required",
+      "nameRequiredMessage": "We need your first and last name to calculate your numerology profile. Please update your name in Settings.",
+      "birthDateRequired": "Birth Date Required",
+      "birthDateRequiredMessage": "We need your birth date to calculate your numerology profile. Please update your birth date in Settings.",
+      "loadFailed": "Unable to load numerology profile"
+    },
+    "coreNumbers": {
+      "title": "Core Numbers",
+      "lifePath": "Life Path",
+      "lifePathDesc": "Your life purpose and the path you walk",
+      "expression": "Expression",
+      "expressionDesc": "Your natural abilities and talents",
+      "soulUrge": "Soul Urge",
+      "soulUrgeDesc": "Your inner motivations and desires",
+      "personality": "Personality",
+      "personalityDesc": "How others perceive you",
+      "birthday": "Birthday",
+      "birthdayDesc": "Your natural gifts and talents",
+      "maturity": "Maturity",
+      "maturityDesc": "Who you are becoming"
+    },
+    "cycles": {
+      "title": "Personal Cycles",
+      "personalYear": "Personal Year",
+      "personalMonth": "Personal Month",
+      "personalDay": "Personal Day"
+    },
+    "lifePeriods": {
+      "title": "Life Periods",
+      "currentPinnacle": "Current Pinnacle",
+      "period": "Period",
+      "ages": "Ages",
+      "onwards": "onwards",
+      "pinnacles": {
+        "first": "1st Pinnacle",
+        "second": "2nd Pinnacle",
+        "third": "3rd Pinnacle",
+        "fourth": "4th Pinnacle"
+      }
+    },
+    "challenges": {
+      "title": "Life Challenges",
+      "first": "First Challenge",
+      "second": "Second Challenge",
+      "third": "Third Challenge",
+      "main": "Main Challenge"
+    },
+    "luckyNumbers": {
+      "title": "Lucky Numbers"
+    },
+    "karmicDebt": {
+      "title": "Karmic Lessons"
+    }
+  },
+  "astrology": {
+    "title": "Astrology",
+    "subtitle": "The Light Behind Your Life",
+    "calculating": "Calculating your Soul Path…",
+    "sections": {
+      "narrative": "Personal Narrative",
+      "foundations": "Foundations",
+      "connections": "Aspects",
+      "patternsPath": "Patterns & Path"
+    },
+    "deepDive": {
+      "whenAligned": "When You're Aligned",
+      "whenOffCourse": "When You're Off Course",
+      "decisionRule": "Decision Rule"
+    },
+    "birthChart": {
+      "title": "Birth Chart",
+      "subtitle": "Your unique planetary signature"
+    },
+    "narrative": {
+      "title": "Your Personal Narrative",
+      "subtitle": "Your cosmic story and life themes",
+      "identity": "Identity",
+      "emotions": "Emotions",
+      "loveRelationships": "Love & Relationships",
+      "workMoney": "Work & Money",
+      "purposeGrowth": "Purpose & Growth",
+      "innerWorld": "Inner World",
+      "notAvailable": "Interpretation not available",
+      "notAvailableDesc": "We calculated your Soul Path, but couldn't generate a full interpretation right now. Your placements are saved — please try again in a moment."
+    },
+    "planets": {
+      "title": "Planetary Placements",
+      "subtitle": "Your unique planetary signature",
+      "deepDiveTitle": "What Your Planets Mean For You",
+      "description": "These show how different parts of you express themselves—your drive, your communication style, how you love and relate.",
+      "sun": "Sun",
+      "sunDesc": "Your core sense of self and vitality.",
+      "moon": "Moon",
+      "moonDesc": "Your emotional landscape and inner world.",
+      "mercury": "Mercury",
+      "mercuryDesc": "How you think, communicate, and process information.",
+      "venus": "Venus",
+      "venusDesc": "How you love, connect, and find beauty.",
+      "mars": "Mars",
+      "marsDesc": "Your drive, desire, and how you take action.",
+      "jupiter": "Jupiter",
+      "jupiterDesc": "Where you expand, believe, and find meaning.",
+      "saturn": "Saturn",
+      "saturnDesc": "Where you build structure and meet responsibility.",
+      "uranus": "Uranus",
+      "uranusDesc": "Where you innovate, rebel, and seek freedom.",
+      "neptune": "Neptune",
+      "neptuneDesc": "Where you dream, dissolve boundaries, and connect to the sacred.",
+      "pluto": "Pluto",
+      "plutoDes": "Where you transform, release, and reclaim power.",
+      "northNode": "North Node",
+      "northNodeDesc": "Your invitation toward growth.",
+      "chiron": "Chiron",
+      "chironDesc": "Where healing emerges from your deepest wounds."
+    },
+    "houses": {
+      "title": "Houses",
+      "subtitle": "The 12 life areas of your chart",
+      "deepDiveTitle": "What Your Houses Mean For You",
+      "description": "Houses show where life themes unfold—which arenas of life ask the most of you, and where certain energies come alive.",
+      "first": "1st House",
+      "firstDesc": "How you meet the world and present yourself.",
+      "second": "2nd House",
+      "secondDesc": "Your relationship with resources, worth, and stability.",
+      "third": "3rd House",
+      "thirdDesc": "How you communicate, learn, and connect nearby.",
+      "fourth": "4th House",
+      "fourthDesc": "Your inner foundation, home, and emotional roots.",
+      "fifth": "5th House",
+      "fifthDesc": "Where you create, play, and express joy.",
+      "sixth": "6th House",
+      "sixthDesc": "Your daily rhythms, work, and well-being.",
+      "seventh": "7th House",
+      "seventhDesc": "How you partner, reflect, and relate one-to-one.",
+      "eighth": "8th House",
+      "eighthDesc": "Where you merge, transform, and face the unknown.",
+      "ninth": "9th House",
+      "ninthDesc": "Your search for meaning, belief, and expansion.",
+      "tenth": "10th House",
+      "tenthDesc": "Your public role, career, and visible legacy.",
+      "eleventh": "11th House",
+      "eleventhDesc": "Your vision for community, friendship, and the future.",
+      "twelfth": "12th House",
+      "twelfthDesc": "Your inner sanctuary, solitude, and the sacred."
+    },
+    "aspects": {
+      "title": "Aspects",
+      "subtitle": "The conversations between your planets",
+      "deepDiveTitle": "What Your Aspects Mean For You",
+      "description": "Aspects show how different inner parts of you interact—where they support, challenge, or intensify each other.",
+      "grid": "Aspect Grid",
+      "topAspects": "Top Aspects",
+      "allAspects": "All Aspects",
+      "showAll": "Show all {count} aspects",
+      "showFewer": "Show fewer aspects"
+    },
+    "patterns": {
+      "title": "Major Patterns",
+      "deepDiveTitle": "What Your Patterns Mean For You",
+      "subtitle": "Major configurations in your chart",
+      "description": "Patterns are large-scale energetic shapes in your chart—where several planets connect to form a recognizable theme or recurring dynamic.",
+      "noPatterns": "No major patterns detected in your chart.",
+      "tSquare": "T-Square",
+      "tSquareDesc": "A T-Square creates tension between three areas of life, asking you to find creative solutions. It often feels like productive friction—pressure that pushes you toward growth, innovation, and resilience. This pattern tends to keep you moving forward, even when stillness might feel easier.",
+      "grandTrine": "Grand Trine",
+      "grandTrineDesc": "A Grand Trine forms a triangle of ease and flow, where energy moves smoothly between three areas. This can feel like natural talent or effortless grace. The invitation is to activate this gift consciously rather than letting it remain passive—talent unused doesn't always become mastery."
+    },
+    "energyShape": {
+      "title": "Energy Shape",
+      "deepDiveTitle": "What Your Energy Shape Means For You",
+      "subtitle": "Element and modality balance",
+      "description": "This shows how energy moves through you—the underlying rhythm of your chart and where certain qualities concentrate or disperse.",
+      "chartType": "Chart Type",
+      "dayChart": "Day Chart",
+      "nightChart": "Night Chart",
+      "dayChartDesc": "Your chart is oriented toward visibility and outward expression. Life often asks you to show up, be seen, and engage with the external world.",
+      "nightChartDesc": "Your chart is oriented toward inner reflection and subtlety. Life often unfolds through inner processing, quiet observation, and behind-the-scenes work.",
+      "chartRuler": "Chart Ruler",
+      "chartRulerDesc": "This planet guides the overall direction of your life and filters how you engage with the world.",
+      "dominantPlanets": "Dominant Planets",
+      "dominantPlanetsDesc": "These planets shape your experience most strongly—they appear in multiple key positions or form important connections.",
+      "dominantSigns": "Dominant Signs",
+      "dominantSignsDesc": "These signs color how you move through the world. Their qualities show up repeatedly in how you express yourself.",
+      "elementModalityDesc": "Elements show where your energy naturally gathers—whether in inspiration (fire), grounding (earth), thought (air), or emotion (water). Modalities reflect how you engage—whether you initiate (cardinal), stabilize (fixed), or adapt (mutable)."
+    },
+    "intensityZones": {
+      "title": "Intensity Zones",
+      "deepDiveTitle": "What Your Intensity Zones Mean For You",
+      "subtitle": "Where energy clusters in your chart",
+      "description": "This shows where life feels concentrated—where multiple planets gather, creating areas of heightened focus and recurring themes.",
+      "signEmphasis": "Sign Emphasis",
+      "signEmphasisDesc": "Multiple planets in these signs amplify their qualities—you might notice these themes appearing repeatedly in how you think, feel, and respond.",
+      "houseEmphasis": "House Emphasis",
+      "houseEmphasisDesc": "These life areas ask a lot of you—they're where complexity, growth, and attention naturally gather.",
+      "stelliums": "Stelliums",
+      "stelliumDesc": "A stellium here creates a concentrated beam of attention—multiple inner parts converging on one theme. This area tends to feel vivid, complex, and central to your experience.",
+      "planets": "{count} planets"
+    },
+    "direction": {
+      "title": "Direction",
+      "deepDiveTitle": "What Your Direction Means For You",
+      "subtitle": "North Node, South Node, and life path",
+      "description": "This reflects growth, healing, and familiarity—where you're invited to stretch, where you naturally return, and where old wounds become sources of wisdom.",
+      "northNode": "North Node",
+      "northNodeDesc": "Your North Node is an invitation toward growth and unfamiliar territory. It points to qualities you're developing, even when they don't feel natural yet. This is where life asks you to stretch—not because you lack something, but because expansion lives here.",
+      "southNode": "South Node",
+      "southNodeDesc": "Your South Node represents familiar patterns and natural comfort. These are qualities you carry easily, perhaps from early life or past experience. The South Node isn't something to abandon, but rather a foundation to honor while you reach toward the North Node's invitation.",
+      "chiron": "Chiron",
+      "chironDesc": "Chiron shows where healing and teaching emerge from your deepest wounds. What once hurt can become a source of compassion and guidance for others. Chiron doesn't promise that the wound disappears, but that it becomes medicine."
+    },
+    "joy": {
+      "title": "Part of Fortune",
+      "description": "This reflects ease, joy, and natural alignment—where life feels generous and where you access flow without force.",
+      "meaning": "The Part of Fortune shows where natural joy and ease flow most readily in your life. This isn't about achievement or effort—it's where things align organically, where you feel instinctively at home."
+    },
+    "errors": {
+      "signInRequired": "Please sign in to view your Soul Path.",
+      "incompleteProfile": "Complete your birth signature",
+      "incompleteProfileDesc": "We need your full birth date, time, and location in Settings before Solara can generate your Soul Path.",
+      "birthDetailsRequired": "Birth Details Required",
+      "birthDetailsRequiredMessage": "We need your complete birth details to calculate your chart."
+    }
+  },
+  "connections": {
+    "title": "Connections",
+    "subtitle": "Map the people in your orbit and explore relational insights",
+    "yourConnections": "YOUR CONNECTIONS",
+    "loading": "Loading your connections...",
+    "addConnection": "Add Connection",
+    "noConnections": "No connections yet. Add someone to begin exploring relational insights.",
+    "noConnectionsMessage": "Add your first connection to explore your relationship dynamics.",
+    "notes": "Notes",
+    "notesPlaceholder": "Jot down thoughts, patterns, or things you want to remember about this connection...",
+    "saveNotes": "Save notes",
+    "saving": "Saving...",
+    "saved": "Saved",
+    "spaceBetween": "Space Between",
+    "viewDailyBrief": "View daily brief",
+    "compatibility": "Compatibility",
+    "synastry": "Synastry",
+    "composite": "Composite",
+    "relationshipTypes": {
+      "partner": "Partner",
+      "child": "Child",
+      "parent": "Parent",
+      "sibling": "Sibling",
+      "friend": "Friend",
+      "colleague": "Colleague",
+      "other": "Other"
+    },
+    "form": {
+      "firstName": "First name",
+      "middleName": "Middle name",
+      "lastName": "Last name",
+      "relationshipType": "Relationship type",
+      "birthDate": "Birth date",
+      "birthTime": "Birth time",
+      "birthPlace": "Birth place",
+      "unknownTime": "I don't know their birth time"
+    },
+    "born": "Born"
+  },
+  "spaceBetween": {
+    "title": "The Space Between",
+    "subtitle": "Your relationship blueprint with {connectionName}",
+    "generating": "Generating your relationship blueprint...",
+    "generatingHint": "This may take a moment",
+    "tryAgain": "Try again",
+    "discover": "Discover the Space Between",
+    "discoverDescription": "Generate your permanent relationship blueprint with {connectionName}. This deep insight is created once and saved forever.",
+    "generateBlueprint": "Generate blueprint",
+    "sections": {
+      "essence": "Essence",
+      "emotionalBlueprint": "Emotional Blueprint",
+      "communication": "Communication",
+      "growthEdges": "Growth Edges",
+      "careGuide": "Care Guide"
+    }
+  },
+  "location": {
+    "title": "Help Solara match your sky",
+    "body": "To generate your insights at the start of your day, Solara needs to know roughly where in the world you are.\n\nWe use this only to calculate your time zone so your daily, weekly, and monthly guidance refreshes at the right local time.\n\nIf you skip this, we'll use UTC as a default. Solara will still work, but your timing might feel a bit off.",
+    "allow": "Allow location",
+    "skip": "Skip, use UTC for now"
+  },
+  "errors": {
+    "pageNotFound": "Page not found",
+    "unauthorized": "Unauthorized",
+    "serverError": "Server error",
+    "networkError": "Network error",
+    "rateLimited": "Too many requests. Please try again later.",
+    "sessionExpired": "Your session has expired. Please sign in again."
+  },
+  "deletion": {
+    "pageTitle": "Data Deletion Status",
+    "noCode": "No confirmation code provided. Please use the link from your data deletion confirmation.",
+    "notFound": "Deletion request not found. The confirmation code may be invalid or expired.",
+    "confirmationCode": "Confirmation Code",
+    "status": "Status",
+    "requestReceived": "Request Received",
+    "processed": "Processed",
+    "errorDetails": "Error details",
+    "contactSupport": "Please contact us at solara@solarainsights.com for assistance.",
+    "questions": "Questions? Contact us at",
+    "pending": {
+      "title": "Pending",
+      "description": "Your data deletion request has been received and is waiting to be processed."
+    },
+    "processing": {
+      "title": "Processing",
+      "description": "Your data is currently being deleted from our systems."
+    },
+    "completed": {
+      "title": "Completed",
+      "description": "Your data has been successfully deleted from Solara Insights.",
+      "permanentNotice": "All your personal data associated with your Facebook account has been permanently deleted from Solara Insights. This action cannot be undone."
+    },
+    "failed": {
+      "title": "Failed",
+      "description": "There was an issue processing your deletion request. Please contact support."
+    },
+    "userNotFound": {
+      "title": "No Data Found",
+      "description": "No account was found associated with your Facebook account. No data needed to be deleted."
+    }
+  },
+  "zodiacSigns": {
+    "aries": "Aries",
+    "taurus": "Taurus",
+    "gemini": "Gemini",
+    "cancer": "Cancer",
+    "leo": "Leo",
+    "virgo": "Virgo",
+    "libra": "Libra",
+    "scorpio": "Scorpio",
+    "sagittarius": "Sagittarius",
+    "capricorn": "Capricorn",
+    "aquarius": "Aquarius",
+    "pisces": "Pisces"
+  },
+  "tarot": {
+    "title": "Ask the Cards",
+    "questionLabel": "YOUR QUESTION",
+    "questionPlaceholder": "What would you like guidance on today?",
+    "questionError": "Please enter a question (at least {minLength} characters)",
+    "charactersNeeded": "{count} more characters needed",
+    "spreadLabel": "CHOOSE YOUR SPREAD",
+    "spreads": {
+      "single": "Single Card",
+      "singleDesc": "Quick insight",
+      "three": "Three Card",
+      "threeDesc": "Past, Present, Future",
+      "five": "Five Card",
+      "fiveDesc": "Deep exploration"
+    },
+    "buttons": {
+      "draw": "Draw Cards",
+      "drawing": "Drawing Cards...",
+      "wait": "Wait {seconds}s..."
+    },
+    "loading": "Shuffling the deck...",
+    "reading": {
+      "title": "Your Reading",
+      "reversed": "Reversed",
+      "synthesis": "THE BIGGER PICTURE",
+      "actions": "SUGGESTED ACTIONS",
+      "reflection": "REFLECTION"
+    },
+    "cta": {
+      "message": "Want deeper, more personalized readings?",
+      "button": "Join Solara"
+    },
+    "errors": {
+      "generic": "We couldn't complete your reading. Please try again.",
+      "rateLimit": "Please wait {seconds} seconds before drawing again."
+    }
+  },
+  "learn": {
+    "searchPlaceholder": "Search guides...",
+    "guidesFound": "{count} {count, plural, one {guide} other {guides}} found",
+    "filterByTopic": "Filter by topic",
+    "clearAll": "Clear all"
+  }
+}

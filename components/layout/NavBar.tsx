@@ -15,30 +15,42 @@ import {
   SheetTitle,
   SheetClose,
 } from "@/components/ui/sheet";
+import {
+  locales,
+  localeNames,
+  localeFlags,
+  defaultLocale,
+  isValidLocale,
+  type Locale,
+} from "@/i18n";
+import { useTranslations } from "next-intl";
 
-const publicNavLinks = [
-  { href: "/", label: "HOME" },
-  { href: "/about", label: "ABOUT" },
-  { href: "/learn", label: "LEARN" },
+type NavLinkKey = "home" | "about" | "learn" | "sanctuary" | "settings";
+
+const publicNavLinks: { href: string; labelKey: NavLinkKey }[] = [
+  { href: "/", labelKey: "home" },
+  { href: "/learn", labelKey: "learn" },
 ];
 
-const protectedNavLinks = [
-  { href: "/sanctuary", label: "SANCTUARY" },
-  { href: "/settings", label: "SETTINGS" },
+const protectedNavLinks: { href: string; labelKey: NavLinkKey }[] = [
+  { href: "/sanctuary", labelKey: "sanctuary" },
+  { href: "/settings", labelKey: "settings" },
 ];
 
-const languageOptions = [
-  { code: "en", label: "EN", flag: "🇺🇸", name: "English" },
-  { code: "es", label: "ES", flag: "🇪🇸", name: "Español" },
-  { code: "fr", label: "FR", flag: "🇫🇷", name: "Français" },
-  { code: "de", label: "DE", flag: "🇩🇪", name: "Deutsch" },
-  { code: "pt", label: "PT", flag: "🇵🇹", name: "Português" },
-];
+// Generate language options from i18n config
+const languageOptions = locales.map((code) => ({
+  code,
+  label: code.toUpperCase(),
+  flag: localeFlags[code],
+  name: localeNames[code],
+}));
 
 export function NavBar() {
   const pathname = usePathname();
   const router = useRouter();
   const { profile, saveProfile } = useSettings();
+  const t = useTranslations("nav");
+  const tSettings = useTranslations("settings");
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
@@ -111,7 +123,8 @@ export function NavBar() {
     : publicNavLinks;
 
   // Get current language from profile or default to English
-  const currentLanguageCode = profile?.language || "en";
+  const profileLang = profile?.language || "";
+  const currentLanguageCode = isValidLocale(profileLang) ? profileLang : defaultLocale;
   const currentLanguage =
     languageOptions.find((lang) => lang.code === currentLanguageCode) ||
     languageOptions[0];
@@ -135,13 +148,13 @@ export function NavBar() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "pill text-xs font-semibold tracking-wide transition-colors",
+                  "pill font-cursive text-2xl font-normal tracking-wide transition-colors",
                   pathname === link.href
                     ? "bg-accent-ink text-white"
                     : "bg-white border border-border-subtle text-accent-ink hover:bg-shell"
                 )}
               >
-                {link.label}
+                {t(link.labelKey).toUpperCase()}
               </Link>
             ))}
 
@@ -151,17 +164,17 @@ export function NavBar() {
                 {user ? (
                   <button
                     onClick={handleSignOut}
-                    className="pill bg-white border border-border-subtle text-accent-ink hover:bg-shell text-xs font-semibold tracking-wide flex items-center gap-2"
+                    className="pill bg-white border border-border-subtle text-accent-ink hover:bg-shell font-cursive text-2xl font-normal tracking-wide flex items-center gap-2"
                   >
                     <LogOut className="h-3 w-3" />
-                    SIGN OUT
+                    {t("signOut").toUpperCase()}
                   </button>
                 ) : (
                   <Link
                     href="/sign-in"
-                    className="pill bg-accent-gold text-accent-ink text-xs font-semibold tracking-wide"
+                    className="pill bg-accent-gold text-accent-ink font-cursive text-2xl font-normal tracking-wide"
                   >
-                    SIGN IN
+                    {t("signIn").toUpperCase()}
                   </Link>
                 )}
               </>
@@ -172,7 +185,7 @@ export function NavBar() {
               <button
                 onClick={() => setShowLanguageMenu(!showLanguageMenu)}
                 disabled={savingLanguage}
-                className="pill bg-white border border-border-subtle text-accent-ink hover:bg-shell text-xs font-semibold tracking-wide flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="pill bg-white border border-border-subtle text-accent-ink hover:bg-shell font-cursive text-2xl font-normal tracking-wide flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {currentLanguage.flag} {currentLanguage.label}
                 <ChevronDown className={cn("h-3 w-3 transition-transform", showLanguageMenu && "rotate-180")} />
@@ -180,7 +193,7 @@ export function NavBar() {
 
               {/* Language dropdown menu */}
               {showLanguageMenu && (
-                <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-border-subtle rounded-lg shadow-lg overflow-hidden z-50">
+                <div className="absolute right-0 top-full mt-2 w-48 max-h-80 overflow-y-auto bg-white border border-border-subtle rounded-lg shadow-lg z-50">
                   {languageOptions.map((lang) => (
                     <button
                       key={lang.code}
@@ -237,13 +250,13 @@ export function NavBar() {
                       <Link
                         href={link.href}
                         className={cn(
-                          "flex items-center min-h-[44px] px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                          "flex items-center min-h-[44px] px-3 py-2 rounded-lg font-cursive text-2xl font-normal transition-colors",
                           pathname === link.href
                             ? "bg-accent-ink text-white"
                             : "text-accent-ink hover:bg-shell"
                         )}
                       >
-                        {link.label}
+                        {t(link.labelKey)}
                       </Link>
                     </SheetClose>
                   ))}
@@ -258,18 +271,18 @@ export function NavBar() {
                     {user ? (
                       <button
                         onClick={handleSignOut}
-                        className="flex items-center gap-3 min-h-[44px] w-full px-3 py-2 rounded-lg text-sm font-medium text-accent-ink hover:bg-shell transition-colors"
+                        className="flex items-center gap-3 min-h-[44px] w-full px-3 py-2 rounded-lg font-cursive text-2xl font-normal text-accent-ink hover:bg-shell transition-colors"
                       >
                         <LogOut className="h-4 w-4" />
-                        Sign Out
+                        {t("signOut")}
                       </button>
                     ) : (
                       <SheetClose asChild>
                         <Link
                           href="/sign-in"
-                          className="flex items-center justify-center min-h-[44px] px-4 py-2 rounded-lg text-sm font-medium gradient-gold text-white"
+                          className="flex items-center justify-center min-h-[44px] px-4 py-2 rounded-lg font-cursive text-2xl font-normal gradient-gold text-white"
                         >
-                          Sign In
+                          {t("signIn")}
                         </Link>
                       </SheetClose>
                     )}
@@ -282,8 +295,9 @@ export function NavBar() {
                 {/* Language section */}
                 <div className="space-y-1">
                   <p className="px-3 text-xs uppercase tracking-wide text-accent-ink/60 font-semibold mb-2">
-                    Language
+                    {tSettings("language.title")}
                   </p>
+                  <div className="max-h-64 overflow-y-auto space-y-1">
                   {languageOptions.map((lang) => (
                     <button
                       key={lang.code}
@@ -306,6 +320,7 @@ export function NavBar() {
                       )}
                     </button>
                   ))}
+                  </div>
                 </div>
               </div>
             </SheetContent>

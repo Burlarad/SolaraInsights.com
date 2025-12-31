@@ -1,0 +1,593 @@
+{
+  "common": {
+    "save": "Simpan",
+    "cancel": "Batal",
+    "close": "Tutup",
+    "loading": "Memuat...",
+    "saving": "Menyimpan...",
+    "saved": "Tersimpan",
+    "submit": "Kirim",
+    "back": "Kembali",
+    "next": "Selanjutnya",
+    "delete": "Hapus",
+    "deleting": "Menghapus...",
+    "error": "Terjadi kesalahan",
+    "tryAgain": "Coba lagi",
+    "confirm": "Konfirmasi",
+    "yes": "Ya",
+    "no": "Tidak",
+    "optional": "Opsional",
+    "required": "Wajib",
+    "or": "atau",
+    "and": "dan",
+    "on": "Aktif",
+    "off": "Nonaktif",
+    "enabled": "Diaktifkan",
+    "disabled": "Dinonaktifkan",
+    "goToSettings": "Buka Pengaturan",
+    "learnMore": "Pelajari lebih lanjut",
+    "viewAll": "Lihat semua",
+    "showMore": "Tampilkan lebih banyak",
+    "showLess": "Tampilkan lebih sedikit",
+    "masterNumber": "Angka Master"
+  },
+  "nav": {
+    "home": "Beranda",
+    "about": "Tentang",
+    "learn": "Belajar",
+    "sanctuary": "Sangtuari",
+    "settings": "Pengaturan",
+    "signIn": "Masuk",
+    "signUp": "Daftar",
+    "signOut": "Keluar"
+  },
+  "auth": {
+    "signIn": {
+      "title": "Selamat datang kembali",
+      "subtitle": "Masuk untuk mengakses sangtuari Anda",
+      "signInWith": "Masuk dengan",
+      "orSignInWithEmail": "Atau masuk dengan email",
+      "email": "Email",
+      "emailPlaceholder": "anda@example.com",
+      "password": "Kata sandi",
+      "forgot": "Lupa?",
+      "signingIn": "Sedang masuk...",
+      "signInButton": "Masuk",
+      "noAccount": "Belum punya akun?",
+      "createAccount": "Buat akun",
+      "signInError": "Kami tidak dapat memasukkan Anda dengan detail tersebut. Silakan periksa email dan kata sandi Anda, atau reset kata sandi Anda.",
+      "unexpectedError": "Terjadi kesalahan yang tidak terduga. Silakan coba lagi.",
+      "comingSoon": "Masuk dengan {provider} segera hadir"
+    },
+    "signUp": {
+      "title": "Buat akun Anda",
+      "subtitle": "Mulai perjalanan Anda menuju cahaya",
+      "fullName": "Nama lengkap",
+      "namePlaceholder": "Nama Anda",
+      "email": "Email",
+      "emailPlaceholder": "anda@example.com",
+      "password": "Kata sandi",
+      "passwordPlaceholder": "Minimal 8 karakter",
+      "confirmPassword": "Konfirmasi kata sandi",
+      "creatingAccount": "Sedang membuat akun...",
+      "createAccountButton": "Buat akun",
+      "terms": "Dengan mendaftar, Anda menyetujui Ketentuan Layanan dan Kebijakan Privasi kami. Sebagian dari langganan Anda mendukung keluarga melalui Yayasan Solara.",
+      "or": "atau",
+      "continueWithFacebook": "Lanjutkan dengan Facebook",
+      "continueWithTikTok": "Lanjutkan dengan TikTok",
+      "hasAccount": "Sudah punya akun?",
+      "signIn": "Masuk",
+      "passwordsDontMatch": "Kata sandi tidak cocok. Silakan coba lagi.",
+      "passwordTooShort": "Kata sandi harus minimal 8 karakter."
+    },
+    "forgotPassword": {
+      "title": "Reset kata sandi Anda",
+      "subtitle": "Masukkan email Anda dan kami akan mengirim tautan reset",
+      "email": "Email",
+      "emailPlaceholder": "anda@example.com",
+      "sending": "Mengirim...",
+      "sendResetLink": "Kirim tautan reset",
+      "backToSignIn": "Kembali ke masuk",
+      "checkEmail": {
+        "title": "Periksa email Anda",
+        "message": "Kami telah mengirim tautan reset kata sandi ke <strong>{email}</strong>. Klik tautan di email untuk membuat kata sandi baru."
+      }
+    },
+    "resetPassword": {
+      "title": "Atur kata sandi baru",
+      "subtitle": "Masukkan kata sandi baru Anda di bawah",
+      "verifying": "Memverifikasi tautan reset Anda...",
+      "newPassword": "Kata sandi baru",
+      "newPasswordPlaceholder": "Minimal 8 karakter",
+      "confirmPassword": "Konfirmasi kata sandi baru",
+      "confirmPasswordPlaceholder": "Masukkan ulang kata sandi Anda",
+      "updating": "Memperbarui kata sandi...",
+      "updatePassword": "Perbarui kata sandi",
+      "backToSignIn": "Kembali ke masuk",
+      "linkExpired": {
+        "title": "Tautan kedaluwarsa",
+        "message": "Tautan reset ini telah kedaluwarsa atau tidak valid. Silakan minta yang baru.",
+        "noCodeMessage": "Tidak ada tautan reset yang terdeteksi. Silakan minta reset kata sandi dari halaman masuk.",
+        "requestNewLink": "Minta tautan reset baru"
+      },
+      "success": {
+        "title": "Kata sandi diperbarui",
+        "message": "Kata sandi Anda telah berhasil diperbarui. Anda sekarang dapat masuk dengan kata sandi baru Anda.",
+        "continueToSignIn": "Lanjutkan ke masuk",
+        "redirecting": "Anda akan dialihkan secara otomatis dalam beberapa detik..."
+      },
+      "sessionRequired": {
+        "title": "Sesi diperlukan",
+        "message": "Silakan gunakan tautan reset dari email Anda untuk mengakses halaman ini.",
+        "requestResetLink": "Minta tautan reset"
+      }
+    },
+    "setPassword": {
+      "title": "Atur kata sandi Anda",
+      "subtitle": "Buat kata sandi untuk akun Solara Anda",
+      "settingPasswordFor": "Mengatur kata sandi untuk",
+      "password": "Kata sandi",
+      "passwordPlaceholder": "Minimal 8 karakter",
+      "confirmPassword": "Konfirmasi kata sandi",
+      "confirmPasswordPlaceholder": "Masukkan ulang kata sandi Anda",
+      "settingPassword": "Mengatur kata sandi...",
+      "continueToOnboarding": "Lanjutkan ke pengenalan",
+      "errors": {
+        "enterBoth": "Silakan masukkan dan konfirmasi kata sandi Anda",
+        "dontMatch": "Kata sandi tidak cocok",
+        "tooShort": "Kata sandi harus minimal 8 karakter"
+      }
+    },
+    "verifyEmail": {
+      "title": "Verifikasi Email Anda",
+      "subtitle": "Kami telah mengirim tautan verifikasi ke email Anda",
+      "resend": "Kirim ulang email verifikasi"
+    }
+  },
+  "onboarding": {
+    "welcome": "Selamat datang di Solara",
+    "letsGetStarted": "Mari mulai",
+    "tellUsAbout": "Ceritakan tentang diri Anda",
+    "pageTitle": "Lengkapi profil Sangtuari Anda",
+    "pageSubtitle": "Kami akan menggunakan informasi ini untuk menghasilkan wawasan yang dipersonalisasi untuk Anda",
+    "firstName": "Nama depan",
+    "middleName": "Nama tengah",
+    "lastName": "Nama belakang",
+    "nickname": "Nama panggilan (opsional)",
+    "nicknamePlaceholder": "Kami harus memanggil Anda apa?",
+    "nicknameHint": "Jika berbeda dari nama depan Anda",
+    "birthDetails": "Detail Kelahiran",
+    "birthDate": "Tanggal Lahir",
+    "birthTime": "Waktu Lahir (opsional)",
+    "birthTimeUnknown": "Saya tidak tahu waktu lahir saya",
+    "birthTimeHint": "Jika Anda tidak tahu waktu lahir yang tepat, Anda bisa melewatkannya sekarang dan menambahkannya nanti untuk bagan dan personalisasi yang lebih akurat.",
+    "birthPlace": "Tempat Lahir",
+    "searchPlace": "Cari kota tempat Anda lahir...",
+    "timezone": "Zona waktu: {timezone}",
+    "locationHint": "Mulai mengetik untuk mencari, lalu pilih dari hasil",
+    "locationWarning": "Silakan cari dan pilih lokasi kelahiran Anda dari dropdown untuk melanjutkan.",
+    "saving": "Menyimpan tanda tangan kelahiran Anda...",
+    "continue": "Lanjutkan",
+    "skip": "Lewati untuk saat ini",
+    "complete": "Selesaikan pengaturan",
+    "settingsNote": "Anda selalu dapat memperbarui detail ini nanti di Pengaturan",
+    "confirmingPayment": "Mengonfirmasi pembayaran Anda...",
+    "confirmingPaymentMessage": "Kami sedang mengonfirmasi langganan Anda. Ini biasanya hanya membutuhkan beberapa detik.",
+    "errors": {
+      "firstNameRequired": "Nama depan wajib diisi",
+      "lastNameRequired": "Nama belakang wajib diisi",
+      "birthDateRequired": "Tanggal lahir wajib diisi",
+      "locationRequired": "Silakan pilih lokasi kelahiran Anda dari hasil pencarian",
+      "saveFailed": "Gagal menyimpan profil. Silakan coba lagi."
+    }
+  },
+  "settings": {
+    "title": "Pengaturan",
+    "subtitle": "Perbarui nama pilihan, zodiak, dan koordinat kelahiran Anda",
+    "identity": {
+      "title": "Identitas",
+      "firstName": "Nama depan",
+      "middleName": "Nama tengah",
+      "lastName": "Nama belakang",
+      "nickname": "Nama panggilan",
+      "nicknameHint": "Jika berbeda dari nama depan Anda",
+      "birthNameHint": "Nama lahir Anda digunakan untuk perhitungan numerologi",
+      "nameMissingBanner": "Silakan tambahkan nama depan dan belakang untuk pengalaman yang lebih personal."
+    },
+    "email": {
+      "title": "Email",
+      "addEmailBanner": "Tambahkan alamat email asli untuk menerima pembaruan dan mengaktifkan reset kata sandi.",
+      "placeholder": "email@anda.com"
+    },
+    "password": {
+      "title": "Kata Sandi",
+      "current": "Kata sandi saat ini",
+      "new": "Kata sandi baru",
+      "confirm": "Konfirmasi kata sandi baru",
+      "change": "Ubah kata sandi",
+      "placeholder": "Kata sandi Anda"
+    },
+    "birthDetails": {
+      "title": "Detail Kelahiran",
+      "date": "Tanggal lahir",
+      "time": "Waktu lahir",
+      "timeUnknown": "Saya tidak tahu waktu lahir saya",
+      "place": "Tempat lahir",
+      "timezone": "Zona waktu"
+    },
+    "zodiac": {
+      "title": "Zodiak",
+      "select": "Pilih zodiak Anda"
+    },
+    "language": {
+      "title": "Bahasa",
+      "select": "Pilih bahasa"
+    },
+    "social": {
+      "title": "Wawasan Sosial",
+      "description": "Hubungkan akun sosial Anda untuk wawasan yang dipersonalisasi",
+      "connect": "Hubungkan",
+      "disconnect": "Putuskan",
+      "connected": "Terhubung"
+    },
+    "dangerZone": {
+      "title": "Zona Bahaya",
+      "hibernate": "Hibernasi Akun",
+      "hibernateDescription": "Nonaktifkan akun Anda sementara. Anda dapat mengaktifkannya kembali kapan saja.",
+      "delete": "Hapus Akun",
+      "deleteDescription": "Hapus akun dan semua data Anda secara permanen. Ini tidak dapat dibatalkan.",
+      "confirmDelete": "Apakah Anda yakin ingin menghapus akun Anda?",
+      "typeToConfirm": "Ketik DELETE untuk mengonfirmasi"
+    },
+    "saveChanges": "Simpan perubahan",
+    "verificationExpired": "Verifikasi Anda telah kedaluwarsa. Silakan verifikasi lagi."
+  },
+  "sanctuary": {
+    "greeting": {
+      "title": "Kejernihan yang tenang, {name}.",
+      "defaultName": "Teman",
+      "defaultMessage": "Wawasan harian Anda sedang dipersiapkan oleh alam semesta."
+    },
+    "tabs": {
+      "insights": "Wawasan",
+      "astrology": "Astrologi",
+      "numerology": "Numerologi",
+      "connections": "Koneksi"
+    },
+    "timeframes": {
+      "today": "Hari Ini",
+      "week": "Minggu",
+      "month": "Bulan",
+      "year": "Tahun"
+    },
+    "insights": {
+      "title": "Sangtuari Anda",
+      "label": "Wawasan sangtuari",
+      "tuning": "Menyetel wawasan Anda...",
+      "ready": "Wawasan Anda siap.",
+      "localTimezone": "Zona waktu lokal",
+      "greeting": "Selamat datang kembali",
+      "sunriseGuidance": "Panduan fajar",
+      "energeticRhythm": "Ritme energi Anda untuk {timeframe}",
+      "coreThemesFor": "Tema inti {timeframe}",
+      "focusFor": "Fokus untuk {timeframe}",
+      "personalNarrative": "Narasi Pribadi",
+      "coreThemes": "Tema Inti",
+      "focusForPeriod": "Fokus untuk periode ini",
+      "journalPrompt": "Prompt Jurnal",
+      "tarot": {
+        "title": "Kartu Tarot",
+        "label": "UNDIAN TAROT — ARKETIPE HARIAN",
+        "yourCard": "Kartu Anda",
+        "matchError": "Kami mengalami kesulitan mencocokkan kartu tarot ini dengan dek kami."
+      },
+      "luckyCompass": {
+        "title": "Kompas Keberuntungan",
+        "label": "KOMPAS KEBERUNTUNGAN — KEBERUNTUNGAN HARIAN + PENANDA CAHAYA",
+        "numbers": "Angka {timeframe}",
+        "powerWords": "KATA KEKUATAN",
+        "handwrittenNote": "CATATAN TULISAN TANGAN"
+      },
+      "emotionalCadence": {
+        "title": "Irama Emosional",
+        "label": "IRAMA EMOSIONAL — RITME HARIAN",
+        "dawn": "Fajar",
+        "midday": "Siang",
+        "dusk": "Senja",
+        "evening": "Malam",
+        "midnight": "Tengah malam",
+        "morning": "Pagi"
+      },
+      "dailyReflection": {
+        "title": "Refleksi harian",
+        "subtitle": "Biarkan catatan Anda tetap pribadi dan lembut.",
+        "placeholder": "Beberapa kata untuk langit Anda hari ini…",
+        "saveHint": "Tekan ⌘+Enter atau Ctrl+Enter untuk menyimpan"
+      },
+      "errors": {
+        "profileLoadError": "Kami mengalami kesulitan memuat profil Anda. Silakan coba lagi, atau hubungi dukungan jika ini berlanjut.",
+        "insightLoadError": "Kami mengalami kesulitan memuat wawasan Anda. Ini mungkin masalah sementara.",
+        "birthSignatureRequired": "Atur tanda tangan kelahiran Anda",
+        "journalSaveError": "Tidak dapat menyimpan. Silakan coba lagi."
+      },
+      "socialInsights": {
+        "paused": "Wawasan sosial dijeda",
+        "pausedDescription": "Aktifkan Wawasan Sosial untuk meningkatkan bacaan Anda dengan pola dari akun yang terhubung."
+      },
+      "reactivated": "Diaktifkan kembali — selamat datang kembali."
+    }
+  },
+  "numerology": {
+    "title": "Angka Anda",
+    "subtitle": "Matematika di Balik Kehidupan Anda",
+    "calculating": "Menghitung angka Anda...",
+    "systems": {
+      "pythagorean": "Pythagoras",
+      "chaldean": "Kaldea"
+    },
+    "errors": {
+      "nameRequired": "Nama Diperlukan",
+      "nameRequiredMessage": "Kami membutuhkan nama depan dan belakang Anda untuk menghitung profil numerologi Anda. Silakan perbarui nama Anda di Pengaturan.",
+      "birthDateRequired": "Tanggal Lahir Diperlukan",
+      "birthDateRequiredMessage": "Kami membutuhkan tanggal lahir Anda untuk menghitung profil numerologi Anda. Silakan perbarui tanggal lahir Anda di Pengaturan.",
+      "loadFailed": "Tidak dapat memuat profil numerologi"
+    },
+    "coreNumbers": {
+      "title": "Angka Inti",
+      "lifePath": "Jalan Hidup",
+      "lifePathDesc": "Tujuan hidup Anda dan jalan yang Anda tempuh",
+      "expression": "Ekspresi",
+      "expressionDesc": "Kemampuan dan bakat alami Anda",
+      "soulUrge": "Dorongan Jiwa",
+      "soulUrgeDesc": "Motivasi dan keinginan batin Anda",
+      "personality": "Kepribadian",
+      "personalityDesc": "Bagaimana orang lain melihat Anda",
+      "birthday": "Ulang Tahun",
+      "birthdayDesc": "Bakat dan kemampuan alami Anda",
+      "maturity": "Kedewasaan",
+      "maturityDesc": "Siapa yang Anda akan menjadi"
+    },
+    "cycles": {
+      "title": "Siklus Pribadi",
+      "personalYear": "Tahun Pribadi",
+      "personalMonth": "Bulan Pribadi",
+      "personalDay": "Hari Pribadi"
+    },
+    "lifePeriods": {
+      "title": "Periode Kehidupan",
+      "currentPinnacle": "Puncak Saat Ini",
+      "period": "Periode",
+      "ages": "Usia",
+      "onwards": "seterusnya",
+      "pinnacles": {
+        "first": "Puncak ke-1",
+        "second": "Puncak ke-2",
+        "third": "Puncak ke-3",
+        "fourth": "Puncak ke-4"
+      }
+    },
+    "challenges": {
+      "title": "Tantangan Hidup",
+      "first": "Tantangan Pertama",
+      "second": "Tantangan Kedua",
+      "third": "Tantangan Ketiga",
+      "main": "Tantangan Utama"
+    },
+    "luckyNumbers": {
+      "title": "Angka Keberuntungan"
+    },
+    "karmicDebt": {
+      "title": "Pelajaran Karma"
+    }
+  },
+  "astrology": {
+    "title": "Astrologi",
+    "subtitle": "Cahaya di Balik Kehidupan Anda",
+    "calculating": "Menghitung bagan Anda...",
+    "birthChart": {
+      "title": "Bagan Kelahiran",
+      "subtitle": "Tanda tangan planet unik Anda"
+    },
+    "planets": {
+      "title": "Planet",
+      "subtitle": "Tanda tangan planet unik Anda",
+      "sun": "Matahari",
+      "sunDesc": "Inti dari rasa diri dan vitalitas Anda.",
+      "moon": "Bulan",
+      "moonDesc": "Lanskap emosional dan dunia dalam Anda.",
+      "mercury": "Merkurius",
+      "mercuryDesc": "Cara Anda berpikir dan berkomunikasi.",
+      "venus": "Venus",
+      "venusDesc": "Apa yang Anda cintai dan anggap indah.",
+      "mars": "Mars",
+      "marsDesc": "Dorongan, hasrat, dan cara Anda bertindak.",
+      "jupiter": "Jupiter",
+      "jupiterDesc": "Di mana Anda mencari pertumbuhan dan makna.",
+      "saturn": "Saturnus",
+      "saturnDesc": "Pelajaran dan bidang penguasaan Anda.",
+      "uranus": "Uranus",
+      "uranusDesc": "Di mana Anda berinovasi dan membebaskan diri.",
+      "neptune": "Neptunus",
+      "neptuneDesc": "Impian, intuisi, dan sifat spiritual Anda.",
+      "pluto": "Pluto",
+      "plutoDesc": "Kedalaman dan kekuatan transformatif Anda.",
+      "northNode": "Node Utara",
+      "northNodeDesc": "Undangan Anda menuju pertumbuhan."
+    },
+    "houses": {
+      "title": "Rumah",
+      "subtitle": "12 area kehidupan dalam bagan Anda",
+      "first": "Rumah 1",
+      "second": "Rumah 2",
+      "secondDesc": "Hubungan Anda dengan sumber daya, nilai, dan stabilitas.",
+      "third": "Rumah 3",
+      "fourth": "Rumah 4",
+      "fourthDesc": "Fondasi batin, rumah, dan akar emosional Anda.",
+      "fifth": "Rumah 5",
+      "sixth": "Rumah 6",
+      "sixthDesc": "Ritme harian, pekerjaan, dan kesejahteraan Anda.",
+      "seventh": "Rumah 7",
+      "eighth": "Rumah 8",
+      "ninth": "Rumah 9",
+      "ninthDesc": "Pencarian Anda akan makna, kepercayaan, dan ekspansi.",
+      "tenth": "Rumah 10",
+      "tenthDesc": "Peran publik, karir, dan warisan yang terlihat.",
+      "eleventh": "Rumah 11",
+      "eleventhDesc": "Visi Anda untuk komunitas, persahabatan, dan masa depan.",
+      "twelfth": "Rumah 12",
+      "twelfthDesc": "Sangtuari batin, kesendirian, dan yang sakral."
+    },
+    "aspects": {
+      "title": "Aspek",
+      "subtitle": "Percakapan antara planet Anda"
+    },
+    "patterns": {
+      "title": "Pola & Jalan",
+      "chartShape": "Bentuk Bagan",
+      "dominantElement": "Elemen Dominan",
+      "dominantModality": "Modalitas Dominan",
+      "hemisphereEmphasis": "Penekanan Hemisfer",
+      "above": "Di atas cakrawala",
+      "below": "Di bawah cakrawala",
+      "aboveDesc": "Bagan Anda berorientasi pada visibilitas dan ekspresi keluar. Kehidupan sering meminta Anda untuk tampil, terlihat, dan terlibat dengan dunia luar.",
+      "belowDesc": "Bagan Anda berorientasi pada refleksi batin dan kehalusan. Kehidupan sering berlangsung melalui pemrosesan batin, pengamatan tenang, dan pekerjaan di balik layar."
+    },
+    "errors": {
+      "birthDetailsRequired": "Detail Kelahiran Diperlukan",
+      "birthDetailsRequiredMessage": "Kami membutuhkan detail kelahiran lengkap Anda untuk menghitung bagan Anda."
+    }
+  },
+  "connections": {
+    "title": "Koneksi",
+    "subtitle": "Jelajahi hubungan Anda",
+    "addConnection": "Tambah Koneksi",
+    "noConnections": "Belum ada koneksi",
+    "noConnectionsMessage": "Tambahkan koneksi pertama Anda untuk menjelajahi dinamika hubungan Anda.",
+    "notes": "Catatan",
+    "saveNotes": "Simpan catatan",
+    "compatibility": "Kecocokan",
+    "synastry": "Sinastri",
+    "composite": "Komposit"
+  },
+  "spaceBetween": {
+    "title": "Ruang Di Antara",
+    "subtitle": "Cetak biru hubungan Anda dengan {connectionName}",
+    "generating": "Menghasilkan cetak biru hubungan Anda...",
+    "generatingHint": "Ini mungkin membutuhkan waktu sebentar",
+    "tryAgain": "Coba lagi",
+    "discover": "Temukan Ruang Di Antara",
+    "discoverDescription": "Hasilkan cetak biru hubungan permanen Anda dengan {connectionName}. Wawasan mendalam ini dibuat sekali dan disimpan selamanya.",
+    "generateBlueprint": "Hasilkan cetak biru",
+    "sections": {
+      "essence": "Esensi",
+      "emotionalBlueprint": "Cetak Biru Emosional",
+      "communication": "Komunikasi",
+      "growthEdges": "Titik Pertumbuhan",
+      "careGuide": "Panduan Perawatan"
+    }
+  },
+  "location": {
+    "title": "Bantu Solara mencocokkan langit Anda",
+    "body": "Untuk menghasilkan wawasan di awal hari Anda, Solara perlu tahu kira-kira di mana Anda berada di dunia.\n\nKami menggunakan ini hanya untuk menghitung zona waktu Anda sehingga panduan harian, mingguan, dan bulanan Anda diperbarui pada waktu lokal yang tepat.\n\nJika Anda melewatkan ini, kami akan menggunakan UTC sebagai default. Solara masih akan bekerja, tetapi waktu Anda mungkin terasa sedikit berbeda.",
+    "allow": "Izinkan lokasi",
+    "skip": "Lewati, gunakan UTC untuk saat ini"
+  },
+  "errors": {
+    "pageNotFound": "Halaman tidak ditemukan",
+    "unauthorized": "Tidak diizinkan",
+    "serverError": "Kesalahan server",
+    "networkError": "Kesalahan jaringan",
+    "rateLimited": "Terlalu banyak permintaan. Silakan coba lagi nanti.",
+    "sessionExpired": "Sesi Anda telah kedaluwarsa. Silakan masuk lagi."
+  },
+  "deletion": {
+    "pageTitle": "Status Penghapusan Data",
+    "noCode": "Tidak ada kode konfirmasi yang diberikan. Silakan gunakan tautan dari email konfirmasi penghapusan data Anda.",
+    "notFound": "Permintaan penghapusan tidak ditemukan. Kode konfirmasi mungkin tidak valid atau kedaluwarsa.",
+    "confirmationCode": "Kode Konfirmasi",
+    "status": "Status",
+    "requestReceived": "Permintaan Diterima",
+    "processed": "Diproses",
+    "errorDetails": "Detail kesalahan",
+    "contactSupport": "Silakan hubungi kami di solara@solarainsights.com untuk bantuan.",
+    "questions": "Ada pertanyaan? Hubungi kami di",
+    "pending": {
+      "title": "Tertunda",
+      "description": "Permintaan penghapusan data Anda telah diterima dan sedang menunggu untuk diproses."
+    },
+    "processing": {
+      "title": "Sedang Diproses",
+      "description": "Data Anda saat ini sedang dihapus dari sistem kami."
+    },
+    "completed": {
+      "title": "Selesai",
+      "description": "Data Anda telah berhasil dihapus dari Solara Insights.",
+      "permanentNotice": "Semua data pribadi Anda yang terkait dengan akun Facebook Anda telah dihapus secara permanen dari Solara Insights. Tindakan ini tidak dapat dibatalkan."
+    },
+    "failed": {
+      "title": "Gagal",
+      "description": "Ada masalah dalam memproses permintaan penghapusan Anda. Silakan hubungi dukungan."
+    },
+    "userNotFound": {
+      "title": "Tidak Ada Data Ditemukan",
+      "description": "Tidak ada akun yang ditemukan yang terkait dengan akun Facebook Anda. Tidak ada data yang perlu dihapus."
+    }
+  },
+  "zodiacSigns": {
+    "aries": "Aries",
+    "taurus": "Taurus",
+    "gemini": "Gemini",
+    "cancer": "Cancer",
+    "leo": "Leo",
+    "virgo": "Virgo",
+    "libra": "Libra",
+    "scorpio": "Scorpio",
+    "sagittarius": "Sagitarius",
+    "capricorn": "Capricorn",
+    "aquarius": "Aquarius",
+    "pisces": "Pisces"
+  },
+  "tarot": {
+    "title": "Tanya Kartu",
+    "questionLabel": "PERTANYAAN ANDA",
+    "questionPlaceholder": "Tentang apa Anda ingin bimbingan hari ini?",
+    "questionError": "Silakan masukkan pertanyaan (minimal {minLength} karakter)",
+    "charactersNeeded": "Butuh {count} karakter lagi",
+    "spreadLabel": "PILIH SPREAD ANDA",
+    "spreads": {
+      "single": "Satu kartu",
+      "singleDesc": "Wawasan cepat",
+      "three": "Tiga kartu",
+      "threeDesc": "Masa Lalu, Sekarang, Masa Depan",
+      "five": "Lima kartu",
+      "fiveDesc": "Eksplorasi mendalam"
+    },
+    "buttons": {
+      "draw": "Tarik kartu",
+      "drawing": "Menarik kartu...",
+      "wait": "Tunggu {seconds}d..."
+    },
+    "loading": "Mengocok dek...",
+    "reading": {
+      "title": "Bacaan Anda",
+      "reversed": "Terbalik",
+      "synthesis": "GAMBARAN BESAR",
+      "actions": "TINDAKAN YANG DISARANKAN",
+      "reflection": "REFLEKSI"
+    },
+    "cta": {
+      "message": "Ingin bacaan yang lebih dalam dan dipersonalisasi?",
+      "button": "Bergabung dengan Solara"
+    },
+    "errors": {
+      "generic": "Tidak dapat menyelesaikan bacaan Anda. Silakan coba lagi.",
+      "rateLimit": "Silakan tunggu {seconds} detik sebelum menarik lagi."
+    }
+  },
+  "learn": {
+    "searchPlaceholder": "Cari panduan...",
+    "guidesFound": "{count} panduan ditemukan",
+    "filterByTopic": "Filter berdasarkan topik",
+    "clearAll": "Hapus semua"
+  }
+}

@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SpaceBetweenReport } from "@/types";
+import { useTranslations } from "next-intl";
 
 interface SpaceBetweenSheetProps {
   open: boolean;
@@ -61,6 +62,8 @@ export function SpaceBetweenSheet({
   connectionId,
   connectionName,
 }: SpaceBetweenSheetProps) {
+  const t = useTranslations("spaceBetween");
+  const tCommon = useTranslations("common");
   const [spaceBetween, setSpaceBetween] = useState<SpaceBetweenReport | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -115,9 +118,9 @@ export function SpaceBetweenSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
         <SheetHeader className="mb-6">
-          <SheetTitle className="text-accent-gold">The Space Between</SheetTitle>
+          <SheetTitle className="text-accent-gold">{t("title")}</SheetTitle>
           <SheetDescription>
-            Your relationship blueprint with {connectionName}
+            {t("subtitle", { connectionName })}
           </SheetDescription>
         </SheetHeader>
 
@@ -125,10 +128,10 @@ export function SpaceBetweenSheet({
           <div className="flex flex-col items-center justify-center py-16">
             <Loader2 className="h-8 w-8 animate-spin text-accent-gold mb-4" />
             <p className="text-sm text-accent-ink/60">
-              Generating your relationship blueprint...
+              {t("generating")}
             </p>
             <p className="text-xs text-accent-ink/40 mt-2">
-              This may take a moment
+              {t("generatingHint")}
             </p>
           </div>
         ) : error ? (
@@ -136,24 +139,24 @@ export function SpaceBetweenSheet({
             <p className="text-5xl mb-4">😔</p>
             <p className="text-red-600 mb-4">{error}</p>
             <Button variant="outline" onClick={loadSpaceBetween}>
-              Try again
+              {tCommon("tryAgain")}
             </Button>
           </div>
         ) : spaceBetween ? (
           <div className="space-y-0">
-              <SpaceAccordionItem title="Essence" defaultOpen={true}>
+              <SpaceAccordionItem title={t("sections.essence")} defaultOpen={true}>
                 {spaceBetween.relationship_essence}
               </SpaceAccordionItem>
-              <SpaceAccordionItem title="Emotional Blueprint">
+              <SpaceAccordionItem title={t("sections.emotionalBlueprint")}>
                 {spaceBetween.emotional_blueprint}
               </SpaceAccordionItem>
-              <SpaceAccordionItem title="Communication">
+              <SpaceAccordionItem title={t("sections.communication")}>
                 {spaceBetween.communication_patterns}
               </SpaceAccordionItem>
-              <SpaceAccordionItem title="Growth Edges">
+              <SpaceAccordionItem title={t("sections.growthEdges")}>
                 {spaceBetween.growth_edges}
               </SpaceAccordionItem>
-              <SpaceAccordionItem title="Care Guide">
+              <SpaceAccordionItem title={t("sections.careGuide")}>
                 {spaceBetween.care_guide}
               </SpaceAccordionItem>
           </div>
@@ -161,14 +164,13 @@ export function SpaceBetweenSheet({
           <div className="text-center py-16">
             <p className="text-5xl mb-4">🌌</p>
             <h3 className="text-lg font-semibold mb-2">
-              Discover the Space Between
+              {t("discover")}
             </h3>
             <p className="text-accent-ink/60 mb-6 max-w-md mx-auto">
-              Generate your permanent relationship blueprint with {connectionName}.
-              This deep insight is created once and saved forever.
+              {t("discoverDescription", { connectionName })}
             </p>
             <Button variant="gold" onClick={loadSpaceBetween}>
-              Generate blueprint
+              {t("generateBlueprint")}
             </Button>
           </div>
         )}

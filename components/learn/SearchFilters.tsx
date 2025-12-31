@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Chip } from "@/components/shared/Chip";
@@ -18,6 +19,8 @@ interface SearchFiltersProps {
 }
 
 export function SearchFilters({ items, onFilterChange }: SearchFiltersProps) {
+  const t = useTranslations("learn");
+
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategories, setActiveCategories] = useState<LearnCategory[]>([]);
 
@@ -70,10 +73,10 @@ export function SearchFilters({ items, onFilterChange }: SearchFiltersProps) {
             />
             <Input
               type="text"
-              placeholder="Search guides..."
+              placeholder={t("searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
-              aria-label="Search guides"
+              aria-label={t("searchPlaceholder")}
               className="pl-10 h-11 text-base"
             />
             {searchQuery && (
@@ -87,7 +90,7 @@ export function SearchFilters({ items, onFilterChange }: SearchFiltersProps) {
             )}
           </div>
           <p className="text-sm text-accent-ink/60 whitespace-nowrap">
-            {filteredCount} {filteredCount === 1 ? "guide" : "guides"} found
+            {t("guidesFound", { count: filteredCount })}
           </p>
         </div>
 
@@ -95,14 +98,14 @@ export function SearchFilters({ items, onFilterChange }: SearchFiltersProps) {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs text-accent-ink/50 uppercase tracking-wide">
-              Filter by topic
+              {t("filterByTopic")}
             </span>
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
                 className="text-xs text-accent-gold hover:underline"
               >
-                Clear all
+                {t("clearAll")}
               </button>
             )}
           </div>

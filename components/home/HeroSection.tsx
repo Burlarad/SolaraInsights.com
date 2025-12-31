@@ -73,12 +73,7 @@ export function HeroSection({
             </p>
           </>
         ) : (
-          <>
-            <h2 className="text-3xl font-semibold mb-2">Choose your sign</h2>
-            <p className="text-base text-accent-ink/70">
-              Select a sign to receive {timeframe.toLowerCase()}'s reading.
-            </p>
-          </>
+          <h2 className="text-3xl font-semibold">Choose your sign</h2>
         )}
       </div>
     </section>

@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { SolaraLogo } from "@/components/layout/SolaraLogo";
 import { Metadata } from "next";
 import Link from "next/link";
 
@@ -10,6 +11,11 @@ export const metadata: Metadata = {
 export default function DataDeletionPage() {
   return (
     <div className="max-w-4xl mx-auto px-6 py-16">
+      {/* Solara Logo - subtle */}
+      <div className="flex justify-center items-center pt-2 pb-4">
+        <SolaraLogo size="sm" className="opacity-50 scale-75" />
+      </div>
+
       <h1 className="text-4xl font-bold text-center mb-4">Data Deletion Instructions</h1>
       <p className="text-center text-accent-ink/60 mb-12">
         How to delete your data from Solara Insights

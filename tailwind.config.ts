@@ -66,6 +66,7 @@ const config: Config = {
       fontFamily: {
         sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
         serif: ['var(--font-serif)', 'Georgia', 'serif'],
+        cursive: ['var(--font-cursive)', 'cursive'],
       },
       letterSpacing: {
         'micro': '0.15em',

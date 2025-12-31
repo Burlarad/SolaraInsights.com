@@ -1,0 +1,685 @@
+{
+  "common": {
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "close": "Đóng",
+    "loading": "Đang tải...",
+    "saving": "Đang lưu...",
+    "saved": "Đã lưu",
+    "submit": "Gửi",
+    "back": "Quay lại",
+    "next": "Tiếp theo",
+    "delete": "Xóa",
+    "deleting": "Đang xóa...",
+    "error": "Đã xảy ra lỗi",
+    "tryAgain": "Thử lại",
+    "confirm": "Xác nhận",
+    "yes": "Có",
+    "no": "Không",
+    "optional": "Tùy chọn",
+    "required": "Bắt buộc",
+    "or": "hoặc",
+    "and": "và",
+    "on": "Bật",
+    "off": "Tắt",
+    "enabled": "Đã bật",
+    "disabled": "Đã tắt",
+    "goToSettings": "Đi đến Cài đặt",
+    "learnMore": "Tìm hiểu thêm",
+    "viewAll": "Xem tất cả",
+    "showMore": "Hiện thêm",
+    "showLess": "Ẩn bớt",
+    "masterNumber": "Số Chủ"
+  },
+  "nav": {
+    "home": "Trang chủ",
+    "about": "Giới thiệu",
+    "learn": "Học hỏi",
+    "sanctuary": "Thánh đường",
+    "settings": "Cài đặt",
+    "signIn": "Đăng nhập",
+    "signUp": "Đăng ký",
+    "signOut": "Đăng xuất"
+  },
+  "auth": {
+    "signIn": {
+      "title": "Chào mừng trở lại",
+      "subtitle": "Đăng nhập để vào thánh đường của bạn",
+      "signInWith": "Đăng nhập với",
+      "orSignInWithEmail": "Hoặc đăng nhập bằng email",
+      "email": "Email",
+      "emailPlaceholder": "ban@example.com",
+      "password": "Mật khẩu",
+      "forgot": "Quên?",
+      "signingIn": "Đang đăng nhập...",
+      "signInButton": "Đăng nhập",
+      "noAccount": "Chưa có tài khoản?",
+      "createAccount": "Tạo tài khoản",
+      "signInError": "Chúng tôi không thể đăng nhập với thông tin đó. Vui lòng kiểm tra email và mật khẩu, hoặc đặt lại mật khẩu.",
+      "unexpectedError": "Đã xảy ra lỗi không mong muốn. Vui lòng thử lại.",
+      "comingSoon": "Đăng nhập {provider} sắp ra mắt"
+    },
+    "signUp": {
+      "title": "Tạo tài khoản của bạn",
+      "subtitle": "Bắt đầu hành trình vào ánh sáng",
+      "fullName": "Họ và tên",
+      "namePlaceholder": "Tên của bạn",
+      "email": "Email",
+      "emailPlaceholder": "ban@example.com",
+      "password": "Mật khẩu",
+      "passwordPlaceholder": "Ít nhất 8 ký tự",
+      "confirmPassword": "Xác nhận mật khẩu",
+      "creatingAccount": "Đang tạo tài khoản...",
+      "createAccountButton": "Tạo tài khoản",
+      "terms": "Bằng việc đăng ký, bạn đồng ý với Điều khoản Dịch vụ và Chính sách Bảo mật của chúng tôi. Một phần đăng ký của bạn hỗ trợ các gia đình thông qua Quỹ Solara.",
+      "or": "hoặc",
+      "continueWithFacebook": "Tiếp tục với Facebook",
+      "continueWithTikTok": "Tiếp tục với TikTok",
+      "hasAccount": "Đã có tài khoản?",
+      "signIn": "Đăng nhập",
+      "passwordsDontMatch": "Mật khẩu không khớp. Vui lòng thử lại.",
+      "passwordTooShort": "Mật khẩu phải có ít nhất 8 ký tự."
+    },
+    "forgotPassword": {
+      "title": "Đặt lại mật khẩu",
+      "subtitle": "Nhập email của bạn và chúng tôi sẽ gửi liên kết đặt lại",
+      "email": "Email",
+      "emailPlaceholder": "ban@example.com",
+      "sending": "Đang gửi...",
+      "sendResetLink": "Gửi liên kết đặt lại",
+      "backToSignIn": "Quay lại đăng nhập",
+      "checkEmail": {
+        "title": "Kiểm tra email của bạn",
+        "message": "Chúng tôi đã gửi liên kết đặt lại mật khẩu đến <strong>{email}</strong>. Nhấp vào liên kết trong email để tạo mật khẩu mới."
+      }
+    },
+    "resetPassword": {
+      "title": "Đặt mật khẩu mới",
+      "subtitle": "Nhập mật khẩu mới của bạn bên dưới",
+      "verifying": "Đang xác minh liên kết đặt lại...",
+      "newPassword": "Mật khẩu mới",
+      "newPasswordPlaceholder": "Ít nhất 8 ký tự",
+      "confirmPassword": "Xác nhận mật khẩu mới",
+      "confirmPasswordPlaceholder": "Nhập lại mật khẩu của bạn",
+      "updating": "Đang cập nhật mật khẩu...",
+      "updatePassword": "Cập nhật mật khẩu",
+      "backToSignIn": "Quay lại đăng nhập",
+      "linkExpired": {
+        "title": "Liên kết đã hết hạn",
+        "message": "Liên kết đặt lại này đã hết hạn hoặc không hợp lệ. Vui lòng yêu cầu liên kết mới.",
+        "noCodeMessage": "Không phát hiện liên kết đặt lại. Vui lòng yêu cầu đặt lại mật khẩu từ trang đăng nhập.",
+        "requestNewLink": "Yêu cầu liên kết đặt lại mới"
+      },
+      "success": {
+        "title": "Đã cập nhật mật khẩu",
+        "message": "Mật khẩu của bạn đã được cập nhật thành công. Bạn có thể đăng nhập với mật khẩu mới.",
+        "continueToSignIn": "Tiếp tục đăng nhập",
+        "redirecting": "Bạn sẽ được chuyển hướng tự động trong vài giây..."
+      },
+      "sessionRequired": {
+        "title": "Yêu cầu phiên đăng nhập",
+        "message": "Vui lòng sử dụng liên kết đặt lại từ email để truy cập trang này.",
+        "requestResetLink": "Yêu cầu liên kết đặt lại"
+      }
+    },
+    "setPassword": {
+      "title": "Đặt mật khẩu của bạn",
+      "subtitle": "Tạo mật khẩu cho tài khoản Solara của bạn",
+      "settingPasswordFor": "Đang đặt mật khẩu cho",
+      "password": "Mật khẩu",
+      "passwordPlaceholder": "Ít nhất 8 ký tự",
+      "confirmPassword": "Xác nhận mật khẩu",
+      "confirmPasswordPlaceholder": "Nhập lại mật khẩu của bạn",
+      "settingPassword": "Đang đặt mật khẩu...",
+      "continueToOnboarding": "Tiếp tục đến trang giới thiệu",
+      "errors": {
+        "enterBoth": "Vui lòng nhập và xác nhận mật khẩu của bạn",
+        "dontMatch": "Mật khẩu không khớp",
+        "tooShort": "Mật khẩu phải có ít nhất 8 ký tự"
+      }
+    },
+    "verifyEmail": {
+      "title": "Xác minh email của bạn",
+      "subtitle": "Chúng tôi đã gửi liên kết xác minh đến email của bạn",
+      "resend": "Gửi lại email xác minh"
+    }
+  },
+  "onboarding": {
+    "welcome": "Chào mừng đến với Solara",
+    "letsGetStarted": "Hãy bắt đầu nào",
+    "tellUsAbout": "Hãy kể về bản thân bạn",
+    "pageTitle": "Hoàn thiện hồ sơ Thánh đường của bạn",
+    "pageSubtitle": "Chúng tôi sẽ sử dụng thông tin này để tạo những hiểu biết cá nhân hóa cho bạn",
+    "firstName": "Tên",
+    "middleName": "Tên đệm",
+    "lastName": "Họ",
+    "nickname": "Biệt danh (tùy chọn)",
+    "nicknamePlaceholder": "Chúng tôi nên gọi bạn là gì?",
+    "nicknameHint": "Nếu khác với tên của bạn",
+    "birthDetails": "Thông tin sinh",
+    "birthDate": "Ngày sinh",
+    "birthTime": "Giờ sinh (tùy chọn)",
+    "birthTimeUnknown": "Tôi không biết giờ sinh của mình",
+    "birthTimeHint": "Nếu bạn không biết giờ sinh chính xác, bạn có thể bỏ qua bây giờ và thêm sau để có biểu đồ và cá nhân hóa chính xác hơn.",
+    "birthPlace": "Nơi sinh",
+    "searchPlace": "Tìm kiếm thành phố nơi bạn sinh...",
+    "timezone": "Múi giờ: {timezone}",
+    "locationHint": "Bắt đầu gõ để tìm kiếm, sau đó chọn từ kết quả",
+    "locationWarning": "Vui lòng tìm kiếm và chọn nơi sinh từ danh sách để tiếp tục.",
+    "saving": "Đang lưu dấu ấn sinh của bạn...",
+    "continue": "Tiếp tục",
+    "skip": "Bỏ qua",
+    "complete": "Hoàn tất thiết lập",
+    "settingsNote": "Bạn luôn có thể cập nhật những thông tin này sau trong Cài đặt",
+    "confirmingPayment": "Đang xác nhận thanh toán của bạn...",
+    "confirmingPaymentMessage": "Chúng tôi đang xác nhận đăng ký của bạn. Điều này thường chỉ mất vài giây.",
+    "errors": {
+      "firstNameRequired": "Tên là bắt buộc",
+      "lastNameRequired": "Họ là bắt buộc",
+      "birthDateRequired": "Ngày sinh là bắt buộc",
+      "locationRequired": "Vui lòng chọn nơi sinh từ kết quả tìm kiếm",
+      "saveFailed": "Không thể lưu hồ sơ. Vui lòng thử lại."
+    }
+  },
+  "settings": {
+    "title": "Cài đặt",
+    "subtitle": "Cập nhật tên, cung hoàng đạo và tọa độ sinh của bạn",
+    "identity": {
+      "title": "Danh tính",
+      "firstName": "Tên",
+      "middleName": "Tên đệm",
+      "lastName": "Họ",
+      "nickname": "Biệt danh",
+      "nicknameHint": "Nếu khác với tên của bạn",
+      "birthNameHint": "Tên khai sinh của bạn được sử dụng cho tính toán số học",
+      "nameMissingBanner": "Vui lòng thêm họ và tên để có trải nghiệm cá nhân hóa hơn."
+    },
+    "email": {
+      "title": "Email",
+      "addEmailBanner": "Thêm địa chỉ email thật để nhận cập nhật và cho phép đặt lại mật khẩu.",
+      "placeholder": "email@cuaban.com"
+    },
+    "password": {
+      "title": "Mật khẩu",
+      "current": "Mật khẩu hiện tại",
+      "new": "Mật khẩu mới",
+      "confirm": "Xác nhận mật khẩu mới",
+      "change": "Đổi mật khẩu",
+      "placeholder": "Mật khẩu của bạn"
+    },
+    "birthDetails": {
+      "title": "Thông tin sinh",
+      "date": "Ngày sinh",
+      "time": "Giờ sinh",
+      "timeUnknown": "Tôi không biết giờ sinh của mình",
+      "place": "Nơi sinh",
+      "timezone": "Múi giờ"
+    },
+    "zodiac": {
+      "title": "Cung hoàng đạo",
+      "select": "Chọn cung của bạn"
+    },
+    "language": {
+      "title": "Ngôn ngữ",
+      "select": "Chọn ngôn ngữ"
+    },
+    "social": {
+      "title": "Thông tin xã hội",
+      "description": "Kết nối tài khoản mạng xã hội của bạn để có thông tin cá nhân hóa",
+      "connect": "Kết nối",
+      "disconnect": "Ngắt kết nối",
+      "connected": "Đã kết nối"
+    },
+    "dangerZone": {
+      "title": "Vùng nguy hiểm",
+      "hibernate": "Tạm ngưng tài khoản",
+      "hibernateDescription": "Tạm thời vô hiệu hóa tài khoản của bạn. Bạn có thể kích hoạt lại bất cứ lúc nào.",
+      "delete": "Xóa tài khoản",
+      "deleteDescription": "Xóa vĩnh viễn tài khoản và tất cả dữ liệu của bạn. Hành động này không thể hoàn tác.",
+      "confirmDelete": "Bạn có chắc chắn muốn xóa tài khoản của mình không?",
+      "typeToConfirm": "Nhập DELETE để xác nhận"
+    },
+    "saveChanges": "Lưu thay đổi",
+    "verificationExpired": "Xác minh của bạn đã hết hạn. Vui lòng xác minh lại."
+  },
+  "sanctuary": {
+    "greeting": {
+      "title": "Sự tĩnh lặng rõ ràng, {name}.",
+      "defaultName": "Bạn",
+      "defaultMessage": "Những hiểu biết hàng ngày của bạn đang được vũ trụ chuẩn bị."
+    },
+    "tabs": {
+      "insights": "Thông tin",
+      "astrology": "Chiêm tinh",
+      "numerology": "Số học",
+      "connections": "Kết nối"
+    },
+    "timeframes": {
+      "today": "Hôm nay",
+      "week": "Tuần",
+      "month": "Tháng",
+      "year": "Năm"
+    },
+    "insights": {
+      "title": "Thánh đường của bạn",
+      "label": "Thông tin thánh đường",
+      "tuning": "Đang điều chỉnh thông tin của bạn...",
+      "ready": "Thông tin của bạn đã sẵn sàng.",
+      "localTimezone": "Múi giờ địa phương",
+      "greeting": "Chào mừng trở lại",
+      "sunriseGuidance": "Hướng dẫn bình minh",
+      "energeticRhythm": "Nhịp năng lượng của bạn cho {timeframe}",
+      "coreThemesFor": "Chủ đề chính của {timeframe}",
+      "focusFor": "Trọng tâm cho {timeframe}",
+      "personalNarrative": "Câu chuyện cá nhân",
+      "coreThemes": "Chủ đề chính",
+      "focusForPeriod": "Trọng tâm cho giai đoạn này",
+      "journalPrompt": "Gợi ý nhật ký",
+      "tarot": {
+        "title": "Lá bài Tarot",
+        "label": "RÚT BÀI TAROT — NGUYÊN MẪU HÀNG NGÀY",
+        "yourCard": "Lá bài của bạn",
+        "matchError": "Chúng tôi gặp khó khăn khi khớp lá bài tarot này với bộ bài của chúng tôi."
+      },
+      "luckyCompass": {
+        "title": "La bàn may mắn",
+        "label": "LA BÀN MAY MẮN — VẬN MAY HÀNG NGÀY + DẤU HIỆU ÁNH SÁNG",
+        "numbers": "Số của {timeframe}",
+        "powerWords": "TỪ KHÓA SỨC MẠNH",
+        "handwrittenNote": "GHI CHÚ VIẾT TAY"
+      },
+      "emotionalCadence": {
+        "title": "Nhịp cảm xúc",
+        "label": "NHỊP CẢM XÚC — NHỊP ĐIỆU HÀNG NGÀY",
+        "dawn": "Bình minh",
+        "midday": "Giữa trưa",
+        "dusk": "Hoàng hôn",
+        "evening": "Tối",
+        "midnight": "Nửa đêm",
+        "morning": "Sáng"
+      },
+      "dailyReflection": {
+        "title": "Suy ngẫm hàng ngày",
+        "subtitle": "Hãy để ghi chú của bạn riêng tư và nhẹ nhàng.",
+        "placeholder": "Vài lời cho bầu trời của bạn hôm nay…",
+        "saveHint": "Nhấn ⌘+Enter hoặc Ctrl+Enter để lưu"
+      },
+      "errors": {
+        "profileLoadError": "Chúng tôi gặp sự cố khi tải hồ sơ của bạn. Vui lòng thử lại, hoặc liên hệ hỗ trợ nếu vấn đề tiếp tục.",
+        "insightLoadError": "Chúng tôi đang gặp sự cố khi tải thông tin của bạn. Đây có thể là sự cố tạm thời.",
+        "birthSignatureRequired": "Thiết lập chữ ký sinh",
+        "journalSaveError": "Không thể lưu. Vui lòng thử lại."
+      },
+      "socialInsights": {
+        "paused": "Thông tin xã hội đã tạm dừng",
+        "pausedDescription": "Bật Thông tin Xã hội để nâng cao bài đọc của bạn với các mẫu từ tài khoản được kết nối."
+      },
+      "reactivated": "Đã kích hoạt lại — chào mừng trở lại."
+    }
+  },
+  "numerology": {
+    "title": "Con số của bạn",
+    "subtitle": "Toán học đằng sau cuộc sống của bạn",
+    "calculating": "Đang tính toán con số của bạn...",
+    "systems": {
+      "pythagorean": "Pythagoras",
+      "chaldean": "Chaldean"
+    },
+    "errors": {
+      "nameRequired": "Cần có tên",
+      "nameRequiredMessage": "Chúng tôi cần họ và tên của bạn để tính toán hồ sơ số học. Vui lòng cập nhật tên trong Cài đặt.",
+      "birthDateRequired": "Cần có ngày sinh",
+      "birthDateRequiredMessage": "Chúng tôi cần ngày sinh của bạn để tính toán hồ sơ số học. Vui lòng cập nhật ngày sinh trong Cài đặt.",
+      "loadFailed": "Không thể tải hồ sơ số học"
+    },
+    "coreNumbers": {
+      "title": "Con số cốt lõi",
+      "lifePath": "Đường đời",
+      "lifePathDesc": "Mục đích sống và con đường bạn đi",
+      "expression": "Biểu đạt",
+      "expressionDesc": "Khả năng và tài năng tự nhiên của bạn",
+      "soulUrge": "Khát vọng linh hồn",
+      "soulUrgeDesc": "Động lực và mong muốn nội tâm của bạn",
+      "personality": "Tính cách",
+      "personalityDesc": "Cách người khác nhìn nhận bạn",
+      "birthday": "Sinh nhật",
+      "birthdayDesc": "Năng khiếu và tài năng tự nhiên của bạn",
+      "maturity": "Trưởng thành",
+      "maturityDesc": "Con người bạn đang trở thành"
+    },
+    "cycles": {
+      "title": "Chu kỳ cá nhân",
+      "personalYear": "Năm cá nhân",
+      "personalMonth": "Tháng cá nhân",
+      "personalDay": "Ngày cá nhân"
+    },
+    "lifePeriods": {
+      "title": "Giai đoạn cuộc sống",
+      "currentPinnacle": "Đỉnh cao hiện tại",
+      "period": "Giai đoạn",
+      "ages": "Tuổi",
+      "onwards": "trở đi",
+      "pinnacles": {
+        "first": "Đỉnh cao 1",
+        "second": "Đỉnh cao 2",
+        "third": "Đỉnh cao 3",
+        "fourth": "Đỉnh cao 4"
+      }
+    },
+    "challenges": {
+      "title": "Thử thách cuộc sống",
+      "first": "Thử thách đầu tiên",
+      "second": "Thử thách thứ hai",
+      "third": "Thử thách thứ ba",
+      "main": "Thử thách chính"
+    },
+    "luckyNumbers": {
+      "title": "Số may mắn"
+    },
+    "karmicDebt": {
+      "title": "Bài học nghiệp quả"
+    }
+  },
+  "astrology": {
+    "title": "Chiêm tinh học",
+    "subtitle": "Ánh sáng đằng sau cuộc sống của bạn",
+    "calculating": "Đang tính toán con đường linh hồn của bạn…",
+    "sections": {
+      "narrative": "Câu Chuyện Cá Nhân",
+      "foundations": "Nền Tảng",
+      "connections": "Góc Chiếu",
+      "patternsPath": "Mẫu Hình & Con Đường"
+    },
+    "deepDive": {
+      "whenAligned": "Khi bạn hài hòa",
+      "whenOffCourse": "Khi bạn lệch hướng",
+      "decisionRule": "Quy tắc quyết định"
+    },
+    "birthChart": {
+      "title": "Lá số sinh",
+      "subtitle": "Dấu ấn hành tinh độc đáo của bạn"
+    },
+    "narrative": {
+      "title": "Câu Chuyện Cá Nhân Của Bạn",
+      "subtitle": "Câu chuyện vũ trụ và chủ đề cuộc sống của bạn",
+      "identity": "Bản Sắc",
+      "emotions": "Cảm Xúc",
+      "loveRelationships": "Tình Yêu & Quan Hệ",
+      "workMoney": "Công Việc & Tiền Bạc",
+      "purposeGrowth": "Mục Đích & Phát Triển",
+      "innerWorld": "Thế Giới Nội Tâm",
+      "notAvailable": "Không có giải thích",
+      "notAvailableDesc": "Chúng tôi đã tính toán con đường linh hồn của bạn, nhưng không thể tạo giải thích đầy đủ vào lúc này. Các vị trí của bạn đã được lưu — vui lòng thử lại sau."
+    },
+    "planets": {
+      "title": "Vị Trí Hành Tinh",
+      "subtitle": "Dấu ấn hành tinh độc đáo của bạn",
+      "deepDiveTitle": "Các hành tinh của bạn có ý nghĩa gì",
+      "description": "Những điều này cho thấy các phần khác nhau của bạn biểu đạt như thế nào — động lực, phong cách giao tiếp, cách bạn yêu thương và kết nối.",
+      "sun": "Mặt Trời",
+      "sunDesc": "Bản ngã cốt lõi và sinh lực của bạn.",
+      "moon": "Mặt Trăng",
+      "moonDesc": "Cảnh quan cảm xúc và thế giới nội tâm của bạn.",
+      "mercury": "Sao Thủy",
+      "mercuryDesc": "Cách bạn suy nghĩ, giao tiếp và xử lý thông tin.",
+      "venus": "Sao Kim",
+      "venusDesc": "Cách bạn yêu thương, kết nối và tìm thấy vẻ đẹp.",
+      "mars": "Sao Hỏa",
+      "marsDesc": "Động lực, khát vọng và cách bạn hành động.",
+      "jupiter": "Sao Mộc",
+      "jupiterDesc": "Nơi bạn mở rộng, tin tưởng và tìm thấy ý nghĩa.",
+      "saturn": "Sao Thổ",
+      "saturnDesc": "Nơi bạn xây dựng cấu trúc và nhận trách nhiệm.",
+      "uranus": "Sao Thiên Vương",
+      "uranusDesc": "Nơi bạn đổi mới, nổi loạn và tìm kiếm tự do.",
+      "neptune": "Sao Hải Vương",
+      "neptuneDesc": "Nơi bạn mơ mộng, hòa tan ranh giới và kết nối với điều thiêng liêng.",
+      "pluto": "Sao Diêm Vương",
+      "plutoDesc": "Nơi bạn chuyển hóa, buông bỏ và lấy lại sức mạnh.",
+      "northNode": "Bắc Giao Điểm",
+      "northNodeDesc": "Lời mời hướng tới sự phát triển của bạn.",
+      "chiron": "Chiron",
+      "chironDesc": "Nơi sự chữa lành nảy sinh từ những vết thương sâu nhất của bạn."
+    },
+    "houses": {
+      "title": "Các Cung",
+      "subtitle": "12 lĩnh vực cuộc sống trong lá số của bạn",
+      "deepDiveTitle": "Các cung của bạn có ý nghĩa gì",
+      "description": "Các cung cho thấy chủ đề cuộc sống diễn ra ở đâu — lĩnh vực nào đòi hỏi bạn nhiều nhất và năng lượng cụ thể sống động ở đâu.",
+      "first": "Cung 1",
+      "firstDesc": "Cách bạn gặp gỡ thế giới và thể hiện bản thân.",
+      "second": "Cung 2",
+      "secondDesc": "Mối quan hệ của bạn với tài nguyên, giá trị và sự ổn định.",
+      "third": "Cung 3",
+      "thirdDesc": "Cách bạn giao tiếp, học hỏi và kết nối gần gũi.",
+      "fourth": "Cung 4",
+      "fourthDesc": "Nền tảng nội tâm, gia đình và gốc rễ cảm xúc của bạn.",
+      "fifth": "Cung 5",
+      "fifthDesc": "Nơi bạn sáng tạo, vui chơi và thể hiện niềm vui.",
+      "sixth": "Cung 6",
+      "sixthDesc": "Nhịp sống hàng ngày, công việc và sức khỏe của bạn.",
+      "seventh": "Cung 7",
+      "seventhDesc": "Cách bạn hợp tác, phản chiếu và kết nối một-một.",
+      "eighth": "Cung 8",
+      "eighthDesc": "Nơi bạn hợp nhất, chuyển hóa và đối mặt với điều chưa biết.",
+      "ninth": "Cung 9",
+      "ninthDesc": "Hành trình tìm kiếm ý nghĩa, niềm tin và mở rộng của bạn.",
+      "tenth": "Cung 10",
+      "tenthDesc": "Vai trò công cộng, sự nghiệp và di sản hữu hình của bạn.",
+      "eleventh": "Cung 11",
+      "eleventhDesc": "Tầm nhìn của bạn về cộng đồng, tình bạn và tương lai.",
+      "twelfth": "Cung 12",
+      "twelfthDesc": "Thánh đường nội tâm, sự cô độc và điều thiêng liêng."
+    },
+    "aspects": {
+      "title": "Góc Chiếu",
+      "subtitle": "Cuộc trò chuyện giữa các hành tinh của bạn",
+      "deepDiveTitle": "Các góc chiếu của bạn có ý nghĩa gì",
+      "description": "Góc chiếu cho thấy các phần khác nhau bên trong bạn tương tác như thế nào — nơi chúng hỗ trợ, thách thức hoặc khuếch đại lẫn nhau.",
+      "grid": "Lưới Góc Chiếu",
+      "topAspects": "Góc Chiếu Chính",
+      "allAspects": "Tất Cả Góc Chiếu",
+      "showAll": "Xem tất cả {count} góc chiếu",
+      "showFewer": "Hiển thị ít góc chiếu hơn"
+    },
+    "patterns": {
+      "title": "Mẫu Hình Chính",
+      "deepDiveTitle": "Các mẫu hình của bạn có ý nghĩa gì",
+      "subtitle": "Cấu hình chính trong lá số của bạn",
+      "description": "Mẫu hình là những hình dạng năng lượng quy mô lớn trong lá số của bạn — nơi nhiều hành tinh kết nối để tạo thành chủ đề hoặc động lực có thể nhận biết và lặp lại.",
+      "noPatterns": "Không phát hiện mẫu hình chính nào trong lá số của bạn.",
+      "tSquare": "T-Square",
+      "tSquareDesc": "T-Square tạo ra căng thẳng giữa ba lĩnh vực cuộc sống, yêu cầu bạn tìm giải pháp sáng tạo. Nó thường cảm thấy như ma sát hiệu quả — áp lực thúc đẩy bạn hướng tới tăng trưởng, đổi mới và khả năng phục hồi.",
+      "grandTrine": "Grand Trine",
+      "grandTrineDesc": "Grand Trine tạo thành một tam giác của sự dễ dàng và dòng chảy, nơi năng lượng di chuyển mượt mà giữa ba lĩnh vực. Điều này có thể cảm thấy như tài năng tự nhiên hoặc sự duyên dáng không cần nỗ lực."
+    },
+    "energyShape": {
+      "title": "Hình Dạng Năng Lượng",
+      "deepDiveTitle": "Hình dạng năng lượng của bạn có ý nghĩa gì",
+      "subtitle": "Cân bằng nguyên tố và phương thức",
+      "description": "Điều này cho thấy năng lượng chảy qua bạn như thế nào — nhịp điệu cơ bản của lá số và nơi các phẩm chất cụ thể tập trung hoặc phân tán.",
+      "chartType": "Loại Lá Số",
+      "dayChart": "Lá Số Ban Ngày",
+      "nightChart": "Lá Số Ban Đêm",
+      "dayChartDesc": "Lá số của bạn hướng tới sự hiện diện và biểu đạt bên ngoài. Cuộc sống thường yêu cầu bạn xuất hiện, được nhìn thấy và tương tác với thế giới bên ngoài.",
+      "nightChartDesc": "Lá số của bạn hướng tới sự phản chiếu nội tâm và tinh tế. Cuộc sống thường diễn ra qua quá trình nội tâm, quan sát yên lặng và công việc hậu trường.",
+      "chartRuler": "Chủ Tinh Lá Số",
+      "chartRulerDesc": "Hành tinh này dẫn dắt hướng đi tổng thể của cuộc sống bạn và lọc cách bạn tương tác với thế giới.",
+      "dominantPlanets": "Hành Tinh Chủ Đạo",
+      "dominantPlanetsDesc": "Những hành tinh này tô màu mạnh nhất cho trải nghiệm của bạn — chúng xuất hiện ở nhiều vị trí quan trọng hoặc tạo thành các kết nối quan trọng.",
+      "dominantSigns": "Cung Hoàng Đạo Chủ Đạo",
+      "dominantSignsDesc": "Những cung này tô màu cho cách bạn di chuyển trong thế giới. Phẩm chất của chúng xuất hiện lặp đi lặp lại trong biểu đạt của bạn.",
+      "elementModalityDesc": "Nguyên tố cho thấy năng lượng tự nhiên tập trung ở đâu — cảm hứng (Lửa), tiếp đất (Đất), tư duy (Khí), cảm xúc (Nước). Phương thức phản ánh cách bạn tham gia — khởi xướng (chủ động), ổn định (cố định), thích ứng (biến đổi)."
+    },
+    "intensityZones": {
+      "title": "Vùng Cường Độ",
+      "deepDiveTitle": "Các vùng cường độ của bạn có ý nghĩa gì",
+      "subtitle": "Nơi năng lượng tập trung trong lá số của bạn",
+      "description": "Điều này cho thấy cuộc sống xuất hiện tập trung ở đâu — nơi nhiều hành tinh tụ tập và tạo ra các vùng được chú ý cao và chủ đề lặp lại.",
+      "signEmphasis": "Nhấn Mạnh Cung",
+      "signEmphasisDesc": "Nhiều hành tinh trong các cung này khuếch đại phẩm chất của chúng — bạn có thể nhận thấy những chủ đề này xuất hiện lặp đi lặp lại trong suy nghĩ, cảm xúc và phản ứng của bạn.",
+      "houseEmphasis": "Nhấn Mạnh Cung Nhà",
+      "houseEmphasisDesc": "Những lĩnh vực cuộc sống này đòi hỏi nhiều từ bạn — sự phức tạp, tăng trưởng và sự chú ý tự nhiên tập trung ở đây.",
+      "stelliums": "Stellium",
+      "stelliumDesc": "Stellium ở đây tạo ra một chùm sự chú ý tập trung — nhiều phần bên trong hội tụ vào một chủ đề. Lĩnh vực này có xu hướng sống động, phức tạp và trung tâm của trải nghiệm bạn.",
+      "planets": "{count} hành tinh"
+    },
+    "direction": {
+      "title": "Hướng Đi",
+      "deepDiveTitle": "Hướng đi của bạn có ý nghĩa gì",
+      "subtitle": "Bắc Giao Điểm, Nam Giao Điểm và Con Đường Cuộc Sống",
+      "description": "Điều này phản ánh sự phát triển, chữa lành và sự quen thuộc — nơi bạn được mời vươn tới, nơi bạn tự nhiên quay về và nơi những vết thương cũ trở thành nguồn trí tuệ.",
+      "northNode": "Bắc Giao Điểm",
+      "northNodeDesc": "Bắc Giao Điểm của bạn là lời mời phát triển và lãnh thổ chưa biết. Nó chỉ về những phẩm chất bạn được kêu gọi phát triển, ngay cả khi chúng chưa cảm thấy tự nhiên. Đây là nơi cuộc sống yêu cầu bạn vươn xa.",
+      "southNode": "Nam Giao Điểm",
+      "southNodeDesc": "Nam Giao Điểm của bạn đại diện cho các mẫu quen thuộc và sự thoải mái tự nhiên. Đây là những phẩm chất bạn mang theo dễ dàng. Nam Giao Điểm không phải để từ bỏ, mà là nền tảng để tôn vinh khi bạn vươn tới lời mời của Bắc Giao Điểm.",
+      "chiron": "Chiron",
+      "chironDesc": "Chiron cho thấy nơi sự chữa lành và giảng dạy nảy sinh từ những vết thương sâu nhất của bạn. Điều từng đau đớn có thể trở thành nguồn từ bi và hướng dẫn cho người khác."
+    },
+    "joy": {
+      "title": "Điểm May Mắn",
+      "description": "Điều này phản ánh sự dễ dàng, niềm vui và sự hài hòa tự nhiên — nơi cuộc sống cảm thấy hào phóng và bạn trải nghiệm dòng chảy không cần nỗ lực.",
+      "meaning": "Điểm May Mắn cho thấy nơi niềm vui và sự dễ dàng tự nhiên chảy sẵn sàng nhất trong cuộc sống của bạn. Đây không phải về thành tựu hay nỗ lực — đây là nơi mọi thứ tự nhiên hài hòa, nơi bạn bản năng cảm thấy như ở nhà."
+    },
+    "errors": {
+      "signInRequired": "Vui lòng đăng nhập để xem con đường linh hồn của bạn.",
+      "incompleteProfile": "Hoàn thiện dấu ấn sinh của bạn",
+      "incompleteProfileDesc": "Chúng tôi cần ngày sinh, giờ sinh và nơi sinh đầy đủ trong cài đặt trước khi Solara có thể tạo con đường linh hồn của bạn.",
+      "birthDetailsRequired": "Cần thông tin sinh",
+      "birthDetailsRequiredMessage": "Chúng tôi cần thông tin sinh đầy đủ của bạn để tính toán lá số."
+    }
+  },
+  "connections": {
+    "title": "Kết nối",
+    "subtitle": "Khám phá các mối quan hệ của bạn",
+    "addConnection": "Thêm kết nối",
+    "noConnections": "Chưa có kết nối nào",
+    "noConnectionsMessage": "Thêm kết nối đầu tiên để khám phá động lực quan hệ của bạn.",
+    "notes": "Ghi chú",
+    "saveNotes": "Lưu ghi chú",
+    "compatibility": "Tương hợp",
+    "synastry": "So sánh lá số",
+    "composite": "Lá số tổng hợp"
+  },
+  "spaceBetween": {
+    "title": "Khoảng Không Giữa",
+    "subtitle": "Bản thiết kế mối quan hệ của bạn với {connectionName}",
+    "generating": "Đang tạo bản thiết kế mối quan hệ của bạn...",
+    "generatingHint": "Điều này có thể mất một chút thời gian",
+    "tryAgain": "Thử lại",
+    "discover": "Khám phá Khoảng Không Giữa",
+    "discoverDescription": "Tạo bản thiết kế mối quan hệ vĩnh viễn với {connectionName}. Hiểu biết sâu sắc này được tạo một lần và lưu giữ mãi mãi.",
+    "generateBlueprint": "Tạo bản thiết kế",
+    "sections": {
+      "essence": "Bản Chất",
+      "emotionalBlueprint": "Bản Đồ Cảm Xúc",
+      "communication": "Giao Tiếp",
+      "growthEdges": "Điểm Phát Triển",
+      "careGuide": "Hướng Dẫn Chăm Sóc"
+    }
+  },
+  "location": {
+    "title": "Giúp Solara khớp với bầu trời của bạn",
+    "body": "Để tạo thông tin chi tiết vào đầu ngày của bạn, Solara cần biết bạn đang ở đâu trên thế giới.\n\nChúng tôi chỉ sử dụng điều này để tính múi giờ của bạn để hướng dẫn hàng ngày, hàng tuần và hàng tháng được làm mới vào đúng giờ địa phương.\n\nNếu bạn bỏ qua điều này, chúng tôi sẽ sử dụng UTC làm mặc định. Solara vẫn sẽ hoạt động, nhưng thời gian của bạn có thể hơi khác.",
+    "allow": "Cho phép vị trí",
+    "skip": "Bỏ qua, sử dụng UTC"
+  },
+  "errors": {
+    "pageNotFound": "Không tìm thấy trang",
+    "unauthorized": "Không được phép",
+    "serverError": "Lỗi máy chủ",
+    "networkError": "Lỗi mạng",
+    "rateLimited": "Quá nhiều yêu cầu. Vui lòng thử lại sau.",
+    "sessionExpired": "Phiên của bạn đã hết hạn. Vui lòng đăng nhập lại."
+  },
+  "deletion": {
+    "pageTitle": "Trạng Thái Xóa Dữ Liệu",
+    "noCode": "Không có mã xác nhận. Vui lòng sử dụng liên kết từ email xác nhận xóa dữ liệu.",
+    "notFound": "Không tìm thấy yêu cầu xóa. Mã xác nhận có thể không hợp lệ hoặc đã hết hạn.",
+    "confirmationCode": "Mã Xác Nhận",
+    "status": "Trạng Thái",
+    "requestReceived": "Đã Nhận Yêu Cầu",
+    "processed": "Đã Xử Lý",
+    "errorDetails": "Chi tiết lỗi",
+    "contactSupport": "Vui lòng liên hệ với chúng tôi tại solara@solarainsights.com để được hỗ trợ.",
+    "questions": "Có câu hỏi? Liên hệ với chúng tôi tại",
+    "pending": {
+      "title": "Đang Chờ",
+      "description": "Yêu cầu xóa dữ liệu của bạn đã được nhận và đang chờ xử lý."
+    },
+    "processing": {
+      "title": "Đang Xử Lý",
+      "description": "Dữ liệu của bạn đang được xóa khỏi hệ thống của chúng tôi."
+    },
+    "completed": {
+      "title": "Hoàn Tất",
+      "description": "Dữ liệu của bạn đã được xóa thành công khỏi Solara Insights.",
+      "permanentNotice": "Tất cả dữ liệu cá nhân liên quan đến tài khoản Facebook của bạn đã được xóa vĩnh viễn khỏi Solara Insights. Hành động này không thể hoàn tác."
+    },
+    "failed": {
+      "title": "Thất Bại",
+      "description": "Đã xảy ra sự cố khi xử lý yêu cầu xóa của bạn. Vui lòng liên hệ hỗ trợ."
+    },
+    "userNotFound": {
+      "title": "Không Tìm Thấy Dữ Liệu",
+      "description": "Không tìm thấy tài khoản nào liên kết với tài khoản Facebook của bạn. Không cần xóa dữ liệu."
+    }
+  },
+  "zodiacSigns": {
+    "aries": "Bạch Dương",
+    "taurus": "Kim Ngưu",
+    "gemini": "Song Tử",
+    "cancer": "Cự Giải",
+    "leo": "Sư Tử",
+    "virgo": "Xử Nữ",
+    "libra": "Thiên Bình",
+    "scorpio": "Bọ Cạp",
+    "sagittarius": "Nhân Mã",
+    "capricorn": "Ma Kết",
+    "aquarius": "Bảo Bình",
+    "pisces": "Song Ngư"
+  },
+  "tarot": {
+    "title": "Hỏi bài Tarot",
+    "questionLabel": "CÂU HỎI CỦA BẠN",
+    "questionPlaceholder": "Hôm nay bạn muốn được hướng dẫn về điều gì?",
+    "questionError": "Vui lòng nhập câu hỏi (ít nhất {minLength} ký tự)",
+    "charactersNeeded": "Cần thêm {count} ký tự nữa",
+    "spreadLabel": "CHỌN TRẢI BÀI",
+    "spreads": {
+      "single": "Một lá",
+      "singleDesc": "Thông tin nhanh",
+      "three": "Ba lá",
+      "threeDesc": "Quá khứ, Hiện tại, Tương lai",
+      "five": "Năm lá",
+      "fiveDesc": "Khám phá sâu"
+    },
+    "buttons": {
+      "draw": "Rút bài",
+      "drawing": "Đang rút bài...",
+      "wait": "Chờ {seconds}s..."
+    },
+    "loading": "Đang xáo bài...",
+    "reading": {
+      "title": "Bài giải của bạn",
+      "reversed": "Ngược",
+      "synthesis": "BỨC TRANH TOÀN CẢNH",
+      "actions": "HÀNH ĐỘNG ĐỀ XUẤT",
+      "reflection": "SUY NGẪM"
+    },
+    "cta": {
+      "message": "Bạn muốn các bài giải sâu hơn, cá nhân hóa hơn?",
+      "button": "Tham gia Solara"
+    },
+    "errors": {
+      "generic": "Không thể hoàn thành bài giải. Vui lòng thử lại.",
+      "rateLimit": "Vui lòng đợi {seconds} giây trước khi rút lại."
+    }
+  },
+  "learn": {
+    "searchPlaceholder": "Tìm kiếm hướng dẫn...",
+    "guidesFound": "Tìm thấy {count} hướng dẫn",
+    "filterByTopic": "Lọc theo chủ đề",
+    "clearAll": "Xóa tất cả"
+  }
+}

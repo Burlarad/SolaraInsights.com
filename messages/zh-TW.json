@@ -1,0 +1,463 @@
+{
+  "common": {
+    "save": "儲存",
+    "cancel": "取消",
+    "close": "關閉",
+    "loading": "載入中...",
+    "saving": "儲存中...",
+    "saved": "已儲存",
+    "submit": "提交",
+    "back": "返回",
+    "next": "下一步",
+    "delete": "刪除",
+    "deleting": "刪除中...",
+    "error": "發生錯誤",
+    "tryAgain": "重試",
+    "confirm": "確認",
+    "yes": "是",
+    "no": "否",
+    "optional": "選填",
+    "required": "必填",
+    "or": "或",
+    "and": "和",
+    "on": "開啟",
+    "off": "關閉",
+    "enabled": "已啟用",
+    "disabled": "已停用",
+    "goToSettings": "前往設定",
+    "learnMore": "了解更多",
+    "viewAll": "查看全部",
+    "showMore": "顯示更多",
+    "showLess": "顯示較少",
+    "masterNumber": "大師數字"
+  },
+  "nav": {
+    "home": "首頁",
+    "about": "關於",
+    "learn": "學習",
+    "sanctuary": "聖殿",
+    "settings": "設定",
+    "signIn": "登入",
+    "signUp": "註冊",
+    "signOut": "登出"
+  },
+  "auth": {
+    "signIn": {
+      "title": "登入",
+      "subtitle": "歡迎回到 Solara",
+      "email": "電子郵件",
+      "password": "密碼",
+      "forgotPassword": "忘記密碼？",
+      "noAccount": "還沒有帳戶？",
+      "createAccount": "建立帳戶"
+    },
+    "signUp": {
+      "title": "建立帳戶",
+      "subtitle": "開始您與 Solara 的旅程",
+      "name": "您的姓名",
+      "email": "電子郵件",
+      "password": "密碼",
+      "confirmPassword": "確認密碼",
+      "hasAccount": "已經有帳戶了？",
+      "terms": "註冊即表示您同意我們的服務條款和隱私政策"
+    },
+    "resetPassword": {
+      "title": "重設密碼",
+      "subtitle": "輸入您的電子郵件以接收重設連結",
+      "sendLink": "發送連結",
+      "backToSignIn": "返回登入"
+    },
+    "verifyEmail": {
+      "title": "驗證您的電子郵件",
+      "subtitle": "我們已向您的電子郵件發送驗證連結",
+      "resend": "重新發送驗證郵件"
+    }
+  },
+  "onboarding": {
+    "welcome": "歡迎來到 Solara",
+    "letsGetStarted": "讓我們開始吧",
+    "tellUsAbout": "告訴我們關於您的資訊",
+    "birthDetails": "出生資料",
+    "birthDate": "出生日期",
+    "birthTime": "出生時間",
+    "birthTimeUnknown": "我不知道我的出生時間",
+    "birthPlace": "出生地點",
+    "searchPlace": "搜尋城市...",
+    "continue": "繼續",
+    "skip": "暫時跳過",
+    "complete": "完成設定"
+  },
+  "settings": {
+    "title": "設定",
+    "subtitle": "更新您的偏好名稱、星座和出生座標",
+    "identity": {
+      "title": "身份",
+      "firstName": "名",
+      "middleName": "中間名",
+      "lastName": "姓",
+      "nickname": "暱稱",
+      "nicknameHint": "如果與您的名字不同",
+      "birthNameHint": "您的出生姓名用於數字命理計算",
+      "nameMissingBanner": "請添加您的姓名以獲得更個人化的體驗。"
+    },
+    "email": {
+      "title": "電子郵件",
+      "addEmailBanner": "添加真實的電子郵件地址以接收更新並啟用密碼重設。",
+      "placeholder": "your@email.com"
+    },
+    "password": {
+      "title": "密碼",
+      "current": "目前密碼",
+      "new": "新密碼",
+      "confirm": "確認新密碼",
+      "change": "變更密碼",
+      "placeholder": "您的密碼"
+    },
+    "birthDetails": {
+      "title": "出生資料",
+      "date": "出生日期",
+      "time": "出生時間",
+      "timeUnknown": "我不知道我的出生時間",
+      "place": "出生地點",
+      "timezone": "時區"
+    },
+    "zodiac": {
+      "title": "星座",
+      "select": "選擇您的星座"
+    },
+    "language": {
+      "title": "語言",
+      "select": "選擇語言"
+    },
+    "social": {
+      "title": "社交洞察",
+      "description": "連結您的社交帳戶以獲得個人化洞察",
+      "connect": "連結",
+      "disconnect": "斷開連結",
+      "connected": "已連結"
+    },
+    "dangerZone": {
+      "title": "危險區域",
+      "hibernate": "休眠帳戶",
+      "hibernateDescription": "暫時停用您的帳戶。您可以隨時重新啟用。",
+      "delete": "刪除帳戶",
+      "deleteDescription": "永久刪除您的帳戶和所有資料。此操作無法撤銷。",
+      "confirmDelete": "您確定要刪除您的帳戶嗎？",
+      "typeToConfirm": "輸入 DELETE 以確認"
+    },
+    "saveChanges": "儲存變更",
+    "verificationExpired": "您的驗證已過期。請重新驗證。"
+  },
+  "sanctuary": {
+    "greeting": {
+      "title": "寧靜的清明，{name}。",
+      "defaultName": "朋友",
+      "defaultMessage": "您的每日洞察正由宇宙為您準備。"
+    },
+    "tabs": {
+      "insights": "洞察",
+      "astrology": "占星術",
+      "numerology": "數字命理",
+      "connections": "連結"
+    },
+    "timeframes": {
+      "today": "今天",
+      "week": "本週",
+      "month": "本月",
+      "year": "今年"
+    },
+    "insights": {
+      "title": "您的聖殿",
+      "label": "聖殿洞察",
+      "tuning": "調整您的洞察中...",
+      "ready": "您的洞察已準備好。",
+      "localTimezone": "本地時區",
+      "greeting": "歡迎回來",
+      "sunriseGuidance": "日出指引",
+      "energeticRhythm": "您{timeframe}的能量節奏",
+      "coreThemesFor": "{timeframe}的核心主題",
+      "focusFor": "{timeframe}的重點",
+      "personalNarrative": "個人敘事",
+      "coreThemes": "核心主題",
+      "focusForPeriod": "本期重點",
+      "journalPrompt": "日記提示",
+      "tarot": {
+        "title": "塔羅牌",
+        "label": "塔羅牌 — 每日原型",
+        "yourCard": "您的牌",
+        "matchError": "我們在匹配這張塔羅牌時遇到問題。"
+      },
+      "luckyCompass": {
+        "title": "幸運指南針",
+        "label": "幸運指南針 — 幸運與光明標記",
+        "numbers": "{timeframe}的數字",
+        "powerWords": "力量詞彙",
+        "handwrittenNote": "手寫便條"
+      },
+      "emotionalCadence": {
+        "title": "情緒節奏",
+        "label": "情緒節奏 — 每日節律",
+        "dawn": "黎明",
+        "midday": "正午",
+        "dusk": "黃昏",
+        "evening": "傍晚",
+        "midnight": "午夜",
+        "morning": "早晨"
+      },
+      "dailyReflection": {
+        "title": "每日反思",
+        "subtitle": "讓您的筆記保持私密和溫柔。",
+        "placeholder": "今天給您的天空寫幾句話…",
+        "saveHint": "按 ⌘+Enter 或 Ctrl+Enter 儲存"
+      },
+      "errors": {
+        "profileLoadError": "載入您的個人資料時遇到問題。請再試一次，或聯繫客服。",
+        "insightLoadError": "載入您的洞察時遇到問題。這可能是暫時性問題。",
+        "birthSignatureRequired": "設定您的出生簽名",
+        "journalSaveError": "無法儲存。請再試一次。"
+      },
+      "socialInsights": {
+        "paused": "社交洞察已暫停",
+        "pausedDescription": "開啟社交洞察，以連結帳戶的模式增強您的解讀。"
+      },
+      "reactivated": "已重新啟用 — 歡迎回來。"
+    }
+  },
+  "numerology": {
+    "title": "您的數字",
+    "subtitle": "生命背後的數學",
+    "calculating": "計算您的數字中...",
+    "systems": {
+      "pythagorean": "畢達哥拉斯",
+      "chaldean": "迦勒底"
+    },
+    "errors": {
+      "nameRequired": "需要姓名",
+      "nameRequiredMessage": "我們需要您的姓名來計算您的數字命理檔案。請在設定中更新您的姓名。",
+      "birthDateRequired": "需要出生日期",
+      "birthDateRequiredMessage": "我們需要您的出生日期來計算您的數字命理檔案。請在設定中更新您的出生日期。",
+      "loadFailed": "無法載入數字命理檔案"
+    },
+    "coreNumbers": {
+      "title": "核心數字",
+      "lifePath": "生命靈數",
+      "lifePathDesc": "您的人生目的和行走的道路",
+      "expression": "表達數",
+      "expressionDesc": "您的天賦能力和才華",
+      "soulUrge": "靈魂渴望",
+      "soulUrgeDesc": "您內在的動機和渴望",
+      "personality": "人格數",
+      "personalityDesc": "他人如何看待您",
+      "birthday": "生日數",
+      "birthdayDesc": "您的天賦和才能",
+      "maturity": "成熟數",
+      "maturityDesc": "您正在成為的人"
+    },
+    "cycles": {
+      "title": "個人週期",
+      "personalYear": "個人年",
+      "personalMonth": "個人月",
+      "personalDay": "個人日"
+    },
+    "lifePeriods": {
+      "title": "人生階段",
+      "currentPinnacle": "目前巔峰",
+      "period": "階段",
+      "ages": "年齡",
+      "onwards": "以後",
+      "pinnacles": {
+        "first": "第一巔峰",
+        "second": "第二巔峰",
+        "third": "第三巔峰",
+        "fourth": "第四巔峰"
+      }
+    },
+    "challenges": {
+      "title": "人生挑戰",
+      "first": "第一挑戰",
+      "second": "第二挑戰",
+      "third": "第三挑戰",
+      "main": "主要挑戰"
+    },
+    "luckyNumbers": {
+      "title": "幸運數字"
+    },
+    "karmicDebt": {
+      "title": "業力課題"
+    }
+  },
+  "astrology": {
+    "title": "占星術",
+    "subtitle": "生命背後的光",
+    "calculating": "計算您的星盤中...",
+    "birthChart": {
+      "title": "出生星盤",
+      "subtitle": "您獨特的行星特徵"
+    },
+    "planets": {
+      "title": "行星",
+      "subtitle": "您獨特的行星特徵",
+      "sun": "太陽",
+      "sunDesc": "您核心的自我意識和活力。",
+      "moon": "月亮",
+      "moonDesc": "您的情感景觀和內在世界。",
+      "mercury": "水星",
+      "mercuryDesc": "您如何思考和溝通。",
+      "venus": "金星",
+      "venusDesc": "您所愛和認為美麗的事物。",
+      "mars": "火星",
+      "marsDesc": "您的動力、慾望和行動方式。",
+      "jupiter": "木星",
+      "jupiterDesc": "您尋求成長和意義的地方。",
+      "saturn": "土星",
+      "saturnDesc": "您的課題和精通領域。",
+      "uranus": "天王星",
+      "uranusDesc": "您創新和突破的地方。",
+      "neptune": "海王星",
+      "neptuneDesc": "您的夢想、直覺和精神本質。",
+      "pluto": "冥王星",
+      "plutoDesc": "您的深度和轉化力量。",
+      "northNode": "北交點",
+      "northNodeDesc": "您成長的邀請。"
+    },
+    "houses": {
+      "title": "宮位",
+      "subtitle": "星盤中的12個生命領域",
+      "first": "第一宮",
+      "second": "第二宮",
+      "secondDesc": "您與資源、價值和穩定的關係。",
+      "third": "第三宮",
+      "fourth": "第四宮",
+      "fourthDesc": "您的內在基礎、家和情感根源。",
+      "fifth": "第五宮",
+      "sixth": "第六宮",
+      "sixthDesc": "您的日常節奏、工作和健康。",
+      "seventh": "第七宮",
+      "eighth": "第八宮",
+      "ninth": "第九宮",
+      "ninthDesc": "您對意義、信仰和擴展的追求。",
+      "tenth": "第十宮",
+      "tenthDesc": "您的公眾角色、事業和可見遺產。",
+      "eleventh": "第十一宮",
+      "eleventhDesc": "您對社區、友誼和未來的願景。",
+      "twelfth": "第十二宮",
+      "twelfthDesc": "您的內在聖所、獨處和神聖。"
+    },
+    "aspects": {
+      "title": "相位",
+      "subtitle": "行星之間的對話"
+    },
+    "patterns": {
+      "title": "模式與道路",
+      "chartShape": "星盤形狀",
+      "dominantElement": "主導元素",
+      "dominantModality": "主導模式",
+      "hemisphereEmphasis": "半球強調",
+      "above": "地平線以上",
+      "below": "地平線以下",
+      "aboveDesc": "您的星盤傾向於可見性和外在表達。生活經常要求您展現自己、被看見並與外在世界互動。",
+      "belowDesc": "您的星盤傾向於內在反思和細膩。生活經常通過內在處理、安靜觀察和幕後工作展開。"
+    },
+    "errors": {
+      "birthDetailsRequired": "需要出生資料",
+      "birthDetailsRequiredMessage": "我們需要您完整的出生資料來計算您的星盤。"
+    }
+  },
+  "connections": {
+    "title": "連結",
+    "subtitle": "探索您的關係",
+    "addConnection": "新增連結",
+    "noConnections": "尚無連結",
+    "noConnectionsMessage": "新增您的第一個連結以探索您的關係動態。",
+    "notes": "備註",
+    "saveNotes": "儲存備註",
+    "compatibility": "相容性",
+    "synastry": "合盤",
+    "composite": "組合盤"
+  },
+  "location": {
+    "title": "幫助 Solara 同步您的天空",
+    "body": "為了在您一天開始時生成洞察，Solara 需要大致了解您在世界的位置。\n\n我們僅使用此資訊來計算您的時區，以便您的每日、每週和每月指引在正確的當地時間更新。\n\n如果您跳過此步驟，我們將預設使用 UTC。Solara 仍然可以運作，但您的時間可能會感覺有點偏差。",
+    "allow": "允許位置",
+    "skip": "跳過，暫時使用 UTC"
+  },
+  "errors": {
+    "pageNotFound": "找不到頁面",
+    "unauthorized": "未授權",
+    "serverError": "伺服器錯誤",
+    "networkError": "網路錯誤",
+    "rateLimited": "請求過多。請稍後再試。",
+    "sessionExpired": "您的工作階段已過期。請重新登入。"
+  },
+  "deletion": {
+    "pending": {
+      "title": "刪除待處理",
+      "description": "您的資料刪除請求已收到並等待處理。"
+    },
+    "processing": {
+      "title": "刪除進行中",
+      "description": "您的資料正在從我們的系統中刪除。"
+    },
+    "completed": {
+      "title": "刪除完成",
+      "description": "您的資料已成功從 Solara Insights 刪除。"
+    }
+  },
+  "zodiacSigns": {
+    "aries": "牡羊座",
+    "taurus": "金牛座",
+    "gemini": "雙子座",
+    "cancer": "巨蟹座",
+    "leo": "獅子座",
+    "virgo": "處女座",
+    "libra": "天秤座",
+    "scorpio": "天蠍座",
+    "sagittarius": "射手座",
+    "capricorn": "摩羯座",
+    "aquarius": "水瓶座",
+    "pisces": "雙魚座"
+  },
+  "tarot": {
+    "title": "問問塔羅牌",
+    "questionLabel": "您的問題",
+    "questionPlaceholder": "今天您想獲得什麼方面的指引？",
+    "questionError": "請輸入問題（至少{minLength}個字元）",
+    "charactersNeeded": "還需要{count}個字元",
+    "spreadLabel": "選擇牌陣",
+    "spreads": {
+      "single": "單張牌",
+      "singleDesc": "快速洞察",
+      "three": "三張牌",
+      "threeDesc": "過去、現在、未來",
+      "five": "五張牌",
+      "fiveDesc": "深度探索"
+    },
+    "buttons": {
+      "draw": "抽牌",
+      "drawing": "正在抽牌...",
+      "wait": "請等待{seconds}秒..."
+    },
+    "loading": "正在洗牌...",
+    "reading": {
+      "title": "您的解讀",
+      "reversed": "逆位",
+      "synthesis": "整體畫面",
+      "actions": "建議行動",
+      "reflection": "反思"
+    },
+    "cta": {
+      "message": "想要更深入、更個性化的解讀嗎？",
+      "button": "加入Solara"
+    },
+    "errors": {
+      "generic": "無法完成解讀。請重試。",
+      "rateLimit": "請等待{seconds}秒後再次抽牌。"
+    }
+  },
+  "learn": {
+    "searchPlaceholder": "搜尋指南...",
+    "guidesFound": "找到{count}個指南",
+    "filterByTopic": "按主題篩選",
+    "clearAll": "清除全部"
+  }
+}

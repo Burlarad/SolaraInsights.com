@@ -1,0 +1,620 @@
+{
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "loading": "Chargement...",
+    "saving": "Enregistrement...",
+    "saved": "Enregistré",
+    "submit": "Soumettre",
+    "back": "Retour",
+    "next": "Suivant",
+    "delete": "Supprimer",
+    "deleting": "Suppression...",
+    "error": "Une erreur s'est produite",
+    "tryAgain": "Réessayer",
+    "confirm": "Confirmer",
+    "yes": "Oui",
+    "no": "Non",
+    "optional": "Facultatif",
+    "required": "Requis",
+    "or": "ou",
+    "and": "et",
+    "on": "Activé",
+    "off": "Désactivé",
+    "enabled": "Activé",
+    "disabled": "Désactivé",
+    "goToSettings": "Aller aux paramètres",
+    "learnMore": "En savoir plus",
+    "viewAll": "Voir tout",
+    "showMore": "Afficher plus",
+    "showLess": "Afficher moins",
+    "masterNumber": "Nombre maître"
+  },
+  "nav": {
+    "home": "Accueil",
+    "about": "À propos",
+    "learn": "Apprendre",
+    "sanctuary": "Sanctuaire",
+    "settings": "Paramètres",
+    "signIn": "Se connecter",
+    "signUp": "S'inscrire",
+    "signOut": "Se déconnecter"
+  },
+  "auth": {
+    "signIn": {
+      "title": "Bon retour parmi nous",
+      "subtitle": "Connectez-vous pour accéder à votre sanctuaire",
+      "signInWith": "Se connecter avec",
+      "orSignInWithEmail": "Ou connectez-vous avec votre e-mail",
+      "email": "E-mail",
+      "emailPlaceholder": "vous@exemple.com",
+      "password": "Mot de passe",
+      "forgot": "Oublié ?",
+      "signingIn": "Connexion en cours...",
+      "signInButton": "Se connecter",
+      "noAccount": "Vous n'avez pas de compte ?",
+      "createAccount": "Créer un compte",
+      "signInError": "Nous n'avons pas pu vous connecter avec ces identifiants. Veuillez vérifier votre e-mail et votre mot de passe, ou réinitialisez votre mot de passe.",
+      "unexpectedError": "Une erreur inattendue s'est produite. Veuillez réessayer.",
+      "comingSoon": "Connexion avec {provider} bientôt disponible"
+    },
+    "signUp": {
+      "title": "Créez votre compte",
+      "subtitle": "Commencez votre voyage vers la lumière",
+      "fullName": "Nom complet",
+      "namePlaceholder": "Votre nom",
+      "email": "E-mail",
+      "emailPlaceholder": "vous@exemple.com",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "Au moins 8 caractères",
+      "confirmPassword": "Confirmer le mot de passe",
+      "creatingAccount": "Création du compte...",
+      "createAccountButton": "Créer un compte",
+      "terms": "En vous inscrivant, vous acceptez nos Conditions d'utilisation et notre Politique de confidentialité. Une partie de votre abonnement soutient des familles via la Fondation Solara.",
+      "or": "ou",
+      "continueWithFacebook": "Continuer avec Facebook",
+      "continueWithTikTok": "Continuer avec TikTok",
+      "hasAccount": "Vous avez déjà un compte ?",
+      "signIn": "Se connecter",
+      "passwordsDontMatch": "Les mots de passe ne correspondent pas. Veuillez réessayer.",
+      "passwordTooShort": "Le mot de passe doit contenir au moins 8 caractères."
+    },
+    "forgotPassword": {
+      "title": "Réinitialisez votre mot de passe",
+      "subtitle": "Entrez votre e-mail et nous vous enverrons un lien de réinitialisation",
+      "email": "E-mail",
+      "emailPlaceholder": "vous@exemple.com",
+      "sending": "Envoi en cours...",
+      "sendResetLink": "Envoyer le lien de réinitialisation",
+      "backToSignIn": "Retour à la connexion",
+      "checkEmail": {
+        "title": "Vérifiez votre e-mail",
+        "message": "Nous avons envoyé un lien de réinitialisation de mot de passe à <strong>{email}</strong>. Cliquez sur le lien dans l'e-mail pour créer un nouveau mot de passe."
+      }
+    },
+    "resetPassword": {
+      "title": "Définir un nouveau mot de passe",
+      "subtitle": "Entrez votre nouveau mot de passe ci-dessous",
+      "verifying": "Vérification de votre lien de réinitialisation...",
+      "newPassword": "Nouveau mot de passe",
+      "newPasswordPlaceholder": "Au moins 8 caractères",
+      "confirmPassword": "Confirmer le nouveau mot de passe",
+      "confirmPasswordPlaceholder": "Ressaisissez votre mot de passe",
+      "updating": "Mise à jour du mot de passe...",
+      "updatePassword": "Mettre à jour le mot de passe",
+      "backToSignIn": "Retour à la connexion",
+      "linkExpired": {
+        "title": "Lien expiré",
+        "message": "Ce lien de réinitialisation a expiré ou est invalide. Veuillez en demander un nouveau.",
+        "noCodeMessage": "Aucun lien de réinitialisation détecté. Veuillez demander une réinitialisation de mot de passe depuis la page de connexion.",
+        "requestNewLink": "Demander un nouveau lien de réinitialisation"
+      },
+      "success": {
+        "title": "Mot de passe mis à jour",
+        "message": "Votre mot de passe a été mis à jour avec succès. Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.",
+        "continueToSignIn": "Continuer vers la connexion",
+        "redirecting": "Vous serez redirigé automatiquement dans quelques secondes..."
+      },
+      "sessionRequired": {
+        "title": "Session requise",
+        "message": "Veuillez utiliser le lien de réinitialisation de votre e-mail pour accéder à cette page.",
+        "requestResetLink": "Demander un lien de réinitialisation"
+      }
+    },
+    "setPassword": {
+      "title": "Définissez votre mot de passe",
+      "subtitle": "Créez un mot de passe pour votre compte Solara",
+      "settingPasswordFor": "Définition du mot de passe pour",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "Au moins 8 caractères",
+      "confirmPassword": "Confirmer le mot de passe",
+      "confirmPasswordPlaceholder": "Ressaisissez votre mot de passe",
+      "settingPassword": "Définition du mot de passe...",
+      "continueToOnboarding": "Continuer vers la configuration",
+      "errors": {
+        "enterBoth": "Veuillez entrer et confirmer votre mot de passe",
+        "dontMatch": "Les mots de passe ne correspondent pas",
+        "tooShort": "Le mot de passe doit contenir au moins 8 caractères"
+      }
+    },
+    "verifyEmail": {
+      "title": "Vérifiez votre e-mail",
+      "subtitle": "Nous avons envoyé un lien de vérification à votre e-mail",
+      "resend": "Renvoyer l'e-mail de vérification"
+    }
+  },
+  "onboarding": {
+    "welcome": "Bienvenue sur Solara",
+    "letsGetStarted": "Commençons",
+    "tellUsAbout": "Parlez-nous de vous",
+    "pageTitle": "Complétez votre profil Sanctuaire",
+    "pageSubtitle": "Nous utiliserons ces informations pour générer vos aperçus personnalisés",
+    "firstName": "Prénom",
+    "middleName": "Deuxième prénom",
+    "lastName": "Nom de famille",
+    "nickname": "Surnom (facultatif)",
+    "nicknamePlaceholder": "Comment souhaitez-vous être appelé ?",
+    "nicknameHint": "Si différent de votre prénom",
+    "birthDetails": "Détails de naissance",
+    "birthDate": "Date de naissance",
+    "birthTime": "Heure de naissance (facultatif)",
+    "birthTimeUnknown": "Je ne connais pas mon heure de naissance",
+    "birthTimeHint": "Si vous ne connaissez pas votre heure exacte de naissance, vous pouvez passer cette étape et l'ajouter plus tard pour des thèmes et une personnalisation plus précis.",
+    "birthPlace": "Lieu de naissance",
+    "searchPlace": "Recherchez votre ville de naissance...",
+    "timezone": "Fuseau horaire : {timezone}",
+    "locationHint": "Commencez à taper pour rechercher, puis sélectionnez dans les résultats",
+    "locationWarning": "Veuillez rechercher et sélectionner votre lieu de naissance dans le menu déroulant pour continuer.",
+    "saving": "Enregistrement de votre signature de naissance...",
+    "continue": "Continuer",
+    "skip": "Passer pour l'instant",
+    "complete": "Terminer la configuration",
+    "settingsNote": "Vous pouvez toujours mettre à jour ces informations plus tard dans les Paramètres",
+    "confirmingPayment": "Confirmation de votre paiement...",
+    "confirmingPaymentMessage": "Nous confirmons votre abonnement. Cela ne prend généralement que quelques secondes.",
+    "errors": {
+      "firstNameRequired": "Le prénom est requis",
+      "lastNameRequired": "Le nom de famille est requis",
+      "birthDateRequired": "La date de naissance est requise",
+      "locationRequired": "Veuillez sélectionner votre lieu de naissance dans les résultats de recherche",
+      "saveFailed": "Échec de l'enregistrement du profil. Veuillez réessayer."
+    }
+  },
+  "settings": {
+    "title": "Paramètres",
+    "subtitle": "Mettez à jour votre nom préféré, votre signe et vos coordonnées natales",
+    "identity": {
+      "title": "Identité",
+      "firstName": "Prénom",
+      "middleName": "Deuxième prénom",
+      "lastName": "Nom de famille",
+      "nickname": "Surnom",
+      "nicknameHint": "Si différent de votre prénom",
+      "birthNameHint": "Votre nom de naissance est utilisé pour les calculs de numérologie",
+      "nameMissingBanner": "Veuillez ajouter votre prénom et nom de famille pour une expérience plus personnalisée."
+    },
+    "email": {
+      "title": "E-mail",
+      "addEmailBanner": "Ajoutez une vraie adresse e-mail pour recevoir des mises à jour et activer la réinitialisation du mot de passe.",
+      "placeholder": "votre@email.com"
+    },
+    "password": {
+      "title": "Mot de passe",
+      "current": "Mot de passe actuel",
+      "new": "Nouveau mot de passe",
+      "confirm": "Confirmer le nouveau mot de passe",
+      "change": "Changer le mot de passe",
+      "placeholder": "Votre mot de passe"
+    },
+    "birthDetails": {
+      "title": "Détails de naissance",
+      "date": "Date de naissance",
+      "time": "Heure de naissance",
+      "timeUnknown": "Je ne connais pas mon heure de naissance",
+      "place": "Lieu de naissance",
+      "timezone": "Fuseau horaire"
+    },
+    "zodiac": {
+      "title": "Signe du zodiaque",
+      "select": "Sélectionnez votre signe"
+    },
+    "language": {
+      "title": "Langue",
+      "select": "Sélectionner la langue"
+    },
+    "social": {
+      "title": "Aperçus sociaux",
+      "description": "Connectez vos comptes sociaux pour des aperçus personnalisés",
+      "connect": "Connecter",
+      "disconnect": "Déconnecter",
+      "connected": "Connecté"
+    },
+    "dangerZone": {
+      "title": "Zone de danger",
+      "hibernate": "Mettre en veille le compte",
+      "hibernateDescription": "Désactivez temporairement votre compte. Vous pouvez le réactiver à tout moment.",
+      "delete": "Supprimer le compte",
+      "deleteDescription": "Supprimez définitivement votre compte et toutes les données. Cette action est irréversible.",
+      "confirmDelete": "Êtes-vous sûr de vouloir supprimer votre compte ?",
+      "typeToConfirm": "Tapez DELETE pour confirmer"
+    },
+    "saveChanges": "Enregistrer les modifications",
+    "verificationExpired": "Votre vérification a expiré. Veuillez vérifier à nouveau."
+  },
+  "sanctuary": {
+    "greeting": {
+      "title": "Clarté sereine, {name}.",
+      "defaultName": "Ami",
+      "defaultMessage": "Vos aperçus quotidiens sont préparés par le cosmos."
+    },
+    "tabs": {
+      "insights": "Aperçus",
+      "astrology": "Astrologie",
+      "numerology": "Numérologie",
+      "connections": "Connexions"
+    },
+    "timeframes": {
+      "today": "Aujourd'hui",
+      "week": "Semaine",
+      "month": "Mois",
+      "year": "Année"
+    },
+    "insights": {
+      "title": "Votre sanctuaire",
+      "label": "Aperçus du sanctuaire",
+      "tuning": "Ajustement de vos aperçus...",
+      "ready": "Vos aperçus sont prêts.",
+      "localTimezone": "Fuseau horaire local",
+      "greeting": "Bon retour",
+      "sunriseGuidance": "Guidance de l'aube",
+      "energeticRhythm": "Votre rythme énergétique pour {timeframe}",
+      "coreThemesFor": "Thèmes principaux de {timeframe}",
+      "focusFor": "Focus pour {timeframe}",
+      "personalNarrative": "Récit personnel",
+      "coreThemes": "Thèmes principaux",
+      "focusForPeriod": "Focus pour cette période",
+      "journalPrompt": "Invite de journal",
+      "tarot": {
+        "title": "Carte de Tarot",
+        "label": "TIRAGE DE TAROT — ARCHÉTYPE DU JOUR",
+        "yourCard": "Votre carte",
+        "matchError": "Nous avons eu du mal à associer cette carte de tarot à notre jeu."
+      },
+      "luckyCompass": {
+        "title": "Boussole de chance",
+        "label": "BOUSSOLE DE CHANCE — MARQUEURS DE CHANCE ET DE LUMIÈRE",
+        "numbers": "Numéros de {timeframe}",
+        "powerWords": "MOTS DE POUVOIR",
+        "handwrittenNote": "UNE NOTE ÉCRITE À LA MAIN"
+      },
+      "emotionalCadence": {
+        "title": "Cadence émotionnelle",
+        "label": "CADENCE ÉMOTIONNELLE — RYTHME QUOTIDIEN",
+        "dawn": "Aube",
+        "midday": "Midi",
+        "dusk": "Crépuscule",
+        "evening": "Soirée",
+        "midnight": "Minuit",
+        "morning": "Matin"
+      },
+      "dailyReflection": {
+        "title": "Réflexion quotidienne",
+        "subtitle": "Laissez vos notes rester privées et douces.",
+        "placeholder": "Quelques mots pour votre ciel aujourd'hui…",
+        "saveHint": "Appuyez sur ⌘+Entrée ou Ctrl+Entrée pour sauvegarder"
+      },
+      "errors": {
+        "profileLoadError": "Nous avons eu des difficultés à charger votre profil. Veuillez réessayer ou contacter le support si cela continue.",
+        "insightLoadError": "Nous avons des difficultés à charger votre aperçu. Cela peut être un problème temporaire.",
+        "birthSignatureRequired": "Configurez votre signature de naissance",
+        "journalSaveError": "Impossible de sauvegarder. Veuillez réessayer."
+      },
+      "socialInsights": {
+        "paused": "Aperçus sociaux en pause",
+        "pausedDescription": "Activez les Aperçus sociaux pour améliorer vos lectures avec des schémas de vos comptes connectés."
+      },
+      "reactivated": "Réactivé — bienvenue à nouveau."
+    }
+  },
+  "numerology": {
+    "title": "Vos nombres",
+    "subtitle": "Les mathématiques derrière votre vie",
+    "calculating": "Calcul de vos nombres...",
+    "systems": {
+      "pythagorean": "Pythagoricien",
+      "chaldean": "Chaldéen"
+    },
+    "errors": {
+      "nameRequired": "Nom requis",
+      "nameRequiredMessage": "Nous avons besoin de votre prénom et nom de famille pour calculer votre profil numérologique. Veuillez mettre à jour votre nom dans les paramètres.",
+      "birthDateRequired": "Date de naissance requise",
+      "birthDateRequiredMessage": "Nous avons besoin de votre date de naissance pour calculer votre profil numérologique. Veuillez mettre à jour votre date de naissance dans les paramètres.",
+      "loadFailed": "Impossible de charger le profil numérologique"
+    },
+    "coreNumbers": {
+      "title": "Nombres fondamentaux",
+      "lifePath": "Chemin de vie",
+      "lifePathDesc": "Votre but de vie et le chemin que vous parcourez",
+      "expression": "Expression",
+      "expressionDesc": "Vos capacités et talents naturels",
+      "soulUrge": "Désir de l'âme",
+      "soulUrgeDesc": "Vos motivations et désirs intérieurs",
+      "personality": "Personnalité",
+      "personalityDesc": "Comment les autres vous perçoivent",
+      "birthday": "Anniversaire",
+      "birthdayDesc": "Vos dons et talents naturels",
+      "maturity": "Maturité",
+      "maturityDesc": "Qui vous devenez"
+    },
+    "cycles": {
+      "title": "Cycles personnels",
+      "personalYear": "Année personnelle",
+      "personalMonth": "Mois personnel",
+      "personalDay": "Jour personnel"
+    },
+    "lifePeriods": {
+      "title": "Périodes de vie",
+      "currentPinnacle": "Pinacle actuel",
+      "period": "Période",
+      "ages": "Âges",
+      "onwards": "et après",
+      "pinnacles": {
+        "first": "1er Pinacle",
+        "second": "2e Pinacle",
+        "third": "3e Pinacle",
+        "fourth": "4e Pinacle"
+      }
+    },
+    "challenges": {
+      "title": "Défis de vie",
+      "first": "Premier défi",
+      "second": "Deuxième défi",
+      "third": "Troisième défi",
+      "main": "Défi principal"
+    },
+    "luckyNumbers": {
+      "title": "Nombres chanceux"
+    },
+    "karmicDebt": {
+      "title": "Leçons karmiques"
+    }
+  },
+  "astrology": {
+    "title": "Astrologie",
+    "subtitle": "La lumière derrière votre vie",
+    "calculating": "Calcul de votre thème...",
+    "birthChart": {
+      "title": "Thème natal",
+      "subtitle": "Votre signature planétaire unique"
+    },
+    "planets": {
+      "title": "Planètes",
+      "subtitle": "Votre signature planétaire unique",
+      "sun": "Soleil",
+      "sunDesc": "Votre sens profond du moi et votre vitalité.",
+      "moon": "Lune",
+      "moonDesc": "Votre paysage émotionnel et monde intérieur.",
+      "mercury": "Mercure",
+      "mercuryDesc": "Comment vous pensez et communiquez.",
+      "venus": "Vénus",
+      "venusDesc": "Ce que vous aimez et trouvez beau.",
+      "mars": "Mars",
+      "marsDesc": "Votre élan, désir et façon d'agir.",
+      "jupiter": "Jupiter",
+      "jupiterDesc": "Où vous cherchez la croissance et le sens.",
+      "saturn": "Saturne",
+      "saturnDesc": "Vos leçons et domaines de maîtrise.",
+      "uranus": "Uranus",
+      "uranusDesc": "Où vous innovez et vous libérez.",
+      "neptune": "Neptune",
+      "neptuneDesc": "Vos rêves, intuition et nature spirituelle.",
+      "pluto": "Pluton",
+      "plutoDesc": "Vos profondeurs et pouvoir transformateur.",
+      "northNode": "Nœud Nord",
+      "northNodeDesc": "Votre invitation vers la croissance."
+    },
+    "houses": {
+      "title": "Maisons",
+      "subtitle": "Les 12 domaines de vie de votre thème",
+      "first": "Maison 1",
+      "second": "Maison 2",
+      "secondDesc": "Votre relation avec les ressources, la valeur et la stabilité.",
+      "third": "Maison 3",
+      "fourth": "Maison 4",
+      "fourthDesc": "Votre fondation intérieure, foyer et racines émotionnelles.",
+      "fifth": "Maison 5",
+      "sixth": "Maison 6",
+      "sixthDesc": "Vos rythmes quotidiens, travail et bien-être.",
+      "seventh": "Maison 7",
+      "eighth": "Maison 8",
+      "ninth": "Maison 9",
+      "ninthDesc": "Votre quête de sens, croyance et expansion.",
+      "tenth": "Maison 10",
+      "tenthDesc": "Votre rôle public, carrière et héritage visible.",
+      "eleventh": "Maison 11",
+      "eleventhDesc": "Votre vision pour la communauté, l'amitié et l'avenir.",
+      "twelfth": "Maison 12",
+      "twelfthDesc": "Votre sanctuaire intérieur, solitude et le sacré."
+    },
+    "aspects": {
+      "title": "Aspects",
+      "subtitle": "Les conversations entre vos planètes"
+    },
+    "patterns": {
+      "title": "Motifs et chemin",
+      "chartShape": "Forme du thème",
+      "dominantElement": "Élément dominant",
+      "dominantModality": "Modalité dominante",
+      "hemisphereEmphasis": "Emphase hémisphérique",
+      "above": "Au-dessus de l'horizon",
+      "below": "En dessous de l'horizon",
+      "aboveDesc": "Votre thème est orienté vers la visibilité et l'expression extérieure. La vie vous demande souvent de vous montrer, d'être vu et de vous engager avec le monde extérieur.",
+      "belowDesc": "Votre thème est orienté vers la réflexion intérieure et la subtilité. La vie se déroule souvent à travers le traitement intérieur, l'observation tranquille et le travail en coulisses."
+    },
+    "errors": {
+      "birthDetailsRequired": "Détails de naissance requis",
+      "birthDetailsRequiredMessage": "Nous avons besoin de vos détails de naissance complets pour calculer votre thème."
+    }
+  },
+  "connections": {
+    "title": "Connexions",
+    "subtitle": "Cartographiez les personnes dans votre orbite et explorez des aperçus relationnels",
+    "yourConnections": "VOS CONNEXIONS",
+    "loading": "Chargement de vos connexions...",
+    "addConnection": "Ajouter une connexion",
+    "noConnections": "Pas encore de connexions. Ajoutez quelqu'un pour commencer à explorer des aperçus relationnels.",
+    "noConnectionsMessage": "Ajoutez votre première connexion pour explorer les dynamiques de votre relation.",
+    "notes": "Notes",
+    "notesPlaceholder": "Notez vos pensées, schémas ou choses à retenir sur cette connexion...",
+    "saveNotes": "Enregistrer les notes",
+    "saving": "Enregistrement...",
+    "saved": "Enregistré",
+    "spaceBetween": "L'espace entre nous",
+    "viewDailyBrief": "Voir le résumé quotidien",
+    "compatibility": "Compatibilité",
+    "synastry": "Synastrie",
+    "composite": "Composite",
+    "relationshipTypes": {
+      "partner": "Partenaire",
+      "child": "Enfant",
+      "parent": "Parent",
+      "sibling": "Frère/Sœur",
+      "friend": "Ami(e)",
+      "colleague": "Collègue",
+      "other": "Autre"
+    },
+    "form": {
+      "firstName": "Prénom",
+      "middleName": "Deuxième prénom",
+      "lastName": "Nom de famille",
+      "relationshipType": "Type de relation",
+      "birthDate": "Date de naissance",
+      "birthTime": "Heure de naissance",
+      "birthPlace": "Lieu de naissance",
+      "unknownTime": "Je ne connais pas son heure de naissance"
+    },
+    "born": "Naissance"
+  },
+  "spaceBetween": {
+    "title": "L'espace entre nous",
+    "subtitle": "Votre plan relationnel avec {connectionName}",
+    "generating": "Génération de votre plan relationnel...",
+    "generatingHint": "Cela peut prendre un moment",
+    "tryAgain": "Réessayer",
+    "discover": "Découvrez l'espace entre vous",
+    "discoverDescription": "Générez votre plan relationnel permanent avec {connectionName}. Cet aperçu profond est créé une fois et sauvegardé pour toujours.",
+    "generateBlueprint": "Générer le plan",
+    "sections": {
+      "essence": "Essence",
+      "emotionalBlueprint": "Plan émotionnel",
+      "communication": "Communication",
+      "growthEdges": "Axes de croissance",
+      "careGuide": "Guide de soin"
+    }
+  },
+  "location": {
+    "title": "Aidez Solara à synchroniser votre ciel",
+    "body": "Pour générer vos aperçus au début de votre journée, Solara doit savoir approximativement où vous vous trouvez dans le monde.\n\nNous utilisons cela uniquement pour calculer votre fuseau horaire afin que vos conseils quotidiens, hebdomadaires et mensuels se rafraîchissent à la bonne heure locale.\n\nSi vous sautez cette étape, nous utiliserons UTC par défaut. Solara fonctionnera toujours, mais votre timing peut sembler un peu décalé.",
+    "allow": "Autoriser la localisation",
+    "skip": "Ignorer, utiliser UTC pour l'instant"
+  },
+  "errors": {
+    "pageNotFound": "Page non trouvée",
+    "unauthorized": "Non autorisé",
+    "serverError": "Erreur serveur",
+    "networkError": "Erreur réseau",
+    "rateLimited": "Trop de requêtes. Veuillez réessayer plus tard.",
+    "sessionExpired": "Votre session a expiré. Veuillez vous reconnecter."
+  },
+  "deletion": {
+    "pageTitle": "Statut de suppression des données",
+    "noCode": "Aucun code de confirmation fourni. Veuillez utiliser le lien de votre confirmation de suppression de données.",
+    "notFound": "Demande de suppression non trouvée. Le code de confirmation peut être invalide ou expiré.",
+    "confirmationCode": "Code de confirmation",
+    "status": "Statut",
+    "requestReceived": "Demande reçue",
+    "processed": "Traité",
+    "errorDetails": "Détails de l'erreur",
+    "contactSupport": "Veuillez nous contacter à solara@solarainsights.com pour obtenir de l'aide.",
+    "questions": "Des questions ? Contactez-nous à",
+    "pending": {
+      "title": "En attente",
+      "description": "Votre demande de suppression de données a été reçue et attend d'être traitée."
+    },
+    "processing": {
+      "title": "En cours",
+      "description": "Vos données sont actuellement en cours de suppression de nos systèmes."
+    },
+    "completed": {
+      "title": "Terminé",
+      "description": "Vos données ont été supprimées avec succès de Solara Insights.",
+      "permanentNotice": "Toutes vos données personnelles associées à votre compte Facebook ont été définitivement supprimées de Solara Insights. Cette action est irréversible."
+    },
+    "failed": {
+      "title": "Échec",
+      "description": "Un problème est survenu lors du traitement de votre demande de suppression. Veuillez contacter le support."
+    },
+    "userNotFound": {
+      "title": "Aucune donnée trouvée",
+      "description": "Aucun compte n'a été trouvé associé à votre compte Facebook. Aucune donnée n'a dû être supprimée."
+    }
+  },
+  "zodiacSigns": {
+    "aries": "Bélier",
+    "taurus": "Taureau",
+    "gemini": "Gémeaux",
+    "cancer": "Cancer",
+    "leo": "Lion",
+    "virgo": "Vierge",
+    "libra": "Balance",
+    "scorpio": "Scorpion",
+    "sagittarius": "Sagittaire",
+    "capricorn": "Capricorne",
+    "aquarius": "Verseau",
+    "pisces": "Poissons"
+  },
+  "tarot": {
+    "title": "Interrogez les cartes",
+    "questionLabel": "VOTRE QUESTION",
+    "questionPlaceholder": "Sur quoi aimeriez-vous être guidé aujourd'hui ?",
+    "questionError": "Veuillez entrer une question (au moins {minLength} caractères)",
+    "charactersNeeded": "{count} caractères de plus nécessaires",
+    "spreadLabel": "CHOISISSEZ VOTRE TIRAGE",
+    "spreads": {
+      "single": "Une carte",
+      "singleDesc": "Aperçu rapide",
+      "three": "Trois cartes",
+      "threeDesc": "Passé, Présent, Futur",
+      "five": "Cinq cartes",
+      "fiveDesc": "Exploration approfondie"
+    },
+    "buttons": {
+      "draw": "Tirer les cartes",
+      "drawing": "Tirage en cours...",
+      "wait": "Attendez {seconds}s..."
+    },
+    "loading": "Mélange du jeu...",
+    "reading": {
+      "title": "Votre lecture",
+      "reversed": "Inversée",
+      "synthesis": "LA VISION D'ENSEMBLE",
+      "actions": "ACTIONS SUGGÉRÉES",
+      "reflection": "RÉFLEXION"
+    },
+    "cta": {
+      "message": "Vous voulez des lectures plus profondes et personnalisées ?",
+      "button": "Rejoignez Solara"
+    },
+    "errors": {
+      "generic": "Nous n'avons pas pu terminer votre lecture. Veuillez réessayer.",
+      "rateLimit": "Veuillez attendre {seconds} secondes avant de tirer à nouveau."
+    }
+  },
+  "learn": {
+    "searchPlaceholder": "Rechercher des guides...",
+    "guidesFound": "{count} {count, plural, one {guide trouvé} other {guides trouvés}}",
+    "filterByTopic": "Filtrer par sujet",
+    "clearAll": "Tout effacer"
+  }
+}

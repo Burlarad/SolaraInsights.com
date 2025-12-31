@@ -1,0 +1,593 @@
+{
+  "common": {
+    "save": "I-save",
+    "cancel": "Kanselahin",
+    "close": "Isara",
+    "loading": "Naglo-load...",
+    "saving": "Nagse-save...",
+    "saved": "Na-save na",
+    "submit": "Ipasa",
+    "back": "Bumalik",
+    "next": "Susunod",
+    "delete": "Burahin",
+    "deleting": "Binubura...",
+    "error": "May nangyaring mali",
+    "tryAgain": "Subukan muli",
+    "confirm": "Kumpirmahin",
+    "yes": "Oo",
+    "no": "Hindi",
+    "optional": "Opsyonal",
+    "required": "Kinakailangan",
+    "or": "o",
+    "and": "at",
+    "on": "Naka-on",
+    "off": "Naka-off",
+    "enabled": "Pinagana",
+    "disabled": "Hindi pinagana",
+    "goToSettings": "Pumunta sa Settings",
+    "learnMore": "Matuto pa",
+    "viewAll": "Tingnan lahat",
+    "showMore": "Ipakita pa",
+    "showLess": "Ipakita ng mas kaunti",
+    "masterNumber": "Master Number"
+  },
+  "nav": {
+    "home": "Home",
+    "about": "Tungkol",
+    "learn": "Matuto",
+    "sanctuary": "Santuwaryo",
+    "settings": "Settings",
+    "signIn": "Mag-sign In",
+    "signUp": "Mag-sign Up",
+    "signOut": "Mag-sign Out"
+  },
+  "auth": {
+    "signIn": {
+      "title": "Maligayang pagbabalik",
+      "subtitle": "Mag-sign in para ma-access ang iyong santuwaryo",
+      "signInWith": "Mag-sign in gamit ang",
+      "orSignInWithEmail": "O mag-sign in gamit ang email",
+      "email": "Email",
+      "emailPlaceholder": "ikaw@halimbawa.com",
+      "password": "Password",
+      "forgot": "Nakalimutan?",
+      "signingIn": "Nagsa-sign in...",
+      "signInButton": "Mag-sign in",
+      "noAccount": "Wala pang account?",
+      "createAccount": "Gumawa ng account",
+      "signInError": "Hindi ka namin ma-sign in gamit ang mga detalyeng iyon. Pakitingnan ang iyong email at password, o i-reset ang iyong password.",
+      "unexpectedError": "May hindi inaasahang error na nangyari. Pakisubukan muli.",
+      "comingSoon": "Darating na ang {provider} sign-in"
+    },
+    "signUp": {
+      "title": "Gumawa ng iyong account",
+      "subtitle": "Simulan ang iyong paglalakbay patungo sa liwanag",
+      "fullName": "Buong pangalan",
+      "namePlaceholder": "Ang pangalan mo",
+      "email": "Email",
+      "emailPlaceholder": "ikaw@halimbawa.com",
+      "password": "Password",
+      "passwordPlaceholder": "Hindi bababa sa 8 character",
+      "confirmPassword": "Kumpirmahin ang password",
+      "creatingAccount": "Gumagawa ng account...",
+      "createAccountButton": "Gumawa ng account",
+      "terms": "Sa pag-sign up, sumasang-ayon ka sa aming Terms of Service at Privacy Policy. Isang bahagi ng iyong subscription ay tumutulong sa mga pamilya sa pamamagitan ng Solara Foundation.",
+      "or": "o",
+      "continueWithFacebook": "Magpatuloy gamit ang Facebook",
+      "continueWithTikTok": "Magpatuloy gamit ang TikTok",
+      "hasAccount": "May account na?",
+      "signIn": "Mag-sign in",
+      "passwordsDontMatch": "Hindi tugma ang mga password. Pakisubukan muli.",
+      "passwordTooShort": "Ang password ay dapat hindi bababa sa 8 character."
+    },
+    "forgotPassword": {
+      "title": "I-reset ang iyong password",
+      "subtitle": "Ilagay ang iyong email at magpapadala kami ng reset link",
+      "email": "Email",
+      "emailPlaceholder": "ikaw@halimbawa.com",
+      "sending": "Nagpapadala...",
+      "sendResetLink": "Magpadala ng reset link",
+      "backToSignIn": "Bumalik sa sign in",
+      "checkEmail": {
+        "title": "Tingnan ang iyong email",
+        "message": "Nagpadala kami ng password reset link sa <strong>{email}</strong>. I-click ang link sa email para gumawa ng bagong password."
+      }
+    },
+    "resetPassword": {
+      "title": "Itakda ang bagong password",
+      "subtitle": "Ilagay ang iyong bagong password sa ibaba",
+      "verifying": "Bine-verify ang iyong reset link...",
+      "newPassword": "Bagong password",
+      "newPasswordPlaceholder": "Hindi bababa sa 8 character",
+      "confirmPassword": "Kumpirmahin ang bagong password",
+      "confirmPasswordPlaceholder": "Ulitin ang iyong password",
+      "updating": "Ina-update ang password...",
+      "updatePassword": "I-update ang password",
+      "backToSignIn": "Bumalik sa sign in",
+      "linkExpired": {
+        "title": "Nag-expire na ang link",
+        "message": "Nag-expire na o hindi balido ang reset link na ito. Pakihiling ng bago.",
+        "noCodeMessage": "Walang nakitang reset link. Pakihiling ng password reset mula sa login page.",
+        "requestNewLink": "Humiling ng bagong reset link"
+      },
+      "success": {
+        "title": "Na-update na ang password",
+        "message": "Matagumpay na na-update ang iyong password. Maaari ka nang mag-sign in gamit ang iyong bagong password.",
+        "continueToSignIn": "Magpatuloy sa sign in",
+        "redirecting": "Awtomatiko kang ire-redirect sa loob ng ilang segundo..."
+      },
+      "sessionRequired": {
+        "title": "Kinakailangan ang session",
+        "message": "Pakigamit ang reset link mula sa iyong email para ma-access ang pahinang ito.",
+        "requestResetLink": "Humiling ng reset link"
+      }
+    },
+    "setPassword": {
+      "title": "Itakda ang iyong password",
+      "subtitle": "Gumawa ng password para sa iyong Solara account",
+      "settingPasswordFor": "Nagtatakda ng password para sa",
+      "password": "Password",
+      "passwordPlaceholder": "Hindi bababa sa 8 character",
+      "confirmPassword": "Kumpirmahin ang password",
+      "confirmPasswordPlaceholder": "Ulitin ang iyong password",
+      "settingPassword": "Nagtatakda ng password...",
+      "continueToOnboarding": "Magpatuloy sa onboarding",
+      "errors": {
+        "enterBoth": "Pakilagay at kumpirmahin ang iyong password",
+        "dontMatch": "Hindi tugma ang mga password",
+        "tooShort": "Ang password ay dapat hindi bababa sa 8 character"
+      }
+    },
+    "verifyEmail": {
+      "title": "I-verify ang Iyong Email",
+      "subtitle": "Nagpadala kami ng verification link sa iyong email",
+      "resend": "Muling ipadala ang verification email"
+    }
+  },
+  "onboarding": {
+    "welcome": "Maligayang pagdating sa Solara",
+    "letsGetStarted": "Magsimula na tayo",
+    "tellUsAbout": "Sabihin mo sa amin ang tungkol sa iyo",
+    "pageTitle": "Kumpletuhin ang iyong Sanctuary profile",
+    "pageSubtitle": "Gagamitin namin ang impormasyong ito para makagawa ng mga personalized na insight para sa iyo",
+    "firstName": "Unang pangalan",
+    "middleName": "Gitnang pangalan",
+    "lastName": "Apelyido",
+    "nickname": "Palayaw (opsyonal)",
+    "nicknamePlaceholder": "Ano ang gusto mong itawag namin sa iyo?",
+    "nicknameHint": "Kung iba sa iyong unang pangalan",
+    "birthDetails": "Detalye ng Kapanganakan",
+    "birthDate": "Petsa ng Kapanganakan",
+    "birthTime": "Oras ng Kapanganakan (opsyonal)",
+    "birthTimeUnknown": "Hindi ko alam ang oras ng aking kapanganakan",
+    "birthTimeHint": "Kung hindi mo alam ang eksaktong oras ng iyong kapanganakan, maaari mo itong laktawan ngayon at idagdag ito mamaya para sa mas tumpak na mga chart at personalization.",
+    "birthPlace": "Lugar ng Kapanganakan",
+    "searchPlace": "Maghanap ng iyong lungsod ng kapanganakan...",
+    "timezone": "Timezone: {timezone}",
+    "locationHint": "Magsimulang mag-type para maghanap, pagkatapos ay pumili mula sa mga resulta",
+    "locationWarning": "Pakihanap at piliin ang iyong lugar ng kapanganakan mula sa dropdown para magpatuloy.",
+    "saving": "Sinasave ang iyong birth signature...",
+    "continue": "Magpatuloy",
+    "skip": "Laktawan muna",
+    "complete": "Kumpletuhin ang setup",
+    "settingsNote": "Maaari mong i-update ang mga detalyeng ito anumang oras sa Settings",
+    "confirmingPayment": "Kinukumpirma ang iyong bayad...",
+    "confirmingPaymentMessage": "Kinukumpirma namin ang iyong subscription. Karaniwang tumatagal lang ito ng ilang segundo.",
+    "errors": {
+      "firstNameRequired": "Kinakailangan ang unang pangalan",
+      "lastNameRequired": "Kinakailangan ang apelyido",
+      "birthDateRequired": "Kinakailangan ang petsa ng kapanganakan",
+      "locationRequired": "Pakipili ang iyong lugar ng kapanganakan mula sa mga resulta ng paghahanap",
+      "saveFailed": "Nabigong i-save ang profile. Pakisubukan muli."
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "I-update ang iyong gustong pangalan, zodiac sign, at natal coordinates",
+    "identity": {
+      "title": "Pagkakakilanlan",
+      "firstName": "Unang pangalan",
+      "middleName": "Gitnang pangalan",
+      "lastName": "Apelyido",
+      "nickname": "Palayaw",
+      "nicknameHint": "Kung iba sa iyong unang pangalan",
+      "birthNameHint": "Ang iyong pangalan sa kapanganakan ay ginagamit para sa numerology calculations",
+      "nameMissingBanner": "Pakidagdag ang iyong unang pangalan at apelyido para sa mas personalized na karanasan."
+    },
+    "email": {
+      "title": "Email",
+      "addEmailBanner": "Magdagdag ng tunay na email address para makatanggap ng updates at para ma-enable ang password reset.",
+      "placeholder": "iyong@email.com"
+    },
+    "password": {
+      "title": "Password",
+      "current": "Kasalukuyang password",
+      "new": "Bagong password",
+      "confirm": "Kumpirmahin ang bagong password",
+      "change": "Palitan ang password",
+      "placeholder": "Ang iyong password"
+    },
+    "birthDetails": {
+      "title": "Detalye ng Kapanganakan",
+      "date": "Petsa ng kapanganakan",
+      "time": "Oras ng kapanganakan",
+      "timeUnknown": "Hindi ko alam ang oras ng aking kapanganakan",
+      "place": "Lugar ng kapanganakan",
+      "timezone": "Timezone"
+    },
+    "zodiac": {
+      "title": "Zodiac Sign",
+      "select": "Piliin ang iyong sign"
+    },
+    "language": {
+      "title": "Wika",
+      "select": "Pumili ng wika"
+    },
+    "social": {
+      "title": "Social Insights",
+      "description": "Ikonekta ang iyong social accounts para sa personalized insights",
+      "connect": "Ikonekta",
+      "disconnect": "I-disconnect",
+      "connected": "Nakakonekta"
+    },
+    "dangerZone": {
+      "title": "Danger Zone",
+      "hibernate": "I-hibernate ang Account",
+      "hibernateDescription": "Pansamantalang i-deactivate ang iyong account. Maaari mong i-reactivate anumang oras.",
+      "delete": "Burahin ang Account",
+      "deleteDescription": "Permanenteng burahin ang iyong account at lahat ng data. Hindi na ito maibabalik.",
+      "confirmDelete": "Sigurado ka bang gusto mong burahin ang iyong account?",
+      "typeToConfirm": "I-type ang DELETE para kumpirmahin"
+    },
+    "saveChanges": "I-save ang mga pagbabago",
+    "verificationExpired": "Nag-expire na ang iyong verification. Pakikumpirma muli."
+  },
+  "sanctuary": {
+    "greeting": {
+      "title": "Tahimik na kalinawan, {name}.",
+      "defaultName": "Kaibigan",
+      "defaultMessage": "Ang iyong pang-araw-araw na insights ay inihahanda ng cosmos."
+    },
+    "tabs": {
+      "insights": "Insights",
+      "astrology": "Astrolohiya",
+      "numerology": "Numerolohiya",
+      "connections": "Koneksyon"
+    },
+    "timeframes": {
+      "today": "Ngayon",
+      "week": "Linggo",
+      "month": "Buwan",
+      "year": "Taon"
+    },
+    "insights": {
+      "title": "Ang Iyong Santuwaryo",
+      "label": "Mga insight ng santuwaryo",
+      "tuning": "Tini-tune ang iyong insights...",
+      "ready": "Handa na ang iyong insights.",
+      "localTimezone": "Lokal na timezone",
+      "greeting": "Maligayang pagbabalik",
+      "sunriseGuidance": "Patnubay sa bukang-liwayway",
+      "energeticRhythm": "Ang iyong enerhiya ritmo para sa {timeframe}",
+      "coreThemesFor": "Mga pangunahing tema ng {timeframe}",
+      "focusFor": "Pokus para sa {timeframe}",
+      "personalNarrative": "Personal na Kuwento",
+      "coreThemes": "Mga Pangunahing Tema",
+      "focusForPeriod": "Pokus para sa panahong ito",
+      "journalPrompt": "Journal Prompt",
+      "tarot": {
+        "title": "Tarot Card",
+        "label": "TAROT DRAW — PANG-ARAW-ARAW NA ARCHETYPE",
+        "yourCard": "Ang Iyong Card",
+        "matchError": "Nahirapan kaming itugma ang tarot card na ito sa aming deck."
+      },
+      "luckyCompass": {
+        "title": "Lucky Compass",
+        "label": "LUCKY COMPASS — PANG-ARAW-ARAW NA SUWERTE + LIGHT MARKERS",
+        "numbers": "Mga numero ng {timeframe}",
+        "powerWords": "MGA POWER WORDS",
+        "handwrittenNote": "SULAT-KAMAY NA TALA"
+      },
+      "emotionalCadence": {
+        "title": "Emotional Cadence",
+        "label": "EMOTIONAL CADENCE — PANG-ARAW-ARAW NA RITMO",
+        "dawn": "Bukang-liwayway",
+        "midday": "Tanghali",
+        "dusk": "Takipsilim",
+        "evening": "Gabi",
+        "midnight": "Hatinggabi",
+        "morning": "Umaga"
+      },
+      "dailyReflection": {
+        "title": "Pang-araw-araw na pagmumuni-muni",
+        "subtitle": "Hayaang manatiling pribado at malumanay ang iyong mga tala.",
+        "placeholder": "Ilang salita para sa iyong langit ngayon…",
+        "saveHint": "Pindutin ang ⌘+Enter o Ctrl+Enter upang i-save"
+      },
+      "errors": {
+        "profileLoadError": "Nahirapan kaming i-load ang iyong profile. Subukan ulit, o makipag-ugnayan sa support kung magpatuloy ito.",
+        "insightLoadError": "Nahirapan kaming i-load ang iyong insight. Maaaring pansamantala itong isyu.",
+        "birthSignatureRequired": "I-set up ang iyong birth signature",
+        "journalSaveError": "Hindi ma-save. Subukan ulit."
+      },
+      "socialInsights": {
+        "paused": "Naka-pause ang mga social insight",
+        "pausedDescription": "I-on ang Social Insights upang mapahusay ang iyong mga reading gamit ang mga pattern mula sa mga konektadong account."
+      },
+      "reactivated": "Na-reactivate — maligayang pagbabalik."
+    }
+  },
+  "numerology": {
+    "title": "Ang Iyong mga Numero",
+    "subtitle": "Ang Matematika sa Likod ng Iyong Buhay",
+    "calculating": "Kinakalkula ang iyong mga numero...",
+    "systems": {
+      "pythagorean": "Pythagorean",
+      "chaldean": "Chaldean"
+    },
+    "errors": {
+      "nameRequired": "Kailangan ng Pangalan",
+      "nameRequiredMessage": "Kailangan namin ang iyong unang pangalan at apelyido para kalkulahin ang iyong numerology profile. Paki-update ang iyong pangalan sa Settings.",
+      "birthDateRequired": "Kailangan ng Petsa ng Kapanganakan",
+      "birthDateRequiredMessage": "Kailangan namin ang iyong petsa ng kapanganakan para kalkulahin ang iyong numerology profile. Paki-update ang iyong petsa ng kapanganakan sa Settings.",
+      "loadFailed": "Hindi ma-load ang numerology profile"
+    },
+    "coreNumbers": {
+      "title": "Mga Pangunahing Numero",
+      "lifePath": "Life Path",
+      "lifePathDesc": "Ang layunin ng iyong buhay at ang landas na iyong tinatahak",
+      "expression": "Expression",
+      "expressionDesc": "Ang iyong mga natural na kakayahan at talento",
+      "soulUrge": "Soul Urge",
+      "soulUrgeDesc": "Ang iyong mga panloob na motibasyon at pagnanasa",
+      "personality": "Personalidad",
+      "personalityDesc": "Kung paano ka nakikita ng iba",
+      "birthday": "Kaarawan",
+      "birthdayDesc": "Ang iyong mga natural na regalo at talento",
+      "maturity": "Pagkahinog",
+      "maturityDesc": "Kung sino ang nagiging ikaw"
+    },
+    "cycles": {
+      "title": "Mga Personal na Siklo",
+      "personalYear": "Personal Year",
+      "personalMonth": "Personal Month",
+      "personalDay": "Personal Day"
+    },
+    "lifePeriods": {
+      "title": "Mga Panahon ng Buhay",
+      "currentPinnacle": "Kasalukuyang Pinnacle",
+      "period": "Panahon",
+      "ages": "Edad",
+      "onwards": "pataas",
+      "pinnacles": {
+        "first": "1st Pinnacle",
+        "second": "2nd Pinnacle",
+        "third": "3rd Pinnacle",
+        "fourth": "4th Pinnacle"
+      }
+    },
+    "challenges": {
+      "title": "Mga Hamon sa Buhay",
+      "first": "Unang Hamon",
+      "second": "Pangalawang Hamon",
+      "third": "Pangatlong Hamon",
+      "main": "Pangunahing Hamon"
+    },
+    "luckyNumbers": {
+      "title": "Mga Lucky Numbers"
+    },
+    "karmicDebt": {
+      "title": "Mga Karmic Lessons"
+    }
+  },
+  "astrology": {
+    "title": "Astrolohiya",
+    "subtitle": "Ang Liwanag sa Likod ng Iyong Buhay",
+    "calculating": "Kinakalkula ang iyong chart...",
+    "birthChart": {
+      "title": "Birth Chart",
+      "subtitle": "Ang iyong natatanging planetary signature"
+    },
+    "planets": {
+      "title": "Mga Planeta",
+      "subtitle": "Ang iyong natatanging planetary signature",
+      "sun": "Araw",
+      "sunDesc": "Ang iyong pangunahing sense of self at vitalidad.",
+      "moon": "Buwan",
+      "moonDesc": "Ang iyong emosyonal na landscape at panloob na mundo.",
+      "mercury": "Mercury",
+      "mercuryDesc": "Kung paano ka mag-isip at makipag-usap.",
+      "venus": "Venus",
+      "venusDesc": "Ang iyong minamahal at nakikitang maganda.",
+      "mars": "Mars",
+      "marsDesc": "Ang iyong drive, pagnanasa, at kung paano ka kumilos.",
+      "jupiter": "Jupiter",
+      "jupiterDesc": "Kung saan ka naghahanap ng paglago at kahulugan.",
+      "saturn": "Saturn",
+      "saturnDesc": "Ang iyong mga aral at mga larangan ng pagkadalubhasa.",
+      "uranus": "Uranus",
+      "uranusDesc": "Kung saan ka nag-iimbento at lumalaya.",
+      "neptune": "Neptune",
+      "neptuneDesc": "Ang iyong mga panaginip, kutob, at espiritwal na kalikasan.",
+      "pluto": "Pluto",
+      "plutoDesc": "Ang iyong kalaliman at transformative power.",
+      "northNode": "North Node",
+      "northNodeDesc": "Ang iyong imbitasyon patungo sa paglago."
+    },
+    "houses": {
+      "title": "Mga Bahay",
+      "subtitle": "Ang 12 bahagi ng buhay sa iyong chart",
+      "first": "1st House",
+      "second": "2nd House",
+      "secondDesc": "Ang iyong relasyon sa mga resources, halaga, at katatagan.",
+      "third": "3rd House",
+      "fourth": "4th House",
+      "fourthDesc": "Ang iyong panloob na pundasyon, tahanan, at emosyonal na ugat.",
+      "fifth": "5th House",
+      "sixth": "6th House",
+      "sixthDesc": "Ang iyong pang-araw-araw na ritmo, trabaho, at kalusugan.",
+      "seventh": "7th House",
+      "eighth": "8th House",
+      "ninth": "9th House",
+      "ninthDesc": "Ang iyong paghahanap ng kahulugan, paniniwala, at pagpapalawak.",
+      "tenth": "10th House",
+      "tenthDesc": "Ang iyong pampublikong papel, karera, at nakikitang pamana.",
+      "eleventh": "11th House",
+      "eleventhDesc": "Ang iyong pananaw para sa komunidad, pagkakaibigan, at kinabukasan.",
+      "twelfth": "12th House",
+      "twelfthDesc": "Ang iyong panloob na santuwaryo, pag-iisa, at kabanalan."
+    },
+    "aspects": {
+      "title": "Mga Aspeto",
+      "subtitle": "Ang mga usapan sa pagitan ng iyong mga planeta"
+    },
+    "patterns": {
+      "title": "Mga Pattern at Landas",
+      "chartShape": "Hugis ng Chart",
+      "dominantElement": "Dominanteng Elemento",
+      "dominantModality": "Dominanteng Modality",
+      "hemisphereEmphasis": "Hemisphere Emphasis",
+      "above": "Sa itaas ng horizon",
+      "below": "Sa ibaba ng horizon",
+      "aboveDesc": "Ang iyong chart ay nakatuon sa visibility at panlabas na expression. Madalas hihingin ng buhay na magpakita ka, makita, at makipag-ugnayan sa panlabas na mundo.",
+      "belowDesc": "Ang iyong chart ay nakatuon sa panloob na pagmumuni-muni at subtlety. Madalas naglalahad ang buhay sa pamamagitan ng panloob na processing, tahimik na pagmamasid, at behind-the-scenes na gawain."
+    },
+    "errors": {
+      "birthDetailsRequired": "Kailangan ng Detalye ng Kapanganakan",
+      "birthDetailsRequiredMessage": "Kailangan namin ang iyong kumpletong detalye ng kapanganakan para kalkulahin ang iyong chart."
+    }
+  },
+  "connections": {
+    "title": "Mga Koneksyon",
+    "subtitle": "I-explore ang iyong mga relasyon",
+    "addConnection": "Magdagdag ng Koneksyon",
+    "noConnections": "Wala pang koneksyon",
+    "noConnectionsMessage": "Magdagdag ng iyong unang koneksyon para i-explore ang dynamics ng iyong relasyon.",
+    "notes": "Mga Tala",
+    "saveNotes": "I-save ang mga tala",
+    "compatibility": "Compatibility",
+    "synastry": "Synastry",
+    "composite": "Composite"
+  },
+  "spaceBetween": {
+    "title": "Ang Espasyo sa Pagitan",
+    "subtitle": "Ang iyong relationship blueprint kasama si {connectionName}",
+    "generating": "Ginagawa ang iyong relationship blueprint...",
+    "generatingHint": "Maaaring tumagal ito ng ilang sandali",
+    "tryAgain": "Subukan muli",
+    "discover": "Tuklasin ang Espasyo sa Pagitan",
+    "discoverDescription": "Gawin ang iyong permanenteng relationship blueprint kasama si {connectionName}. Ang malalim na insight na ito ay isang beses lang ginagawa at nase-save habang buhay.",
+    "generateBlueprint": "Gumawa ng blueprint",
+    "sections": {
+      "essence": "Kakanyahan",
+      "emotionalBlueprint": "Emotional Blueprint",
+      "communication": "Komunikasyon",
+      "growthEdges": "Mga Lugar ng Paglago",
+      "careGuide": "Gabay sa Pag-aalaga"
+    }
+  },
+  "location": {
+    "title": "Tulungan ang Solara na itugma ang iyong kalangitan",
+    "body": "Para makagawa ng insights sa simula ng iyong araw, kailangang malaman ng Solara kung saan ka sa mundo.\n\nGinagamit lang namin ito para kalkulahin ang iyong timezone para ang iyong pang-araw-araw, lingguhan, at buwanang gabay ay nagre-refresh sa tamang lokal na oras.\n\nKung laktawan mo ito, gagamitin namin ang UTC bilang default. Gagana pa rin ang Solara, pero maaaring medyo kakaiba ang iyong timing.",
+    "allow": "Payagan ang lokasyon",
+    "skip": "Laktawan, gamitin muna ang UTC"
+  },
+  "errors": {
+    "pageNotFound": "Hindi nahanap ang pahina",
+    "unauthorized": "Hindi awtorisado",
+    "serverError": "Error sa server",
+    "networkError": "Error sa network",
+    "rateLimited": "Masyadong maraming request. Pakisubukan muli mamaya.",
+    "sessionExpired": "Nag-expire na ang iyong session. Pakisubukang mag-sign in muli."
+  },
+  "deletion": {
+    "pageTitle": "Status ng Pagtanggal ng Data",
+    "noCode": "Walang ibinigay na confirmation code. Pakigamit ang link mula sa iyong data deletion confirmation.",
+    "notFound": "Hindi nahanap ang deletion request. Maaaring hindi balido o nag-expire na ang confirmation code.",
+    "confirmationCode": "Confirmation Code",
+    "status": "Status",
+    "requestReceived": "Natanggap ang Request",
+    "processed": "Naproseso",
+    "errorDetails": "Mga detalye ng error",
+    "contactSupport": "Makipag-ugnayan sa amin sa solara@solarainsights.com para sa tulong.",
+    "questions": "May mga tanong? Makipag-ugnayan sa amin sa",
+    "pending": {
+      "title": "Naghihintay",
+      "description": "Natanggap na ang iyong kahilingan sa pagtanggal ng data at naghihintay na iproseso."
+    },
+    "processing": {
+      "title": "Isinasagawa",
+      "description": "Kasalukuyang tinatanggal ang iyong data mula sa aming mga sistema."
+    },
+    "completed": {
+      "title": "Kumpleto",
+      "description": "Matagumpay na natanggal ang iyong data mula sa Solara Insights.",
+      "permanentNotice": "Ang lahat ng iyong personal na data na nauugnay sa iyong Facebook account ay permanenteng tinanggal mula sa Solara Insights. Hindi na ito maibabalik."
+    },
+    "failed": {
+      "title": "Nabigo",
+      "description": "May problema sa pagproseso ng iyong deletion request. Pakikontact ang support."
+    },
+    "userNotFound": {
+      "title": "Walang Nahanap na Data",
+      "description": "Walang nahanap na account na nauugnay sa iyong Facebook account. Walang data na kailangang tanggalin."
+    }
+  },
+  "zodiacSigns": {
+    "aries": "Aries",
+    "taurus": "Taurus",
+    "gemini": "Gemini",
+    "cancer": "Cancer",
+    "leo": "Leo",
+    "virgo": "Virgo",
+    "libra": "Libra",
+    "scorpio": "Scorpio",
+    "sagittarius": "Sagittarius",
+    "capricorn": "Capricorn",
+    "aquarius": "Aquarius",
+    "pisces": "Pisces"
+  },
+  "tarot": {
+    "title": "Magtanong sa mga Baraha",
+    "questionLabel": "ANG IYONG TANONG",
+    "questionPlaceholder": "Tungkol saan mo gustong magkaroon ng gabay ngayon?",
+    "questionError": "Mangyaring maglagay ng tanong (hindi bababa sa {minLength} karakter)",
+    "charactersNeeded": "Kailangan pa ng {count} karakter",
+    "spreadLabel": "PUMILI NG IYONG SPREAD",
+    "spreads": {
+      "single": "Isang baraha",
+      "singleDesc": "Mabilis na insight",
+      "three": "Tatlong baraha",
+      "threeDesc": "Nakaraan, Kasalukuyan, Kinabukasan",
+      "five": "Limang baraha",
+      "fiveDesc": "Malalim na pagsusuri"
+    },
+    "buttons": {
+      "draw": "Pumili ng baraha",
+      "drawing": "Pumipili ng baraha...",
+      "wait": "Maghintay {seconds}s..."
+    },
+    "loading": "Binabasa ang deck...",
+    "reading": {
+      "title": "Ang iyong reading",
+      "reversed": "Baligtad",
+      "synthesis": "ANG MALAKING LARAWAN",
+      "actions": "IMINUMUNGKAHING AKSYON",
+      "reflection": "PAGNINILAY"
+    },
+    "cta": {
+      "message": "Gusto mo ba ng mas malalim at personalized na mga reading?",
+      "button": "Sumali sa Solara"
+    },
+    "errors": {
+      "generic": "Hindi makumpleto ang iyong reading. Mangyaring subukan muli.",
+      "rateLimit": "Mangyaring maghintay ng {seconds} segundo bago pumili muli."
+    }
+  },
+  "learn": {
+    "searchPlaceholder": "Maghanap ng mga gabay...",
+    "guidesFound": "{count} gabay ang nahanap",
+    "filterByTopic": "I-filter ayon sa paksa",
+    "clearAll": "I-clear lahat"
+  }
+}

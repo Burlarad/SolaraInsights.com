@@ -7,15 +7,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SanctuaryTabs } from "@/components/sanctuary/SanctuaryTabs";
 import { TimeframeToggle } from "@/components/sanctuary/TimeframeToggle";
-import { GreetingCard } from "@/components/sanctuary/GreetingCard";
+import { SolaraLogo } from "@/components/layout/SolaraLogo";
 import { EmotionalCadenceTimeline } from "@/components/sanctuary/EmotionalCadenceTimeline";
 import { SocialConnectModal } from "@/components/sanctuary/SocialConnectModal";
 import { useSettings } from "@/providers/SettingsProvider";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { SanctuaryInsight, Timeframe, SocialProvider } from "@/types";
 import { findTarotCard } from "@/lib/tarot";
-import { findRune } from "@/lib/runes";
+// FEATURE DISABLED: Rune Whisper / Daily Sigil
+// import { findRune } from "@/lib/runes";
 import { pickRotatingMessage, getErrorCategory, type ApiErrorResponse } from "@/lib/ui/pickRotatingMessage";
+import { useTranslations } from "next-intl";
 
 interface ErrorInfo {
   message: string;
@@ -29,7 +31,9 @@ function SanctuaryContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { profile, loading: profileLoading, error: profileError, refreshProfile } = useSettings();
-  const { coords, timezone } = useGeolocation();
+  const { coords } = useGeolocation();
+  const t = useTranslations("sanctuary");
+  const tCommon = useTranslations("common");
 
   const [timeframe, setTimeframe] = useState<Timeframe>("today");
   const [insight, setInsight] = useState<SanctuaryInsight | null>(null);
@@ -286,11 +290,11 @@ function SanctuaryContent() {
       }
 
       // Show success message briefly
-      setJournalSavedMessage("Saved");
+      setJournalSavedMessage(tCommon("saved"));
       setTimeout(() => setJournalSavedMessage(null), 2000);
     } catch (err: any) {
       console.error("Error saving journal entry:", err);
-      setJournalError("Unable to save. Please try again.");
+      setJournalError(t("insights.errors.journalSaveError"));
       setTimeout(() => setJournalError(null), 3000);
     } finally {
       setIsSavingJournal(false);
@@ -310,7 +314,7 @@ function SanctuaryContent() {
     }
   }, [timeframe, profileLoading, profile]);
 
-  const timeframeLabel = timeframe === "today" ? "Today" : timeframe === "week" ? "Week" : timeframe === "month" ? "Month" : "Year";
+  const timeframeLabel = t(`timeframes.${timeframe}`);
 
   // Handle profile loading errors
   if (profileError) {
@@ -319,11 +323,11 @@ function SanctuaryContent() {
         <Card>
           <CardContent className="p-12 text-center space-y-4">
             <p className="text-accent-ink/70">
-              We had trouble loading your profile. Please try again, or contact support if this continues.
+              {t("insights.errors.profileLoadError")}
             </p>
             <p className="text-sm text-danger-soft">{profileError}</p>
             <Button variant="outline" onClick={() => window.location.reload()}>
-              Try again
+              {tCommon("tryAgain")}
             </Button>
           </CardContent>
         </Card>
@@ -336,26 +340,18 @@ function SanctuaryContent() {
       {/* Reactivation toast */}
       {reactivatedToast && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg animate-in fade-in slide-in-from-top-2 duration-300">
-          Reactivated — welcome back.
+          {t("insights.reactivated")}
         </div>
       )}
-
-      {/* Timezone info */}
-      <div className="flex items-center justify-between text-xs text-accent-ink/60">
-        <div>
-          <span className="font-medium">Local timezone:</span> {profile?.timezone || "Loading..."}
-        </div>
-        <div>Sanctuary insights</div>
-      </div>
 
       {/* Social Insights toggle - only show when OFF */}
       {profile && !profile.social_insights_enabled && (
         <Card className="border-border-subtle bg-amber-50/50">
           <CardContent className="p-4 flex items-center justify-between gap-4">
             <div className="flex-1">
-              <p className="text-sm font-medium text-accent-ink">Social Insights Paused</p>
+              <p className="text-sm font-medium text-accent-ink">{t("insights.socialInsights.paused")}</p>
               <p className="text-xs text-accent-ink/70 mt-1">
-                Turn on Social Insights to enhance your readings with patterns from your connected accounts.
+                {t("insights.socialInsights.pausedDescription")}
               </p>
             </div>
             <button
@@ -363,7 +359,7 @@ function SanctuaryContent() {
               className="flex items-center gap-2 flex-shrink-0"
               aria-label="Enable social insights"
             >
-              <span className="text-xs text-accent-ink/60">OFF</span>
+              <span className="text-xs text-accent-ink/60">{tCommon("off").toUpperCase()}</span>
               <div className="w-11 h-7 rounded-full flex items-center px-1 transition-colors bg-gray-300">
                 <div className="w-5 h-5 bg-white rounded-full transition-transform translate-x-0"></div>
               </div>
@@ -372,11 +368,10 @@ function SanctuaryContent() {
         </Card>
       )}
 
-      {/* Greeting card */}
-      <GreetingCard
-        name={profile?.preferred_name || profile?.full_name || "Friend"}
-        message={loading ? "Tuning your insights..." : error ? error : "Your insights are ready."}
-      />
+      {/* Solara Logo - blended into background */}
+      <div className="flex justify-center items-center pt-4 pb-8 opacity-60">
+        <SolaraLogo size="sm" />
+      </div>
 
       {/* Tabs and timeframe */}
       <div className="flex items-center justify-between">
@@ -390,7 +385,7 @@ function SanctuaryContent() {
           <CardContent className="p-8 text-center space-y-4">
             <p className="text-accent-ink/70">{error}</p>
             <Link href="/settings">
-              <Button variant="gold">Tune your birth signature</Button>
+              <Button variant="gold">{t("insights.errors.birthSignatureRequired")}</Button>
             </Link>
           </CardContent>
         </Card>
@@ -413,7 +408,7 @@ function SanctuaryContent() {
             )}
 
             <Button variant="outline" onClick={() => loadInsight()}>
-              Try again
+              {tCommon("tryAgain")}
             </Button>
           </CardContent>
         </Card>
@@ -447,10 +442,10 @@ function SanctuaryContent() {
         <Card className="border-border-subtle bg-accent-muted/20">
           <CardContent className="p-8 text-center space-y-4">
             <p className="text-accent-ink/70">
-              We're having trouble loading your insight. This might be a temporary issue.
+              {t("insights.errors.insightLoadError")}
             </p>
             <Button variant="outline" onClick={() => loadInsight()}>
-              Try again
+              {tCommon("tryAgain")}
             </Button>
           </CardContent>
         </Card>
@@ -465,7 +460,7 @@ function SanctuaryContent() {
             <Card>
               <CardHeader>
                 <div className="space-y-1">
-                  <CardTitle>Sunrise guidance</CardTitle>
+                  <CardTitle>{t("insights.sunriseGuidance")}</CardTitle>
                   {profile?.zodiac_sign && (
                     <p className="text-sm text-accent-ink/60 uppercase tracking-wide">
                       {profile.zodiac_sign}
@@ -483,9 +478,9 @@ function SanctuaryContent() {
             {/* Emotional Cadence - Day Arc Timeline */}
             <Card>
               <CardHeader>
-                <CardTitle>Emotional Cadence</CardTitle>
+                <CardTitle>{t("insights.emotionalCadence.title")}</CardTitle>
                 <p className="text-sm text-accent-ink/60">
-                  Your energetic rhythm for {timeframe}
+                  {t("insights.energeticRhythm", { timeframe })}
                 </p>
               </CardHeader>
               <CardContent>
@@ -505,7 +500,7 @@ function SanctuaryContent() {
             <div className="grid md:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">{timeframeLabel}&apos;s core themes</CardTitle>
+                  <CardTitle className="text-lg">{t("insights.coreThemesFor", { timeframe: timeframeLabel })}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2">
@@ -521,7 +516,7 @@ function SanctuaryContent() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Focus for {timeframe}</CardTitle>
+                  <CardTitle className="text-lg">{t("insights.focusFor", { timeframe })}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-accent-ink/70 leading-relaxed">
@@ -534,8 +529,8 @@ function SanctuaryContent() {
             {/* Tarot overview */}
             <Card>
               <CardHeader>
-                <p className="micro-label mb-2">TAROT OVERVIEW — DAILY DRAW</p>
-                <CardTitle>{insight.tarot?.cardName ?? "Your Card"}</CardTitle>
+                <p className="micro-label mb-2">{t("insights.tarot.label")}</p>
+                <CardTitle>{insight.tarot?.cardName ?? t("insights.tarot.yourCard")}</CardTitle>
                 <p className="text-sm text-accent-ink/60">{insight.tarot?.arcanaType ?? ""}</p>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -551,7 +546,7 @@ function SanctuaryContent() {
                     </div>
                   ) : (
                     <p className="text-xs text-accent-ink/50 text-center mb-4">
-                      We had trouble matching this tarot card to our deck.
+                      {t("insights.tarot.matchError")}
                     </p>
                   );
                 })()}
@@ -567,7 +562,7 @@ function SanctuaryContent() {
               </CardContent>
             </Card>
 
-            {/* Rune whisper */}
+            {/* FEATURE DISABLED: Rune Whisper / Daily Sigil
             <Card>
               <CardHeader>
                 <p className="micro-label mb-2">RUNE WHISPER — DAILY SIGIL</p>
@@ -600,6 +595,7 @@ function SanctuaryContent() {
                 )}
               </CardContent>
             </Card>
+            */}
           </div>
 
           {/* Right column (1/3 width) */}
@@ -607,8 +603,8 @@ function SanctuaryContent() {
             {/* Lucky Compass */}
             <Card>
               <CardHeader>
-                <p className="micro-label mb-2">LUCKY COMPASS — DAILY LUCK + LIGHT MARKERS</p>
-                <CardTitle className="text-lg">{timeframeLabel}&apos;s numbers</CardTitle>
+                <p className="micro-label mb-2">{t("insights.luckyCompass.label")}</p>
+                <CardTitle className="text-lg">{t("insights.luckyCompass.numbers", { timeframe: timeframeLabel })}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex gap-3">
@@ -632,7 +628,7 @@ function SanctuaryContent() {
                 )}
 
                 <div>
-                  <p className="micro-label mb-3">POWER WORDS</p>
+                  <p className="micro-label mb-3">{t("insights.luckyCompass.powerWords")}</p>
                   <div className="flex flex-wrap gap-2">
                     {(insight.luckyCompass?.powerWords ?? []).map((word, i) => (
                       <span
@@ -647,7 +643,7 @@ function SanctuaryContent() {
 
                 {insight.luckyCompass?.handwrittenNote && (
                   <div className="pt-4 border-t border-border-subtle">
-                    <p className="micro-label mb-2">A HANDWRITTEN NOTE</p>
+                    <p className="micro-label mb-2">{t("insights.luckyCompass.handwrittenNote")}</p>
                     <p className="text-sm text-accent-ink/70 italic leading-relaxed">
                       &quot;{insight.luckyCompass.handwrittenNote}&quot;
                     </p>
@@ -659,15 +655,15 @@ function SanctuaryContent() {
             {/* Daily reflection */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Daily reflection</CardTitle>
+                <CardTitle className="text-lg">{t("insights.dailyReflection.title")}</CardTitle>
                 <p className="text-sm text-accent-ink/60">
-                  Let your notes stay private and gentle.
+                  {t("insights.dailyReflection.subtitle")}
                 </p>
               </CardHeader>
               <CardContent>
                 <textarea
                   className="w-full h-32 px-3 py-2 rounded-lg border border-border-subtle bg-white resize-none focus:outline-none focus:ring-2 focus:ring-accent-gold/50 text-sm"
-                  placeholder={insight.journalPrompt || "A few words for your sky today…"}
+                  placeholder={insight.journalPrompt || t("insights.dailyReflection.placeholder")}
                   value={journalContent}
                   onChange={(e) => setJournalContent(e.target.value)}
                   onKeyDown={handleJournalKeyDown}
@@ -675,7 +671,7 @@ function SanctuaryContent() {
                 />
                 <div className="flex items-center justify-between mt-2">
                   <p className="text-xs text-accent-ink/60">
-                    Press ⌘+Enter or Ctrl+Enter to save
+                    {t("insights.dailyReflection.saveHint")}
                   </p>
                   {journalSavedMessage && (
                     <p className="text-xs text-accent-gold font-medium">

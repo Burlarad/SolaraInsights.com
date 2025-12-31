@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import { Inter, Crimson_Pro } from "next/font/google";
+import { Inter, Crimson_Pro, Tangerine } from "next/font/google";
 import { GeolocationProvider } from "@/contexts/GeolocationContext";
 import { SettingsProvider } from "@/providers/SettingsProvider";
+import { IntlProvider } from "@/providers/IntlProvider";
 import { HashTokenHandler } from "@/components/auth/HashTokenHandler";
 import "./globals.css";
 
@@ -14,6 +15,13 @@ const inter = Inter({
 const crimsonPro = Crimson_Pro({
   subsets: ["latin"],
   variable: "--font-serif",
+  display: "swap",
+});
+
+const tangerine = Tangerine({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-cursive",
   display: "swap",
 });
 
@@ -32,12 +40,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${crimsonPro.variable}`}>
+    <html lang="en" className={`${inter.variable} ${crimsonPro.variable} ${tangerine.variable}`}>
       <body>
         <GeolocationProvider>
           <SettingsProvider>
-            <HashTokenHandler />
-            {children}
+            <IntlProvider>
+              <HashTokenHandler />
+              {children}
+            </IntlProvider>
           </SettingsProvider>
         </GeolocationProvider>
       </body>

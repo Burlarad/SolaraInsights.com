@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,7 @@ import { getOauthCallbackUrl } from "@/lib/url/base";
 
 export default function SignUpPage() {
   const router = useRouter();
+  const t = useTranslations("auth.signUp");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,12 +27,12 @@ export default function SignUpPage() {
     setError(null);
 
     if (password !== confirmPassword) {
-      setError("Passwords don't match. Please try again.");
+      setError(t("passwordsDontMatch"));
       return;
     }
 
     if (password.length < 8) {
-      setError("Password must be at least 8 characters long.");
+      setError(t("passwordTooShort"));
       return;
     }
 
@@ -90,9 +92,9 @@ export default function SignUpPage() {
     <div className="max-w-md mx-auto">
     <Card className="border-border-subtle">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl text-center">Create your account</CardTitle>
+        <CardTitle className="text-2xl text-center">{t("title")}</CardTitle>
         <p className="text-center text-sm text-accent-ink/60">
-          Begin your journey into the light
+          {t("subtitle")}
         </p>
       </CardHeader>
       <CardContent>
@@ -104,11 +106,11 @@ export default function SignUpPage() {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="name">Full name</Label>
+            <Label htmlFor="name">{t("fullName")}</Label>
             <Input
               id="name"
               type="text"
-              placeholder="Your name"
+              placeholder={t("namePlaceholder")}
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -116,11 +118,11 @@ export default function SignUpPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t("email")}</Label>
             <Input
               id="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder={t("emailPlaceholder")}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -128,11 +130,11 @@ export default function SignUpPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t("password")}</Label>
             <Input
               id="password"
               type="password"
-              placeholder="At least 8 characters"
+              placeholder={t("passwordPlaceholder")}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -141,7 +143,7 @@ export default function SignUpPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm password</Label>
+            <Label htmlFor="confirmPassword">{t("confirmPassword")}</Label>
             <Input
               id="confirmPassword"
               type="password"
@@ -157,18 +159,17 @@ export default function SignUpPage() {
             className="w-full"
             disabled={isLoading}
           >
-            {isLoading ? "Creating account..." : "Create account"}
+            {isLoading ? t("creatingAccount") : t("createAccountButton")}
           </Button>
 
           <p className="text-xs text-center text-accent-ink/60 leading-relaxed">
-            By signing up, you agree to our Terms of Service and Privacy Policy.
-            A portion of your subscription supports families through the Solara Foundation.
+            {t("terms")}
           </p>
         </form>
 
         <div className="my-6 flex items-center">
           <div className="flex-1 border-t border-border-subtle"></div>
-          <span className="px-4 text-xs text-accent-ink/40 uppercase">or</span>
+          <span className="px-4 text-xs text-accent-ink/40 uppercase">{t("or")}</span>
           <div className="flex-1 border-t border-border-subtle"></div>
         </div>
 
@@ -179,7 +180,7 @@ export default function SignUpPage() {
             className="w-full"
             onClick={handleFacebookSignUp}
           >
-            Continue with Facebook
+            {t("continueWithFacebook")}
           </Button>
 
           <Button
@@ -190,14 +191,14 @@ export default function SignUpPage() {
               window.location.href = "/api/auth/login/tiktok?return_to=/join";
             }}
           >
-            Continue with TikTok
+            {t("continueWithTikTok")}
           </Button>
         </div>
 
         <div className="mt-6 text-center text-sm">
-          <span className="text-accent-ink/60">Already have an account? </span>
+          <span className="text-accent-ink/60">{t("hasAccount")} </span>
           <Link href="/sign-in" className="text-accent-gold hover:underline">
-            Sign in
+            {t("signIn")}
           </Link>
         </div>
       </CardContent>

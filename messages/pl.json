@@ -1,0 +1,593 @@
+{
+  "common": {
+    "save": "Zapisz",
+    "cancel": "Anuluj",
+    "close": "Zamknij",
+    "loading": "Ładowanie...",
+    "saving": "Zapisywanie...",
+    "saved": "Zapisano",
+    "submit": "Wyślij",
+    "back": "Wstecz",
+    "next": "Dalej",
+    "delete": "Usuń",
+    "deleting": "Usuwanie...",
+    "error": "Coś poszło nie tak",
+    "tryAgain": "Spróbuj ponownie",
+    "confirm": "Potwierdź",
+    "yes": "Tak",
+    "no": "Nie",
+    "optional": "Opcjonalne",
+    "required": "Wymagane",
+    "or": "lub",
+    "and": "i",
+    "on": "Włączone",
+    "off": "Wyłączone",
+    "enabled": "Aktywne",
+    "disabled": "Nieaktywne",
+    "goToSettings": "Przejdź do Ustawień",
+    "learnMore": "Dowiedz się więcej",
+    "viewAll": "Zobacz wszystko",
+    "showMore": "Pokaż więcej",
+    "showLess": "Pokaż mniej",
+    "masterNumber": "Liczba Mistrzowska"
+  },
+  "nav": {
+    "home": "Strona główna",
+    "about": "O nas",
+    "learn": "Nauka",
+    "sanctuary": "Sanktuarium",
+    "settings": "Ustawienia",
+    "signIn": "Zaloguj się",
+    "signUp": "Zarejestruj się",
+    "signOut": "Wyloguj się"
+  },
+  "auth": {
+    "signIn": {
+      "title": "Witaj ponownie",
+      "subtitle": "Zaloguj się, aby wejść do swojego sanktuarium",
+      "signInWith": "Zaloguj się przez",
+      "orSignInWithEmail": "Lub zaloguj się przez e-mail",
+      "email": "E-mail",
+      "emailPlaceholder": "ty@przyklad.pl",
+      "password": "Hasło",
+      "forgot": "Zapomniałeś?",
+      "signingIn": "Logowanie...",
+      "signInButton": "Zaloguj się",
+      "noAccount": "Nie masz konta?",
+      "createAccount": "Utwórz konto",
+      "signInError": "Nie mogliśmy Cię zalogować z podanymi danymi. Sprawdź swój e-mail i hasło lub zresetuj hasło.",
+      "unexpectedError": "Wystąpił nieoczekiwany błąd. Spróbuj ponownie.",
+      "comingSoon": "Logowanie przez {provider} wkrótce dostępne"
+    },
+    "signUp": {
+      "title": "Utwórz swoje konto",
+      "subtitle": "Rozpocznij swoją podróż ku światłu",
+      "fullName": "Imię i nazwisko",
+      "namePlaceholder": "Twoje imię",
+      "email": "E-mail",
+      "emailPlaceholder": "ty@przyklad.pl",
+      "password": "Hasło",
+      "passwordPlaceholder": "Minimum 8 znaków",
+      "confirmPassword": "Potwierdź hasło",
+      "creatingAccount": "Tworzenie konta...",
+      "createAccountButton": "Utwórz konto",
+      "terms": "Rejestrując się, zgadzasz się z naszymi Warunkami Usługi i Polityką Prywatności. Część Twojej subskrypcji wspiera rodziny przez Fundację Solara.",
+      "or": "lub",
+      "continueWithFacebook": "Kontynuuj z Facebook",
+      "continueWithTikTok": "Kontynuuj z TikTok",
+      "hasAccount": "Masz już konto?",
+      "signIn": "Zaloguj się",
+      "passwordsDontMatch": "Hasła nie są zgodne. Spróbuj ponownie.",
+      "passwordTooShort": "Hasło musi mieć co najmniej 8 znaków."
+    },
+    "forgotPassword": {
+      "title": "Zresetuj hasło",
+      "subtitle": "Podaj swój e-mail, a wyślemy Ci link do resetu",
+      "email": "E-mail",
+      "emailPlaceholder": "ty@przyklad.pl",
+      "sending": "Wysyłanie...",
+      "sendResetLink": "Wyślij link resetujący",
+      "backToSignIn": "Powrót do logowania",
+      "checkEmail": {
+        "title": "Sprawdź swoją skrzynkę",
+        "message": "Wysłaliśmy link do resetu hasła na adres <strong>{email}</strong>. Kliknij link w e-mailu, aby utworzyć nowe hasło."
+      }
+    },
+    "resetPassword": {
+      "title": "Ustaw nowe hasło",
+      "subtitle": "Wprowadź poniżej swoje nowe hasło",
+      "verifying": "Weryfikowanie linku resetującego...",
+      "newPassword": "Nowe hasło",
+      "newPasswordPlaceholder": "Minimum 8 znaków",
+      "confirmPassword": "Potwierdź nowe hasło",
+      "confirmPasswordPlaceholder": "Wprowadź hasło ponownie",
+      "updating": "Aktualizowanie hasła...",
+      "updatePassword": "Zaktualizuj hasło",
+      "backToSignIn": "Powrót do logowania",
+      "linkExpired": {
+        "title": "Link wygasł",
+        "message": "Ten link resetujący wygasł lub jest nieprawidłowy. Poproś o nowy.",
+        "noCodeMessage": "Nie wykryto linku resetującego. Poproś o reset hasła ze strony logowania.",
+        "requestNewLink": "Poproś o nowy link"
+      },
+      "success": {
+        "title": "Hasło zaktualizowane",
+        "message": "Twoje hasło zostało pomyślnie zaktualizowane. Możesz teraz zalogować się nowym hasłem.",
+        "continueToSignIn": "Przejdź do logowania",
+        "redirecting": "Za chwilę zostaniesz automatycznie przekierowany..."
+      },
+      "sessionRequired": {
+        "title": "Wymagana sesja",
+        "message": "Użyj linku resetującego z e-maila, aby uzyskać dostęp do tej strony.",
+        "requestResetLink": "Poproś o link resetujący"
+      }
+    },
+    "setPassword": {
+      "title": "Ustaw swoje hasło",
+      "subtitle": "Utwórz hasło do swojego konta Solara",
+      "settingPasswordFor": "Ustawianie hasła dla",
+      "password": "Hasło",
+      "passwordPlaceholder": "Minimum 8 znaków",
+      "confirmPassword": "Potwierdź hasło",
+      "confirmPasswordPlaceholder": "Wprowadź hasło ponownie",
+      "settingPassword": "Ustawianie hasła...",
+      "continueToOnboarding": "Przejdź do konfiguracji",
+      "errors": {
+        "enterBoth": "Wprowadź i potwierdź swoje hasło",
+        "dontMatch": "Hasła nie są zgodne",
+        "tooShort": "Hasło musi mieć co najmniej 8 znaków"
+      }
+    },
+    "verifyEmail": {
+      "title": "Zweryfikuj Swój E-mail",
+      "subtitle": "Wysłaliśmy link weryfikacyjny na Twój e-mail",
+      "resend": "Wyślij ponownie e-mail weryfikacyjny"
+    }
+  },
+  "onboarding": {
+    "welcome": "Witaj w Solara",
+    "letsGetStarted": "Zaczynajmy",
+    "tellUsAbout": "Opowiedz nam o sobie",
+    "pageTitle": "Uzupełnij swój profil Sanktuarium",
+    "pageSubtitle": "Wykorzystamy te informacje do wygenerowania spersonalizowanych spostrzeżeń",
+    "firstName": "Imię",
+    "middleName": "Drugie imię",
+    "lastName": "Nazwisko",
+    "nickname": "Pseudonim (opcjonalnie)",
+    "nicknamePlaceholder": "Jak mamy się do Ciebie zwracać?",
+    "nicknameHint": "Jeśli inny niż twoje imię",
+    "birthDetails": "Dane Urodzenia",
+    "birthDate": "Data urodzenia",
+    "birthTime": "Godzina urodzenia (opcjonalnie)",
+    "birthTimeUnknown": "Nie znam godziny urodzenia",
+    "birthTimeHint": "Jeśli nie znasz dokładnej godziny urodzenia, możesz to pominąć i dodać później dla dokładniejszych wykresów i personalizacji.",
+    "birthPlace": "Miejsce urodzenia",
+    "searchPlace": "Wyszukaj swoje miasto urodzenia...",
+    "timezone": "Strefa czasowa: {timezone}",
+    "locationHint": "Zacznij pisać, aby wyszukać, następnie wybierz z wyników",
+    "locationWarning": "Wyszukaj i wybierz miejsce urodzenia z listy, aby kontynuować.",
+    "saving": "Zapisywanie Twojego podpisu urodzeniowego...",
+    "continue": "Kontynuuj",
+    "skip": "Pomiń na razie",
+    "complete": "Zakończ konfigurację",
+    "settingsNote": "Możesz zawsze zaktualizować te dane później w Ustawieniach",
+    "confirmingPayment": "Potwierdzanie płatności...",
+    "confirmingPaymentMessage": "Potwierdzamy Twoją subskrypcję. To zwykle zajmuje tylko kilka sekund.",
+    "errors": {
+      "firstNameRequired": "Imię jest wymagane",
+      "lastNameRequired": "Nazwisko jest wymagane",
+      "birthDateRequired": "Data urodzenia jest wymagana",
+      "locationRequired": "Wybierz miejsce urodzenia z wyników wyszukiwania",
+      "saveFailed": "Nie udało się zapisać profilu. Spróbuj ponownie."
+    }
+  },
+  "settings": {
+    "title": "Ustawienia",
+    "subtitle": "Zaktualizuj preferowane imię, znak zodiaku i współrzędne urodzenia",
+    "identity": {
+      "title": "Tożsamość",
+      "firstName": "Imię",
+      "middleName": "Drugie imię",
+      "lastName": "Nazwisko",
+      "nickname": "Pseudonim",
+      "nicknameHint": "Jeśli inny niż twoje imię",
+      "birthNameHint": "Twoje imię z aktu urodzenia jest używane do obliczeń numerologicznych",
+      "nameMissingBanner": "Dodaj swoje imię i nazwisko dla bardziej spersonalizowanego doświadczenia."
+    },
+    "email": {
+      "title": "E-mail",
+      "addEmailBanner": "Dodaj prawdziwy adres e-mail, aby otrzymywać aktualizacje i umożliwić resetowanie hasła.",
+      "placeholder": "twoj@email.com"
+    },
+    "password": {
+      "title": "Hasło",
+      "current": "Obecne hasło",
+      "new": "Nowe hasło",
+      "confirm": "Potwierdź nowe hasło",
+      "change": "Zmień hasło",
+      "placeholder": "Twoje hasło"
+    },
+    "birthDetails": {
+      "title": "Dane Urodzenia",
+      "date": "Data urodzenia",
+      "time": "Godzina urodzenia",
+      "timeUnknown": "Nie znam godziny urodzenia",
+      "place": "Miejsce urodzenia",
+      "timezone": "Strefa czasowa"
+    },
+    "zodiac": {
+      "title": "Znak Zodiaku",
+      "select": "Wybierz swój znak"
+    },
+    "language": {
+      "title": "Język",
+      "select": "Wybierz język"
+    },
+    "social": {
+      "title": "Społeczne Spostrzeżenia",
+      "description": "Połącz swoje konta społecznościowe dla spersonalizowanych spostrzeżeń",
+      "connect": "Połącz",
+      "disconnect": "Rozłącz",
+      "connected": "Połączono"
+    },
+    "dangerZone": {
+      "title": "Strefa Niebezpieczeństwa",
+      "hibernate": "Uśpij Konto",
+      "hibernateDescription": "Tymczasowo dezaktywuj swoje konto. Możesz je reaktywować w dowolnym momencie.",
+      "delete": "Usuń Konto",
+      "deleteDescription": "Trwale usuń swoje konto i wszystkie dane. Tego nie można cofnąć.",
+      "confirmDelete": "Czy na pewno chcesz usunąć swoje konto?",
+      "typeToConfirm": "Wpisz DELETE, aby potwierdzić"
+    },
+    "saveChanges": "Zapisz zmiany",
+    "verificationExpired": "Twoja weryfikacja wygasła. Zweryfikuj ponownie."
+  },
+  "sanctuary": {
+    "greeting": {
+      "title": "Spokojna jasność, {name}.",
+      "defaultName": "Przyjacielu",
+      "defaultMessage": "Twoje codzienne spostrzeżenia są przygotowywane przez kosmos."
+    },
+    "tabs": {
+      "insights": "Spostrzeżenia",
+      "astrology": "Astrologia",
+      "numerology": "Numerologia",
+      "connections": "Połączenia"
+    },
+    "timeframes": {
+      "today": "Dziś",
+      "week": "Tydzień",
+      "month": "Miesiąc",
+      "year": "Rok"
+    },
+    "insights": {
+      "title": "Twoje Sanktuarium",
+      "label": "Spostrzeżenia sanktuarium",
+      "tuning": "Dostrajanie spostrzeżeń...",
+      "ready": "Twoje spostrzeżenia są gotowe.",
+      "localTimezone": "Lokalna strefa czasowa",
+      "greeting": "Witaj z powrotem",
+      "sunriseGuidance": "Przewodnictwo o świcie",
+      "energeticRhythm": "Twój energetyczny rytm na {timeframe}",
+      "coreThemesFor": "Główne tematy {timeframe}",
+      "focusFor": "Koncentracja na {timeframe}",
+      "personalNarrative": "Osobista Narracja",
+      "coreThemes": "Główne Tematy",
+      "focusForPeriod": "Koncentracja na ten okres",
+      "journalPrompt": "Podpowiedź do Dziennika",
+      "tarot": {
+        "title": "Karta Tarota",
+        "label": "LOSOWANIE TAROTA — CODZIENNY ARCHETYP",
+        "yourCard": "Twoja Karta",
+        "matchError": "Mieliśmy problem z dopasowaniem tej karty tarota do naszej talii."
+      },
+      "luckyCompass": {
+        "title": "Kompas Szczęścia",
+        "label": "KOMPAS SZCZĘŚCIA — CODZIENNA FORTUNA + ZNAKI ŚWIATŁA",
+        "numbers": "Liczby na {timeframe}",
+        "powerWords": "SŁOWA MOCY",
+        "handwrittenNote": "RĘCZNIE NAPISANA NOTATKA"
+      },
+      "emotionalCadence": {
+        "title": "Emocjonalna Kadencja",
+        "label": "EMOCJONALNA KADENCJA — CODZIENNY RYTM",
+        "dawn": "Świt",
+        "midday": "Południe",
+        "dusk": "Zmierzch",
+        "evening": "Wieczór",
+        "midnight": "Północ",
+        "morning": "Poranek"
+      },
+      "dailyReflection": {
+        "title": "Codzienna refleksja",
+        "subtitle": "Niech twoje notatki pozostaną prywatne i łagodne.",
+        "placeholder": "Kilka słów dla twojego nieba dzisiaj…",
+        "saveHint": "Naciśnij ⌘+Enter lub Ctrl+Enter, aby zapisać"
+      },
+      "errors": {
+        "profileLoadError": "Mieliśmy problem z załadowaniem twojego profilu. Spróbuj ponownie lub skontaktuj się z pomocą techniczną, jeśli problem będzie się powtarzał.",
+        "insightLoadError": "Mamy problem z załadowaniem twojego spostrzeżenia. To może być tymczasowy problem.",
+        "birthSignatureRequired": "Skonfiguruj swoją sygnaturę urodzenia",
+        "journalSaveError": "Nie można zapisać. Spróbuj ponownie."
+      },
+      "socialInsights": {
+        "paused": "Spostrzeżenia społeczne wstrzymane",
+        "pausedDescription": "Włącz Spostrzeżenia Społeczne, aby wzbogacić swoje odczyty o wzorce z połączonych kont."
+      },
+      "reactivated": "Reaktywowane — witaj z powrotem."
+    }
+  },
+  "numerology": {
+    "title": "Twoje Liczby",
+    "subtitle": "Matematyka Za Twoim Życiem",
+    "calculating": "Obliczanie twoich liczb...",
+    "systems": {
+      "pythagorean": "Pitagorejski",
+      "chaldean": "Chaldejski"
+    },
+    "errors": {
+      "nameRequired": "Wymagane Imię",
+      "nameRequiredMessage": "Potrzebujemy twojego imienia i nazwiska do obliczenia profilu numerologicznego. Zaktualizuj swoje imię w Ustawieniach.",
+      "birthDateRequired": "Wymagana Data Urodzenia",
+      "birthDateRequiredMessage": "Potrzebujemy twojej daty urodzenia do obliczenia profilu numerologicznego. Zaktualizuj datę urodzenia w Ustawieniach.",
+      "loadFailed": "Nie można załadować profilu numerologicznego"
+    },
+    "coreNumbers": {
+      "title": "Podstawowe Liczby",
+      "lifePath": "Ścieżka Życia",
+      "lifePathDesc": "Twój cel życiowy i ścieżka, którą podążasz",
+      "expression": "Ekspresja",
+      "expressionDesc": "Twoje naturalne zdolności i talenty",
+      "soulUrge": "Pragnienie Duszy",
+      "soulUrgeDesc": "Twoje wewnętrzne motywacje i pragnienia",
+      "personality": "Osobowość",
+      "personalityDesc": "Jak inni cię postrzegają",
+      "birthday": "Urodziny",
+      "birthdayDesc": "Twoje naturalne dary i talenty",
+      "maturity": "Dojrzałość",
+      "maturityDesc": "Kim się stajesz"
+    },
+    "cycles": {
+      "title": "Osobiste Cykle",
+      "personalYear": "Osobisty Rok",
+      "personalMonth": "Osobisty Miesiąc",
+      "personalDay": "Osobisty Dzień"
+    },
+    "lifePeriods": {
+      "title": "Okresy Życia",
+      "currentPinnacle": "Obecny Szczyt",
+      "period": "Okres",
+      "ages": "Wiek",
+      "onwards": "i dalej",
+      "pinnacles": {
+        "first": "1. Szczyt",
+        "second": "2. Szczyt",
+        "third": "3. Szczyt",
+        "fourth": "4. Szczyt"
+      }
+    },
+    "challenges": {
+      "title": "Wyzwania Życiowe",
+      "first": "Pierwsze Wyzwanie",
+      "second": "Drugie Wyzwanie",
+      "third": "Trzecie Wyzwanie",
+      "main": "Główne Wyzwanie"
+    },
+    "luckyNumbers": {
+      "title": "Szczęśliwe Liczby"
+    },
+    "karmicDebt": {
+      "title": "Lekcje Karmiczne"
+    }
+  },
+  "astrology": {
+    "title": "Astrologia",
+    "subtitle": "Światło Za Twoim Życiem",
+    "calculating": "Obliczanie twojego wykresu...",
+    "birthChart": {
+      "title": "Wykres Urodzeniowy",
+      "subtitle": "Twoja unikalna sygnatura planetarna"
+    },
+    "planets": {
+      "title": "Planety",
+      "subtitle": "Twoja unikalna sygnatura planetarna",
+      "sun": "Słońce",
+      "sunDesc": "Twoje poczucie siebie i witalność.",
+      "moon": "Księżyc",
+      "moonDesc": "Twój krajobraz emocjonalny i wewnętrzny świat.",
+      "mercury": "Merkury",
+      "mercuryDesc": "Jak myślisz i komunikujesz się.",
+      "venus": "Wenus",
+      "venusDesc": "Co kochasz i uważasz za piękne.",
+      "mars": "Mars",
+      "marsDesc": "Twoja determinacja, pragnienie i sposób działania.",
+      "jupiter": "Jowisz",
+      "jupiterDesc": "Gdzie szukasz wzrostu i sensu.",
+      "saturn": "Saturn",
+      "saturnDesc": "Twoje lekcje i obszary mistrzostwa.",
+      "uranus": "Uran",
+      "uranusDesc": "Gdzie innowujesz i wyzwalasz się.",
+      "neptune": "Neptun",
+      "neptuneDesc": "Twoje marzenia, intuicja i duchowa natura.",
+      "pluto": "Pluton",
+      "plutoDesc": "Twoje głębiny i transformacyjna moc.",
+      "northNode": "Węzeł Północny",
+      "northNodeDesc": "Twoje zaproszenie do wzrostu."
+    },
+    "houses": {
+      "title": "Domy",
+      "subtitle": "12 obszarów życia w twoim wykresie",
+      "first": "1. Dom",
+      "second": "2. Dom",
+      "secondDesc": "Twoja relacja z zasobami, wartością i stabilnością.",
+      "third": "3. Dom",
+      "fourth": "4. Dom",
+      "fourthDesc": "Twój wewnętrzny fundament, dom i emocjonalne korzenie.",
+      "fifth": "5. Dom",
+      "sixth": "6. Dom",
+      "sixthDesc": "Twoje codzienne rytmy, praca i dobre samopoczucie.",
+      "seventh": "7. Dom",
+      "eighth": "8. Dom",
+      "ninth": "9. Dom",
+      "ninthDesc": "Twoje poszukiwanie sensu, wiary i ekspansji.",
+      "tenth": "10. Dom",
+      "tenthDesc": "Twoja publiczna rola, kariera i widoczne dziedzictwo.",
+      "eleventh": "11. Dom",
+      "eleventhDesc": "Twoja wizja społeczności, przyjaźni i przyszłości.",
+      "twelfth": "12. Dom",
+      "twelfthDesc": "Twoje wewnętrzne sanktuarium, samotność i sacrum."
+    },
+    "aspects": {
+      "title": "Aspekty",
+      "subtitle": "Rozmowy między twoimi planetami"
+    },
+    "patterns": {
+      "title": "Wzory i Ścieżka",
+      "chartShape": "Kształt Wykresu",
+      "dominantElement": "Dominujący Żywioł",
+      "dominantModality": "Dominująca Modalność",
+      "hemisphereEmphasis": "Akcent Półkuli",
+      "above": "Nad horyzontem",
+      "below": "Pod horyzontem",
+      "aboveDesc": "Twój wykres jest zorientowany na widoczność i zewnętrzną ekspresję. Życie często prosi cię o pokazanie się, bycie widocznym i angażowanie się w zewnętrzny świat.",
+      "belowDesc": "Twój wykres jest zorientowany na wewnętrzną refleksję i subtelność. Życie często rozwija się przez wewnętrzne przetwarzanie, cichą obserwację i pracę za kulisami."
+    },
+    "errors": {
+      "birthDetailsRequired": "Wymagane Dane Urodzenia",
+      "birthDetailsRequiredMessage": "Potrzebujemy pełnych danych urodzenia do obliczenia twojego wykresu."
+    }
+  },
+  "connections": {
+    "title": "Połączenia",
+    "subtitle": "Odkryj swoje relacje",
+    "addConnection": "Dodaj Połączenie",
+    "noConnections": "Brak połączeń",
+    "noConnectionsMessage": "Dodaj swoje pierwsze połączenie, aby zbadać dynamikę swoich relacji.",
+    "notes": "Notatki",
+    "saveNotes": "Zapisz notatki",
+    "compatibility": "Kompatybilność",
+    "synastry": "Synastria",
+    "composite": "Kompozyt"
+  },
+  "spaceBetween": {
+    "title": "Przestrzeń Między",
+    "subtitle": "Twój schemat relacji z {connectionName}",
+    "generating": "Generowanie schematu Waszej relacji...",
+    "generatingHint": "To może chwilę potrwać",
+    "tryAgain": "Spróbuj ponownie",
+    "discover": "Odkryj Przestrzeń Między",
+    "discoverDescription": "Wygeneruj trwały schemat relacji z {connectionName}. Ta głęboka analiza jest tworzona raz i zapisywana na zawsze.",
+    "generateBlueprint": "Wygeneruj schemat",
+    "sections": {
+      "essence": "Esencja",
+      "emotionalBlueprint": "Schemat Emocjonalny",
+      "communication": "Komunikacja",
+      "growthEdges": "Obszary Rozwoju",
+      "careGuide": "Przewodnik Troski"
+    }
+  },
+  "location": {
+    "title": "Pomóż Solara dopasować twoje niebo",
+    "body": "Aby generować twoje spostrzeżenia na początku dnia, Solara musi w przybliżeniu wiedzieć, gdzie na świecie jesteś.\n\nUżywamy tego tylko do obliczenia twojej strefy czasowej, aby twoje codzienne, tygodniowe i miesięczne wskazówki odświeżały się o odpowiedniej lokalnej porze.\n\nJeśli to pominiesz, użyjemy UTC jako domyślnej. Solara nadal będzie działać, ale twój czas może wydawać się nieco niepasujący.",
+    "allow": "Zezwól na lokalizację",
+    "skip": "Pomiń, użyj UTC na razie"
+  },
+  "errors": {
+    "pageNotFound": "Strona nie znaleziona",
+    "unauthorized": "Nieautoryzowany",
+    "serverError": "Błąd serwera",
+    "networkError": "Błąd sieci",
+    "rateLimited": "Zbyt wiele żądań. Spróbuj ponownie później.",
+    "sessionExpired": "Twoja sesja wygasła. Zaloguj się ponownie."
+  },
+  "deletion": {
+    "pageTitle": "Status Usuwania Danych",
+    "noCode": "Nie podano kodu potwierdzenia. Użyj linku z potwierdzenia usunięcia danych.",
+    "notFound": "Nie znaleziono żądania usunięcia. Kod potwierdzenia może być nieprawidłowy lub wygasł.",
+    "confirmationCode": "Kod Potwierdzenia",
+    "status": "Status",
+    "requestReceived": "Żądanie Otrzymane",
+    "processed": "Przetworzone",
+    "errorDetails": "Szczegóły błędu",
+    "contactSupport": "Skontaktuj się z nami pod adresem solara@solarainsights.com w celu uzyskania pomocy.",
+    "questions": "Pytania? Skontaktuj się z nami pod adresem",
+    "pending": {
+      "title": "Oczekuje",
+      "description": "Twoje żądanie usunięcia danych zostało przyjęte i czeka na przetworzenie."
+    },
+    "processing": {
+      "title": "Przetwarzanie",
+      "description": "Twoje dane są obecnie usuwane z naszych systemów."
+    },
+    "completed": {
+      "title": "Zakończone",
+      "description": "Twoje dane zostały pomyślnie usunięte z Solara Insights.",
+      "permanentNotice": "Wszystkie dane osobowe powiązane z Twoim kontem Facebook zostały trwale usunięte z Solara Insights. Tej czynności nie można cofnąć."
+    },
+    "failed": {
+      "title": "Niepowodzenie",
+      "description": "Wystąpił problem podczas przetwarzania żądania usunięcia. Skontaktuj się z pomocą techniczną."
+    },
+    "userNotFound": {
+      "title": "Nie Znaleziono Danych",
+      "description": "Nie znaleziono konta powiązanego z Twoim kontem Facebook. Nie było żadnych danych do usunięcia."
+    }
+  },
+  "zodiacSigns": {
+    "aries": "Baran",
+    "taurus": "Byk",
+    "gemini": "Bliźnięta",
+    "cancer": "Rak",
+    "leo": "Lew",
+    "virgo": "Panna",
+    "libra": "Waga",
+    "scorpio": "Skorpion",
+    "sagittarius": "Strzelec",
+    "capricorn": "Koziorożec",
+    "aquarius": "Wodnik",
+    "pisces": "Ryby"
+  },
+  "tarot": {
+    "title": "Zapytaj karty",
+    "questionLabel": "TWOJE PYTANIE",
+    "questionPlaceholder": "O czym chciałbyś dziś uzyskać wskazówki?",
+    "questionError": "Wprowadź pytanie (minimum {minLength} znaków)",
+    "charactersNeeded": "Potrzeba jeszcze {count} znaków",
+    "spreadLabel": "WYBIERZ ROZKŁAD",
+    "spreads": {
+      "single": "Jedna karta",
+      "singleDesc": "Szybki wgląd",
+      "three": "Trzy karty",
+      "threeDesc": "Przeszłość, Teraźniejszość, Przyszłość",
+      "five": "Pięć kart",
+      "fiveDesc": "Głęboka eksploracja"
+    },
+    "buttons": {
+      "draw": "Wyciągnij karty",
+      "drawing": "Wyciąganie kart...",
+      "wait": "Poczekaj {seconds}s..."
+    },
+    "loading": "Tasowanie talii...",
+    "reading": {
+      "title": "Twoja lektura",
+      "reversed": "Odwrócona",
+      "synthesis": "SZERSZY OBRAZ",
+      "actions": "SUGEROWANE DZIAŁANIA",
+      "reflection": "REFLEKSJA"
+    },
+    "cta": {
+      "message": "Chcesz głębszych, spersonalizowanych odczytów?",
+      "button": "Dołącz do Solary"
+    },
+    "errors": {
+      "generic": "Nie udało się ukończyć odczytu. Spróbuj ponownie.",
+      "rateLimit": "Poczekaj {seconds} sekund przed ponownym losowaniem."
+    }
+  },
+  "learn": {
+    "searchPlaceholder": "Szukaj przewodników...",
+    "guidesFound": "{count} {count, plural, one {przewodnik znaleziony} few {przewodniki znalezione} other {przewodników znalezionych}}",
+    "filterByTopic": "Filtruj według tematu",
+    "clearAll": "Wyczyść wszystko"
+  }
+}

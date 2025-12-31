@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PublicTarotResponse, TarotSpread } from "@/types";
@@ -26,12 +27,6 @@ function getUserLanguage(): string {
 
 const MIN_QUESTION_LENGTH = 10;
 
-const SPREAD_OPTIONS: { value: TarotSpread; label: string; description: string }[] = [
-  { value: 1, label: "Single Card", description: "Quick insight" },
-  { value: 3, label: "Three Card", description: "Past, Present, Future" },
-  { value: 5, label: "Five Card", description: "Deep exploration" },
-];
-
 // Scroll element to exact center of viewport
 function scrollToCenter(el: HTMLElement) {
   const rect = el.getBoundingClientRect();
@@ -41,6 +36,8 @@ function scrollToCenter(el: HTMLElement) {
 }
 
 export function TarotArena() {
+  const t = useTranslations("tarot");
+
   const [question, setQuestion] = useState("");
   const [spread, setSpread] = useState<TarotSpread>(3);
   const [reading, setReading] = useState<PublicTarotResponse | null>(null);
@@ -51,6 +48,12 @@ export function TarotArena() {
 
   const outputRef = useRef<HTMLDivElement>(null);
   const cooldownInterval = useRef<NodeJS.Timeout | null>(null);
+
+  const spreadOptions = useMemo(() => [
+    { value: 1 as TarotSpread, label: t("spreads.single"), description: t("spreads.singleDesc") },
+    { value: 3 as TarotSpread, label: t("spreads.three"), description: t("spreads.threeDesc") },
+    { value: 5 as TarotSpread, label: t("spreads.five"), description: t("spreads.fiveDesc") },
+  ], [t]);
 
   // Cleanup cooldown interval
   useEffect(() => {
@@ -87,7 +90,7 @@ export function TarotArena() {
   const drawCards = async () => {
     const trimmedQuestion = question.trim();
     if (!trimmedQuestion || trimmedQuestion.length < MIN_QUESTION_LENGTH) {
-      setError(`Please enter a question (at least ${MIN_QUESTION_LENGTH} characters)`);
+      setError(t("questionError", { minLength: MIN_QUESTION_LENGTH }));
       return;
     }
 
@@ -120,7 +123,7 @@ export function TarotArena() {
         if (response.status === 429) {
           const retryAfter = data.retryAfterSeconds || data.retryAfter || 10;
           setCooldownRemaining(retryAfter);
-          setError(data.message || `Please wait ${retryAfter} seconds before drawing again.`);
+          setError(data.message || t("errors.rateLimit", { seconds: retryAfter }));
           return;
         }
 
@@ -141,7 +144,7 @@ export function TarotArena() {
       });
     } catch (err: any) {
       console.error("Error drawing cards:", err);
-      setError(err.message || "We couldn't complete your reading. Please try again.");
+      setError(err.message || t("errors.generic"));
     } finally {
       setLoading(false);
     }
@@ -157,19 +160,19 @@ export function TarotArena() {
       {/* Input Section */}
       <Card className="bg-shell border-accent-gold/20">
         <CardHeader className="pb-4">
-          <CardTitle className="text-xl md:text-2xl">Ask the Cards</CardTitle>
+          <CardTitle className="text-xl md:text-2xl">{t("title")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Question Input */}
           <div>
             <label htmlFor="tarot-question" className="micro-label mb-2 block">
-              YOUR QUESTION
+              {t("questionLabel")}
             </label>
             <textarea
               id="tarot-question"
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
-              placeholder="What would you like guidance on today?"
+              placeholder={t("questionPlaceholder")}
               className="w-full min-h-[100px] p-4 rounded-lg border border-border-subtle bg-white text-base text-accent-ink placeholder:text-accent-ink/50 focus:outline-none focus:ring-2 focus:ring-accent-gold/30 focus:border-accent-gold resize-none"
               maxLength={500}
               disabled={loading}
@@ -177,7 +180,7 @@ export function TarotArena() {
             <div className="flex justify-between mt-1">
               <p className="text-xs text-accent-ink/50">
                 {question.trim().length < MIN_QUESTION_LENGTH
-                  ? `${MIN_QUESTION_LENGTH - question.trim().length} more characters needed`
+                  ? t("charactersNeeded", { count: MIN_QUESTION_LENGTH - question.trim().length })
                   : ""}
               </p>
               <p className="text-xs text-accent-ink/50">{question.length}/500</p>
@@ -186,9 +189,9 @@ export function TarotArena() {
 
           {/* Spread Selector */}
           <div>
-            <p className="micro-label mb-3">CHOOSE YOUR SPREAD</p>
+            <p className="micro-label mb-3">{t("spreadLabel")}</p>
             <div className="flex flex-wrap gap-3">
-              {SPREAD_OPTIONS.map((option) => (
+              {spreadOptions.map((option) => (
                 <button
                   key={option.value}
                   onClick={() => setSpread(option.value)}
@@ -215,10 +218,10 @@ export function TarotArena() {
               className="w-full min-h-[52px] text-base"
             >
               {loading
-                ? "Drawing Cards..."
+                ? t("buttons.drawing")
                 : cooldownRemaining > 0
-                ? `Wait ${cooldownRemaining}s...`
-                : "Draw Cards"}
+                ? t("buttons.wait", { seconds: cooldownRemaining })
+                : t("buttons.draw")}
             </Button>
           </div>
 
@@ -249,7 +252,7 @@ export function TarotArena() {
                 <div className="h-4 bg-accent-muted rounded w-5/6 mx-auto" />
               </div>
               <p className="text-center text-accent-ink/60 mt-6">
-                Shuffling the deck...
+                {t("loading")}
               </p>
             </CardContent>
           </Card>
@@ -265,7 +268,7 @@ export function TarotArena() {
             }`}
           >
             <CardHeader className="pb-4">
-              <CardTitle className="text-xl md:text-2xl">Your Reading</CardTitle>
+              <CardTitle className="text-xl md:text-2xl">{t("reading.title")}</CardTitle>
               <p className="text-sm text-accent-ink/60 italic">"{reading.question}"</p>
             </CardHeader>
 
@@ -313,7 +316,7 @@ export function TarotArena() {
                       </p>
                       <p className="text-xs text-accent-ink/60">{card.position}</p>
                       {card.reversed && (
-                        <p className="text-xs text-accent-gold italic">Reversed</p>
+                        <p className="text-xs text-accent-gold italic">{t("reading.reversed")}</p>
                       )}
                     </div>
                   );
@@ -327,7 +330,7 @@ export function TarotArena() {
                     <h4 className="font-semibold text-accent-ink">
                       {card.cardName}
                       {card.reversed && (
-                        <span className="text-accent-gold ml-2 text-sm">(Reversed)</span>
+                        <span className="text-accent-gold ml-2 text-sm">({t("reading.reversed")})</span>
                       )}
                     </h4>
                     <p className="micro-label mt-1">{card.position}</p>
@@ -340,7 +343,7 @@ export function TarotArena() {
 
               {/* Synthesis */}
               <div>
-                <p className="micro-label mb-3">THE BIGGER PICTURE</p>
+                <p className="micro-label mb-3">{t("reading.synthesis")}</p>
                 <div className="text-accent-ink/80 leading-relaxed space-y-4">
                   {reading.interpretation.synthesis.split("\n\n").map((p, i) => (
                     <p key={i}>{p}</p>
@@ -351,7 +354,7 @@ export function TarotArena() {
               {/* Action Steps */}
               {reading.interpretation.actionSteps.length > 0 && (
                 <div>
-                  <p className="micro-label mb-3">SUGGESTED ACTIONS</p>
+                  <p className="micro-label mb-3">{t("reading.actions")}</p>
                   <ul className="space-y-2">
                     {reading.interpretation.actionSteps.map((step, i) => (
                       <li
@@ -369,7 +372,7 @@ export function TarotArena() {
               {/* Reflection Question */}
               {reading.interpretation.reflectionQuestion && (
                 <div className="bg-accent-gold/5 border border-accent-gold/20 rounded-lg p-4">
-                  <p className="micro-label mb-2">REFLECTION</p>
+                  <p className="micro-label mb-2">{t("reading.reflection")}</p>
                   <p className="text-accent-ink italic">
                     "{reading.interpretation.reflectionQuestion}"
                   </p>
@@ -379,10 +382,10 @@ export function TarotArena() {
               {/* CTA for sign up - quiet, no birth chart mention */}
               <div className="pt-6 border-t border-border-subtle text-center space-y-3">
                 <p className="text-sm text-accent-ink/60">
-                  Want deeper, more personalized readings?
+                  {t("cta.message")}
                 </p>
                 <Button variant="gold" asChild className="min-h-[48px]">
-                  <a href="/join">Join Solara</a>
+                  <a href="/join">{t("cta.button")}</a>
                 </Button>
               </div>
             </CardContent>

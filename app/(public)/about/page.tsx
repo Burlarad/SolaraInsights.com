@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { SolaraLogo } from "@/components/layout/SolaraLogo";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -9,6 +10,11 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <div className="max-w-4xl mx-auto px-6 py-16">
+      {/* Solara Logo */}
+      <div className="flex justify-center items-center pt-4 pb-6">
+        <SolaraLogo size="lg" />
+      </div>
+
       <h1 className="text-5xl font-bold text-center mb-12">About Solara Insights</h1>
 
       <Card className="p-8 md:p-12">

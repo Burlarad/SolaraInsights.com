@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
+import { SolaraLogo } from "@/components/layout/SolaraLogo";
 import { Chip } from "@/components/shared/Chip";
 import { Clock, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import {
@@ -76,6 +77,11 @@ export default async function LearnGuidePage({ params }: PageProps) {
 
   return (
     <div className="max-w-3xl mx-auto px-4 md:px-6 py-8 md:py-12">
+      {/* Solara Logo */}
+      <div className="flex justify-center items-center pt-4 pb-6">
+        <SolaraLogo size="sm" />
+      </div>
+
       {/* Back link */}
       <Link
         href="/learn"

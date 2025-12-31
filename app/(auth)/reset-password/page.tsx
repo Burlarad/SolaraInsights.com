@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +12,7 @@ import { supabase } from "@/lib/supabase/client";
 import { Loader2 } from "lucide-react";
 
 function ResetPasswordContent() {
+  const t = useTranslations("auth.resetPassword");
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -135,7 +137,7 @@ function ResetPasswordContent() {
         <CardContent className="py-16">
           <div className="flex flex-col items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-accent-gold mb-4" />
-            <p className="text-accent-ink/60">Verifying your reset link...</p>
+            <p className="text-accent-ink/60">{t("verifying")}</p>
           </div>
         </CardContent>
       </Card>
@@ -150,11 +152,11 @@ function ResetPasswordContent() {
           <div className="text-center mb-4">
             <span className="text-5xl">⚠️</span>
           </div>
-          <CardTitle className="text-2xl text-center">Link expired</CardTitle>
+          <CardTitle className="text-2xl text-center">{t("linkExpired.title")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-center text-accent-ink/70 leading-relaxed">
-            {codeExchangeError}
+            {t("linkExpired.message")}
           </p>
 
           <div className="flex flex-col gap-3">
@@ -163,13 +165,13 @@ function ResetPasswordContent() {
               className="w-full"
               onClick={() => router.push("/forgot-password")}
             >
-              Request new reset link
+              {t("linkExpired.requestNewLink")}
             </Button>
             <Link
               href="/sign-in"
               className="text-center text-sm text-accent-gold hover:underline"
             >
-              Back to sign in
+              {t("backToSignIn")}
             </Link>
           </div>
         </CardContent>
@@ -185,11 +187,11 @@ function ResetPasswordContent() {
           <div className="text-center mb-4">
             <span className="text-5xl">✓</span>
           </div>
-          <CardTitle className="text-2xl text-center">Password updated</CardTitle>
+          <CardTitle className="text-2xl text-center">{t("success.title")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-center text-accent-ink/70 leading-relaxed">
-            Your password has been updated successfully. You can now sign in with your new password.
+            {t("success.message")}
           </p>
 
           <div className="text-center">
@@ -198,12 +200,12 @@ function ResetPasswordContent() {
               className="w-full"
               onClick={() => router.push("/sign-in")}
             >
-              Continue to sign in
+              {t("success.continueToSignIn")}
             </Button>
           </div>
 
           <p className="text-center text-sm text-accent-ink/50">
-            You will be redirected automatically in a few seconds...
+            {t("success.redirecting")}
           </p>
         </CardContent>
       </Card>
@@ -215,18 +217,18 @@ function ResetPasswordContent() {
     return (
       <Card className="border-border-subtle">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl text-center">Session required</CardTitle>
+          <CardTitle className="text-2xl text-center">{t("sessionRequired.title")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-center text-accent-ink/70">
-            Please use the reset link from your email to access this page.
+            {t("sessionRequired.message")}
           </p>
           <Button
             variant="gold"
             className="w-full"
             onClick={() => router.push("/forgot-password")}
           >
-            Request reset link
+            {t("sessionRequired.requestResetLink")}
           </Button>
         </CardContent>
       </Card>
@@ -236,9 +238,9 @@ function ResetPasswordContent() {
   return (
     <Card className="border-border-subtle">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl text-center">Set new password</CardTitle>
+        <CardTitle className="text-2xl text-center">{t("title")}</CardTitle>
         <p className="text-center text-sm text-accent-ink/60">
-          Enter your new password below
+          {t("subtitle")}
         </p>
       </CardHeader>
       <CardContent>
@@ -250,11 +252,11 @@ function ResetPasswordContent() {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="newPassword">New password</Label>
+            <Label htmlFor="newPassword">{t("newPassword")}</Label>
             <Input
               id="newPassword"
               type="password"
-              placeholder="At least 8 characters"
+              placeholder={t("newPasswordPlaceholder")}
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               required
@@ -263,11 +265,11 @@ function ResetPasswordContent() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm new password</Label>
+            <Label htmlFor="confirmPassword">{t("confirmPassword")}</Label>
             <Input
               id="confirmPassword"
               type="password"
-              placeholder="Re-enter your password"
+              placeholder={t("confirmPasswordPlaceholder")}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
@@ -280,13 +282,13 @@ function ResetPasswordContent() {
             className="w-full"
             disabled={isLoading}
           >
-            {isLoading ? "Updating password..." : "Update password"}
+            {isLoading ? t("updating") : t("updatePassword")}
           </Button>
         </form>
 
         <div className="mt-6 text-center text-sm">
           <Link href="/sign-in" className="text-accent-gold hover:underline">
-            Back to sign in
+            {t("backToSignIn")}
           </Link>
         </div>
       </CardContent>

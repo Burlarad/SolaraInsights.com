@@ -1,0 +1,712 @@
+{
+  "common": {
+    "save": "保存",
+    "cancel": "取消",
+    "close": "关闭",
+    "loading": "加载中...",
+    "saving": "保存中...",
+    "saved": "已保存",
+    "submit": "提交",
+    "back": "返回",
+    "next": "下一步",
+    "delete": "删除",
+    "deleting": "删除中...",
+    "error": "出了点问题",
+    "tryAgain": "重试",
+    "confirm": "确认",
+    "yes": "是",
+    "no": "否",
+    "optional": "可选",
+    "required": "必填",
+    "or": "或",
+    "and": "和",
+    "on": "开启",
+    "off": "关闭",
+    "enabled": "已启用",
+    "disabled": "已禁用",
+    "goToSettings": "前往设置",
+    "learnMore": "了解更多",
+    "viewAll": "查看全部",
+    "showMore": "显示更多",
+    "showLess": "收起",
+    "masterNumber": "主数"
+  },
+  "nav": {
+    "home": "首页",
+    "about": "关于",
+    "learn": "学习",
+    "sanctuary": "圣所",
+    "settings": "设置",
+    "signIn": "登录",
+    "signUp": "注册",
+    "signOut": "退出"
+  },
+  "auth": {
+    "signIn": {
+      "title": "欢迎回来",
+      "subtitle": "登录以访问您的圣所",
+      "signInWith": "使用以下方式登录",
+      "orSignInWithEmail": "或使用邮箱登录",
+      "email": "邮箱",
+      "emailPlaceholder": "you@example.com",
+      "password": "密码",
+      "forgot": "忘记密码？",
+      "signingIn": "登录中...",
+      "signInButton": "登录",
+      "noAccount": "还没有账户？",
+      "createAccount": "创建账户",
+      "signInError": "无法使用这些信息登录。请检查您的邮箱和密码，或重置密码。",
+      "unexpectedError": "发生意外错误，请重试。",
+      "comingSoon": "{provider} 登录即将推出"
+    },
+    "signUp": {
+      "title": "创建账户",
+      "subtitle": "开启您的光明之旅",
+      "fullName": "全名",
+      "namePlaceholder": "您的姓名",
+      "email": "邮箱",
+      "emailPlaceholder": "you@example.com",
+      "password": "密码",
+      "passwordPlaceholder": "至少8个字符",
+      "confirmPassword": "确认密码",
+      "creatingAccount": "创建账户中...",
+      "createAccountButton": "创建账户",
+      "terms": "注册即表示您同意我们的服务条款和隐私政策。您的部分订阅费用将通过Solara基金会支持有需要的家庭。",
+      "or": "或",
+      "continueWithFacebook": "使用 Facebook 继续",
+      "continueWithTikTok": "使用 TikTok 继续",
+      "hasAccount": "已有账户？",
+      "signIn": "登录",
+      "passwordsDontMatch": "密码不匹配，请重试。",
+      "passwordTooShort": "密码必须至少8个字符。"
+    },
+    "forgotPassword": {
+      "title": "重置密码",
+      "subtitle": "输入您的邮箱，我们将发送重置链接",
+      "email": "邮箱",
+      "emailPlaceholder": "you@example.com",
+      "sending": "发送中...",
+      "sendResetLink": "发送重置链接",
+      "backToSignIn": "返回登录",
+      "checkEmail": {
+        "title": "请查收邮件",
+        "message": "我们已向 <strong>{email}</strong> 发送了密码重置链接。请点击邮件中的链接创建新密码。"
+      }
+    },
+    "resetPassword": {
+      "title": "设置新密码",
+      "subtitle": "在下方输入您的新密码",
+      "verifying": "验证重置链接中...",
+      "newPassword": "新密码",
+      "newPasswordPlaceholder": "至少8个字符",
+      "confirmPassword": "确认新密码",
+      "confirmPasswordPlaceholder": "再次输入密码",
+      "updating": "更新密码中...",
+      "updatePassword": "更新密码",
+      "backToSignIn": "返回登录",
+      "linkExpired": {
+        "title": "链接已过期",
+        "message": "此重置链接已过期或无效，请申请新链接。",
+        "noCodeMessage": "未检测到重置链接。请从登录页面申请密码重置。",
+        "requestNewLink": "申请新重置链接"
+      },
+      "success": {
+        "title": "密码已更新",
+        "message": "您的密码已成功更新，现在可以使用新密码登录。",
+        "continueToSignIn": "继续登录",
+        "redirecting": "几秒后将自动跳转..."
+      },
+      "sessionRequired": {
+        "title": "需要会话",
+        "message": "请使用邮件中的重置链接访问此页面。",
+        "requestResetLink": "申请重置链接"
+      }
+    },
+    "setPassword": {
+      "title": "设置密码",
+      "subtitle": "为您的 Solara 账户创建密码",
+      "settingPasswordFor": "正在为以下账户设置密码",
+      "password": "密码",
+      "passwordPlaceholder": "至少8个字符",
+      "confirmPassword": "确认密码",
+      "confirmPasswordPlaceholder": "再次输入密码",
+      "settingPassword": "设置密码中...",
+      "continueToOnboarding": "继续完成设置",
+      "errors": {
+        "enterBoth": "请输入并确认您的密码",
+        "dontMatch": "密码不匹配",
+        "tooShort": "密码必须至少8个字符"
+      }
+    },
+    "verifyEmail": {
+      "title": "验证邮箱",
+      "subtitle": "我们已向您的邮箱发送了验证链接",
+      "resend": "重新发送验证邮件"
+    }
+  },
+  "onboarding": {
+    "welcome": "欢迎来到 Solara",
+    "letsGetStarted": "让我们开始吧",
+    "tellUsAbout": "介绍一下您自己",
+    "pageTitle": "完善您的圣所档案",
+    "pageSubtitle": "我们将使用这些信息为您生成个性化洞见",
+    "firstName": "名",
+    "middleName": "中间名",
+    "lastName": "姓",
+    "nickname": "昵称（可选）",
+    "nicknamePlaceholder": "我们该怎么称呼您？",
+    "nicknameHint": "如果与您的名字不同",
+    "birthDetails": "出生信息",
+    "birthDate": "出生日期",
+    "birthTime": "出生时间（可选）",
+    "birthTimeUnknown": "我不知道出生时间",
+    "birthTimeHint": "如果您不知道确切的出生时间，可以先跳过，稍后再添加以获得更准确的星盘和个性化内容。",
+    "birthPlace": "出生地点",
+    "searchPlace": "搜索您的出生城市...",
+    "timezone": "时区：{timezone}",
+    "locationHint": "开始输入进行搜索，然后从结果中选择",
+    "locationWarning": "请从下拉菜单中搜索并选择您的出生地点以继续。",
+    "saving": "保存您的出生印记中...",
+    "continue": "继续",
+    "skip": "暂时跳过",
+    "complete": "完成设置",
+    "settingsNote": "您可以随时在设置中更新这些信息",
+    "confirmingPayment": "确认付款中...",
+    "confirmingPaymentMessage": "正在确认您的订阅，通常只需几秒钟。",
+    "errors": {
+      "firstNameRequired": "名是必填项",
+      "lastNameRequired": "姓是必填项",
+      "birthDateRequired": "出生日期是必填项",
+      "locationRequired": "请从搜索结果中选择您的出生地点",
+      "saveFailed": "保存档案失败，请重试。"
+    }
+  },
+  "settings": {
+    "title": "设置",
+    "subtitle": "更新您的偏好名称、星座和出生坐标",
+    "identity": {
+      "title": "身份",
+      "firstName": "名",
+      "middleName": "中间名",
+      "lastName": "姓",
+      "nickname": "昵称",
+      "nicknameHint": "如果与您的名字不同",
+      "birthNameHint": "您的出生姓名用于数字命理计算",
+      "nameMissingBanner": "请添加您的名和姓以获得更个性化的体验。"
+    },
+    "email": {
+      "title": "邮箱",
+      "addEmailBanner": "添加真实邮箱地址以接收更新并启用密码重置。",
+      "placeholder": "your@email.com"
+    },
+    "password": {
+      "title": "密码",
+      "current": "当前密码",
+      "new": "新密码",
+      "confirm": "确认新密码",
+      "change": "更改密码",
+      "placeholder": "您的密码"
+    },
+    "birthDetails": {
+      "title": "出生信息",
+      "date": "出生日期",
+      "time": "出生时间",
+      "timeUnknown": "我不知道出生时间",
+      "place": "出生地点",
+      "timezone": "时区"
+    },
+    "zodiac": {
+      "title": "星座",
+      "select": "选择您的星座"
+    },
+    "language": {
+      "title": "语言",
+      "select": "选择语言"
+    },
+    "social": {
+      "title": "社交洞见",
+      "description": "连接您的社交账户以获取个性化洞见",
+      "connect": "连接",
+      "disconnect": "断开",
+      "connected": "已连接"
+    },
+    "dangerZone": {
+      "title": "危险区域",
+      "hibernate": "休眠账户",
+      "hibernateDescription": "暂时停用您的账户。您可以随时重新激活。",
+      "delete": "删除账户",
+      "deleteDescription": "永久删除您的账户和所有数据。此操作无法撤销。",
+      "confirmDelete": "您确定要删除账户吗？",
+      "typeToConfirm": "输入 DELETE 以确认"
+    },
+    "saveChanges": "保存更改",
+    "verificationExpired": "验证已过期，请重新验证。"
+  },
+  "sanctuary": {
+    "greeting": {
+      "title": "宁静的清明，{name}。",
+      "defaultName": "朋友",
+      "defaultMessage": "您的每日洞察正由宇宙为您准备。"
+    },
+    "tabs": {
+      "insights": "洞见",
+      "astrology": "占星",
+      "numerology": "数字命理",
+      "connections": "连接"
+    },
+    "timeframes": {
+      "today": "今日",
+      "week": "本周",
+      "month": "本月",
+      "year": "今年"
+    },
+    "insights": {
+      "title": "您的圣所",
+      "label": "圣所洞见",
+      "tuning": "调整您的洞见中...",
+      "ready": "您的洞见已就绪。",
+      "localTimezone": "本地时区",
+      "greeting": "欢迎回来",
+      "sunriseGuidance": "日出指引",
+      "energeticRhythm": "您{timeframe}的能量节奏",
+      "coreThemesFor": "{timeframe}的核心主题",
+      "focusFor": "{timeframe}的重点",
+      "personalNarrative": "个人叙事",
+      "coreThemes": "核心主题",
+      "focusForPeriod": "本阶段重点",
+      "journalPrompt": "日记提示",
+      "tarot": {
+        "title": "塔罗牌",
+        "label": "塔罗概览 — 每日抽牌",
+        "yourCard": "您的牌",
+        "matchError": "我们在匹配这张塔罗牌到牌组时遇到了问题。"
+      },
+      "luckyCompass": {
+        "title": "幸运罗盘",
+        "label": "幸运罗盘 — 每日幸运与光明标记",
+        "numbers": "{timeframe}的数字",
+        "powerWords": "能量词汇",
+        "handwrittenNote": "手写笔记"
+      },
+      "emotionalCadence": {
+        "title": "情绪节律",
+        "label": "情绪节律 — 每日韵律",
+        "dawn": "黎明",
+        "midday": "正午",
+        "dusk": "黄昏",
+        "evening": "傍晚",
+        "midnight": "午夜",
+        "morning": "早晨"
+      },
+      "dailyReflection": {
+        "title": "每日反思",
+        "subtitle": "让您的笔记保持私密和温柔。",
+        "placeholder": "今天给您的天空写几句话...",
+        "saveHint": "按 ⌘+Enter 或 Ctrl+Enter 保存"
+      },
+      "errors": {
+        "profileLoadError": "加载您的档案时遇到问题，请重试，如问题持续请联系支持。",
+        "insightLoadError": "加载您的洞见时遇到问题，这可能是临时问题。",
+        "birthSignatureRequired": "调整您的出生印记",
+        "journalSaveError": "无法保存，请重试。"
+      },
+      "socialInsights": {
+        "paused": "社交洞见已暂停",
+        "pausedDescription": "开启社交洞见，用您关联账户的模式来增强您的解读。"
+      },
+      "reactivated": "已重新激活 — 欢迎回来。"
+    }
+  },
+  "numerology": {
+    "title": "您的数字",
+    "subtitle": "生命背后的数学",
+    "calculating": "计算您的数字中...",
+    "systems": {
+      "pythagorean": "毕达哥拉斯",
+      "chaldean": "迦勒底"
+    },
+    "errors": {
+      "nameRequired": "需要姓名",
+      "nameRequiredMessage": "我们需要您的名和姓来计算数字命理档案。请在设置中更新您的姓名。",
+      "birthDateRequired": "需要出生日期",
+      "birthDateRequiredMessage": "我们需要您的出生日期来计算数字命理档案。请在设置中更新您的出生日期。",
+      "loadFailed": "无法加载数字命理档案"
+    },
+    "coreNumbers": {
+      "title": "核心数字",
+      "lifePath": "生命路径",
+      "lifePathDesc": "您的人生目标和所走的道路",
+      "expression": "表达数",
+      "expressionDesc": "您与生俱来的能力和天赋",
+      "soulUrge": "灵魂冲动",
+      "soulUrgeDesc": "您内在的动机和渴望",
+      "personality": "人格数",
+      "personalityDesc": "他人如何看待您",
+      "birthday": "生日数",
+      "birthdayDesc": "您天生的才能和天赋",
+      "maturity": "成熟数",
+      "maturityDesc": "您正在成为的人"
+    },
+    "cycles": {
+      "title": "个人周期",
+      "personalYear": "个人年",
+      "personalMonth": "个人月",
+      "personalDay": "个人日"
+    },
+    "lifePeriods": {
+      "title": "生命阶段",
+      "currentPinnacle": "当前高峰期",
+      "period": "时期",
+      "ages": "年龄",
+      "onwards": "及以后",
+      "pinnacles": {
+        "first": "第一高峰期",
+        "second": "第二高峰期",
+        "third": "第三高峰期",
+        "fourth": "第四高峰期"
+      }
+    },
+    "challenges": {
+      "title": "生命挑战",
+      "first": "第一挑战",
+      "second": "第二挑战",
+      "third": "第三挑战",
+      "main": "主要挑战"
+    },
+    "luckyNumbers": {
+      "title": "幸运数字"
+    },
+    "karmicDebt": {
+      "title": "业力课题"
+    }
+  },
+  "astrology": {
+    "title": "占星术",
+    "subtitle": "生命背后的光芒",
+    "calculating": "计算您的灵魂路径中...",
+    "sections": {
+      "narrative": "个人叙事",
+      "foundations": "基础",
+      "connections": "相位",
+      "patternsPath": "模式与路径"
+    },
+    "deepDive": {
+      "whenAligned": "当您处于和谐状态",
+      "whenOffCourse": "当您偏离轨道",
+      "decisionRule": "决策法则"
+    },
+    "birthChart": {
+      "title": "出生星盘",
+      "subtitle": "您独特的行星印记"
+    },
+    "narrative": {
+      "title": "您的个人叙事",
+      "subtitle": "您的宇宙故事和生命主题",
+      "identity": "身份认同",
+      "emotions": "情感",
+      "loveRelationships": "爱情与关系",
+      "workMoney": "工作与金钱",
+      "purposeGrowth": "目标与成长",
+      "innerWorld": "内在世界",
+      "notAvailable": "解读暂不可用",
+      "notAvailableDesc": "我们已计算您的灵魂路径，但目前无法生成完整解读。您的配置已保存——请稍后再试。"
+    },
+    "planets": {
+      "title": "行星配置",
+      "subtitle": "您独特的行星印记",
+      "deepDiveTitle": "您的行星对您意味着什么",
+      "description": "这些展示了您不同部分如何表达——您的驱动力、沟通方式、如何爱与联系。",
+      "sun": "太阳",
+      "sunDesc": "您核心的自我意识和活力。",
+      "moon": "月亮",
+      "moonDesc": "您的情感景观和内在世界。",
+      "mercury": "水星",
+      "mercuryDesc": "您如何思考、沟通和处理信息。",
+      "venus": "金星",
+      "venusDesc": "您如何去爱、连接和发现美。",
+      "mars": "火星",
+      "marsDesc": "您的驱动力、欲望和行动方式。",
+      "jupiter": "木星",
+      "jupiterDesc": "您在哪里扩展、相信并找到意义。",
+      "saturn": "土星",
+      "saturnDesc": "您在哪里建立结构并承担责任。",
+      "uranus": "天王星",
+      "uranusDesc": "您在哪里创新、反叛并寻求自由。",
+      "neptune": "海王星",
+      "neptuneDesc": "您在哪里做梦、消融界限并连接神圣。",
+      "pluto": "冥王星",
+      "plutoDesc": "您在哪里转化、释放并重获力量。",
+      "northNode": "北交点",
+      "northNodeDesc": "您走向成长的邀请。",
+      "chiron": "凯龙星",
+      "chironDesc": "疗愈从您最深的伤痛中浮现之处。"
+    },
+    "houses": {
+      "title": "宫位",
+      "subtitle": "星盘的12个生命领域",
+      "deepDiveTitle": "您的宫位对您意味着什么",
+      "description": "宫位展示了生命主题在哪里展开——哪些生命领域对您要求最多，以及某些能量在哪里活跃。",
+      "first": "第一宫",
+      "firstDesc": "您如何面对世界并展现自己。",
+      "second": "第二宫",
+      "secondDesc": "您与资源、价值和稳定的关系。",
+      "third": "第三宫",
+      "thirdDesc": "您如何沟通、学习并与周围连接。",
+      "fourth": "第四宫",
+      "fourthDesc": "您的内在基础、家庭和情感根源。",
+      "fifth": "第五宫",
+      "fifthDesc": "您在哪里创造、玩耍并表达喜悦。",
+      "sixth": "第六宫",
+      "sixthDesc": "您的日常节奏、工作和健康。",
+      "seventh": "第七宫",
+      "seventhDesc": "您如何建立伙伴关系、反映和一对一联系。",
+      "eighth": "第八宫",
+      "eighthDesc": "您在哪里融合、转化并面对未知。",
+      "ninth": "第九宫",
+      "ninthDesc": "您对意义、信仰和扩展的追寻。",
+      "tenth": "第十宫",
+      "tenthDesc": "您的公众角色、事业和可见遗产。",
+      "eleventh": "第十一宫",
+      "eleventhDesc": "您对社群、友谊和未来的愿景。",
+      "twelfth": "第十二宫",
+      "twelfthDesc": "您的内在圣所、独处和神圣。"
+    },
+    "aspects": {
+      "title": "相位",
+      "subtitle": "行星之间的对话",
+      "deepDiveTitle": "您的相位对您意味着什么",
+      "description": "相位展示了您内在不同部分如何互动——它们在哪里支持、挑战或增强彼此。",
+      "grid": "相位格",
+      "topAspects": "主要相位",
+      "allAspects": "所有相位",
+      "showAll": "显示所有 {count} 个相位",
+      "showFewer": "显示较少相位"
+    },
+    "patterns": {
+      "title": "主要模式",
+      "deepDiveTitle": "您的模式对您意味着什么",
+      "subtitle": "星盘中的主要配置",
+      "description": "模式是星盘中的大规模能量形状——几颗行星连接形成可识别的主题或反复出现的动态。",
+      "noPatterns": "未在您的星盘中检测到主要模式。",
+      "tSquare": "T三角",
+      "tSquareDesc": "T三角在三个生命领域之间创造张力，要求您找到创造性的解决方案。它常常感觉像是富有成效的摩擦——推动您走向成长、创新和韧性的压力。这种模式往往让您保持前进，即使静止可能更容易。",
+      "grandTrine": "大三角",
+      "grandTrineDesc": "大三角形成一个轻松流动的三角形，能量在三个领域之间顺畅流动。这可能感觉像天赋或毫不费力的优雅。邀请是有意识地激活这份天赋，而不是让它保持被动——未使用的天赋不一定能成为掌握。"
+    },
+    "energyShape": {
+      "title": "能量形态",
+      "deepDiveTitle": "您的能量形态对您意味着什么",
+      "subtitle": "元素和模式平衡",
+      "description": "这展示了能量如何流经您——星盘的基本节奏以及某些特质在哪里集中或分散。",
+      "chartType": "星盘类型",
+      "dayChart": "日间盘",
+      "nightChart": "夜间盘",
+      "dayChartDesc": "您的星盘倾向于可见性和外在表达。生活常常要求您出现、被看见并与外部世界互动。",
+      "nightChartDesc": "您的星盘倾向于内在反思和微妙。生活常常通过内在处理、安静观察和幕后工作展开。",
+      "chartRuler": "星盘守护星",
+      "chartRulerDesc": "这颗行星引导您生命的整体方向，并过滤您与世界的互动方式。",
+      "dominantPlanets": "主导行星",
+      "dominantPlanetsDesc": "这些行星最强烈地塑造您的体验——它们出现在多个关键位置或形成重要连接。",
+      "dominantSigns": "主导星座",
+      "dominantSignsDesc": "这些星座为您在世界中的移动方式着色。它们的特质在您表达自己的方式中反复出现。",
+      "elementModalityDesc": "元素显示您的能量自然聚集在哪里——无论是在灵感（火）、扎根（土）、思想（风）还是情感（水）中。模式反映您如何参与——是否发起（开创）、稳定（固定）或适应（变动）。"
+    },
+    "intensityZones": {
+      "title": "强度区域",
+      "deepDiveTitle": "您的强度区域对您意味着什么",
+      "subtitle": "能量在星盘中聚集的地方",
+      "description": "这展示了生活在哪里感觉集中——多颗行星聚集的地方，创造高度关注和反复主题的区域。",
+      "signEmphasis": "星座强调",
+      "signEmphasisDesc": "这些星座中的多颗行星放大了它们的特质——您可能会注意到这些主题反复出现在您的思考、感受和反应方式中。",
+      "houseEmphasis": "宫位强调",
+      "houseEmphasisDesc": "这些生命领域对您要求很多——它们是复杂性、成长和关注自然聚集的地方。",
+      "stelliums": "群星",
+      "stelliumDesc": "这里的群星创造了一束集中的注意力——多个内在部分汇聚在一个主题上。这个领域往往感觉生动、复杂，是您体验的核心。",
+      "planets": "{count} 颗行星"
+    },
+    "direction": {
+      "title": "方向",
+      "deepDiveTitle": "您的方向对您意味着什么",
+      "subtitle": "北交点、南交点和生命道路",
+      "description": "这反映了成长、疗愈和熟悉——您被邀请伸展的地方、您自然回归的地方，以及旧伤成为智慧之源的地方。",
+      "northNode": "北交点",
+      "northNodeDesc": "您的北交点是走向成长和陌生领域的邀请。它指向您正在发展的特质，即使它们还不自然。这是生活要求您伸展的地方——不是因为您缺乏什么，而是因为扩展存在于这里。",
+      "southNode": "南交点",
+      "southNodeDesc": "您的南交点代表熟悉的模式和自然的舒适。这些是您轻松携带的特质，也许来自早年生活或过去的经历。南交点不是要放弃的东西，而是在您走向北交点邀请时要尊重的基础。",
+      "chiron": "凯龙星",
+      "chironDesc": "凯龙星显示疗愈和教导从您最深的伤痛中浮现之处。曾经伤害的东西可以成为对他人的同情和指导的来源。凯龙星不承诺伤口会消失，但它会成为良药。"
+    },
+    "joy": {
+      "title": "幸运点",
+      "description": "这反映了轻松、喜悦和自然对齐——生活感觉慷慨的地方以及您无需强迫就能进入流动状态的地方。",
+      "meaning": "幸运点显示自然的喜悦和轻松在您生活中最容易流动的地方。这与成就或努力无关——这是事物自然对齐的地方，您本能地感到在家。"
+    },
+    "errors": {
+      "signInRequired": "请登录以查看您的灵魂路径。",
+      "incompleteProfile": "完善您的出生印记",
+      "incompleteProfileDesc": "在 Solara 生成您的灵魂路径之前，我们需要您在设置中提供完整的出生日期、时间和地点。",
+      "birthDetailsRequired": "需要出生信息",
+      "birthDetailsRequiredMessage": "我们需要您完整的出生信息来计算星盘。"
+    }
+  },
+  "connections": {
+    "title": "连接",
+    "subtitle": "映射您身边的人并探索关系洞见",
+    "yourConnections": "您的连接",
+    "loading": "加载您的连接中...",
+    "addConnection": "添加连接",
+    "noConnections": "还没有连接。添加某人开始探索关系洞见。",
+    "noConnectionsMessage": "添加您的第一个连接以探索关系动态。",
+    "notes": "笔记",
+    "notesPlaceholder": "记下关于这个连接的想法、模式或您想记住的事情...",
+    "saveNotes": "保存笔记",
+    "saving": "保存中...",
+    "saved": "已保存",
+    "spaceBetween": "空间之间",
+    "viewDailyBrief": "查看每日简报",
+    "compatibility": "契合度",
+    "synastry": "合盘",
+    "composite": "组合盘",
+    "relationshipTypes": {
+      "partner": "伴侣",
+      "child": "子女",
+      "parent": "父母",
+      "sibling": "兄弟姐妹",
+      "friend": "朋友",
+      "colleague": "同事",
+      "other": "其他"
+    },
+    "form": {
+      "firstName": "名",
+      "middleName": "中间名",
+      "lastName": "姓",
+      "relationshipType": "关系类型",
+      "birthDate": "出生日期",
+      "birthTime": "出生时间",
+      "birthPlace": "出生地点",
+      "unknownTime": "我不知道他们的出生时间"
+    },
+    "born": "出生于"
+  },
+  "spaceBetween": {
+    "title": "空间之间",
+    "subtitle": "您与 {connectionName} 的关系蓝图",
+    "generating": "生成您的关系蓝图中...",
+    "generatingHint": "这可能需要一些时间",
+    "tryAgain": "重试",
+    "discover": "发现空间之间",
+    "discoverDescription": "生成您与 {connectionName} 的永久关系蓝图。这个深度洞见只创建一次并永久保存。",
+    "generateBlueprint": "生成蓝图",
+    "sections": {
+      "essence": "本质",
+      "emotionalBlueprint": "情感蓝图",
+      "communication": "沟通",
+      "growthEdges": "成长边缘",
+      "careGuide": "关怀指南"
+    }
+  },
+  "location": {
+    "title": "帮助 Solara 匹配您的天空",
+    "body": "为了在您一天开始时生成洞见，Solara 需要大致知道您在世界的哪个位置。\n\n我们仅使用这个来计算您的时区，以便您的每日、每周和每月指导在正确的本地时间更新。\n\n如果您跳过这个，我们将默认使用 UTC。Solara 仍然可以工作，但您的时间可能会感觉有点不对。",
+    "allow": "允许获取位置",
+    "skip": "跳过，暂时使用 UTC"
+  },
+  "errors": {
+    "pageNotFound": "页面未找到",
+    "unauthorized": "未授权",
+    "serverError": "服务器错误",
+    "networkError": "网络错误",
+    "rateLimited": "请求过多，请稍后重试。",
+    "sessionExpired": "您的会话已过期，请重新登录。"
+  },
+  "deletion": {
+    "pageTitle": "数据删除状态",
+    "noCode": "未提供确认码。请使用数据删除确认邮件中的链接。",
+    "notFound": "未找到删除请求。确认码可能无效或已过期。",
+    "confirmationCode": "确认码",
+    "status": "状态",
+    "requestReceived": "请求已收到",
+    "processed": "已处理",
+    "errorDetails": "错误详情",
+    "contactSupport": "如需帮助，请联系 solara@solarainsights.com。",
+    "questions": "有问题？请联系",
+    "pending": {
+      "title": "等待中",
+      "description": "您的数据删除请求已收到，正在等待处理。"
+    },
+    "processing": {
+      "title": "处理中",
+      "description": "您的数据正在从我们的系统中删除。"
+    },
+    "completed": {
+      "title": "已完成",
+      "description": "您的数据已成功从 Solara Insights 删除。",
+      "permanentNotice": "与您的 Facebook 账户关联的所有个人数据已从 Solara Insights 永久删除。此操作无法撤销。"
+    },
+    "failed": {
+      "title": "失败",
+      "description": "处理您的删除请求时出现问题。请联系支持。"
+    },
+    "userNotFound": {
+      "title": "未找到数据",
+      "description": "未找到与您的 Facebook 账户关联的账户。无需删除任何数据。"
+    }
+  },
+  "zodiacSigns": {
+    "aries": "白羊座",
+    "taurus": "金牛座",
+    "gemini": "双子座",
+    "cancer": "巨蟹座",
+    "leo": "狮子座",
+    "virgo": "处女座",
+    "libra": "天秤座",
+    "scorpio": "天蝎座",
+    "sagittarius": "射手座",
+    "capricorn": "摩羯座",
+    "aquarius": "水瓶座",
+    "pisces": "双鱼座"
+  },
+  "tarot": {
+    "title": "问问塔罗牌",
+    "questionLabel": "您的问题",
+    "questionPlaceholder": "今天您想获得什么方面的指引？",
+    "questionError": "请输入问题（至少{minLength}个字符）",
+    "charactersNeeded": "还需要{count}个字符",
+    "spreadLabel": "选择牌阵",
+    "spreads": {
+      "single": "单张牌",
+      "singleDesc": "快速洞察",
+      "three": "三张牌",
+      "threeDesc": "过去、现在、未来",
+      "five": "五张牌",
+      "fiveDesc": "深度探索"
+    },
+    "buttons": {
+      "draw": "抽牌",
+      "drawing": "正在抽牌...",
+      "wait": "请等待{seconds}秒..."
+    },
+    "loading": "正在洗牌...",
+    "reading": {
+      "title": "您的解读",
+      "reversed": "逆位",
+      "synthesis": "整体画面",
+      "actions": "建议行动",
+      "reflection": "反思"
+    },
+    "cta": {
+      "message": "想要更深入、更个性化的解读吗？",
+      "button": "加入Solara"
+    },
+    "errors": {
+      "generic": "无法完成解读。请重试。",
+      "rateLimit": "请等待{seconds}秒后再次抽牌。"
+    }
+  },
+  "learn": {
+    "searchPlaceholder": "搜索指南...",
+    "guidesFound": "找到{count}个指南",
+    "filterByTopic": "按主题筛选",
+    "clearAll": "清除全部"
+  }
+}

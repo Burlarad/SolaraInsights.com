@@ -12,10 +12,13 @@ import { toSafeInternalPath } from "@/lib/validation/internalUrl";
 import { getOauthCallbackUrl } from "@/lib/url/base";
 import { SocialConsentModal } from "@/components/auth/SocialConsentModal";
 import { persistOauthContext } from "@/lib/auth/socialConsent";
+import { useTranslations } from "next-intl";
 
 function SignInContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const t = useTranslations("auth.signIn");
+  const tCommon = useTranslations("common");
 
   // Get returnUrl from query params with security validation
   const returnUrl = toSafeInternalPath(searchParams.get("returnUrl"));
@@ -68,9 +71,7 @@ function SignInContent() {
         console.error("Sign-in error:", signInError);
 
         // Show user-friendly message
-        setError(
-          "We couldn't sign you in with those details. Please check your email and password, or reset your password."
-        );
+        setError(t("signInError"));
         return;
       }
 
@@ -82,7 +83,7 @@ function SignInContent() {
     } catch (err) {
       // Log unexpected errors for debugging
       console.error("Unexpected sign-in error:", err);
-      setError("An unexpected error occurred. Please try again.");
+      setError(t("unexpectedError"));
     } finally {
       setIsLoading(false);
     }
@@ -140,9 +141,9 @@ function SignInContent() {
   return (
     <Card className="border-border-subtle">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl text-center">Welcome back</CardTitle>
+        <CardTitle className="text-2xl text-center">{t("title")}</CardTitle>
         <p className="text-center text-sm text-accent-ink/60">
-          Sign in to access your sanctuary
+          {t("subtitle")}
         </p>
       </CardHeader>
       <CardContent>
@@ -164,7 +165,7 @@ function SignInContent() {
 
         {/* Social sign-in options */}
         <div className="space-y-3 mb-6">
-          <p className="text-center text-sm text-accent-ink/60">Sign in with</p>
+          <p className="text-center text-sm text-accent-ink/60">{t("signInWith")}</p>
           <div className="flex items-center justify-center gap-3">
             {/* Facebook */}
             <button
@@ -213,7 +214,7 @@ function SignInContent() {
         <div className="my-6 flex items-center">
           <div className="flex-1 border-t border-border-subtle"></div>
           <span className="px-4 text-xs text-accent-ink/40 uppercase">
-            Or sign in with email
+            {t("orSignInWithEmail")}
           </span>
           <div className="flex-1 border-t border-border-subtle"></div>
         </div>
@@ -221,11 +222,11 @@ function SignInContent() {
         {/* Email/password form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t("email")}</Label>
             <Input
               id="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder={t("emailPlaceholder")}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -234,12 +235,12 @@ function SignInContent() {
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t("password")}</Label>
               <Link
                 href="/forgot-password"
                 className="text-sm text-accent-gold hover:underline"
               >
-                Forgot?
+                {t("forgot")}
               </Link>
             </div>
             <Input
@@ -257,14 +258,14 @@ function SignInContent() {
             className="w-full"
             disabled={isLoading}
           >
-            {isLoading ? "Signing in..." : "Sign in"}
+            {isLoading ? t("signingIn") : t("signInButton")}
           </Button>
         </form>
 
         <div className="mt-6 text-center text-sm">
-          <span className="text-accent-ink/60">Don&apos;t have an account? </span>
+          <span className="text-accent-ink/60">{t("noAccount")} </span>
           <Link href="/join" className="text-accent-gold hover:underline">
-            Create account
+            {t("createAccount")}
           </Link>
         </div>
       </CardContent>
@@ -281,18 +282,21 @@ function SignInContent() {
   );
 }
 
+function SignInLoading() {
+  const tCommon = useTranslations("common");
+  return (
+    <Card className="border-border-subtle">
+      <CardContent className="p-12 text-center text-accent-ink/60">
+        {tCommon("loading")}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function SignInPage() {
   return (
     <div className="max-w-md mx-auto">
-      <Suspense
-        fallback={
-          <Card className="border-border-subtle">
-            <CardContent className="p-12 text-center text-accent-ink/60">
-              Loading...
-            </CardContent>
-          </Card>
-        }
-      >
+      <Suspense fallback={<SignInLoading />}>
         <SignInContent />
       </Suspense>
     </div>

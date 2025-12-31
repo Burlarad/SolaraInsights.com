@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { SolaraLogo } from "@/components/layout/SolaraLogo";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -9,6 +10,11 @@ export const metadata: Metadata = {
 export default function TermsOfServicePage() {
   return (
     <div className="max-w-4xl mx-auto px-6 py-16">
+      {/* Solara Logo - subtle */}
+      <div className="flex justify-center items-center pt-2 pb-4">
+        <SolaraLogo size="sm" className="opacity-50 scale-75" />
+      </div>
+
       <h1 className="text-4xl font-bold text-center mb-4">Terms of Service</h1>
       <p className="text-center text-accent-ink/60 mb-12">
         Effective Date: December 29, 2025

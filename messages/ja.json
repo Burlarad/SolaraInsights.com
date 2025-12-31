@@ -1,0 +1,712 @@
+{
+  "common": {
+    "save": "保存",
+    "cancel": "キャンセル",
+    "close": "閉じる",
+    "loading": "読み込み中...",
+    "saving": "保存中...",
+    "saved": "保存しました",
+    "submit": "送信",
+    "back": "戻る",
+    "next": "次へ",
+    "delete": "削除",
+    "deleting": "削除中...",
+    "error": "エラーが発生しました",
+    "tryAgain": "再試行",
+    "confirm": "確認",
+    "yes": "はい",
+    "no": "いいえ",
+    "optional": "任意",
+    "required": "必須",
+    "or": "または",
+    "and": "と",
+    "on": "オン",
+    "off": "オフ",
+    "enabled": "有効",
+    "disabled": "無効",
+    "goToSettings": "設定へ",
+    "learnMore": "詳細を見る",
+    "viewAll": "すべて表示",
+    "showMore": "もっと見る",
+    "showLess": "閉じる",
+    "masterNumber": "マスターナンバー"
+  },
+  "nav": {
+    "home": "ホーム",
+    "about": "概要",
+    "learn": "学ぶ",
+    "sanctuary": "サンクチュアリ",
+    "settings": "設定",
+    "signIn": "ログイン",
+    "signUp": "新規登録",
+    "signOut": "ログアウト"
+  },
+  "auth": {
+    "signIn": {
+      "title": "おかえりなさい",
+      "subtitle": "サンクチュアリにアクセスするにはログインしてください",
+      "signInWith": "でログイン",
+      "orSignInWithEmail": "またはメールでログイン",
+      "email": "メールアドレス",
+      "emailPlaceholder": "you@example.com",
+      "password": "パスワード",
+      "forgot": "お忘れですか？",
+      "signingIn": "ログイン中...",
+      "signInButton": "ログイン",
+      "noAccount": "アカウントをお持ちでないですか？",
+      "createAccount": "アカウント作成",
+      "signInError": "入力された情報ではログインできませんでした。メールアドレスとパスワードを確認するか、パスワードをリセットしてください。",
+      "unexpectedError": "予期しないエラーが発生しました。もう一度お試しください。",
+      "comingSoon": "{provider}でのログインは近日公開予定です"
+    },
+    "signUp": {
+      "title": "アカウントを作成",
+      "subtitle": "光への旅を始めましょう",
+      "fullName": "氏名",
+      "namePlaceholder": "お名前",
+      "email": "メールアドレス",
+      "emailPlaceholder": "you@example.com",
+      "password": "パスワード",
+      "passwordPlaceholder": "8文字以上",
+      "confirmPassword": "パスワード確認",
+      "creatingAccount": "アカウント作成中...",
+      "createAccountButton": "アカウント作成",
+      "terms": "登録することで、利用規約とプライバシーポリシーに同意したことになります。サブスクリプションの一部はSolara財団を通じて家族を支援するために使われます。",
+      "or": "または",
+      "continueWithFacebook": "Facebookで続ける",
+      "continueWithTikTok": "TikTokで続ける",
+      "hasAccount": "すでにアカウントをお持ちですか？",
+      "signIn": "ログイン",
+      "passwordsDontMatch": "パスワードが一致しません。もう一度お試しください。",
+      "passwordTooShort": "パスワードは8文字以上である必要があります。"
+    },
+    "forgotPassword": {
+      "title": "パスワードをリセット",
+      "subtitle": "メールアドレスを入力すると、リセットリンクをお送りします",
+      "email": "メールアドレス",
+      "emailPlaceholder": "you@example.com",
+      "sending": "送信中...",
+      "sendResetLink": "リセットリンクを送信",
+      "backToSignIn": "ログインに戻る",
+      "checkEmail": {
+        "title": "メールを確認してください",
+        "message": "<strong>{email}</strong>にパスワードリセットリンクを送信しました。メール内のリンクをクリックして新しいパスワードを作成してください。"
+      }
+    },
+    "resetPassword": {
+      "title": "新しいパスワードを設定",
+      "subtitle": "下に新しいパスワードを入力してください",
+      "verifying": "リセットリンクを確認中...",
+      "newPassword": "新しいパスワード",
+      "newPasswordPlaceholder": "8文字以上",
+      "confirmPassword": "新しいパスワードを確認",
+      "confirmPasswordPlaceholder": "パスワードを再入力",
+      "updating": "パスワードを更新中...",
+      "updatePassword": "パスワードを更新",
+      "backToSignIn": "ログインに戻る",
+      "linkExpired": {
+        "title": "リンクの有効期限切れ",
+        "message": "このリセットリンクは期限切れまたは無効です。新しいリンクをリクエストしてください。",
+        "noCodeMessage": "リセットリンクが検出されませんでした。ログインページからパスワードリセットをリクエストしてください。",
+        "requestNewLink": "新しいリセットリンクをリクエスト"
+      },
+      "success": {
+        "title": "パスワードが更新されました",
+        "message": "パスワードが正常に更新されました。新しいパスワードでログインできます。",
+        "continueToSignIn": "ログインへ進む",
+        "redirecting": "数秒後に自動的にリダイレクトされます..."
+      },
+      "sessionRequired": {
+        "title": "セッションが必要です",
+        "message": "このページにアクセスするには、メールのリセットリンクを使用してください。",
+        "requestResetLink": "リセットリンクをリクエスト"
+      }
+    },
+    "setPassword": {
+      "title": "パスワードを設定",
+      "subtitle": "Solaraアカウントのパスワードを作成してください",
+      "settingPasswordFor": "パスワードを設定中",
+      "password": "パスワード",
+      "passwordPlaceholder": "8文字以上",
+      "confirmPassword": "パスワード確認",
+      "confirmPasswordPlaceholder": "パスワードを再入力",
+      "settingPassword": "パスワードを設定中...",
+      "continueToOnboarding": "セットアップへ進む",
+      "errors": {
+        "enterBoth": "パスワードを入力して確認してください",
+        "dontMatch": "パスワードが一致しません",
+        "tooShort": "パスワードは8文字以上である必要があります"
+      }
+    },
+    "verifyEmail": {
+      "title": "メールを確認してください",
+      "subtitle": "確認リンクをメールに送信しました",
+      "resend": "確認メールを再送信"
+    }
+  },
+  "onboarding": {
+    "welcome": "Solaraへようこそ",
+    "letsGetStarted": "始めましょう",
+    "tellUsAbout": "あなたについて教えてください",
+    "pageTitle": "サンクチュアリプロファイルを完成させましょう",
+    "pageSubtitle": "この情報を使用してパーソナライズされたインサイトを生成します",
+    "firstName": "名",
+    "middleName": "ミドルネーム",
+    "lastName": "姓",
+    "nickname": "ニックネーム（任意）",
+    "nicknamePlaceholder": "何とお呼びしますか？",
+    "nicknameHint": "名前と異なる場合",
+    "birthDetails": "出生情報",
+    "birthDate": "生年月日",
+    "birthTime": "出生時間（任意）",
+    "birthTimeUnknown": "出生時間がわかりません",
+    "birthTimeHint": "正確な出生時間がわからない場合は、今はスキップして後で追加することで、より正確なチャートとパーソナライズが可能になります。",
+    "birthPlace": "出生地",
+    "searchPlace": "出生都市を検索...",
+    "timezone": "タイムゾーン: {timezone}",
+    "locationHint": "入力して検索し、結果から選択してください",
+    "locationWarning": "続行するには、ドロップダウンから出生地を検索して選択してください。",
+    "saving": "出生シグネチャーを保存中...",
+    "continue": "続ける",
+    "skip": "今はスキップ",
+    "complete": "設定を完了",
+    "settingsNote": "これらの詳細は後で設定でいつでも更新できます",
+    "confirmingPayment": "お支払いを確認中...",
+    "confirmingPaymentMessage": "サブスクリプションを確認しています。通常は数秒で完了します。",
+    "errors": {
+      "firstNameRequired": "名は必須です",
+      "lastNameRequired": "姓は必須です",
+      "birthDateRequired": "生年月日は必須です",
+      "locationRequired": "検索結果から出生地を選択してください",
+      "saveFailed": "プロファイルの保存に失敗しました。もう一度お試しください。"
+    }
+  },
+  "settings": {
+    "title": "設定",
+    "subtitle": "お名前、星座、出生座標を更新",
+    "identity": {
+      "title": "アイデンティティ",
+      "firstName": "名",
+      "middleName": "ミドルネーム",
+      "lastName": "姓",
+      "nickname": "ニックネーム",
+      "nicknameHint": "名前と異なる場合",
+      "birthNameHint": "出生名は数秘術の計算に使用されます",
+      "nameMissingBanner": "よりパーソナライズされた体験のために、名前と姓を追加してください。"
+    },
+    "email": {
+      "title": "メールアドレス",
+      "addEmailBanner": "更新を受け取り、パスワードリセットを有効にするために、実際のメールアドレスを追加してください。",
+      "placeholder": "your@email.com"
+    },
+    "password": {
+      "title": "パスワード",
+      "current": "現在のパスワード",
+      "new": "新しいパスワード",
+      "confirm": "新しいパスワードを確認",
+      "change": "パスワードを変更",
+      "placeholder": "パスワード"
+    },
+    "birthDetails": {
+      "title": "出生情報",
+      "date": "生年月日",
+      "time": "出生時間",
+      "timeUnknown": "出生時間がわかりません",
+      "place": "出生地",
+      "timezone": "タイムゾーン"
+    },
+    "zodiac": {
+      "title": "星座",
+      "select": "星座を選択"
+    },
+    "language": {
+      "title": "言語",
+      "select": "言語を選択"
+    },
+    "social": {
+      "title": "ソーシャルインサイト",
+      "description": "パーソナライズされたインサイトのためにソーシャルアカウントを接続",
+      "connect": "接続",
+      "disconnect": "切断",
+      "connected": "接続済み"
+    },
+    "dangerZone": {
+      "title": "危険ゾーン",
+      "hibernate": "アカウント休止",
+      "hibernateDescription": "アカウントを一時的に無効にします。いつでも再有効化できます。",
+      "delete": "アカウント削除",
+      "deleteDescription": "アカウントとすべてのデータを完全に削除します。元に戻すことはできません。",
+      "confirmDelete": "本当にアカウントを削除しますか？",
+      "typeToConfirm": "確認のためDELETEと入力してください"
+    },
+    "saveChanges": "変更を保存",
+    "verificationExpired": "確認の有効期限が切れました。再度確認してください。"
+  },
+  "sanctuary": {
+    "greeting": {
+      "title": "穏やかな明晰さ、{name}。",
+      "defaultName": "フレンド",
+      "defaultMessage": "あなたの日々のインサイトは宇宙によって準備されています。"
+    },
+    "tabs": {
+      "insights": "インサイト",
+      "astrology": "占星術",
+      "numerology": "数秘術",
+      "connections": "つながり"
+    },
+    "timeframes": {
+      "today": "今日",
+      "week": "週間",
+      "month": "月間",
+      "year": "年間"
+    },
+    "insights": {
+      "title": "あなたのサンクチュアリ",
+      "label": "サンクチュアリのインサイト",
+      "tuning": "インサイトを調整中...",
+      "ready": "インサイトの準備ができました。",
+      "localTimezone": "ローカルタイムゾーン",
+      "greeting": "おかえりなさい",
+      "sunriseGuidance": "日の出のガイダンス",
+      "energeticRhythm": "{timeframe}のエネルギーリズム",
+      "coreThemesFor": "{timeframe}のコアテーマ",
+      "focusFor": "{timeframe}のフォーカス",
+      "personalNarrative": "パーソナルナラティブ",
+      "coreThemes": "コアテーマ",
+      "focusForPeriod": "この期間のフォーカス",
+      "journalPrompt": "ジャーナルプロンプト",
+      "tarot": {
+        "title": "タロットカード",
+        "label": "タロット — 今日のアーキタイプ",
+        "yourCard": "あなたのカード",
+        "matchError": "このタロットカードをデッキに照合できませんでした。"
+      },
+      "luckyCompass": {
+        "title": "ラッキーコンパス",
+        "label": "ラッキーコンパス — 幸運と光のマーカー",
+        "numbers": "{timeframe}の数字",
+        "powerWords": "パワーワード",
+        "handwrittenNote": "手書きのメモ"
+      },
+      "emotionalCadence": {
+        "title": "感情のリズム",
+        "label": "感情のリズム — 毎日のリズム",
+        "dawn": "夜明け",
+        "midday": "正午",
+        "dusk": "夕暮れ",
+        "evening": "夜",
+        "midnight": "真夜中",
+        "morning": "朝"
+      },
+      "dailyReflection": {
+        "title": "毎日の振り返り",
+        "subtitle": "あなたのメモをプライベートで優しく保ちましょう。",
+        "placeholder": "今日の空に向けて一言…",
+        "saveHint": "⌘+Enter または Ctrl+Enter で保存"
+      },
+      "errors": {
+        "profileLoadError": "プロフィールの読み込みに問題がありました。もう一度お試しください。問題が続く場合はサポートにお問い合わせください。",
+        "insightLoadError": "インサイトの読み込みに問題があります。一時的な問題かもしれません。",
+        "birthSignatureRequired": "出生シグネチャーを設定してください",
+        "journalSaveError": "保存できませんでした。もう一度お試しください。"
+      },
+      "socialInsights": {
+        "paused": "ソーシャルインサイトが一時停止中",
+        "pausedDescription": "ソーシャルインサイトを有効にして、接続されたアカウントのパターンでリーディングを強化しましょう。"
+      },
+      "reactivated": "再アクティブ化されました — おかえりなさい。"
+    }
+  },
+  "numerology": {
+    "title": "あなたの数字",
+    "subtitle": "人生の数学",
+    "calculating": "数字を計算中...",
+    "systems": {
+      "pythagorean": "ピタゴラス式",
+      "chaldean": "カルデア式"
+    },
+    "errors": {
+      "nameRequired": "名前が必要です",
+      "nameRequiredMessage": "数秘術プロファイルを計算するには、名前と姓が必要です。設定で名前を更新してください。",
+      "birthDateRequired": "生年月日が必要です",
+      "birthDateRequiredMessage": "数秘術プロファイルを計算するには、生年月日が必要です。設定で生年月日を更新してください。",
+      "loadFailed": "数秘術プロファイルを読み込めませんでした"
+    },
+    "coreNumbers": {
+      "title": "コアナンバー",
+      "lifePath": "ライフパス",
+      "lifePathDesc": "人生の目的と歩む道",
+      "expression": "表現数",
+      "expressionDesc": "あなたの自然な能力と才能",
+      "soulUrge": "ソウルアージ",
+      "soulUrgeDesc": "内なる動機と願望",
+      "personality": "パーソナリティ",
+      "personalityDesc": "他者があなたをどう見るか",
+      "birthday": "誕生日数",
+      "birthdayDesc": "あなたの自然な才能と能力",
+      "maturity": "成熟数",
+      "maturityDesc": "あなたがなろうとしている人"
+    },
+    "cycles": {
+      "title": "パーソナルサイクル",
+      "personalYear": "パーソナルイヤー",
+      "personalMonth": "パーソナルマンス",
+      "personalDay": "パーソナルデイ"
+    },
+    "lifePeriods": {
+      "title": "人生の期間",
+      "currentPinnacle": "現在のピナクル",
+      "period": "期間",
+      "ages": "年齢",
+      "onwards": "以降",
+      "pinnacles": {
+        "first": "第1ピナクル",
+        "second": "第2ピナクル",
+        "third": "第3ピナクル",
+        "fourth": "第4ピナクル"
+      }
+    },
+    "challenges": {
+      "title": "人生の課題",
+      "first": "第1の課題",
+      "second": "第2の課題",
+      "third": "第3の課題",
+      "main": "主要な課題"
+    },
+    "luckyNumbers": {
+      "title": "ラッキーナンバー"
+    },
+    "karmicDebt": {
+      "title": "カルマの教訓"
+    }
+  },
+  "astrology": {
+    "title": "占星術",
+    "subtitle": "人生の光",
+    "calculating": "ソウルパスを計算中…",
+    "sections": {
+      "narrative": "パーソナルナラティブ",
+      "foundations": "基盤",
+      "connections": "アスペクト",
+      "patternsPath": "パターンと道"
+    },
+    "deepDive": {
+      "whenAligned": "調和している時",
+      "whenOffCourse": "軌道から外れた時",
+      "decisionRule": "決定のルール"
+    },
+    "birthChart": {
+      "title": "出生図",
+      "subtitle": "あなた独自の惑星シグネチャー"
+    },
+    "narrative": {
+      "title": "あなたのパーソナルナラティブ",
+      "subtitle": "あなたの宇宙的な物語と人生のテーマ",
+      "identity": "アイデンティティ",
+      "emotions": "感情",
+      "loveRelationships": "恋愛と人間関係",
+      "workMoney": "仕事とお金",
+      "purposeGrowth": "目的と成長",
+      "innerWorld": "内なる世界",
+      "notAvailable": "解釈が利用できません",
+      "notAvailableDesc": "ソウルパスを計算しましたが、現時点では完全な解釈を生成できませんでした。配置は保存されています — しばらくしてからもう一度お試しください。"
+    },
+    "planets": {
+      "title": "惑星の配置",
+      "subtitle": "あなた独自の惑星シグネチャー",
+      "deepDiveTitle": "あなたの惑星が意味すること",
+      "description": "これらは、あなたの様々な側面がどのように表現されるかを示しています — あなたの原動力、コミュニケーションスタイル、愛し方とつながり方。",
+      "sun": "太陽",
+      "sunDesc": "あなたの核となる自己意識と活力。",
+      "moon": "月",
+      "moonDesc": "あなたの感情的な風景と内なる世界。",
+      "mercury": "水星",
+      "mercuryDesc": "思考し、コミュニケーションし、情報を処理する方法。",
+      "venus": "金星",
+      "venusDesc": "愛し、つながり、美を見出す方法。",
+      "mars": "火星",
+      "marsDesc": "あなたの原動力、欲望、行動の仕方。",
+      "jupiter": "木星",
+      "jupiterDesc": "拡大し、信じ、意味を見出す場所。",
+      "saturn": "土星",
+      "saturnDesc": "構造を築き、責任を取る場所。",
+      "uranus": "天王星",
+      "uranusDesc": "革新し、反抗し、自由を求める場所。",
+      "neptune": "海王星",
+      "neptuneDesc": "夢を見、境界を溶かし、聖なるものとつながる場所。",
+      "pluto": "冥王星",
+      "plutoDesc": "変容し、手放し、力を取り戻す場所。",
+      "northNode": "ノースノード",
+      "northNodeDesc": "成長への招待。",
+      "chiron": "キロン",
+      "chironDesc": "最も深い傷から癒しが生まれる場所。"
+    },
+    "houses": {
+      "title": "ハウス",
+      "subtitle": "チャートの12の人生領域",
+      "deepDiveTitle": "あなたのハウスが意味すること",
+      "description": "ハウスは、人生のテーマがどこで展開されるかを示しています — どの人生領域があなたに最も多くを求め、どこで特定のエネルギーが生き生きとするか。",
+      "first": "第1ハウス",
+      "firstDesc": "世界と出会い、自分を表現する方法。",
+      "second": "第2ハウス",
+      "secondDesc": "資源、価値、安定性との関係。",
+      "third": "第3ハウス",
+      "thirdDesc": "コミュニケーション、学習、身近なつながりの方法。",
+      "fourth": "第4ハウス",
+      "fourthDesc": "内なる基盤、家庭、感情のルーツ。",
+      "fifth": "第5ハウス",
+      "fifthDesc": "創造し、遊び、喜びを表現する場所。",
+      "sixth": "第6ハウス",
+      "sixthDesc": "日常のリズム、仕事、健康。",
+      "seventh": "第7ハウス",
+      "seventhDesc": "パートナーシップを結び、反映し、一対一でつながる方法。",
+      "eighth": "第8ハウス",
+      "eighthDesc": "融合し、変容し、未知と出会う場所。",
+      "ninth": "第9ハウス",
+      "ninthDesc": "意味、信念、拡大の探求。",
+      "tenth": "第10ハウス",
+      "tenthDesc": "公的な役割、キャリア、可視的な遺産。",
+      "eleventh": "第11ハウス",
+      "eleventhDesc": "コミュニティ、友情、未来へのビジョン。",
+      "twelfth": "第12ハウス",
+      "twelfthDesc": "内なる聖域、孤独、聖なるもの。"
+    },
+    "aspects": {
+      "title": "アスペクト",
+      "subtitle": "惑星間の対話",
+      "deepDiveTitle": "あなたのアスペクトが意味すること",
+      "description": "アスペクトは、あなたの内なる異なる部分がどのように相互作用するかを示しています — どこで支え合い、挑戦し合い、増幅し合うか。",
+      "grid": "アスペクトグリッド",
+      "topAspects": "主要アスペクト",
+      "allAspects": "全アスペクト",
+      "showAll": "全{count}アスペクトを表示",
+      "showFewer": "アスペクトを少なく表示"
+    },
+    "patterns": {
+      "title": "主要パターン",
+      "deepDiveTitle": "あなたのパターンが意味すること",
+      "subtitle": "チャートの主要な構成",
+      "description": "パターンは、チャート内の大規模なエネルギーの形です — 複数の惑星が結びついて、認識可能なテーマや繰り返される力学を形成する場所。",
+      "noPatterns": "チャートに主要パターンは検出されませんでした。",
+      "tSquare": "Tスクエア",
+      "tSquareDesc": "Tスクエアは3つの人生領域間に緊張を生み出し、創造的な解決策を見つけることを求めます。しばしば生産的な摩擦のように感じられ、成長、革新、回復力へと駆り立てるプレッシャーです。",
+      "grandTrine": "グランドトライン",
+      "grandTrineDesc": "グランドトラインは、3つの領域間でエネルギーがスムーズに流れる、容易さと流れの三角形を形成します。これは自然な才能や努力のない優雅さのように感じられることがあります。"
+    },
+    "energyShape": {
+      "title": "エネルギーの形",
+      "deepDiveTitle": "あなたのエネルギーの形が意味すること",
+      "subtitle": "エレメントとモダリティのバランス",
+      "description": "これは、エネルギーがあなたを通してどのように流れるかを示しています — チャートの根底にあるリズムと、特定の性質がどこに集中または分散しているか。",
+      "chartType": "チャートタイプ",
+      "dayChart": "デイチャート",
+      "nightChart": "ナイトチャート",
+      "dayChartDesc": "あなたのチャートは可視性と外向的な表現に向いています。人生はしばしば存在し、見られ、外の世界と関わることを求めます。",
+      "nightChartDesc": "あなたのチャートは内なる反省と繊細さに向いています。人生はしばしば内面の処理、静かな観察、舞台裏での仕事を通じて展開されます。",
+      "chartRuler": "チャートルーラー",
+      "chartRulerDesc": "この惑星があなたの人生全体の方向性を導き、世界との関わり方をフィルタリングします。",
+      "dominantPlanets": "支配的な惑星",
+      "dominantPlanetsDesc": "これらの惑星があなたの経験に最も強く色を付けます — 複数の重要な位置に現れたり、重要なつながりを形成したりします。",
+      "dominantSigns": "支配的なサイン",
+      "dominantSignsDesc": "これらのサインは、あなたが世界を進む方法に色を付けます。その性質はあなたの表現に繰り返し現れます。",
+      "elementModalityDesc": "エレメントは、エネルギーが自然にどこに集まるかを示します — インスピレーション（火）、グラウンディング（地）、思考（風）、感情（水）。モダリティは、どのように関与するかを反映します — 開始する（カーディナル）、安定させる（フィックスド）、適応する（ミュータブル）。"
+    },
+    "intensityZones": {
+      "title": "強度ゾーン",
+      "deepDiveTitle": "あなたの強度ゾーンが意味すること",
+      "subtitle": "チャートでエネルギーが集まる場所",
+      "description": "これは、人生がどこに集中して現れるかを示しています — 複数の惑星が集まり、高い注目と繰り返されるテーマの領域を作る場所。",
+      "signEmphasis": "サインの強調",
+      "signEmphasisDesc": "これらのサインに複数の惑星があると、その性質が増幅されます — これらのテーマがあなたの思考、感情、反応に繰り返し現れることに気づくかもしれません。",
+      "houseEmphasis": "ハウスの強調",
+      "houseEmphasisDesc": "これらの人生領域はあなたに多くを求めます — ここに複雑さ、成長、注目が自然に集まります。",
+      "stelliums": "ステリウム",
+      "stelliumDesc": "ここにステリウムがあると、集中した注目のビームが生まれます — 複数の内なる部分が1つのテーマに収束します。この領域は活気があり、複雑で、あなたの経験の中心となる傾向があります。",
+      "planets": "{count}個の惑星"
+    },
+    "direction": {
+      "title": "方向性",
+      "deepDiveTitle": "あなたの方向性が意味すること",
+      "subtitle": "ノースノード、サウスノード、人生の道",
+      "description": "これは成長、癒し、親しみを反映しています — どこに伸びるよう招かれているか、自然にどこに戻るか、古い傷がどこで知恵の源となるか。",
+      "northNode": "ノースノード",
+      "northNodeDesc": "ノースノードは、成長と未知の領域への招待です。まだ自然に感じられなくても、発展させるよう呼ばれている性質を指し示しています。ここで人生はあなたに伸びることを求めます。",
+      "southNode": "サウスノード",
+      "southNodeDesc": "サウスノードは、慣れ親しんだパターンと自然な快適さを表しています。これらはあなたが容易に持っている性質です。サウスノードは捨てるべきものではなく、ノースノードの招待に手を伸ばしながら尊重すべき基盤です。",
+      "chiron": "キロン",
+      "chironDesc": "キロンは、最も深い傷から癒しと教えが生まれる場所を示しています。かつて痛みだったものが、他者への思いやりと導きの源となることができます。"
+    },
+    "joy": {
+      "title": "幸運点",
+      "description": "これは容易さ、喜び、自然な調和を反映しています — 人生が寛大に感じられ、努力なくフローを経験する場所。",
+      "meaning": "幸運点は、自然な喜びと容易さがあなたの人生で最も喜んで流れる場所を示しています。これは達成や努力についてではありません — ここで物事が有機的に整い、本能的に居心地よく感じられます。"
+    },
+    "errors": {
+      "signInRequired": "ソウルパスを表示するにはログインしてください。",
+      "incompleteProfile": "出生シグネチャーを完成させてください",
+      "incompleteProfileDesc": "Solaraがソウルパスを生成する前に、設定で完全な生年月日、出生時間、出生地が必要です。",
+      "birthDetailsRequired": "出生情報が必要です",
+      "birthDetailsRequiredMessage": "チャートを計算するには、完全な出生情報が必要です。"
+    }
+  },
+  "connections": {
+    "title": "つながり",
+    "subtitle": "あなたの周りの人々をマッピングし、関係性のインサイトを探求しましょう",
+    "yourConnections": "あなたのつながり",
+    "loading": "つながりを読み込み中...",
+    "addConnection": "つながりを追加",
+    "noConnections": "まだつながりがありません。誰かを追加して関係性のインサイトを探求しましょう。",
+    "noConnectionsMessage": "最初のつながりを追加して、関係のダイナミクスを探りましょう。",
+    "notes": "メモ",
+    "notesPlaceholder": "このつながりについての考え、パターン、覚えておきたいことを書き留めましょう...",
+    "saveNotes": "メモを保存",
+    "saving": "保存中...",
+    "saved": "保存しました",
+    "spaceBetween": "ふたりの間",
+    "viewDailyBrief": "デイリーブリーフを見る",
+    "compatibility": "相性",
+    "synastry": "シナストリー",
+    "composite": "コンポジット",
+    "relationshipTypes": {
+      "partner": "パートナー",
+      "child": "子供",
+      "parent": "親",
+      "sibling": "兄弟姉妹",
+      "friend": "友人",
+      "colleague": "同僚",
+      "other": "その他"
+    },
+    "form": {
+      "firstName": "名",
+      "middleName": "ミドルネーム",
+      "lastName": "姓",
+      "relationshipType": "関係タイプ",
+      "birthDate": "生年月日",
+      "birthTime": "出生時間",
+      "birthPlace": "出生地",
+      "unknownTime": "出生時間がわかりません"
+    },
+    "born": "生まれ"
+  },
+  "spaceBetween": {
+    "title": "ふたりの間",
+    "subtitle": "{connectionName}との関係ブループリント",
+    "generating": "関係ブループリントを生成中...",
+    "generatingHint": "少々お待ちください",
+    "tryAgain": "もう一度試す",
+    "discover": "ふたりの間を発見する",
+    "discoverDescription": "{connectionName}との永久的な関係ブループリントを生成します。この深いインサイトは一度作成され、永久に保存されます。",
+    "generateBlueprint": "ブループリントを生成",
+    "sections": {
+      "essence": "エッセンス",
+      "emotionalBlueprint": "感情のブループリント",
+      "communication": "コミュニケーション",
+      "growthEdges": "成長の余地",
+      "careGuide": "ケアガイド"
+    }
+  },
+  "location": {
+    "title": "Solaraがあなたの空を合わせるのを助けてください",
+    "body": "一日の始まりにインサイトを生成するために、Solaraはあなたが世界のどこにいるかを大まかに知る必要があります。\n\nこれはタイムゾーンを計算するためだけに使用され、毎日、毎週、毎月のガイダンスが正しい現地時間に更新されるようにします。\n\nスキップすると、デフォルトでUTCを使用します。Solaraは引き続き動作しますが、タイミングが少しずれているように感じるかもしれません。",
+    "allow": "位置情報を許可",
+    "skip": "スキップして今はUTCを使用"
+  },
+  "errors": {
+    "pageNotFound": "ページが見つかりません",
+    "unauthorized": "認証されていません",
+    "serverError": "サーバーエラー",
+    "networkError": "ネットワークエラー",
+    "rateLimited": "リクエストが多すぎます。後でもう一度お試しください。",
+    "sessionExpired": "セッションの有効期限が切れました。再度ログインしてください。"
+  },
+  "deletion": {
+    "pageTitle": "データ削除ステータス",
+    "noCode": "確認コードが提供されていません。データ削除確認メールのリンクを使用してください。",
+    "notFound": "削除リクエストが見つかりません。確認コードが無効または期限切れの可能性があります。",
+    "confirmationCode": "確認コード",
+    "status": "ステータス",
+    "requestReceived": "リクエスト受信",
+    "processed": "処理済み",
+    "errorDetails": "エラー詳細",
+    "contactSupport": "サポートが必要な場合は solara@solarainsights.com までご連絡ください。",
+    "questions": "ご質問は以下までお問い合わせください：",
+    "pending": {
+      "title": "保留中",
+      "description": "データ削除リクエストを受信し、処理を待っています。"
+    },
+    "processing": {
+      "title": "処理中",
+      "description": "システムからデータを削除中です。"
+    },
+    "completed": {
+      "title": "完了",
+      "description": "Solara Insightsからデータが正常に削除されました。",
+      "permanentNotice": "Facebookアカウントに関連付けられたすべての個人データがSolara Insightsから完全に削除されました。この操作は元に戻せません。"
+    },
+    "failed": {
+      "title": "失敗",
+      "description": "削除リクエストの処理中に問題が発生しました。サポートにお問い合わせください。"
+    },
+    "userNotFound": {
+      "title": "データが見つかりません",
+      "description": "Facebookアカウントに関連付けられたアカウントが見つかりませんでした。削除するデータはありませんでした。"
+    }
+  },
+  "zodiacSigns": {
+    "aries": "牡羊座",
+    "taurus": "牡牛座",
+    "gemini": "双子座",
+    "cancer": "蟹座",
+    "leo": "獅子座",
+    "virgo": "乙女座",
+    "libra": "天秤座",
+    "scorpio": "蠍座",
+    "sagittarius": "射手座",
+    "capricorn": "山羊座",
+    "aquarius": "水瓶座",
+    "pisces": "魚座"
+  },
+  "tarot": {
+    "title": "カードに聞く",
+    "questionLabel": "あなたの質問",
+    "questionPlaceholder": "今日何についてガイダンスを得たいですか？",
+    "questionError": "質問を入力してください（{minLength}文字以上）",
+    "charactersNeeded": "あと{count}文字必要です",
+    "spreadLabel": "スプレッドを選択",
+    "spreads": {
+      "single": "1枚引き",
+      "singleDesc": "クイックインサイト",
+      "three": "3枚引き",
+      "threeDesc": "過去、現在、未来",
+      "five": "5枚引き",
+      "fiveDesc": "深い探求"
+    },
+    "buttons": {
+      "draw": "カードを引く",
+      "drawing": "カードを引いています...",
+      "wait": "{seconds}秒お待ちください..."
+    },
+    "loading": "デッキをシャッフル中...",
+    "reading": {
+      "title": "あなたのリーディング",
+      "reversed": "逆位置",
+      "synthesis": "全体像",
+      "actions": "推奨アクション",
+      "reflection": "振り返り"
+    },
+    "cta": {
+      "message": "より深く、パーソナライズされたリーディングをお望みですか？",
+      "button": "Solaraに参加"
+    },
+    "errors": {
+      "generic": "リーディングを完了できませんでした。もう一度お試しください。",
+      "rateLimit": "次のリーディングまで{seconds}秒お待ちください。"
+    }
+  },
+  "learn": {
+    "searchPlaceholder": "ガイドを検索...",
+    "guidesFound": "{count}件のガイドが見つかりました",
+    "filterByTopic": "トピックでフィルター",
+    "clearAll": "すべてクリア"
+  }
+}

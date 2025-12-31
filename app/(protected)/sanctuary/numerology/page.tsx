@@ -16,12 +16,15 @@ import {
   getKarmicDebtLabel,
 } from "@/lib/numerology";
 import { getNumberMeaning } from "@/lib/numerology/meanings";
+import { useTranslations } from "next-intl";
 
 export default function NumerologyPage() {
   const [data, setData] = useState<NumerologyResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [system, setSystem] = useState<NumerologySystem>("pythagorean");
+  const t = useTranslations("numerology");
+  const tCommon = useTranslations("common");
 
   // AI-generated interpretations (stone tablet - computed once per user)
   // TODO: Fetch AI interpretations from /api/numerology/interpret
@@ -63,14 +66,14 @@ export default function NumerologyPage() {
     return (
       <div className="max-w-7xl mx-auto px-6 py-12 space-y-8">
         <div className="space-y-2">
-          <h1 className="text-2xl font-semibold">Your Numbers</h1>
-          <p className="text-sm text-accent-ink/70">The Math Behind Your Life</p>
+          <h1 className="text-2xl font-semibold">{t("title")}</h1>
+          <p className="text-sm text-accent-ink/70">{t("subtitle")}</p>
         </div>
         <SanctuaryTabs />
         <div className="text-center py-12">
           <div className="inline-flex items-center gap-3">
             <div className="w-6 h-6 rounded-full border-2 border-accent-gold/30 border-t-accent-gold animate-spin" />
-            <span className="text-accent-ink/60">Calculating your numbers...</span>
+            <span className="text-accent-ink/60">{t("calculating")}</span>
           </div>
         </div>
       </div>
@@ -81,19 +84,18 @@ export default function NumerologyPage() {
     return (
       <div className="max-w-7xl mx-auto px-6 py-12 space-y-8">
         <div className="space-y-2">
-          <h1 className="text-2xl font-semibold">Your Numbers</h1>
-          <p className="text-sm text-accent-ink/70">The Math Behind Your Life</p>
+          <h1 className="text-2xl font-semibold">{t("title")}</h1>
+          <p className="text-sm text-accent-ink/70">{t("subtitle")}</p>
         </div>
         <SanctuaryTabs />
         <Card className="border-amber-200 bg-amber-50/50">
           <CardContent className="py-12 text-center space-y-4">
-            <h2 className="text-xl font-semibold text-accent-ink">Name Required</h2>
+            <h2 className="text-xl font-semibold text-accent-ink">{t("errors.nameRequired")}</h2>
             <p className="text-accent-ink/70 max-w-md mx-auto">
-              We need your first and last name to calculate your numerology profile.
-              Please update your name in Settings.
+              {t("errors.nameRequiredMessage")}
             </p>
             <Button variant="gold" asChild>
-              <a href="/settings">Go to Settings</a>
+              <a href="/settings">{tCommon("goToSettings")}</a>
             </Button>
           </CardContent>
         </Card>
@@ -105,19 +107,18 @@ export default function NumerologyPage() {
     return (
       <div className="max-w-7xl mx-auto px-6 py-12 space-y-8">
         <div className="space-y-2">
-          <h1 className="text-2xl font-semibold">Your Numbers</h1>
-          <p className="text-sm text-accent-ink/70">The Math Behind Your Life</p>
+          <h1 className="text-2xl font-semibold">{t("title")}</h1>
+          <p className="text-sm text-accent-ink/70">{t("subtitle")}</p>
         </div>
         <SanctuaryTabs />
         <Card className="border-amber-200 bg-amber-50/50">
           <CardContent className="py-12 text-center space-y-4">
-            <h2 className="text-xl font-semibold text-accent-ink">Birth Date Required</h2>
+            <h2 className="text-xl font-semibold text-accent-ink">{t("errors.birthDateRequired")}</h2>
             <p className="text-accent-ink/70 max-w-md mx-auto">
-              We need your birth date to calculate your numerology profile.
-              Please update your birth date in Settings.
+              {t("errors.birthDateRequiredMessage")}
             </p>
             <Button variant="gold" asChild>
-              <a href="/settings">Go to Settings</a>
+              <a href="/settings">{tCommon("goToSettings")}</a>
             </Button>
           </CardContent>
         </Card>
@@ -129,15 +130,15 @@ export default function NumerologyPage() {
     return (
       <div className="max-w-7xl mx-auto px-6 py-12 space-y-8">
         <div className="space-y-2">
-          <h1 className="text-2xl font-semibold">Your Numbers</h1>
-          <p className="text-sm text-accent-ink/70">The Math Behind Your Life</p>
+          <h1 className="text-2xl font-semibold">{t("title")}</h1>
+          <p className="text-sm text-accent-ink/70">{t("subtitle")}</p>
         </div>
         <SanctuaryTabs />
         <Card className="border-danger-soft/20">
           <CardContent className="py-12 text-center space-y-4">
-            <p className="text-accent-ink/70">{error || "Unable to load numerology profile"}</p>
+            <p className="text-accent-ink/70">{error || t("errors.loadFailed")}</p>
             <Button variant="outline" onClick={() => window.location.reload()}>
-              Try again
+              {tCommon("tryAgain")}
             </Button>
           </CardContent>
         </Card>
@@ -166,8 +167,8 @@ export default function NumerologyPage() {
     <div className="max-w-7xl mx-auto px-6 py-12 space-y-8">
       {/* Page Header */}
       <div className="space-y-2">
-        <h1 className="text-2xl font-semibold">Your Numbers</h1>
-        <p className="text-sm text-accent-ink/70">The Math Behind Your Life</p>
+        <h1 className="text-2xl font-semibold">{t("title")}</h1>
+        <p className="text-sm text-accent-ink/70">{t("subtitle")}</p>
       </div>
 
       {/* Navigation + System Toggle */}
@@ -182,7 +183,7 @@ export default function NumerologyPage() {
                 : "text-accent-ink hover:bg-white/80"
             }`}
           >
-            Pythagorean
+            {t("systems.pythagorean")}
           </button>
           <button
             onClick={() => setSystem("chaldean")}
@@ -192,63 +193,63 @@ export default function NumerologyPage() {
                 : "text-accent-ink hover:bg-white/80"
             }`}
           >
-            Chaldean
+            {t("systems.chaldean")}
           </button>
         </div>
       </div>
 
       {/* Core Numbers Grid */}
       <section>
-        <h2 className="text-lg font-semibold text-accent-gold mb-4">Core Numbers</h2>
+        <h2 className="text-lg font-semibold text-accent-gold mb-4">{t("coreNumbers.title")}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <CoreNumberCard
-            label="Life Path"
+            label={t("coreNumbers.lifePath")}
             number={coreNumbers.lifePath.value}
             master={coreNumbers.lifePath.master}
-            contextDescription="Your life purpose and the path you walk"
+            contextDescription={t("coreNumbers.lifePathDesc")}
           />
           <CoreNumberCard
-            label="Expression"
+            label={t("coreNumbers.expression")}
             number={coreNumbers.expression.value}
             master={coreNumbers.expression.master}
-            contextDescription="Your natural abilities and talents"
+            contextDescription={t("coreNumbers.expressionDesc")}
           />
           <CoreNumberCard
-            label="Soul Urge"
+            label={t("coreNumbers.soulUrge")}
             number={coreNumbers.soulUrge.value}
             master={coreNumbers.soulUrge.master}
-            contextDescription="Your inner motivations and desires"
+            contextDescription={t("coreNumbers.soulUrgeDesc")}
           />
           <CoreNumberCard
-            label="Personality"
+            label={t("coreNumbers.personality")}
             number={coreNumbers.personality.value}
             master={coreNumbers.personality.master}
-            contextDescription="How others perceive you"
+            contextDescription={t("coreNumbers.personalityDesc")}
           />
           <CoreNumberCard
-            label="Birthday"
+            label={t("coreNumbers.birthday")}
             number={coreNumbers.birthday.value}
             master={coreNumbers.birthday.master}
-            contextDescription="Your natural gifts and talents"
+            contextDescription={t("coreNumbers.birthdayDesc")}
           />
           <CoreNumberCard
-            label="Maturity"
+            label={t("coreNumbers.maturity")}
             number={coreNumbers.maturity.value}
             master={coreNumbers.maturity.master}
-            contextDescription="Who you are becoming"
+            contextDescription={t("coreNumbers.maturityDesc")}
           />
         </div>
       </section>
 
       {/* Personal Cycles */}
       <section>
-        <h2 className="text-lg font-semibold text-accent-gold mb-4">Personal Cycles</h2>
+        <h2 className="text-lg font-semibold text-accent-gold mb-4">{t("cycles.title")}</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Personal Year */}
           <Card className="bg-white border-border-subtle">
             <CardContent className="p-5">
               <p className="text-xs text-accent-ink/60 uppercase tracking-wide mb-1">
-                Personal Year
+                {t("cycles.personalYear")}
               </p>
               <div className="flex items-baseline gap-2 mb-2">
                 <p className="text-3xl font-bold text-accent-gold">{cycles.personalYear}</p>
@@ -266,7 +267,7 @@ export default function NumerologyPage() {
           <Card className="bg-white border-border-subtle">
             <CardContent className="p-5">
               <p className="text-xs text-accent-ink/60 uppercase tracking-wide mb-1">
-                Personal Month
+                {t("cycles.personalMonth")}
               </p>
               <div className="flex items-baseline gap-2 mb-2">
                 <p className="text-3xl font-bold text-accent-gold">{cycles.personalMonth}</p>
@@ -284,7 +285,7 @@ export default function NumerologyPage() {
           <Card className="bg-white border-border-subtle">
             <CardContent className="p-5">
               <p className="text-xs text-accent-ink/60 uppercase tracking-wide mb-1">
-                Personal Day
+                {t("cycles.personalDay")}
               </p>
               <div className="flex items-baseline gap-2 mb-2">
                 <p className="text-3xl font-bold text-accent-gold">{cycles.personalDay}</p>
@@ -302,12 +303,12 @@ export default function NumerologyPage() {
 
       {/* Current Pinnacle */}
       <section>
-        <h2 className="text-lg font-semibold text-accent-gold mb-4">Life Periods</h2>
+        <h2 className="text-lg font-semibold text-accent-gold mb-4">{t("lifePeriods.title")}</h2>
         <Card className="bg-gradient-to-br from-accent-gold/5 to-transparent border-accent-gold/20">
           <CardContent className="p-6">
             <div className="flex items-start justify-between mb-4">
               <div>
-                <p className="text-sm text-accent-ink/60">Current Pinnacle</p>
+                <p className="text-sm text-accent-ink/60">{t("lifePeriods.currentPinnacle")}</p>
                 <div className="flex items-baseline gap-2">
                   <p className="text-4xl font-bold text-accent-gold">{currentPinnacle.number}</p>
                   <span className="text-sm font-medium text-accent-ink/70">
@@ -316,9 +317,9 @@ export default function NumerologyPage() {
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm text-accent-ink/60">{currentPinnacle.period} Period</p>
+                <p className="text-sm text-accent-ink/60">{currentPinnacle.period} {t("lifePeriods.period")}</p>
                 <p className="text-sm text-accent-ink/70">
-                  Ages {currentPinnacle.startAge || 0} - {currentPinnacle.endAge || "onwards"}
+                  {t("lifePeriods.ages")} {currentPinnacle.startAge || 0} - {currentPinnacle.endAge || t("lifePeriods.onwards")}
                 </p>
               </div>
             </div>
@@ -347,7 +348,7 @@ export default function NumerologyPage() {
                   }`}
                 >
                   <p className="text-xs text-accent-ink/60 mb-1">
-                    {["1st", "2nd", "3rd", "4th"][i]} Pinnacle
+                    {t(`lifePeriods.pinnacles.${["first", "second", "third", "fourth"][i]}`)}
                   </p>
                   <div className="flex items-baseline gap-2 mb-1">
                     <p className={`text-2xl font-bold ${isActive ? "text-accent-gold" : "text-accent-ink"}`}>
@@ -358,7 +359,7 @@ export default function NumerologyPage() {
                     </span>
                   </div>
                   <p className="text-xs text-accent-ink/50 mb-2">
-                    Ages {p.startAge || 0} - {p.endAge || "onwards"}
+                    {t("lifePeriods.ages")} {p.startAge || 0} - {p.endAge || t("lifePeriods.onwards")}
                   </p>
                   <p className="text-xs text-accent-ink/70 line-clamp-2">
                     {pinnacleMeaning.brief}
@@ -372,7 +373,7 @@ export default function NumerologyPage() {
 
       {/* Challenges */}
       <section>
-        <h2 className="text-lg font-semibold text-accent-gold mb-4">Life Challenges</h2>
+        <h2 className="text-lg font-semibold text-accent-gold mb-4">{t("challenges.title")}</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[challenges.first, challenges.second, challenges.third, challenges.fourth].map(
             (c, i) => {
@@ -381,7 +382,7 @@ export default function NumerologyPage() {
                 <Card key={i} className="bg-white border-border-subtle">
                   <CardContent className="p-4">
                     <p className="text-xs text-accent-ink/60 mb-1">
-                      {["First", "Second", "Third", "Main"][i]} Challenge
+                      {t(`challenges.${["first", "second", "third", "main"][i]}`)}
                     </p>
                     <div className="flex items-baseline gap-2 mb-2">
                       <p className="text-2xl font-bold text-accent-ink">{c}</p>
@@ -402,7 +403,7 @@ export default function NumerologyPage() {
 
       {/* Lucky Numbers */}
       <section>
-        <h2 className="text-lg font-semibold text-accent-gold mb-4">Lucky Numbers</h2>
+        <h2 className="text-lg font-semibold text-accent-gold mb-4">{t("luckyNumbers.title")}</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {luckyNumbers.all.map((num, i) => {
             const numMeaning = getNumberMeaning(num);
@@ -428,7 +429,7 @@ export default function NumerologyPage() {
                     {numMeaning.keyword}
                   </p>
                   {isMaster && (
-                    <p className="text-xs text-accent-gold font-medium mb-1">Master Number</p>
+                    <p className="text-xs text-accent-gold font-medium mb-1">{tCommon("masterNumber")}</p>
                   )}
                   <p className="text-xs text-accent-ink/60">{numMeaning.energy}</p>
                 </CardContent>
@@ -441,7 +442,7 @@ export default function NumerologyPage() {
       {/* Karmic Debt */}
       {karmicDebt.hasKarmicDebt && (
         <section>
-          <h2 className="text-lg font-semibold text-accent-gold mb-4">Karmic Lessons</h2>
+          <h2 className="text-lg font-semibold text-accent-gold mb-4">{t("karmicDebt.title")}</h2>
           <div className="space-y-4">
             {karmicDebt.numbers.map((num) => (
               <Card key={num} className="bg-white border-border-subtle">

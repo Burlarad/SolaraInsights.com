@@ -1,4 +1,8 @@
+// Zodiac signs ordered starting with Capricorn (winter solstice)
 export const ZODIAC_SIGNS = [
+  { name: "Capricorn", key: "capricorn", symbol: "♑︎" },
+  { name: "Aquarius", key: "aquarius", symbol: "♒︎" },
+  { name: "Pisces", key: "pisces", symbol: "♓︎" },
   { name: "Aries", key: "aries", symbol: "♈︎" },
   { name: "Taurus", key: "taurus", symbol: "♉︎" },
   { name: "Gemini", key: "gemini", symbol: "♊︎" },
@@ -8,9 +12,6 @@ export const ZODIAC_SIGNS = [
   { name: "Libra", key: "libra", symbol: "♎︎" },
   { name: "Scorpio", key: "scorpio", symbol: "♏︎" },
   { name: "Sagittarius", key: "sagittarius", symbol: "♐︎" },
-  { name: "Capricorn", key: "capricorn", symbol: "♑︎" },
-  { name: "Aquarius", key: "aquarius", symbol: "♒︎" },
-  { name: "Pisces", key: "pisces", symbol: "♓︎" },
 ] as const;
 
 export const TIMEFRAMES = ["Today", "Week", "Month"] as const;

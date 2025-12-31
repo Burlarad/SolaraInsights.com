@@ -5,6 +5,7 @@ import { LearnHero } from "@/components/learn/LearnHero";
 import { SearchFilters } from "@/components/learn/SearchFilters";
 import { RoadmapRow } from "@/components/learn/RoadmapRow";
 import { LearnGuideCard } from "@/components/learn/LearnGuideCard";
+import { SolaraLogo } from "@/components/layout/SolaraLogo";
 import { LEARN_ITEMS, LearnItem } from "@/lib/learn/content";
 
 export default function LearnPage() {
@@ -20,6 +21,11 @@ export default function LearnPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-12 space-y-8 md:space-y-10">
+      {/* Solara Logo */}
+      <div className="flex justify-center items-center pt-4 pb-6">
+        <SolaraLogo size="lg" />
+      </div>
+
       <LearnHero />
 
       {/* Show roadmap when no filters are active */}

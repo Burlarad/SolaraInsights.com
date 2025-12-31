@@ -10,7 +10,7 @@ interface SolaraLogoProps {
 
 export function SolaraLogo({ size = "lg", className }: SolaraLogoProps) {
   const discSize = size === "lg" ? "h-24 w-24" : "h-12 w-12";
-  const wordmarkSize = size === "lg" ? "text-5xl" : "text-xl";
+  const wordmarkSize = size === "lg" ? "text-6xl" : "text-3xl";
 
   return (
     <div className={cn("flex flex-col items-center gap-4", className)}>
@@ -29,10 +29,10 @@ export function SolaraLogo({ size = "lg", className }: SolaraLogoProps) {
       <div
         className={cn(
           wordmarkSize,
-          "font-bold tracking-tight text-accent-ink uppercase"
+          "font-cursive font-normal tracking-wide text-accent-ink"
         )}
       >
-        SOLARA
+        Solara
       </div>
 
       {/* Tagline */}

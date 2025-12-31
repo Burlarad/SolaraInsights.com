@@ -37,7 +37,7 @@ export function ZodiacCard({ name, symbol, isSelected, onClick }: ZodiacCardProp
       </div>
 
       {/* Sign name */}
-      <h3 className="text-base md:text-lg font-semibold text-accent-ink uppercase tracking-wide">
+      <h3 className="font-cursive text-xl md:text-2xl font-normal text-accent-ink tracking-wide">
         {name}
       </h3>
 

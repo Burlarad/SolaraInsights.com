@@ -3,7 +3,8 @@ import { createServerSupabaseClient, createAdminSupabaseClient } from "@/lib/sup
 import { openai, OPENAI_MODELS } from "@/lib/openai/client";
 import { InsightsRequest, SanctuaryInsight } from "@/types";
 import { getTarotCardNames } from "@/lib/tarot";
-import { getRuneNames } from "@/lib/runes";
+// FEATURE DISABLED: Rune Whisper / Daily Sigil
+// import { getRuneNames } from "@/lib/runes";
 import { getCache, setCache, acquireLockFailClosed, releaseLock, isRedisAvailable, REDIS_UNAVAILABLE_RESPONSE } from "@/lib/cache/redis";
 import { checkRateLimit, checkBurstLimit, createRateLimitResponse } from "@/lib/cache/rateLimit";
 import { getUserPeriodKeys, buildInsightCacheKey, buildInsightLockKey } from "@/lib/timezone/periodKeys";
@@ -448,9 +449,10 @@ LANGUAGE:
 OUTPUT FORMAT:
 Respond with ONLY valid JSON. No markdown, no explanations—just the JSON object.`;
 
-    // Get tarot card and rune names for prompt constraints
+    // Get tarot card names for prompt constraints
     const tarotCardNames = getTarotCardNames();
-    const runeNames = getRuneNames();
+    // FEATURE DISABLED: Rune Whisper / Daily Sigil
+    // const runeNames = getRuneNames();
 
     const userPrompt = `Generate ${timeframe} insights for ${profile.preferred_name || profile.full_name || "this person"}.
 
@@ -480,12 +482,6 @@ For the tarot card:
 - Do NOT claim you are literally drawing from a physical deck.
 - Treat the card as a symbolic archetype that fits this person's current energy.
 
-For the rune:
-- You MUST choose exactly one name from this list: ${runeNames.join(", ")}.
-- Do NOT invent new rune names.
-- Do NOT claim you are physically pulling a rune.
-- Present it as a symbolic archetype.
-
 Return a JSON object with this structure:
 {
   "personalNarrative": "Exactly 2 paragraphs, 8-12 sentences total. Include 1 micro-action (<=10 min). Follow Ayren voice rules.",
@@ -505,12 +501,6 @@ Return a JSON object with this structure:
     "summary": "one sentence",
     "symbolism": "one paragraph",
     "guidance": "one paragraph"
-  },
-  "rune": {
-    "name": "rune name",
-    "keyword": "one word",
-    "meaning": "one paragraph",
-    "affirmation": "one sentence"
   },
   "luckyCompass": {
     "numbers": [

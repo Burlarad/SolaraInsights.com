@@ -1,0 +1,593 @@
+{
+  "common": {
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "close": "Sluiten",
+    "loading": "Laden...",
+    "saving": "Opslaan...",
+    "saved": "Opgeslagen",
+    "submit": "Verzenden",
+    "back": "Terug",
+    "next": "Volgende",
+    "delete": "Verwijderen",
+    "deleting": "Verwijderen...",
+    "error": "Er is iets misgegaan",
+    "tryAgain": "Probeer opnieuw",
+    "confirm": "Bevestigen",
+    "yes": "Ja",
+    "no": "Nee",
+    "optional": "Optioneel",
+    "required": "Verplicht",
+    "or": "of",
+    "and": "en",
+    "on": "Aan",
+    "off": "Uit",
+    "enabled": "Ingeschakeld",
+    "disabled": "Uitgeschakeld",
+    "goToSettings": "Ga naar Instellingen",
+    "learnMore": "Meer informatie",
+    "viewAll": "Alles bekijken",
+    "showMore": "Meer tonen",
+    "showLess": "Minder tonen",
+    "masterNumber": "Meestergetal"
+  },
+  "nav": {
+    "home": "Home",
+    "about": "Over",
+    "learn": "Leren",
+    "sanctuary": "Heiligdom",
+    "settings": "Instellingen",
+    "signIn": "Inloggen",
+    "signUp": "Registreren",
+    "signOut": "Uitloggen"
+  },
+  "auth": {
+    "signIn": {
+      "title": "Welkom terug",
+      "subtitle": "Log in om je heiligdom te betreden",
+      "signInWith": "Inloggen met",
+      "orSignInWithEmail": "Of log in met e-mail",
+      "email": "E-mail",
+      "emailPlaceholder": "jij@voorbeeld.nl",
+      "password": "Wachtwoord",
+      "forgot": "Vergeten?",
+      "signingIn": "Bezig met inloggen...",
+      "signInButton": "Inloggen",
+      "noAccount": "Nog geen account?",
+      "createAccount": "Account aanmaken",
+      "signInError": "We konden je niet inloggen met deze gegevens. Controleer je e-mail en wachtwoord, of reset je wachtwoord.",
+      "unexpectedError": "Er is een onverwachte fout opgetreden. Probeer het opnieuw.",
+      "comingSoon": "{provider} inloggen komt binnenkort"
+    },
+    "signUp": {
+      "title": "Maak je account aan",
+      "subtitle": "Begin je reis naar het licht",
+      "fullName": "Volledige naam",
+      "namePlaceholder": "Je naam",
+      "email": "E-mail",
+      "emailPlaceholder": "jij@voorbeeld.nl",
+      "password": "Wachtwoord",
+      "passwordPlaceholder": "Minimaal 8 tekens",
+      "confirmPassword": "Bevestig wachtwoord",
+      "creatingAccount": "Account aanmaken...",
+      "createAccountButton": "Account aanmaken",
+      "terms": "Door je te registreren ga je akkoord met onze Servicevoorwaarden en Privacybeleid. Een deel van je abonnement ondersteunt gezinnen via de Solara Foundation.",
+      "or": "of",
+      "continueWithFacebook": "Doorgaan met Facebook",
+      "continueWithTikTok": "Doorgaan met TikTok",
+      "hasAccount": "Heb je al een account?",
+      "signIn": "Inloggen",
+      "passwordsDontMatch": "Wachtwoorden komen niet overeen. Probeer het opnieuw.",
+      "passwordTooShort": "Wachtwoord moet minimaal 8 tekens bevatten."
+    },
+    "forgotPassword": {
+      "title": "Wachtwoord resetten",
+      "subtitle": "Voer je e-mail in en we sturen je een resetlink",
+      "email": "E-mail",
+      "emailPlaceholder": "jij@voorbeeld.nl",
+      "sending": "Verzenden...",
+      "sendResetLink": "Verstuur resetlink",
+      "backToSignIn": "Terug naar inloggen",
+      "checkEmail": {
+        "title": "Controleer je e-mail",
+        "message": "We hebben een wachtwoord resetlink gestuurd naar <strong>{email}</strong>. Klik op de link in de e-mail om een nieuw wachtwoord aan te maken."
+      }
+    },
+    "resetPassword": {
+      "title": "Nieuw wachtwoord instellen",
+      "subtitle": "Voer hieronder je nieuwe wachtwoord in",
+      "verifying": "Je resetlink verifiëren...",
+      "newPassword": "Nieuw wachtwoord",
+      "newPasswordPlaceholder": "Minimaal 8 tekens",
+      "confirmPassword": "Bevestig nieuw wachtwoord",
+      "confirmPasswordPlaceholder": "Voer je wachtwoord opnieuw in",
+      "updating": "Wachtwoord bijwerken...",
+      "updatePassword": "Wachtwoord bijwerken",
+      "backToSignIn": "Terug naar inloggen",
+      "linkExpired": {
+        "title": "Link verlopen",
+        "message": "Deze resetlink is verlopen of ongeldig. Vraag een nieuwe aan.",
+        "noCodeMessage": "Geen resetlink gedetecteerd. Vraag een wachtwoord reset aan via de inlogpagina.",
+        "requestNewLink": "Nieuwe resetlink aanvragen"
+      },
+      "success": {
+        "title": "Wachtwoord bijgewerkt",
+        "message": "Je wachtwoord is succesvol bijgewerkt. Je kunt nu inloggen met je nieuwe wachtwoord.",
+        "continueToSignIn": "Doorgaan naar inloggen",
+        "redirecting": "Je wordt automatisch doorgestuurd over enkele seconden..."
+      },
+      "sessionRequired": {
+        "title": "Sessie vereist",
+        "message": "Gebruik de resetlink uit je e-mail om deze pagina te openen.",
+        "requestResetLink": "Resetlink aanvragen"
+      }
+    },
+    "setPassword": {
+      "title": "Stel je wachtwoord in",
+      "subtitle": "Maak een wachtwoord aan voor je Solara account",
+      "settingPasswordFor": "Wachtwoord instellen voor",
+      "password": "Wachtwoord",
+      "passwordPlaceholder": "Minimaal 8 tekens",
+      "confirmPassword": "Bevestig wachtwoord",
+      "confirmPasswordPlaceholder": "Voer je wachtwoord opnieuw in",
+      "settingPassword": "Wachtwoord instellen...",
+      "continueToOnboarding": "Doorgaan naar onboarding",
+      "errors": {
+        "enterBoth": "Voer je wachtwoord in en bevestig het",
+        "dontMatch": "Wachtwoorden komen niet overeen",
+        "tooShort": "Wachtwoord moet minimaal 8 tekens bevatten"
+      }
+    },
+    "verifyEmail": {
+      "title": "Verifieer Je E-mail",
+      "subtitle": "We hebben een verificatielink naar je e-mail gestuurd",
+      "resend": "Verificatie-e-mail opnieuw verzenden"
+    }
+  },
+  "onboarding": {
+    "welcome": "Welkom bij Solara",
+    "letsGetStarted": "Laten we beginnen",
+    "tellUsAbout": "Vertel ons over jezelf",
+    "pageTitle": "Voltooi je Heiligdom profiel",
+    "pageSubtitle": "We gebruiken deze informatie om je gepersonaliseerde inzichten te genereren",
+    "firstName": "Voornaam",
+    "middleName": "Tweede naam",
+    "lastName": "Achternaam",
+    "nickname": "Bijnaam (optioneel)",
+    "nicknamePlaceholder": "Hoe moeten we je noemen?",
+    "nicknameHint": "Indien anders dan je voornaam",
+    "birthDetails": "Geboortegegevens",
+    "birthDate": "Geboortedatum",
+    "birthTime": "Geboortetijd (optioneel)",
+    "birthTimeUnknown": "Ik weet mijn geboortetijd niet",
+    "birthTimeHint": "Als je je exacte geboortetijd niet weet, kun je dit nu overslaan en later toevoegen voor nauwkeurigere kaarten en personalisatie.",
+    "birthPlace": "Geboorteplaats",
+    "searchPlace": "Zoek naar je geboortestad...",
+    "timezone": "Tijdzone: {timezone}",
+    "locationHint": "Begin met typen om te zoeken, selecteer dan uit de resultaten",
+    "locationWarning": "Zoek en selecteer je geboortelocatie uit de dropdown om door te gaan.",
+    "saving": "Je geboorte-signatuur opslaan...",
+    "continue": "Doorgaan",
+    "skip": "Nu overslaan",
+    "complete": "Setup voltooien",
+    "settingsNote": "Je kunt deze gegevens later altijd bijwerken in Instellingen",
+    "confirmingPayment": "Je betaling bevestigen...",
+    "confirmingPaymentMessage": "We bevestigen je abonnement. Dit duurt meestal maar een paar seconden.",
+    "errors": {
+      "firstNameRequired": "Voornaam is verplicht",
+      "lastNameRequired": "Achternaam is verplicht",
+      "birthDateRequired": "Geboortedatum is verplicht",
+      "locationRequired": "Selecteer je geboortelocatie uit de zoekresultaten",
+      "saveFailed": "Profiel opslaan mislukt. Probeer het opnieuw."
+    }
+  },
+  "settings": {
+    "title": "Instellingen",
+    "subtitle": "Werk je voorkeursnaam, sterrenbeeld en geboortecoördinaten bij",
+    "identity": {
+      "title": "Identiteit",
+      "firstName": "Voornaam",
+      "middleName": "Tweede naam",
+      "lastName": "Achternaam",
+      "nickname": "Bijnaam",
+      "nicknameHint": "Indien anders dan je voornaam",
+      "birthNameHint": "Je geboortenaam wordt gebruikt voor numerologieberekeningen",
+      "nameMissingBanner": "Voeg je voor- en achternaam toe voor een meer persoonlijke ervaring."
+    },
+    "email": {
+      "title": "E-mail",
+      "addEmailBanner": "Voeg een echt e-mailadres toe om updates te ontvangen en wachtwoordreset mogelijk te maken.",
+      "placeholder": "jouw@email.com"
+    },
+    "password": {
+      "title": "Wachtwoord",
+      "current": "Huidig wachtwoord",
+      "new": "Nieuw wachtwoord",
+      "confirm": "Bevestig nieuw wachtwoord",
+      "change": "Wachtwoord wijzigen",
+      "placeholder": "Je wachtwoord"
+    },
+    "birthDetails": {
+      "title": "Geboortegegevens",
+      "date": "Geboortedatum",
+      "time": "Geboortetijd",
+      "timeUnknown": "Ik weet mijn geboortetijd niet",
+      "place": "Geboorteplaats",
+      "timezone": "Tijdzone"
+    },
+    "zodiac": {
+      "title": "Sterrenbeeld",
+      "select": "Selecteer je teken"
+    },
+    "language": {
+      "title": "Taal",
+      "select": "Selecteer taal"
+    },
+    "social": {
+      "title": "Sociale Inzichten",
+      "description": "Verbind je sociale accounts voor gepersonaliseerde inzichten",
+      "connect": "Verbinden",
+      "disconnect": "Ontkoppelen",
+      "connected": "Verbonden"
+    },
+    "dangerZone": {
+      "title": "Gevarenzone",
+      "hibernate": "Account Sluimeren",
+      "hibernateDescription": "Deactiveer je account tijdelijk. Je kunt het op elk moment opnieuw activeren.",
+      "delete": "Account Verwijderen",
+      "deleteDescription": "Verwijder je account en alle gegevens permanent. Dit kan niet ongedaan worden gemaakt.",
+      "confirmDelete": "Weet je zeker dat je je account wilt verwijderen?",
+      "typeToConfirm": "Typ DELETE om te bevestigen"
+    },
+    "saveChanges": "Wijzigingen opslaan",
+    "verificationExpired": "Je verificatie is verlopen. Verifieer opnieuw."
+  },
+  "sanctuary": {
+    "greeting": {
+      "title": "Stille helderheid, {name}.",
+      "defaultName": "Vriend",
+      "defaultMessage": "Je dagelijkse inzichten worden voorbereid door de kosmos."
+    },
+    "tabs": {
+      "insights": "Inzichten",
+      "astrology": "Astrologie",
+      "numerology": "Numerologie",
+      "connections": "Connecties"
+    },
+    "timeframes": {
+      "today": "Vandaag",
+      "week": "Week",
+      "month": "Maand",
+      "year": "Jaar"
+    },
+    "insights": {
+      "title": "Jouw Heiligdom",
+      "label": "Heiligdom inzichten",
+      "tuning": "Je inzichten afstemmen...",
+      "ready": "Je inzichten zijn klaar.",
+      "localTimezone": "Lokale tijdzone",
+      "greeting": "Welkom terug",
+      "sunriseGuidance": "Zonsopgang begeleiding",
+      "energeticRhythm": "Je energetische ritme voor {timeframe}",
+      "coreThemesFor": "Kernthema's van {timeframe}",
+      "focusFor": "Focus voor {timeframe}",
+      "personalNarrative": "Persoonlijk Verhaal",
+      "coreThemes": "Kernthema's",
+      "focusForPeriod": "Focus voor deze periode",
+      "journalPrompt": "Dagboekprompt",
+      "tarot": {
+        "title": "Tarotkaart",
+        "label": "TAROT TREKKING — DAGELIJKS ARCHETYPE",
+        "yourCard": "Jouw Kaart",
+        "matchError": "We konden deze tarotkaart niet koppelen aan ons deck."
+      },
+      "luckyCompass": {
+        "title": "Gelukskompas",
+        "label": "GELUKSKOMPAS — DAGELIJKS GELUK + LICHTMARKERS",
+        "numbers": "Getallen van {timeframe}",
+        "powerWords": "KRACHTWOORDEN",
+        "handwrittenNote": "EEN HANDGESCHREVEN NOTITIE"
+      },
+      "emotionalCadence": {
+        "title": "Emotionele Cadans",
+        "label": "EMOTIONELE CADANS — DAGELIJKS RITME",
+        "dawn": "Dageraad",
+        "midday": "Middag",
+        "dusk": "Schemering",
+        "evening": "Avond",
+        "midnight": "Middernacht",
+        "morning": "Ochtend"
+      },
+      "dailyReflection": {
+        "title": "Dagelijkse reflectie",
+        "subtitle": "Laat je notities privé en zacht blijven.",
+        "placeholder": "Een paar woorden voor je hemel vandaag…",
+        "saveHint": "Druk ⌘+Enter of Ctrl+Enter om op te slaan"
+      },
+      "errors": {
+        "profileLoadError": "We hadden problemen met het laden van je profiel. Probeer het opnieuw, of neem contact op met support als dit aanhoudt.",
+        "insightLoadError": "We hebben problemen met het laden van je inzicht. Dit kan een tijdelijk probleem zijn.",
+        "birthSignatureRequired": "Stel je geboorte signatuur in",
+        "journalSaveError": "Kan niet opslaan. Probeer het opnieuw."
+      },
+      "socialInsights": {
+        "paused": "Sociale inzichten gepauzeerd",
+        "pausedDescription": "Schakel Sociale Inzichten in om je lezingen te verbeteren met patronen van je verbonden accounts."
+      },
+      "reactivated": "Gereactiveerd — welkom terug."
+    }
+  },
+  "numerology": {
+    "title": "Jouw Getallen",
+    "subtitle": "De Wiskunde Achter Je Leven",
+    "calculating": "Je getallen berekenen...",
+    "systems": {
+      "pythagorean": "Pythagoreïsch",
+      "chaldean": "Chaldeeuws"
+    },
+    "errors": {
+      "nameRequired": "Naam Vereist",
+      "nameRequiredMessage": "We hebben je voor- en achternaam nodig om je numerologieprofiel te berekenen. Werk je naam bij in Instellingen.",
+      "birthDateRequired": "Geboortedatum Vereist",
+      "birthDateRequiredMessage": "We hebben je geboortedatum nodig om je numerologieprofiel te berekenen. Werk je geboortedatum bij in Instellingen.",
+      "loadFailed": "Kan numerologieprofiel niet laden"
+    },
+    "coreNumbers": {
+      "title": "Kerngetallen",
+      "lifePath": "Levenspad",
+      "lifePathDesc": "Je levensdoel en het pad dat je bewandelt",
+      "expression": "Expressie",
+      "expressionDesc": "Je natuurlijke vaardigheden en talenten",
+      "soulUrge": "Zielsverlangen",
+      "soulUrgeDesc": "Je innerlijke motivaties en verlangens",
+      "personality": "Persoonlijkheid",
+      "personalityDesc": "Hoe anderen jou waarnemen",
+      "birthday": "Verjaardag",
+      "birthdayDesc": "Je natuurlijke gaven en talenten",
+      "maturity": "Volwassenheid",
+      "maturityDesc": "Wie je aan het worden bent"
+    },
+    "cycles": {
+      "title": "Persoonlijke Cycli",
+      "personalYear": "Persoonlijk Jaar",
+      "personalMonth": "Persoonlijke Maand",
+      "personalDay": "Persoonlijke Dag"
+    },
+    "lifePeriods": {
+      "title": "Levensperiodes",
+      "currentPinnacle": "Huidige Hoogtepunt",
+      "period": "Periode",
+      "ages": "Leeftijden",
+      "onwards": "en verder",
+      "pinnacles": {
+        "first": "1e Hoogtepunt",
+        "second": "2e Hoogtepunt",
+        "third": "3e Hoogtepunt",
+        "fourth": "4e Hoogtepunt"
+      }
+    },
+    "challenges": {
+      "title": "Levensuitdagingen",
+      "first": "Eerste Uitdaging",
+      "second": "Tweede Uitdaging",
+      "third": "Derde Uitdaging",
+      "main": "Hoofduitdaging"
+    },
+    "luckyNumbers": {
+      "title": "Geluksgetallen"
+    },
+    "karmicDebt": {
+      "title": "Karmische Lessen"
+    }
+  },
+  "astrology": {
+    "title": "Astrologie",
+    "subtitle": "Het Licht Achter Je Leven",
+    "calculating": "Je horoscoop berekenen...",
+    "birthChart": {
+      "title": "Geboortehoroscoop",
+      "subtitle": "Je unieke planetaire handtekening"
+    },
+    "planets": {
+      "title": "Planeten",
+      "subtitle": "Je unieke planetaire handtekening",
+      "sun": "Zon",
+      "sunDesc": "Je kern gevoel van zelf en vitaliteit.",
+      "moon": "Maan",
+      "moonDesc": "Je emotionele landschap en innerlijke wereld.",
+      "mercury": "Mercurius",
+      "mercuryDesc": "Hoe je denkt en communiceert.",
+      "venus": "Venus",
+      "venusDesc": "Wat je liefhebt en mooi vindt.",
+      "mars": "Mars",
+      "marsDesc": "Je drive, verlangen en hoe je actie onderneemt.",
+      "jupiter": "Jupiter",
+      "jupiterDesc": "Waar je groei en betekenis zoekt.",
+      "saturn": "Saturnus",
+      "saturnDesc": "Je lessen en gebieden van meesterschap.",
+      "uranus": "Uranus",
+      "uranusDesc": "Waar je innoveert en doorbreekt.",
+      "neptune": "Neptunus",
+      "neptuneDesc": "Je dromen, intuïtie en spirituele aard.",
+      "pluto": "Pluto",
+      "plutoDesc": "Je diepten en transformatieve kracht.",
+      "northNode": "Noordelijke Knoop",
+      "northNodeDesc": "Je uitnodiging naar groei."
+    },
+    "houses": {
+      "title": "Huizen",
+      "subtitle": "De 12 levensgebieden van je horoscoop",
+      "first": "1e Huis",
+      "second": "2e Huis",
+      "secondDesc": "Je relatie met middelen, waarde en stabiliteit.",
+      "third": "3e Huis",
+      "fourth": "4e Huis",
+      "fourthDesc": "Je innerlijke fundament, thuis en emotionele wortels.",
+      "fifth": "5e Huis",
+      "sixth": "6e Huis",
+      "sixthDesc": "Je dagelijkse ritmes, werk en welzijn.",
+      "seventh": "7e Huis",
+      "eighth": "8e Huis",
+      "ninth": "9e Huis",
+      "ninthDesc": "Je zoektocht naar betekenis, geloof en expansie.",
+      "tenth": "10e Huis",
+      "tenthDesc": "Je publieke rol, carrière en zichtbare nalatenschap.",
+      "eleventh": "11e Huis",
+      "eleventhDesc": "Je visie voor gemeenschap, vriendschap en de toekomst.",
+      "twelfth": "12e Huis",
+      "twelfthDesc": "Je innerlijke heiligdom, eenzaamheid en het heilige."
+    },
+    "aspects": {
+      "title": "Aspecten",
+      "subtitle": "De gesprekken tussen je planeten"
+    },
+    "patterns": {
+      "title": "Patronen & Pad",
+      "chartShape": "Horoscoopvorm",
+      "dominantElement": "Dominant Element",
+      "dominantModality": "Dominante Modaliteit",
+      "hemisphereEmphasis": "Hemisfeer Nadruk",
+      "above": "Boven de horizon",
+      "below": "Onder de horizon",
+      "aboveDesc": "Je horoscoop is gericht op zichtbaarheid en uiterlijke expressie. Het leven vraagt je vaak om aanwezig te zijn, gezien te worden en je met de buitenwereld bezig te houden.",
+      "belowDesc": "Je horoscoop is gericht op innerlijke reflectie en subtiliteit. Het leven ontvouwt zich vaak door innerlijke verwerking, stille observatie en werk achter de schermen."
+    },
+    "errors": {
+      "birthDetailsRequired": "Geboortegegevens Vereist",
+      "birthDetailsRequiredMessage": "We hebben je volledige geboortegegevens nodig om je horoscoop te berekenen."
+    }
+  },
+  "connections": {
+    "title": "Connecties",
+    "subtitle": "Ontdek je relaties",
+    "addConnection": "Connectie Toevoegen",
+    "noConnections": "Nog geen connecties",
+    "noConnectionsMessage": "Voeg je eerste connectie toe om je relatiedynamiek te verkennen.",
+    "notes": "Notities",
+    "saveNotes": "Notities opslaan",
+    "compatibility": "Compatibiliteit",
+    "synastry": "Synastrie",
+    "composite": "Composiet"
+  },
+  "spaceBetween": {
+    "title": "De Ruimte Tussen",
+    "subtitle": "Jouw relatieblauwdruk met {connectionName}",
+    "generating": "Je relatieblauwdruk genereren...",
+    "generatingHint": "Dit kan even duren",
+    "tryAgain": "Probeer opnieuw",
+    "discover": "Ontdek de Ruimte Tussen",
+    "discoverDescription": "Genereer je permanente relatieblauwdruk met {connectionName}. Dit diepgaande inzicht wordt eenmalig gecreëerd en voor altijd bewaard.",
+    "generateBlueprint": "Blauwdruk genereren",
+    "sections": {
+      "essence": "Essentie",
+      "emotionalBlueprint": "Emotionele Blauwdruk",
+      "communication": "Communicatie",
+      "growthEdges": "Groeipunten",
+      "careGuide": "Zorgwijzer"
+    }
+  },
+  "location": {
+    "title": "Help Solara je hemel te matchen",
+    "body": "Om je inzichten aan het begin van je dag te genereren, moet Solara ongeveer weten waar ter wereld je bent.\n\nWe gebruiken dit alleen om je tijdzone te berekenen, zodat je dagelijkse, wekelijkse en maandelijkse begeleiding op het juiste lokale moment wordt vernieuwd.\n\nAls je dit overslaat, gebruiken we UTC als standaard. Solara zal nog steeds werken, maar je timing kan een beetje anders aanvoelen.",
+    "allow": "Locatie toestaan",
+    "skip": "Overslaan, gebruik UTC voorlopig"
+  },
+  "errors": {
+    "pageNotFound": "Pagina niet gevonden",
+    "unauthorized": "Niet geautoriseerd",
+    "serverError": "Serverfout",
+    "networkError": "Netwerkfout",
+    "rateLimited": "Te veel verzoeken. Probeer het later opnieuw.",
+    "sessionExpired": "Je sessie is verlopen. Log opnieuw in."
+  },
+  "deletion": {
+    "pageTitle": "Status Gegevensverwijdering",
+    "noCode": "Geen bevestigingscode opgegeven. Gebruik de link uit je bevestiging van gegevensverwijdering.",
+    "notFound": "Verwijderingsverzoek niet gevonden. De bevestigingscode is mogelijk ongeldig of verlopen.",
+    "confirmationCode": "Bevestigingscode",
+    "status": "Status",
+    "requestReceived": "Verzoek Ontvangen",
+    "processed": "Verwerkt",
+    "errorDetails": "Foutdetails",
+    "contactSupport": "Neem contact met ons op via solara@solarainsights.com voor hulp.",
+    "questions": "Vragen? Neem contact met ons op via",
+    "pending": {
+      "title": "In Behandeling",
+      "description": "Je verzoek tot gegevensverwijdering is ontvangen en wacht op verwerking."
+    },
+    "processing": {
+      "title": "In Verwerking",
+      "description": "Je gegevens worden momenteel uit onze systemen verwijderd."
+    },
+    "completed": {
+      "title": "Voltooid",
+      "description": "Je gegevens zijn succesvol verwijderd uit Solara Insights.",
+      "permanentNotice": "Alle persoonlijke gegevens die aan je Facebook-account waren gekoppeld zijn permanent verwijderd uit Solara Insights. Deze actie kan niet ongedaan worden gemaakt."
+    },
+    "failed": {
+      "title": "Mislukt",
+      "description": "Er was een probleem bij het verwerken van je verwijderingsverzoek. Neem contact op met support."
+    },
+    "userNotFound": {
+      "title": "Geen Gegevens Gevonden",
+      "description": "Er is geen account gevonden dat aan je Facebook-account is gekoppeld. Er hoefden geen gegevens verwijderd te worden."
+    }
+  },
+  "zodiacSigns": {
+    "aries": "Ram",
+    "taurus": "Stier",
+    "gemini": "Tweelingen",
+    "cancer": "Kreeft",
+    "leo": "Leeuw",
+    "virgo": "Maagd",
+    "libra": "Weegschaal",
+    "scorpio": "Schorpioen",
+    "sagittarius": "Boogschutter",
+    "capricorn": "Steenbok",
+    "aquarius": "Waterman",
+    "pisces": "Vissen"
+  },
+  "tarot": {
+    "title": "Vraag de kaarten",
+    "questionLabel": "JE VRAAG",
+    "questionPlaceholder": "Waarover wil je vandaag begeleiding?",
+    "questionError": "Voer een vraag in (minimaal {minLength} tekens)",
+    "charactersNeeded": "Nog {count} tekens nodig",
+    "spreadLabel": "KIES JE LEGGING",
+    "spreads": {
+      "single": "Eén kaart",
+      "singleDesc": "Snel inzicht",
+      "three": "Drie kaarten",
+      "threeDesc": "Verleden, Heden, Toekomst",
+      "five": "Vijf kaarten",
+      "fiveDesc": "Diepgaande verkenning"
+    },
+    "buttons": {
+      "draw": "Trek kaarten",
+      "drawing": "Kaarten trekken...",
+      "wait": "Wacht {seconds}s..."
+    },
+    "loading": "Het deck wordt geschud...",
+    "reading": {
+      "title": "Je lezing",
+      "reversed": "Omgekeerd",
+      "synthesis": "HET GROTERE PLAATJE",
+      "actions": "VOORGESTELDE ACTIES",
+      "reflection": "REFLECTIE"
+    },
+    "cta": {
+      "message": "Wil je diepere, gepersonaliseerde lezingen?",
+      "button": "Word lid van Solara"
+    },
+    "errors": {
+      "generic": "We konden je lezing niet voltooien. Probeer het opnieuw.",
+      "rateLimit": "Wacht {seconds} seconden voordat je opnieuw trekt."
+    }
+  },
+  "learn": {
+    "searchPlaceholder": "Gidsen zoeken...",
+    "guidesFound": "{count} {count, plural, one {gids gevonden} other {gidsen gevonden}}",
+    "filterByTopic": "Filteren op onderwerp",
+    "clearAll": "Alles wissen"
+  }
+}

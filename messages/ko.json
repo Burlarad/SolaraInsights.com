@@ -1,0 +1,712 @@
+{
+  "common": {
+    "save": "저장",
+    "cancel": "취소",
+    "close": "닫기",
+    "loading": "로딩 중...",
+    "saving": "저장 중...",
+    "saved": "저장됨",
+    "submit": "제출",
+    "back": "뒤로",
+    "next": "다음",
+    "delete": "삭제",
+    "deleting": "삭제 중...",
+    "error": "오류가 발생했습니다",
+    "tryAgain": "다시 시도",
+    "confirm": "확인",
+    "yes": "예",
+    "no": "아니오",
+    "optional": "선택사항",
+    "required": "필수",
+    "or": "또는",
+    "and": "그리고",
+    "on": "켜기",
+    "off": "끄기",
+    "enabled": "활성화됨",
+    "disabled": "비활성화됨",
+    "goToSettings": "설정으로 이동",
+    "learnMore": "자세히 알아보기",
+    "viewAll": "모두 보기",
+    "showMore": "더 보기",
+    "showLess": "접기",
+    "masterNumber": "마스터 넘버"
+  },
+  "nav": {
+    "home": "홈",
+    "about": "소개",
+    "learn": "학습",
+    "sanctuary": "성소",
+    "settings": "설정",
+    "signIn": "로그인",
+    "signUp": "가입",
+    "signOut": "로그아웃"
+  },
+  "auth": {
+    "signIn": {
+      "title": "다시 오신 것을 환영합니다",
+      "subtitle": "성소에 접속하려면 로그인하세요",
+      "signInWith": "로그인 방법",
+      "orSignInWithEmail": "또는 이메일로 로그인",
+      "email": "이메일",
+      "emailPlaceholder": "you@example.com",
+      "password": "비밀번호",
+      "forgot": "비밀번호 찾기",
+      "signingIn": "로그인 중...",
+      "signInButton": "로그인",
+      "noAccount": "계정이 없으신가요?",
+      "createAccount": "계정 만들기",
+      "signInError": "해당 정보로 로그인할 수 없습니다. 이메일과 비밀번호를 확인하거나 비밀번호를 재설정하세요.",
+      "unexpectedError": "예기치 않은 오류가 발생했습니다. 다시 시도해 주세요.",
+      "comingSoon": "{provider} 로그인이 곧 제공됩니다"
+    },
+    "signUp": {
+      "title": "계정 만들기",
+      "subtitle": "빛을 향한 여정을 시작하세요",
+      "fullName": "성명",
+      "namePlaceholder": "이름을 입력하세요",
+      "email": "이메일",
+      "emailPlaceholder": "you@example.com",
+      "password": "비밀번호",
+      "passwordPlaceholder": "최소 8자 이상",
+      "confirmPassword": "비밀번호 확인",
+      "creatingAccount": "계정 생성 중...",
+      "createAccountButton": "계정 만들기",
+      "terms": "가입하시면 서비스 이용약관 및 개인정보 처리방침에 동의하게 됩니다. 구독료의 일부는 Solara 재단을 통해 가족들을 지원합니다.",
+      "or": "또는",
+      "continueWithFacebook": "Facebook으로 계속하기",
+      "continueWithTikTok": "TikTok으로 계속하기",
+      "hasAccount": "이미 계정이 있으신가요?",
+      "signIn": "로그인",
+      "passwordsDontMatch": "비밀번호가 일치하지 않습니다. 다시 시도해 주세요.",
+      "passwordTooShort": "비밀번호는 최소 8자 이상이어야 합니다."
+    },
+    "forgotPassword": {
+      "title": "비밀번호 재설정",
+      "subtitle": "이메일을 입력하시면 재설정 링크를 보내드립니다",
+      "email": "이메일",
+      "emailPlaceholder": "you@example.com",
+      "sending": "전송 중...",
+      "sendResetLink": "재설정 링크 보내기",
+      "backToSignIn": "로그인으로 돌아가기",
+      "checkEmail": {
+        "title": "이메일을 확인하세요",
+        "message": "<strong>{email}</strong>으로 비밀번호 재설정 링크를 보냈습니다. 이메일의 링크를 클릭하여 새 비밀번호를 만드세요."
+      }
+    },
+    "resetPassword": {
+      "title": "새 비밀번호 설정",
+      "subtitle": "아래에 새 비밀번호를 입력하세요",
+      "verifying": "재설정 링크 확인 중...",
+      "newPassword": "새 비밀번호",
+      "newPasswordPlaceholder": "최소 8자 이상",
+      "confirmPassword": "새 비밀번호 확인",
+      "confirmPasswordPlaceholder": "비밀번호 다시 입력",
+      "updating": "비밀번호 업데이트 중...",
+      "updatePassword": "비밀번호 업데이트",
+      "backToSignIn": "로그인으로 돌아가기",
+      "linkExpired": {
+        "title": "링크 만료됨",
+        "message": "이 재설정 링크가 만료되었거나 유효하지 않습니다. 새 링크를 요청해 주세요.",
+        "noCodeMessage": "재설정 링크가 감지되지 않았습니다. 로그인 페이지에서 비밀번호 재설정을 요청해 주세요.",
+        "requestNewLink": "새 재설정 링크 요청"
+      },
+      "success": {
+        "title": "비밀번호 업데이트 완료",
+        "message": "비밀번호가 성공적으로 업데이트되었습니다. 이제 새 비밀번호로 로그인할 수 있습니다.",
+        "continueToSignIn": "로그인하러 가기",
+        "redirecting": "잠시 후 자동으로 이동합니다..."
+      },
+      "sessionRequired": {
+        "title": "세션 필요",
+        "message": "이 페이지에 접속하려면 이메일의 재설정 링크를 사용해 주세요.",
+        "requestResetLink": "재설정 링크 요청"
+      }
+    },
+    "setPassword": {
+      "title": "비밀번호 설정",
+      "subtitle": "Solara 계정의 비밀번호를 만드세요",
+      "settingPasswordFor": "비밀번호 설정 대상",
+      "password": "비밀번호",
+      "passwordPlaceholder": "최소 8자 이상",
+      "confirmPassword": "비밀번호 확인",
+      "confirmPasswordPlaceholder": "비밀번호 다시 입력",
+      "settingPassword": "비밀번호 설정 중...",
+      "continueToOnboarding": "온보딩으로 계속하기",
+      "errors": {
+        "enterBoth": "비밀번호를 입력하고 확인해 주세요",
+        "dontMatch": "비밀번호가 일치하지 않습니다",
+        "tooShort": "비밀번호는 최소 8자 이상이어야 합니다"
+      }
+    },
+    "verifyEmail": {
+      "title": "이메일 확인",
+      "subtitle": "이메일로 확인 링크를 보냈습니다",
+      "resend": "확인 이메일 다시 보내기"
+    }
+  },
+  "onboarding": {
+    "welcome": "Solara에 오신 것을 환영합니다",
+    "letsGetStarted": "시작해 볼까요",
+    "tellUsAbout": "자신에 대해 알려주세요",
+    "pageTitle": "성소 프로필 완성하기",
+    "pageSubtitle": "이 정보를 사용하여 맞춤형 인사이트를 생성합니다",
+    "firstName": "이름",
+    "middleName": "중간 이름",
+    "lastName": "성",
+    "nickname": "닉네임 (선택사항)",
+    "nicknamePlaceholder": "무엇으로 불러드릴까요?",
+    "nicknameHint": "이름과 다른 경우",
+    "birthDetails": "출생 정보",
+    "birthDate": "생년월일",
+    "birthTime": "출생 시간 (선택사항)",
+    "birthTimeUnknown": "출생 시간을 모릅니다",
+    "birthTimeHint": "정확한 출생 시간을 모르시면 지금은 건너뛰고 나중에 추가하여 더 정확한 차트와 맞춤화를 받을 수 있습니다.",
+    "birthPlace": "출생지",
+    "searchPlace": "출생 도시를 검색하세요...",
+    "timezone": "시간대: {timezone}",
+    "locationHint": "입력을 시작하여 검색한 후 결과에서 선택하세요",
+    "locationWarning": "계속하려면 드롭다운에서 출생 위치를 검색하고 선택해 주세요.",
+    "saving": "출생 서명 저장 중...",
+    "continue": "계속",
+    "skip": "지금은 건너뛰기",
+    "complete": "설정 완료",
+    "settingsNote": "이 정보는 나중에 설정에서 언제든지 업데이트할 수 있습니다",
+    "confirmingPayment": "결제 확인 중...",
+    "confirmingPaymentMessage": "구독을 확인하고 있습니다. 보통 몇 초 정도 걸립니다.",
+    "errors": {
+      "firstNameRequired": "이름은 필수입니다",
+      "lastNameRequired": "성은 필수입니다",
+      "birthDateRequired": "생년월일은 필수입니다",
+      "locationRequired": "검색 결과에서 출생 위치를 선택해 주세요",
+      "saveFailed": "프로필 저장에 실패했습니다. 다시 시도해 주세요."
+    }
+  },
+  "settings": {
+    "title": "설정",
+    "subtitle": "선호하는 이름, 별자리 및 출생 좌표 업데이트",
+    "identity": {
+      "title": "신원",
+      "firstName": "이름",
+      "middleName": "중간 이름",
+      "lastName": "성",
+      "nickname": "닉네임",
+      "nicknameHint": "이름과 다른 경우",
+      "birthNameHint": "출생 이름은 수비학 계산에 사용됩니다",
+      "nameMissingBanner": "더 맞춤화된 경험을 위해 이름과 성을 추가해 주세요."
+    },
+    "email": {
+      "title": "이메일",
+      "addEmailBanner": "업데이트를 받고 비밀번호 재설정을 활성화하려면 실제 이메일 주소를 추가하세요.",
+      "placeholder": "your@email.com"
+    },
+    "password": {
+      "title": "비밀번호",
+      "current": "현재 비밀번호",
+      "new": "새 비밀번호",
+      "confirm": "새 비밀번호 확인",
+      "change": "비밀번호 변경",
+      "placeholder": "비밀번호"
+    },
+    "birthDetails": {
+      "title": "출생 정보",
+      "date": "생년월일",
+      "time": "출생 시간",
+      "timeUnknown": "출생 시간을 모릅니다",
+      "place": "출생지",
+      "timezone": "시간대"
+    },
+    "zodiac": {
+      "title": "별자리",
+      "select": "별자리 선택"
+    },
+    "language": {
+      "title": "언어",
+      "select": "언어 선택"
+    },
+    "social": {
+      "title": "소셜 인사이트",
+      "description": "맞춤형 인사이트를 위해 소셜 계정 연결",
+      "connect": "연결",
+      "disconnect": "연결 해제",
+      "connected": "연결됨"
+    },
+    "dangerZone": {
+      "title": "위험 구역",
+      "hibernate": "계정 휴면",
+      "hibernateDescription": "일시적으로 계정을 비활성화합니다. 언제든지 다시 활성화할 수 있습니다.",
+      "delete": "계정 삭제",
+      "deleteDescription": "계정과 모든 데이터를 영구적으로 삭제합니다. 되돌릴 수 없습니다.",
+      "confirmDelete": "정말로 계정을 삭제하시겠습니까?",
+      "typeToConfirm": "확인하려면 DELETE를 입력하세요"
+    },
+    "saveChanges": "변경사항 저장",
+    "verificationExpired": "확인이 만료되었습니다. 다시 확인해 주세요."
+  },
+  "sanctuary": {
+    "greeting": {
+      "title": "고요한 명확함, {name}.",
+      "defaultName": "친구",
+      "defaultMessage": "오늘의 인사이트가 우주에 의해 준비되고 있습니다."
+    },
+    "tabs": {
+      "insights": "인사이트",
+      "astrology": "점성술",
+      "numerology": "수비학",
+      "connections": "연결"
+    },
+    "timeframes": {
+      "today": "오늘",
+      "week": "이번 주",
+      "month": "이번 달",
+      "year": "올해"
+    },
+    "insights": {
+      "title": "당신의 성소",
+      "label": "성소 인사이트",
+      "tuning": "인사이트 조정 중...",
+      "ready": "인사이트가 준비되었습니다.",
+      "localTimezone": "현지 시간대",
+      "greeting": "다시 오신 것을 환영합니다",
+      "sunriseGuidance": "일출 가이던스",
+      "energeticRhythm": "{timeframe}의 에너지 리듬",
+      "coreThemesFor": "{timeframe}의 핵심 테마",
+      "focusFor": "{timeframe}의 초점",
+      "personalNarrative": "개인 내러티브",
+      "coreThemes": "핵심 테마",
+      "focusForPeriod": "이 기간의 초점",
+      "journalPrompt": "일기 프롬프트",
+      "tarot": {
+        "title": "타로 카드",
+        "label": "타로 — 오늘의 원형",
+        "yourCard": "당신의 카드",
+        "matchError": "이 타로 카드를 덱에 매칭하는 데 문제가 있었습니다."
+      },
+      "luckyCompass": {
+        "title": "행운의 나침반",
+        "label": "행운의 나침반 — 행운과 빛의 표지",
+        "numbers": "{timeframe}의 숫자",
+        "powerWords": "파워 워드",
+        "handwrittenNote": "손글씨 메모"
+      },
+      "emotionalCadence": {
+        "title": "감정의 리듬",
+        "label": "감정의 리듬 — 일일 리듬",
+        "dawn": "새벽",
+        "midday": "정오",
+        "dusk": "황혼",
+        "evening": "저녁",
+        "midnight": "자정",
+        "morning": "아침"
+      },
+      "dailyReflection": {
+        "title": "일일 성찰",
+        "subtitle": "메모를 개인적이고 부드럽게 유지하세요.",
+        "placeholder": "오늘 당신의 하늘에 몇 마디…",
+        "saveHint": "⌘+Enter 또는 Ctrl+Enter를 눌러 저장"
+      },
+      "errors": {
+        "profileLoadError": "프로필을 로드하는 데 문제가 있었습니다. 다시 시도하시거나, 문제가 계속되면 지원팀에 문의하세요.",
+        "insightLoadError": "인사이트를 로드하는 데 문제가 있습니다. 일시적인 문제일 수 있습니다.",
+        "birthSignatureRequired": "출생 시그니처를 설정하세요",
+        "journalSaveError": "저장할 수 없습니다. 다시 시도하세요."
+      },
+      "socialInsights": {
+        "paused": "소셜 인사이트 일시 중지됨",
+        "pausedDescription": "연결된 계정의 패턴으로 리딩을 향상시키려면 소셜 인사이트를 켜세요."
+      },
+      "reactivated": "재활성화됨 — 다시 오신 것을 환영합니다."
+    }
+  },
+  "numerology": {
+    "title": "당신의 숫자",
+    "subtitle": "인생 뒤에 숨은 수학",
+    "calculating": "숫자 계산 중...",
+    "systems": {
+      "pythagorean": "피타고라스식",
+      "chaldean": "칼데아식"
+    },
+    "errors": {
+      "nameRequired": "이름 필요",
+      "nameRequiredMessage": "수비학 프로필을 계산하려면 이름과 성이 필요합니다. 설정에서 이름을 업데이트해 주세요.",
+      "birthDateRequired": "생년월일 필요",
+      "birthDateRequiredMessage": "수비학 프로필을 계산하려면 생년월일이 필요합니다. 설정에서 생년월일을 업데이트해 주세요.",
+      "loadFailed": "수비학 프로필을 불러올 수 없습니다"
+    },
+    "coreNumbers": {
+      "title": "핵심 숫자",
+      "lifePath": "생명 경로",
+      "lifePathDesc": "인생의 목적과 걷는 길",
+      "expression": "표현수",
+      "expressionDesc": "타고난 능력과 재능",
+      "soulUrge": "영혼의 충동",
+      "soulUrgeDesc": "내면의 동기와 욕구",
+      "personality": "성격수",
+      "personalityDesc": "다른 사람들이 당신을 보는 방식",
+      "birthday": "생일수",
+      "birthdayDesc": "타고난 재능과 능력",
+      "maturity": "성숙수",
+      "maturityDesc": "당신이 되어가는 사람"
+    },
+    "cycles": {
+      "title": "개인 주기",
+      "personalYear": "개인년",
+      "personalMonth": "개인월",
+      "personalDay": "개인일"
+    },
+    "lifePeriods": {
+      "title": "인생 기간",
+      "currentPinnacle": "현재 정점",
+      "period": "기간",
+      "ages": "나이",
+      "onwards": "이후",
+      "pinnacles": {
+        "first": "첫 번째 정점",
+        "second": "두 번째 정점",
+        "third": "세 번째 정점",
+        "fourth": "네 번째 정점"
+      }
+    },
+    "challenges": {
+      "title": "인생 도전",
+      "first": "첫 번째 도전",
+      "second": "두 번째 도전",
+      "third": "세 번째 도전",
+      "main": "주요 도전"
+    },
+    "luckyNumbers": {
+      "title": "행운의 숫자"
+    },
+    "karmicDebt": {
+      "title": "업보 교훈"
+    }
+  },
+  "astrology": {
+    "title": "점성술",
+    "subtitle": "인생 뒤에 숨은 빛",
+    "calculating": "소울 패스를 계산 중…",
+    "sections": {
+      "narrative": "개인 내러티브",
+      "foundations": "기초",
+      "connections": "애스펙트",
+      "patternsPath": "패턴과 경로"
+    },
+    "deepDive": {
+      "whenAligned": "조화로울 때",
+      "whenOffCourse": "경로에서 벗어났을 때",
+      "decisionRule": "결정 규칙"
+    },
+    "birthChart": {
+      "title": "출생 차트",
+      "subtitle": "당신만의 행성 서명"
+    },
+    "narrative": {
+      "title": "당신의 개인 내러티브",
+      "subtitle": "당신의 우주적 이야기와 인생 테마",
+      "identity": "정체성",
+      "emotions": "감정",
+      "loveRelationships": "사랑과 관계",
+      "workMoney": "일과 돈",
+      "purposeGrowth": "목적과 성장",
+      "innerWorld": "내면 세계",
+      "notAvailable": "해석을 사용할 수 없음",
+      "notAvailableDesc": "소울 패스를 계산했지만 현재 전체 해석을 생성하지 못했습니다. 배치가 저장되었습니다 — 잠시 후 다시 시도해 주세요."
+    },
+    "planets": {
+      "title": "행성 위치",
+      "subtitle": "당신만의 행성 서명",
+      "deepDiveTitle": "당신의 행성이 의미하는 것",
+      "description": "이것들은 당신의 다양한 면이 어떻게 표현되는지 보여줍니다 — 당신의 추진력, 소통 스타일, 사랑하고 연결하는 방식.",
+      "sun": "태양",
+      "sunDesc": "핵심 자아 감각과 활력.",
+      "moon": "달",
+      "moonDesc": "감정적 풍경과 내면 세계.",
+      "mercury": "수성",
+      "mercuryDesc": "생각하고, 소통하고, 정보를 처리하는 방식.",
+      "venus": "금성",
+      "venusDesc": "사랑하고, 연결하고, 아름다움을 발견하는 방식.",
+      "mars": "화성",
+      "marsDesc": "추진력, 욕구, 행동하는 방식.",
+      "jupiter": "목성",
+      "jupiterDesc": "확장하고, 믿고, 의미를 찾는 곳.",
+      "saturn": "토성",
+      "saturnDesc": "구조를 세우고 책임을 지는 곳.",
+      "uranus": "천왕성",
+      "uranusDesc": "혁신하고, 반항하고, 자유를 추구하는 곳.",
+      "neptune": "해왕성",
+      "neptuneDesc": "꿈꾸고, 경계를 녹이고, 신성함과 연결하는 곳.",
+      "pluto": "명왕성",
+      "plutoDesc": "변형하고, 놓아주고, 힘을 되찾는 곳.",
+      "northNode": "북쪽 노드",
+      "northNodeDesc": "성장을 향한 초대.",
+      "chiron": "키론",
+      "chironDesc": "가장 깊은 상처에서 치유가 일어나는 곳."
+    },
+    "houses": {
+      "title": "하우스",
+      "subtitle": "차트의 12개 삶의 영역",
+      "deepDiveTitle": "당신의 하우스가 의미하는 것",
+      "description": "하우스는 삶의 테마가 어디서 펼쳐지는지 보여줍니다 — 어떤 삶의 영역이 당신에게 가장 많은 것을 요구하고 특정 에너지가 어디서 활기를 띠는지.",
+      "first": "1하우스",
+      "firstDesc": "세상과 만나고 자신을 표현하는 방식.",
+      "second": "2하우스",
+      "secondDesc": "자원, 가치, 안정과의 관계.",
+      "third": "3하우스",
+      "thirdDesc": "소통하고, 배우고, 가까이에서 연결하는 방식.",
+      "fourth": "4하우스",
+      "fourthDesc": "내면의 기반, 가정, 감정적 뿌리.",
+      "fifth": "5하우스",
+      "fifthDesc": "창조하고, 놀고, 기쁨을 표현하는 곳.",
+      "sixth": "6하우스",
+      "sixthDesc": "일상의 리듬, 일, 웰빙.",
+      "seventh": "7하우스",
+      "seventhDesc": "파트너가 되고, 반영하고, 일대일로 연결하는 방식.",
+      "eighth": "8하우스",
+      "eighthDesc": "융합하고, 변형하고, 미지와 만나는 곳.",
+      "ninth": "9하우스",
+      "ninthDesc": "의미, 믿음, 확장을 향한 탐구.",
+      "tenth": "10하우스",
+      "tenthDesc": "공적 역할, 경력, 가시적 유산.",
+      "eleventh": "11하우스",
+      "eleventhDesc": "공동체, 우정, 미래에 대한 비전.",
+      "twelfth": "12하우스",
+      "twelfthDesc": "내면의 성소, 고독, 신성한 것."
+    },
+    "aspects": {
+      "title": "애스펙트",
+      "subtitle": "행성 간의 대화",
+      "deepDiveTitle": "당신의 애스펙트가 의미하는 것",
+      "description": "애스펙트는 당신의 다양한 내면이 어떻게 상호작용하는지 보여줍니다 — 어디서 서로 지지하고, 도전하고, 증폭시키는지.",
+      "grid": "애스펙트 그리드",
+      "topAspects": "주요 애스펙트",
+      "allAspects": "모든 애스펙트",
+      "showAll": "모든 {count}개 애스펙트 보기",
+      "showFewer": "더 적은 애스펙트 보기"
+    },
+    "patterns": {
+      "title": "주요 패턴",
+      "deepDiveTitle": "당신의 패턴이 의미하는 것",
+      "subtitle": "차트의 주요 구성",
+      "description": "패턴은 차트에서 대규모 에너지 형태입니다 — 여러 행성이 연결되어 인식 가능한 테마나 반복되는 역학을 형성하는 곳.",
+      "noPatterns": "차트에서 주요 패턴이 감지되지 않았습니다.",
+      "tSquare": "T 스퀘어",
+      "tSquareDesc": "T 스퀘어는 세 가지 삶의 영역 사이에 긴장을 만들어 창의적인 해결책을 찾도록 요청합니다. 종종 생산적인 마찰처럼 느껴집니다 — 성장, 혁신, 회복력을 향해 나아가게 하는 압력.",
+      "grandTrine": "그랜드 트라인",
+      "grandTrineDesc": "그랜드 트라인은 세 영역 사이에서 에너지가 부드럽게 흐르는 편안함과 흐름의 삼각형을 형성합니다. 이것은 자연스러운 재능이나 노력 없는 우아함처럼 느껴질 수 있습니다."
+    },
+    "energyShape": {
+      "title": "에너지 형태",
+      "deepDiveTitle": "당신의 에너지 형태가 의미하는 것",
+      "subtitle": "원소와 양식 균형",
+      "description": "이것은 에너지가 당신을 통해 어떻게 흐르는지 보여줍니다 — 차트의 근본적인 리듬과 특정 성질이 어디에 집중되거나 분산되는지.",
+      "chartType": "차트 유형",
+      "dayChart": "주간 차트",
+      "nightChart": "야간 차트",
+      "dayChartDesc": "당신의 차트는 가시성과 외적 표현을 지향합니다. 삶은 종종 당신에게 존재하고, 보이고, 외부 세계와 교류할 것을 요청합니다.",
+      "nightChartDesc": "당신의 차트는 내면의 성찰과 미묘함을 지향합니다. 삶은 종종 내면 처리, 조용한 관찰, 무대 뒤 작업을 통해 펼쳐집니다.",
+      "chartRuler": "차트 지배자",
+      "chartRulerDesc": "이 행성이 당신 삶의 전체 방향을 안내하고 세상과 상호작용하는 방식을 필터링합니다.",
+      "dominantPlanets": "지배적 행성",
+      "dominantPlanetsDesc": "이 행성들이 당신의 경험에 가장 강하게 색을 입힙니다 — 여러 핵심 위치에 나타나거나 중요한 연결을 형성합니다.",
+      "dominantSigns": "지배적 별자리",
+      "dominantSignsDesc": "이 별자리들이 당신이 세상을 움직이는 방식에 색을 입힙니다. 그 성질이 당신의 표현에 반복적으로 나타납니다.",
+      "elementModalityDesc": "원소는 에너지가 자연스럽게 어디에 모이는지 보여줍니다 — 영감(불), 접지(흙), 생각(공기), 감정(물). 양식은 어떻게 참여하는지를 반영합니다 — 시작하는(카디널), 안정시키는(고정), 적응하는(변화)."
+    },
+    "intensityZones": {
+      "title": "강도 영역",
+      "deepDiveTitle": "당신의 강도 영역이 의미하는 것",
+      "subtitle": "차트에서 에너지가 모이는 곳",
+      "description": "이것은 삶이 집중되어 나타나는 곳을 보여줍니다 — 여러 행성이 모여 높은 주의와 반복되는 테마의 영역을 만드는 곳.",
+      "signEmphasis": "별자리 강조",
+      "signEmphasisDesc": "이 별자리들에 여러 행성이 있으면 그 성질이 증폭됩니다 — 이러한 테마가 당신의 생각, 감정, 반응에 반복적으로 나타나는 것을 알 수 있습니다.",
+      "houseEmphasis": "하우스 강조",
+      "houseEmphasisDesc": "이 삶의 영역들이 당신에게 많은 것을 요구합니다 — 여기서 복잡성, 성장, 주의가 자연스럽게 모입니다.",
+      "stelliums": "스텔리움",
+      "stelliumDesc": "여기에 스텔리움이 있으면 집중된 주의의 광선이 생깁니다 — 여러 내면이 하나의 테마에 수렴합니다. 이 영역은 활기차고, 복잡하고, 당신 경험의 중심이 되는 경향이 있습니다.",
+      "planets": "{count}개 행성"
+    },
+    "direction": {
+      "title": "방향",
+      "deepDiveTitle": "당신의 방향이 의미하는 것",
+      "subtitle": "북쪽 노드, 남쪽 노드, 인생의 길",
+      "description": "이것은 성장, 치유, 익숙함을 반영합니다 — 어디로 뻗어나가도록 초대받는지, 자연스럽게 어디로 돌아가는지, 오래된 상처가 어디서 지혜의 원천이 되는지.",
+      "northNode": "북쪽 노드",
+      "northNodeDesc": "북쪽 노드는 성장과 미지의 영역으로의 초대입니다. 아직 자연스럽게 느껴지지 않더라도 발전시켜야 할 성질을 가리킵니다. 여기서 삶이 당신에게 뻗어나갈 것을 요청합니다.",
+      "southNode": "남쪽 노드",
+      "southNodeDesc": "남쪽 노드는 익숙한 패턴과 자연스러운 편안함을 나타냅니다. 이것들은 당신이 쉽게 지니는 성질입니다. 남쪽 노드는 버려야 할 것이 아니라 북쪽 노드의 초대에 손을 뻗으면서 존중해야 할 기반입니다.",
+      "chiron": "키론",
+      "chironDesc": "키론은 가장 깊은 상처에서 치유와 가르침이 일어나는 곳을 보여줍니다. 한때 아팠던 것이 다른 사람들을 위한 연민과 안내의 원천이 될 수 있습니다."
+    },
+    "joy": {
+      "title": "행운점",
+      "description": "이것은 편안함, 기쁨, 자연스러운 정렬을 반영합니다 — 삶이 관대하게 느껴지고 노력 없이 흐름을 경험하는 곳.",
+      "meaning": "행운점은 자연스러운 기쁨과 편안함이 당신의 삶에서 가장 기꺼이 흐르는 곳을 보여줍니다. 이것은 성취나 노력에 관한 것이 아닙니다 — 여기서 것들이 유기적으로 정렬되고, 본능적으로 집처럼 느껴집니다."
+    },
+    "errors": {
+      "signInRequired": "소울 패스를 보려면 로그인해 주세요.",
+      "incompleteProfile": "출생 서명을 완성해 주세요",
+      "incompleteProfileDesc": "Solara가 소울 패스를 생성하기 전에 설정에서 완전한 생년월일, 시간, 장소가 필요합니다.",
+      "birthDetailsRequired": "출생 정보 필요",
+      "birthDetailsRequiredMessage": "차트를 계산하려면 완전한 출생 정보가 필요합니다."
+    }
+  },
+  "connections": {
+    "title": "연결",
+    "subtitle": "주변 사람들을 매핑하고 관계 인사이트를 탐색하세요",
+    "yourConnections": "나의 연결",
+    "loading": "연결 불러오는 중...",
+    "addConnection": "연결 추가",
+    "noConnections": "아직 연결이 없습니다. 관계 인사이트 탐색을 시작하려면 누군가를 추가하세요.",
+    "noConnectionsMessage": "첫 번째 연결을 추가하여 관계 역학을 탐색하세요.",
+    "notes": "메모",
+    "notesPlaceholder": "이 연결에 대해 기억하고 싶은 생각, 패턴, 또는 것들을 적어보세요...",
+    "saveNotes": "메모 저장",
+    "saving": "저장 중...",
+    "saved": "저장됨",
+    "spaceBetween": "둘 사이의 공간",
+    "viewDailyBrief": "일일 브리프 보기",
+    "compatibility": "궁합",
+    "synastry": "시나스트리",
+    "composite": "컴포지트",
+    "relationshipTypes": {
+      "partner": "파트너",
+      "child": "자녀",
+      "parent": "부모",
+      "sibling": "형제자매",
+      "friend": "친구",
+      "colleague": "동료",
+      "other": "기타"
+    },
+    "form": {
+      "firstName": "이름",
+      "middleName": "중간 이름",
+      "lastName": "성",
+      "relationshipType": "관계 유형",
+      "birthDate": "생년월일",
+      "birthTime": "출생 시간",
+      "birthPlace": "출생지",
+      "unknownTime": "출생 시간을 모릅니다"
+    },
+    "born": "출생"
+  },
+  "spaceBetween": {
+    "title": "둘 사이의 공간",
+    "subtitle": "{connectionName}과의 관계 청사진",
+    "generating": "관계 청사진 생성 중...",
+    "generatingHint": "잠시 시간이 걸릴 수 있습니다",
+    "tryAgain": "다시 시도",
+    "discover": "둘 사이의 공간 발견하기",
+    "discoverDescription": "{connectionName}과의 영구적인 관계 청사진을 생성하세요. 이 깊은 인사이트는 한 번 생성되어 영원히 저장됩니다.",
+    "generateBlueprint": "청사진 생성",
+    "sections": {
+      "essence": "본질",
+      "emotionalBlueprint": "감정적 청사진",
+      "communication": "소통",
+      "growthEdges": "성장 영역",
+      "careGuide": "케어 가이드"
+    }
+  },
+  "location": {
+    "title": "Solara가 당신의 하늘을 맞추는 것을 도와주세요",
+    "body": "하루가 시작될 때 인사이트를 생성하려면 Solara는 당신이 세계 어디에 있는지 대략적으로 알아야 합니다.\n\n이것은 시간대를 계산하는 데만 사용되어 일일, 주간, 월간 가이드가 올바른 현지 시간에 업데이트됩니다.\n\n건너뛰면 UTC를 기본값으로 사용합니다. Solara는 여전히 작동하지만 타이밍이 약간 어긋날 수 있습니다.",
+    "allow": "위치 허용",
+    "skip": "건너뛰고 지금은 UTC 사용"
+  },
+  "errors": {
+    "pageNotFound": "페이지를 찾을 수 없습니다",
+    "unauthorized": "인증되지 않음",
+    "serverError": "서버 오류",
+    "networkError": "네트워크 오류",
+    "rateLimited": "요청이 너무 많습니다. 나중에 다시 시도해 주세요.",
+    "sessionExpired": "세션이 만료되었습니다. 다시 로그인해 주세요."
+  },
+  "deletion": {
+    "pageTitle": "데이터 삭제 상태",
+    "noCode": "확인 코드가 제공되지 않았습니다. 데이터 삭제 확인 이메일의 링크를 사용해 주세요.",
+    "notFound": "삭제 요청을 찾을 수 없습니다. 확인 코드가 유효하지 않거나 만료되었을 수 있습니다.",
+    "confirmationCode": "확인 코드",
+    "status": "상태",
+    "requestReceived": "요청 접수됨",
+    "processed": "처리됨",
+    "errorDetails": "오류 상세",
+    "contactSupport": "도움이 필요하시면 solara@solarainsights.com으로 연락해 주세요.",
+    "questions": "질문이 있으시면 연락해 주세요:",
+    "pending": {
+      "title": "대기 중",
+      "description": "데이터 삭제 요청이 접수되어 처리를 기다리고 있습니다."
+    },
+    "processing": {
+      "title": "처리 중",
+      "description": "시스템에서 데이터를 삭제하고 있습니다."
+    },
+    "completed": {
+      "title": "완료됨",
+      "description": "Solara Insights에서 데이터가 성공적으로 삭제되었습니다.",
+      "permanentNotice": "Facebook 계정과 연결된 모든 개인 데이터가 Solara Insights에서 영구적으로 삭제되었습니다. 이 작업은 되돌릴 수 없습니다."
+    },
+    "failed": {
+      "title": "실패",
+      "description": "삭제 요청을 처리하는 중 문제가 발생했습니다. 고객 지원에 문의해 주세요."
+    },
+    "userNotFound": {
+      "title": "데이터 없음",
+      "description": "Facebook 계정과 연결된 계정을 찾을 수 없습니다. 삭제할 데이터가 없습니다."
+    }
+  },
+  "zodiacSigns": {
+    "aries": "양자리",
+    "taurus": "황소자리",
+    "gemini": "쌍둥이자리",
+    "cancer": "게자리",
+    "leo": "사자자리",
+    "virgo": "처녀자리",
+    "libra": "천칭자리",
+    "scorpio": "전갈자리",
+    "sagittarius": "궁수자리",
+    "capricorn": "염소자리",
+    "aquarius": "물병자리",
+    "pisces": "물고기자리"
+  },
+  "tarot": {
+    "title": "카드에게 물어보기",
+    "questionLabel": "당신의 질문",
+    "questionPlaceholder": "오늘 어떤 조언을 받고 싶으신가요?",
+    "questionError": "질문을 입력해 주세요 (최소 {minLength}자)",
+    "charactersNeeded": "{count}자 더 필요합니다",
+    "spreadLabel": "스프레드 선택",
+    "spreads": {
+      "single": "한 장",
+      "singleDesc": "빠른 인사이트",
+      "three": "세 장",
+      "threeDesc": "과거, 현재, 미래",
+      "five": "다섯 장",
+      "fiveDesc": "깊은 탐구"
+    },
+    "buttons": {
+      "draw": "카드 뽑기",
+      "drawing": "카드 뽑는 중...",
+      "wait": "{seconds}초 대기..."
+    },
+    "loading": "덱을 섞는 중...",
+    "reading": {
+      "title": "당신의 리딩",
+      "reversed": "역방향",
+      "synthesis": "전체 그림",
+      "actions": "제안된 행동",
+      "reflection": "성찰"
+    },
+    "cta": {
+      "message": "더 깊고 개인화된 리딩을 원하시나요?",
+      "button": "Solara 가입하기"
+    },
+    "errors": {
+      "generic": "리딩을 완료할 수 없습니다. 다시 시도해 주세요.",
+      "rateLimit": "다음 리딩까지 {seconds}초 기다려 주세요."
+    }
+  },
+  "learn": {
+    "searchPlaceholder": "가이드 검색...",
+    "guidesFound": "{count}개의 가이드를 찾았습니다",
+    "filterByTopic": "주제별 필터",
+    "clearAll": "모두 지우기"
+  }
+}

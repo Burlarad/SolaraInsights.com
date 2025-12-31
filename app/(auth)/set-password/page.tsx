@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +27,8 @@ import { supabase } from "@/lib/supabase/client";
 
 function SetPasswordContent() {
   const router = useRouter();
+  const t = useTranslations("auth.setPassword");
+  const tCommon = useTranslations("common");
 
   // Auth state
   const [user, setUser] = useState<any>(null);
@@ -62,17 +65,17 @@ function SetPasswordContent() {
   const handleSetPassword = async () => {
     // Validate
     if (!password || !confirmPassword) {
-      setError("Please enter and confirm your password");
+      setError(t("errors.enterBoth"));
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError(t("errors.dontMatch"));
       return;
     }
 
     if (password.length < 8) {
-      setError("Password must be at least 8 characters");
+      setError(t("errors.tooShort"));
       return;
     }
 
@@ -104,7 +107,7 @@ function SetPasswordContent() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-accent-ink/60">Loading...</p>
+        <p className="text-accent-ink/60">{tCommon("loading")}</p>
       </div>
     );
   }
@@ -113,16 +116,16 @@ function SetPasswordContent() {
     <div className="max-w-md mx-auto">
       <Card className="border-border-subtle">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Set your password</CardTitle>
+          <CardTitle className="text-2xl text-center">{t("title")}</CardTitle>
           <p className="text-center text-sm text-accent-ink/60 mt-2">
-            Create a password for your Solara account
+            {t("subtitle")}
           </p>
         </CardHeader>
         <CardContent className="space-y-6">
           {user?.email && (
             <div className="text-center p-3 bg-accent-gold/10 rounded-lg">
               <p className="text-sm text-accent-ink/80">
-                Setting password for <strong>{user.email}</strong>
+                {t("settingPasswordFor")} <strong>{user.email}</strong>
               </p>
             </div>
           )}
@@ -135,11 +138,11 @@ function SetPasswordContent() {
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t("password")}</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="At least 8 characters"
+                placeholder={t("passwordPlaceholder")}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSetPassword()}
@@ -147,11 +150,11 @@ function SetPasswordContent() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm password</Label>
+              <Label htmlFor="confirmPassword">{t("confirmPassword")}</Label>
               <Input
                 id="confirmPassword"
                 type="password"
-                placeholder="Re-enter your password"
+                placeholder={t("confirmPasswordPlaceholder")}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSetPassword()}
@@ -164,7 +167,7 @@ function SetPasswordContent() {
               disabled={isSubmitting || !password || !confirmPassword}
               className="w-full"
             >
-              {isSubmitting ? "Setting password..." : "Continue to onboarding"}
+              {isSubmitting ? t("settingPassword") : t("continueToOnboarding")}
             </Button>
           </div>
         </CardContent>

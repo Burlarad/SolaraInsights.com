@@ -12,6 +12,7 @@ import { PlacePicker, PlaceSelection } from "@/components/shared/PlacePicker";
 import { Connection, DailyBrief } from "@/types";
 import { formatDateForDisplay } from "@/lib/datetime";
 import { pickRotatingMessage, getErrorCategory, type ApiErrorResponse } from "@/lib/ui/pickRotatingMessage";
+import { useTranslations } from "next-intl";
 
 interface BriefErrorInfo {
   message: string;
@@ -61,6 +62,9 @@ const RELATIONSHIP_TYPES = [
 ];
 
 export default function ConnectionsPage() {
+  const t = useTranslations("connections");
+  const tCommon = useTranslations("common");
+
   // Connections list state
   const [connections, setConnections] = useState<ConnectionWithPreview[]>([]);
   const [loading, setLoading] = useState(true);
@@ -645,22 +649,22 @@ export default function ConnectionsPage() {
       </div>
 
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold mb-2">Connections</h1>
+        <h1 className="text-4xl font-bold mb-2">{t("title")}</h1>
         <p className="text-accent-ink/60">
-          Map the people in your orbit and explore relational insights
+          {t("subtitle")}
         </p>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Left: Connection list */}
         <div className="lg:col-span-2 space-y-4">
-          <p className="micro-label">YOUR CONNECTIONS</p>
+          <p className="micro-label">{t("yourConnections")}</p>
 
           {loading ? (
             <Card className="text-center py-12">
               <CardContent>
                 <Loader2 className="h-8 w-8 animate-spin text-accent-gold mx-auto mb-4" />
-                <p className="text-accent-ink/60">Loading your connections...</p>
+                <p className="text-accent-ink/60">{t("loading")}</p>
               </CardContent>
             </Card>
           ) : error ? (
@@ -668,7 +672,7 @@ export default function ConnectionsPage() {
               <CardContent>
                 <p className="text-red-600 mb-4">{error}</p>
                 <Button variant="outline" onClick={loadConnections}>
-                  Try again
+                  {tCommon("tryAgain")}
                 </Button>
               </CardContent>
             </Card>
@@ -676,7 +680,7 @@ export default function ConnectionsPage() {
             <Card className="text-center py-12">
               <CardContent>
                 <p className="text-accent-ink/60">
-                  No connections yet. Add someone to begin exploring relational insights.
+                  {t("noConnections")}
                 </p>
               </CardContent>
             </Card>
@@ -718,7 +722,7 @@ export default function ConnectionsPage() {
                             <Chip className="text-xs">{connection.relationship_type}</Chip>
                             {connection.birth_date && (
                               <span className="text-xs text-accent-ink/50">
-                                Born {formatDateForDisplay(connection.birth_date)}
+                                {t("born")} {formatDateForDisplay(connection.birth_date)}
                               </span>
                             )}
                           </div>
@@ -1096,7 +1100,7 @@ export default function ConnectionsPage() {
                                 }}
                                 disabled={savingNotesId === connection.id}
                               >
-                                {savingNotesId === connection.id ? "Saving..." : "Save notes"}
+                                {savingNotesId === connection.id ? t("saving") : t("saveNotes")}
                               </Button>
                             </div>
                           </div>

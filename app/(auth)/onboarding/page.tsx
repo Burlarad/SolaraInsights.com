@@ -14,9 +14,12 @@ import {
   getCheckoutSessionId,
   clearCheckoutSessionCookie,
 } from "@/lib/auth/socialConsent";
+import { useTranslations } from "next-intl";
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const t = useTranslations("onboarding");
+  const tCommon = useTranslations("common");
   const { profile, loading: profileLoading, saveProfile, refreshProfile } = useSettings();
 
   // Form state - split name fields
@@ -176,19 +179,19 @@ export default function OnboardingPage() {
     try {
       // Validate required fields - first and last name required for onboarding
       if (!firstName.trim()) {
-        throw new Error("First name is required");
+        throw new Error(t("errors.firstNameRequired"));
       }
 
       if (!lastName.trim()) {
-        throw new Error("Last name is required");
+        throw new Error(t("errors.lastNameRequired"));
       }
 
       if (!birthDate) {
-        throw new Error("Birth date is required");
+        throw new Error(t("errors.birthDateRequired"));
       }
 
       if (!birthPlace) {
-        throw new Error("Please select your birth location from the search results");
+        throw new Error(t("errors.locationRequired"));
       }
 
       // Save profile with split name fields - server will compose full_name
@@ -216,7 +219,7 @@ export default function OnboardingPage() {
       router.push("/sanctuary");
     } catch (err: any) {
       console.error("Onboarding error:", err);
-      setError(err.message || "Failed to save profile. Please try again.");
+      setError(err.message || t("errors.saveFailed"));
       setIsLoading(false);
     }
   };
@@ -224,7 +227,7 @@ export default function OnboardingPage() {
   if (profileLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-accent-ink/60">Loading...</p>
+        <p className="text-accent-ink/60">{tCommon("loading")}</p>
       </div>
     );
   }
@@ -236,14 +239,14 @@ export default function OnboardingPage() {
         <Card className="border-border-subtle">
           <CardHeader>
             <CardTitle className="text-2xl text-center">
-              Confirming your payment...
+              {t("confirmingPayment")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex flex-col items-center gap-4">
               <div className="w-12 h-12 rounded-full border-4 border-accent-gold/30 border-t-accent-gold animate-spin" />
               <p className="text-center text-accent-ink/60">
-                We're confirming your subscription. This usually takes just a few seconds.
+                {t("confirmingPaymentMessage")}
               </p>
             </div>
           </CardContent>
@@ -257,10 +260,10 @@ export default function OnboardingPage() {
       <Card className="border-border-subtle">
         <CardHeader>
           <CardTitle className="text-2xl text-center">
-            Complete your Sanctuary profile
+            {t("pageTitle")}
           </CardTitle>
           <p className="text-center text-sm text-accent-ink/60 mt-2">
-            We'll use this information to generate your personalized insights
+            {t("pageSubtitle")}
           </p>
         </CardHeader>
         <CardContent>
@@ -275,7 +278,7 @@ export default function OnboardingPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="firstName">
-                  First name <span className="text-danger-soft">*</span>
+                  {t("firstName")} <span className="text-danger-soft">*</span>
                 </Label>
                 <Input
                   id="firstName"
@@ -288,11 +291,11 @@ export default function OnboardingPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="middleName">Middle name</Label>
+                <Label htmlFor="middleName">{t("middleName")}</Label>
                 <Input
                   id="middleName"
                   type="text"
-                  placeholder="Optional"
+                  placeholder={tCommon("optional")}
                   value={middleName}
                   onChange={(e) => setMiddleName(e.target.value)}
                 />
@@ -300,7 +303,7 @@ export default function OnboardingPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="lastName">
-                  Last name <span className="text-danger-soft">*</span>
+                  {t("lastName")} <span className="text-danger-soft">*</span>
                 </Label>
                 <Input
                   id="lastName"
@@ -315,23 +318,23 @@ export default function OnboardingPage() {
 
             {/* Nickname */}
             <div className="space-y-2">
-              <Label htmlFor="nickname">Nickname (optional)</Label>
+              <Label htmlFor="nickname">{t("nickname")}</Label>
               <Input
                 id="nickname"
                 type="text"
-                placeholder="What should we call you?"
+                placeholder={t("nicknamePlaceholder")}
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
               />
               <p className="text-xs text-accent-ink/60">
-                If different from your first name
+                {t("nicknameHint")}
               </p>
             </div>
 
             {/* Birth Date */}
             <div className="space-y-2">
               <Label htmlFor="birthDate">
-                Birth Date <span className="text-danger-soft">*</span>
+                {t("birthDate")} <span className="text-danger-soft">*</span>
               </Label>
               <Input
                 id="birthDate"
@@ -344,7 +347,7 @@ export default function OnboardingPage() {
 
             {/* Birth Time */}
             <div className="space-y-2">
-              <Label htmlFor="birthTime">Time of Birth (optional)</Label>
+              <Label htmlFor="birthTime">{t("birthTime")}</Label>
               <Input
                 id="birthTime"
                 type="time"
@@ -352,19 +355,18 @@ export default function OnboardingPage() {
                 onChange={(e) => setBirthTime(e.target.value)}
               />
               <p className="text-xs text-accent-ink/60">
-                If you don't know your exact birth time, you can skip now and add it later
-                for more accurate charts and personalization.
+                {t("birthTimeHint")}
               </p>
             </div>
 
             {/* Birth Location */}
             <div className="space-y-2">
               <Label>
-                Place of Birth <span className="text-danger-soft">*</span>
+                {t("birthPlace")} <span className="text-danger-soft">*</span>
               </Label>
               <PlacePicker
                 initialValue={birthPlaceDisplay}
-                placeholder="Search for your birth city..."
+                placeholder={t("searchPlace")}
                 onSelect={(place) => {
                   setBirthPlace(place);
                   const displayParts = [
@@ -381,11 +383,11 @@ export default function OnboardingPage() {
               />
               {birthPlace && (
                 <p className="text-xs text-accent-ink/60">
-                  Timezone: {birthPlace.timezone}
+                  {t("timezone", { timezone: birthPlace.timezone })}
                 </p>
               )}
               <p className="text-xs text-accent-ink/60">
-                Start typing to search, then select from the results
+                {t("locationHint")}
               </p>
             </div>
 
@@ -393,7 +395,7 @@ export default function OnboardingPage() {
             <div className="pt-4 space-y-3">
               {!birthPlace && (
                 <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-800">
-                  Please search and select your birth location from the dropdown to continue.
+                  {t("locationWarning")}
                 </div>
               )}
               <Button
@@ -402,13 +404,13 @@ export default function OnboardingPage() {
                 className="w-full"
                 disabled={isLoading || !birthPlace}
               >
-                {isLoading ? "Saving your birth signature..." : "Complete setup"}
+                {isLoading ? t("saving") : t("complete")}
               </Button>
             </div>
 
             <div className="text-center text-xs text-accent-ink/60">
               <p>
-                You can always update these details later in Settings
+                {t("settingsNote")}
               </p>
             </div>
           </form>

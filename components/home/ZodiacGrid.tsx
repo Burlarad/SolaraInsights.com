@@ -123,20 +123,7 @@ export function ZodiacGrid({ timeframe, experience }: ZodiacGridProps) {
 
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-16 space-y-12">
-      {/* Zodiac grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-        {ZODIAC_SIGNS.map((sign) => (
-          <ZodiacCard
-            key={sign.key}
-            name={sign.name}
-            symbol={sign.symbol}
-            isSelected={selectedSign?.key === sign.key}
-            onClick={() => handleSignClick(sign)}
-          />
-        ))}
-      </div>
-
-      {/* Horoscope reading section (inline, not modal) */}
+      {/* Reading section - appears ABOVE zodiac grid when sign is selected */}
       <div ref={horoscopeRef}>
         {/* Only show when a sign is selected AND experience is Horoscope */}
         {selectedSign && experience === "Horoscope" && (
@@ -240,13 +227,19 @@ export function ZodiacGrid({ timeframe, experience }: ZodiacGridProps) {
             </CardContent>
           </Card>
         )}
+      </div>
 
-        {/* Empty state when no sign selected */}
-        {!selectedSign && (
-          <div className="text-center py-12 text-accent-ink/50">
-            <p className="text-lg">Select a zodiac sign above to see your reading</p>
-          </div>
-        )}
+      {/* Zodiac grid */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+        {ZODIAC_SIGNS.map((sign) => (
+          <ZodiacCard
+            key={sign.key}
+            name={sign.name}
+            symbol={sign.symbol}
+            isSelected={selectedSign?.key === sign.key}
+            onClick={() => handleSignClick(sign)}
+          />
+        ))}
       </div>
     </section>
   );

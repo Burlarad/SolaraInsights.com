@@ -20,6 +20,7 @@ import { SocialProvider } from "@/types";
 import { supabase } from "@/lib/supabase/client";
 import { hasPasswordCredential, getPrimaryOAuthProvider, getPrimaryProvider, isCustomOAuthUser } from "@/lib/auth/helpers";
 import { hasPlaceholderEmail } from "@/lib/auth/placeholder";
+import { useTranslations } from "next-intl";
 
 // Social provider configuration for display
 // X OAuth disabled - requires X Basic tier ($100/mo) for /users/me endpoint
@@ -54,6 +55,9 @@ export default function SettingsPage() {
   const router = useRouter();
   const { profile, saveProfile, refreshProfile, loading: profileLoading, error: profileError } = useSettings();
   const searchParams = useSearchParams();
+  const t = useTranslations("settings");
+  const tCommon = useTranslations("common");
+  const tZodiac = useTranslations("zodiacSigns");
 
   // Reactivation state (for hibernated accounts)
   const [reactivatePassword, setReactivatePassword] = useState("");
@@ -904,9 +908,9 @@ export default function SettingsPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 md:py-12 space-y-8 md:space-y-10">
       <div className="text-center mb-6 md:mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold mb-2">Tune your birth signature</h1>
+        <h1 className="text-3xl md:text-4xl font-bold mb-2">{t("title")}</h1>
         <p className="text-sm md:text-base text-accent-ink/60">
-          Update your preferred name, sign, and natal coordinates
+          {t("subtitle")}
         </p>
       </div>
 
@@ -914,19 +918,19 @@ export default function SettingsPage() {
         <CardContent className="p-5 sm:p-6 md:p-8 space-y-8 md:space-y-10">
           {/* Identity */}
           <section className="space-y-5">
-            <h2 className="text-lg md:text-xl font-semibold text-accent-gold">Identity</h2>
+            <h2 className="text-lg md:text-xl font-semibold text-accent-gold">{t("identity.title")}</h2>
 
             {/* Gentle banner for existing users missing first/last name */}
             {profile && (!profile.first_name || !profile.last_name) && (
               <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-800">
-                Please add your first and last name for a more personalized experience.
+                {t("identity.nameMissingBanner")}
               </div>
             )}
 
             <div className="space-y-3">
               <div className="grid md:grid-cols-3 gap-5">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName">First name</Label>
+                  <Label htmlFor="firstName">{t("identity.firstName")}</Label>
                   <Input
                     id="firstName"
                     value={firstName}
@@ -936,17 +940,17 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="middleName">Middle name</Label>
+                  <Label htmlFor="middleName">{t("identity.middleName")}</Label>
                   <Input
                     id="middleName"
                     value={middleName}
                     onChange={(e) => setMiddleName(e.target.value)}
-                    placeholder="Optional"
+                    placeholder={tCommon("optional")}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="lastName">Last name</Label>
+                  <Label htmlFor="lastName">{t("identity.lastName")}</Label>
                   <Input
                     id="lastName"
                     value={lastName}
@@ -956,12 +960,12 @@ export default function SettingsPage() {
                 </div>
               </div>
               <p className="text-xs text-accent-ink/60">
-                Your birth name is used for numerology calculations
+                {t("identity.birthNameHint")}
               </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="nickname">Nickname</Label>
+              <Label htmlFor="nickname">{t("identity.nickname")}</Label>
               <Input
                 id="nickname"
                 value={nickname}
@@ -969,7 +973,7 @@ export default function SettingsPage() {
                 placeholder="What should we call you?"
               />
               <p className="text-xs text-accent-ink/60">
-                If different from your first name
+                {t("identity.nicknameHint")}
               </p>
             </div>
 
@@ -1182,7 +1186,7 @@ export default function SettingsPage() {
           <section className="space-y-5 pt-6 border-t border-border-subtle/60">
             <div>
               <h2 className="text-lg md:text-xl font-semibold text-accent-gold">
-                Birth details
+                {t("birthDetails.title")}
               </h2>
               <p className="text-sm md:text-base text-accent-ink/60 mt-1">
                 Your exact birth information allows for the most precise insights
@@ -1192,7 +1196,7 @@ export default function SettingsPage() {
             <div className="grid md:grid-cols-2 gap-5">
               <div className="space-y-2">
                 <Label htmlFor="birthDate">
-                  Birth date <span className="text-danger-soft">*</span>
+                  {t("birthDetails.date")} <span className="text-danger-soft">*</span>
                 </Label>
                 <Input
                   id="birthDate"
@@ -1224,7 +1228,7 @@ export default function SettingsPage() {
                     htmlFor="unknownBirthTime"
                     className="text-sm text-accent-ink/70"
                   >
-                    I don&apos;t know my birth time
+                    {t("birthDetails.timeUnknown")}
                   </label>
                 </div>
               </div>
@@ -1550,7 +1554,7 @@ export default function SettingsPage() {
             disabled={isSaving || !birthPlace}
             className="w-full sm:w-auto min-h-[48px] text-base"
           >
-            {isSaving ? "Saving..." : "Save changes"}
+            {isSaving ? tCommon("saving") : t("saveChanges")}
           </Button>
           <Button
             variant="outline"

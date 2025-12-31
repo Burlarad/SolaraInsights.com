@@ -15,7 +15,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminSupabaseClient } from "@/lib/supabase/server";
 import { openai, OPENAI_MODELS } from "@/lib/openai/client";
 import { getTarotCardNames } from "@/lib/tarot";
-import { getRuneNames } from "@/lib/runes";
+// FEATURE DISABLED: Rune Whisper / Daily Sigil
+// import { getRuneNames } from "@/lib/runes";
 import { getCache, setCache, acquireLock, releaseLock, getDayKey } from "@/lib/cache/redis";
 import { buildInsightCacheKey, buildInsightLockKey } from "@/lib/timezone/periodKeys";
 import { toZonedTime, format } from "date-fns-tz";
@@ -195,7 +196,8 @@ OUTPUT FORMAT:
 Respond with ONLY valid JSON. No markdown, no explanations—just the JSON object.`;
 
           const tarotCardNames = getTarotCardNames();
-          const runeNames = getRuneNames();
+          // FEATURE DISABLED: Rune Whisper / Daily Sigil
+          // const runeNames = getRuneNames();
 
           const userPrompt = `Generate today insights for ${fullProfile.preferred_name || fullProfile.full_name || "this person"}.
 
@@ -224,12 +226,6 @@ For the tarot card:
 - Do NOT claim you are literally drawing from a physical deck.
 - Treat the card as a symbolic archetype that fits this person's current energy.
 
-For the rune:
-- You MUST choose exactly one name from this list: ${runeNames.join(", ")}.
-- Do NOT invent new rune names.
-- Do NOT claim you are physically pulling a rune.
-- Present it as a symbolic archetype.
-
 Return a JSON object with this structure:
 {
   "personalNarrative": "Exactly 2 paragraphs, 8-12 sentences total. Include 1 micro-action (<=10 min). Follow Ayren voice rules.",
@@ -246,12 +242,6 @@ Return a JSON object with this structure:
     "summary": "one sentence",
     "symbolism": "one paragraph",
     "guidance": "one paragraph"
-  },
-  "rune": {
-    "name": "rune name",
-    "keyword": "one word",
-    "meaning": "one paragraph",
-    "affirmation": "one sentence"
   },
   "luckyCompass": {
     "numbers": [

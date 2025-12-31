@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { pickRotatingMessage, getErrorCategory, type ApiErrorResponse } from "@/lib/ui/pickRotatingMessage";
 import { AspectGrid, AspectList } from "@/components/charts/AspectGrid";
 import { BalanceCharts } from "@/components/charts/BalanceCharts";
+import { useTranslations } from "next-intl";
 
 interface ErrorInfo {
   message: string;
@@ -82,12 +83,7 @@ function DeepDiveCard({
 
 type SoulPathSection = "narrative" | "foundations" | "connections" | "patterns-path";
 
-const SECTIONS: { id: SoulPathSection; label: string }[] = [
-  { id: "narrative", label: "Personal Narrative" },
-  { id: "foundations", label: "Foundations" },
-  { id: "connections", label: "Aspects" },
-  { id: "patterns-path", label: "Patterns & Path" },
-];
+// Section labels are now translated in the component using t("sections.*")
 
 const HOUSE_LABELS: Record<number, { ordinal: string; title: string }> = {
   1: { ordinal: "1st", title: "Self & Aura" },
@@ -127,6 +123,8 @@ export default function BirthChartPage() {
   const [placements, setPlacements] = useState<any | null>(null);
   const [activeSection, setActiveSection] = useState<SoulPathSection>("narrative");
   const [showAllAspects, setShowAllAspects] = useState(false);
+  const t = useTranslations("astrology");
+  const tCommon = useTranslations("common");
 
   // Derived state: check if insight has the full expected structure
   // Must validate ALL nested properties to prevent client-side crashes
@@ -231,34 +229,41 @@ export default function BirthChartPage() {
     fetchBirthChart();
   }, []);
 
+  // Build sections array with translations
+  const SECTIONS: { id: SoulPathSection; label: string }[] = [
+    { id: "narrative", label: t("sections.narrative") },
+    { id: "foundations", label: t("sections.foundations") },
+    { id: "connections", label: t("sections.connections") },
+    { id: "patterns-path", label: t("sections.patternsPath") },
+  ];
+
   return (
     <div className="max-w-7xl mx-auto px-6 py-12 space-y-8">
       {/* Page Header */}
       <div className="space-y-2">
-        <h1 className="text-2xl font-semibold">Astrology</h1>
-        <p className="text-sm text-accent-ink/70">The Light Behind Your Life</p>
+        <h1 className="text-2xl font-semibold">{t("title")}</h1>
+        <p className="text-sm text-accent-ink/70">{t("subtitle")}</p>
       </div>
 
       <SanctuaryTabs />
 
       {loading && (
         <div>
-          <p className="text-sm text-accent-ink/70">Calculating your Soul Path…</p>
+          <p className="text-sm text-accent-ink/70">{t("calculating")}</p>
         </div>
       )}
 
       {!loading && incompleteProfile && (
         <div className="rounded-xl border border-accent-soft bg-accent-soft/30 p-8 space-y-3">
-          <h2 className="text-lg font-semibold">Complete your birth signature</h2>
+          <h2 className="text-lg font-semibold">{t("errors.incompleteProfile")}</h2>
           <p className="text-sm text-accent-ink/80">
-            We need your full birth date, time, and location in Settings before Solara can
-            generate your Soul Path.
+            {t("errors.incompleteProfileDesc")}
           </p>
           <a
             href="/settings"
             className="inline-flex items-center text-sm font-medium text-accent underline"
           >
-            Go to Settings
+            {tCommon("goToSettings")}
           </a>
         </div>
       )}
@@ -278,7 +283,7 @@ export default function BirthChartPage() {
           )}
 
           <Button variant="outline" onClick={() => fetchBirthChart()}>
-            Try again
+            {tCommon("tryAgain")}
           </Button>
         </div>
       )}
@@ -330,8 +335,8 @@ export default function BirthChartPage() {
             <div className="space-y-6">
               <SolaraCard className="space-y-6">
                 <div>
-                  <h2 className="text-xl font-semibold mb-2">Your Personal Narrative</h2>
-                  <p className="text-sm text-accent-ink/60">Your cosmic story and life themes</p>
+                  <h2 className="text-xl font-semibold mb-2">{t("narrative.title")}</h2>
+                  <p className="text-sm text-accent-ink/60">{t("narrative.subtitle")}</p>
                 </div>
 
                 {/* Headline */}
@@ -349,7 +354,7 @@ export default function BirthChartPage() {
                 {/* Life Sections */}
                 <div className="space-y-6 pt-4 border-t border-accent-soft/30">
                   <div className="space-y-3">
-                    <h4 className="text-sm font-medium text-accent-ink/70">Identity</h4>
+                    <h4 className="text-sm font-medium text-accent-ink/70">{t("narrative.identity")}</h4>
                     <div className="text-base text-accent-ink/80 leading-relaxed space-y-4">
                       {insight!.sections.identity.split("\n\n").map((para, idx) => (
                         <p key={idx}>{para}</p>
@@ -358,7 +363,7 @@ export default function BirthChartPage() {
                   </div>
 
                   <div className="space-y-3">
-                    <h4 className="text-sm font-medium text-accent-ink/70">Emotions</h4>
+                    <h4 className="text-sm font-medium text-accent-ink/70">{t("narrative.emotions")}</h4>
                     <div className="text-base text-accent-ink/80 leading-relaxed space-y-4">
                       {insight!.sections.emotions.split("\n\n").map((para, idx) => (
                         <p key={idx}>{para}</p>
@@ -367,7 +372,7 @@ export default function BirthChartPage() {
                   </div>
 
                   <div className="space-y-3">
-                    <h4 className="text-sm font-medium text-accent-ink/70">Love & Relationships</h4>
+                    <h4 className="text-sm font-medium text-accent-ink/70">{t("narrative.loveRelationships")}</h4>
                     <div className="text-base text-accent-ink/80 leading-relaxed space-y-4">
                       {insight!.sections.loveAndRelationships.split("\n\n").map((para, idx) => (
                         <p key={idx}>{para}</p>
@@ -376,7 +381,7 @@ export default function BirthChartPage() {
                   </div>
 
                   <div className="space-y-3">
-                    <h4 className="text-sm font-medium text-accent-ink/70">Work & Money</h4>
+                    <h4 className="text-sm font-medium text-accent-ink/70">{t("narrative.workMoney")}</h4>
                     <div className="text-base text-accent-ink/80 leading-relaxed space-y-4">
                       {insight!.sections.workAndMoney.split("\n\n").map((para, idx) => (
                         <p key={idx}>{para}</p>
@@ -385,7 +390,7 @@ export default function BirthChartPage() {
                   </div>
 
                   <div className="space-y-3">
-                    <h4 className="text-sm font-medium text-accent-ink/70">Purpose & Growth</h4>
+                    <h4 className="text-sm font-medium text-accent-ink/70">{t("narrative.purposeGrowth")}</h4>
                     <div className="text-base text-accent-ink/80 leading-relaxed space-y-4">
                       {insight!.sections.purposeAndGrowth.split("\n\n").map((para, idx) => (
                         <p key={idx}>{para}</p>
@@ -394,7 +399,7 @@ export default function BirthChartPage() {
                   </div>
 
                   <div className="space-y-3">
-                    <h4 className="text-sm font-medium text-accent-ink/70">Inner World</h4>
+                    <h4 className="text-sm font-medium text-accent-ink/70">{t("narrative.innerWorld")}</h4>
                     <div className="text-base text-accent-ink/80 leading-relaxed space-y-4">
                       {insight!.sections.innerWorld.split("\n\n").map((para, idx) => (
                         <p key={idx}>{para}</p>
@@ -408,10 +413,9 @@ export default function BirthChartPage() {
 
           {activeSection === "narrative" && !hasFullInsight && (
             <SolaraCard className="space-y-3">
-              <h2 className="text-lg font-semibold">Interpretation not available</h2>
+              <h2 className="text-lg font-semibold">{t("narrative.notAvailable")}</h2>
               <p className="text-sm text-accent-ink/80 leading-relaxed">
-                We calculated your Soul Path, but couldn't generate a full interpretation right now.
-                Your placements are saved — please try again in a moment.
+                {t("narrative.notAvailableDesc")}
               </p>
             </SolaraCard>
           )}
@@ -422,16 +426,16 @@ export default function BirthChartPage() {
               {/* Planetary Placements */}
               {insight?.tabDeepDives?.planetaryPlacements && (
                 <DeepDiveCard
-                  title="What Your Planets Mean For You"
-                  subtitle="Your unique planetary signature"
+                  title={t("planets.deepDiveTitle")}
+                  subtitle={t("planets.subtitle")}
                   deepDive={insight.tabDeepDives.planetaryPlacements}
                 />
               )}
 
               <SolaraCard className="space-y-4">
-                <h2 className="text-xl font-semibold">Planetary Placements</h2>
+                <h2 className="text-xl font-semibold">{t("planets.title")}</h2>
                 <p className="text-sm text-accent-ink/60 leading-relaxed">
-                  These show how different parts of you express themselves—your drive, your communication style, how you love and relate.
+                  {t("planets.description")}
                 </p>
                 <div className="space-y-4">
                   {placements.planets?.map((p: any) => (
@@ -468,16 +472,16 @@ export default function BirthChartPage() {
               {/* Houses */}
               {insight?.tabDeepDives?.houses && (
                 <DeepDiveCard
-                  title="What Your Houses Mean For You"
-                  subtitle="The 12 life areas of your chart"
+                  title={t("houses.deepDiveTitle")}
+                  subtitle={t("houses.subtitle")}
                   deepDive={insight.tabDeepDives.houses}
                 />
               )}
 
               <SolaraCard className="space-y-4">
-                <h2 className="text-xl font-semibold">Houses</h2>
+                <h2 className="text-xl font-semibold">{t("houses.title")}</h2>
                 <p className="text-sm text-accent-ink/60 leading-relaxed">
-                  Houses show where life themes unfold—which arenas of life ask the most of you, and where certain energies come alive.
+                  {t("houses.description")}
                 </p>
                 <div className="space-y-4">
                   {placements.houses
@@ -527,21 +531,21 @@ export default function BirthChartPage() {
               {/* Deep Dive Card (if available) */}
               {insight?.tabDeepDives?.aspects && (
                 <DeepDiveCard
-                  title="What Your Aspects Mean For You"
-                  subtitle="The conversations between your planets"
+                  title={t("aspects.deepDiveTitle")}
+                  subtitle={t("aspects.subtitle")}
                   deepDive={insight.tabDeepDives.aspects}
                 />
               )}
 
               <SolaraCard className="space-y-4">
-                <h2 className="text-xl font-semibold">Aspects</h2>
+                <h2 className="text-xl font-semibold">{t("aspects.title")}</h2>
                 <p className="text-sm text-accent-ink/60 leading-relaxed">
-                  Aspects show how different inner parts of you interact—where they support, challenge, or intensify each other.
+                  {t("aspects.description")}
                 </p>
 
                 {/* Visual Aspect Grid */}
                 <div className="py-4">
-                  <h3 className="text-sm font-medium text-accent-ink/70 mb-3">Aspect Grid</h3>
+                  <h3 className="text-sm font-medium text-accent-ink/70 mb-3">{t("aspects.grid")}</h3>
                   <AspectGrid
                     aspects={placements.aspects}
                     className="mb-4"
@@ -551,7 +555,7 @@ export default function BirthChartPage() {
                 {/* Aspect List */}
                 <div className="border-t border-accent-soft/30 pt-4">
                   <h3 className="text-sm font-medium text-accent-ink/70 mb-3">
-                    {showAllAspects ? "All Aspects" : "Top Aspects"}
+                    {showAllAspects ? t("aspects.allAspects") : t("aspects.topAspects")}
                   </h3>
                   <AspectList
                     aspects={placements.aspects.slice(0, showAllAspects ? undefined : 10)}
@@ -563,7 +567,7 @@ export default function BirthChartPage() {
                     onClick={() => setShowAllAspects(true)}
                     className="text-sm text-accent underline hover:no-underline"
                   >
-                    Show all {placements.aspects.length} aspects
+                    {t("aspects.showAll", { count: placements.aspects.length })}
                   </button>
                 )}
                 {showAllAspects && placements.aspects.length > 10 && (
@@ -571,7 +575,7 @@ export default function BirthChartPage() {
                     onClick={() => setShowAllAspects(false)}
                     className="text-sm text-accent underline hover:no-underline"
                   >
-                    Show fewer aspects
+                    {t("aspects.showFewer")}
                   </button>
                 )}
               </SolaraCard>
@@ -586,24 +590,24 @@ export default function BirthChartPage() {
                 <>
                   {insight?.tabDeepDives?.patterns && (
                     <DeepDiveCard
-                      title="What Your Patterns Mean For You"
-                      subtitle="Major configurations in your chart"
+                      title={t("patterns.deepDiveTitle")}
+                      subtitle={t("patterns.subtitle")}
                       deepDive={insight.tabDeepDives.patterns}
                     />
                   )}
 
                   <SolaraCard className="space-y-4">
-                    <h2 className="text-xl font-semibold">Major Patterns</h2>
+                    <h2 className="text-xl font-semibold">{t("patterns.title")}</h2>
                     <p className="text-sm text-accent-ink/60 leading-relaxed">
-                      Patterns are large-scale energetic shapes in your chart—where several planets connect to form a recognizable theme or recurring dynamic.
+                      {t("patterns.description")}
                     </p>
                     {placements.calculated.patterns.length > 0 ? (
                       <div className="space-y-5">
                         {placements.calculated.patterns.map((pattern: any, idx: number) => (
                           <div key={idx} className="pb-4 border-b border-accent-soft/30 last:border-0">
                             <h3 className="font-medium text-accent-ink mb-2">
-                              {pattern.type === "t_square" && "T-Square"}
-                              {pattern.type === "grand_trine" && "Grand Trine"}
+                              {pattern.type === "t_square" && t("patterns.tSquare")}
+                              {pattern.type === "grand_trine" && t("patterns.grandTrine")}
                             </h3>
                             {pattern.planets && (
                               <p className="text-sm text-accent-ink/70 mb-2">
@@ -611,16 +615,14 @@ export default function BirthChartPage() {
                               </p>
                             )}
                             <p className="text-sm text-accent-ink/60 leading-relaxed">
-                              {pattern.type === "t_square" &&
-                                "A T-Square creates tension between three areas of life, asking you to find creative solutions. It often feels like productive friction—pressure that pushes you toward growth, innovation, and resilience. This pattern tends to keep you moving forward, even when stillness might feel easier."}
-                              {pattern.type === "grand_trine" &&
-                                "A Grand Trine forms a triangle of ease and flow, where energy moves smoothly between three areas. This can feel like natural talent or effortless grace. The invitation is to activate this gift consciously rather than letting it remain passive—talent unused doesn't always become mastery."}
+                              {pattern.type === "t_square" && t("patterns.tSquareDesc")}
+                              {pattern.type === "grand_trine" && t("patterns.grandTrineDesc")}
                             </p>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <p className="text-sm text-accent-ink/60">No major patterns detected in your chart.</p>
+                      <p className="text-sm text-accent-ink/60">{t("patterns.noPatterns")}</p>
                     )}
                   </SolaraCard>
                 </>

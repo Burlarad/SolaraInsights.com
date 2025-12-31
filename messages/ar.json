@@ -1,0 +1,620 @@
+{
+  "common": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "close": "إغلاق",
+    "loading": "جارٍ التحميل...",
+    "saving": "جارٍ الحفظ...",
+    "saved": "تم الحفظ",
+    "submit": "إرسال",
+    "back": "رجوع",
+    "next": "التالي",
+    "delete": "حذف",
+    "deleting": "جارٍ الحذف...",
+    "error": "حدث خطأ ما",
+    "tryAgain": "حاول مرة أخرى",
+    "confirm": "تأكيد",
+    "yes": "نعم",
+    "no": "لا",
+    "optional": "اختياري",
+    "required": "مطلوب",
+    "or": "أو",
+    "and": "و",
+    "on": "تشغيل",
+    "off": "إيقاف",
+    "enabled": "مُفعّل",
+    "disabled": "معطّل",
+    "goToSettings": "الذهاب للإعدادات",
+    "learnMore": "اعرف المزيد",
+    "viewAll": "عرض الكل",
+    "showMore": "عرض المزيد",
+    "showLess": "عرض أقل",
+    "masterNumber": "الرقم الرئيسي"
+  },
+  "nav": {
+    "home": "الرئيسية",
+    "about": "عن التطبيق",
+    "learn": "تعلّم",
+    "sanctuary": "الملاذ",
+    "settings": "الإعدادات",
+    "signIn": "تسجيل الدخول",
+    "signUp": "إنشاء حساب",
+    "signOut": "تسجيل الخروج"
+  },
+  "auth": {
+    "signIn": {
+      "title": "مرحباً بعودتك",
+      "subtitle": "سجّل الدخول للوصول إلى ملاذك",
+      "signInWith": "تسجيل الدخول باستخدام",
+      "orSignInWithEmail": "أو سجّل الدخول بالبريد الإلكتروني",
+      "email": "البريد الإلكتروني",
+      "emailPlaceholder": "you@example.com",
+      "password": "كلمة المرور",
+      "forgot": "نسيت؟",
+      "signingIn": "جارٍ تسجيل الدخول...",
+      "signInButton": "تسجيل الدخول",
+      "noAccount": "ليس لديك حساب؟",
+      "createAccount": "إنشاء حساب",
+      "signInError": "تعذر تسجيل الدخول بهذه البيانات. يرجى التحقق من بريدك الإلكتروني وكلمة المرور، أو إعادة تعيين كلمة المرور.",
+      "unexpectedError": "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.",
+      "comingSoon": "تسجيل الدخول عبر {provider} قريباً"
+    },
+    "signUp": {
+      "title": "إنشاء حسابك",
+      "subtitle": "ابدأ رحلتك نحو النور",
+      "fullName": "الاسم الكامل",
+      "namePlaceholder": "اسمك",
+      "email": "البريد الإلكتروني",
+      "emailPlaceholder": "you@example.com",
+      "password": "كلمة المرور",
+      "passwordPlaceholder": "8 أحرف على الأقل",
+      "confirmPassword": "تأكيد كلمة المرور",
+      "creatingAccount": "جارٍ إنشاء الحساب...",
+      "createAccountButton": "إنشاء حساب",
+      "terms": "بالتسجيل، أنت توافق على شروط الخدمة وسياسة الخصوصية. جزء من اشتراكك يدعم العائلات من خلال مؤسسة سولارا.",
+      "or": "أو",
+      "continueWithFacebook": "المتابعة مع فيسبوك",
+      "continueWithTikTok": "المتابعة مع تيك توك",
+      "hasAccount": "لديك حساب بالفعل؟",
+      "signIn": "تسجيل الدخول",
+      "passwordsDontMatch": "كلمتا المرور غير متطابقتين. يرجى المحاولة مرة أخرى.",
+      "passwordTooShort": "يجب أن تكون كلمة المرور 8 أحرف على الأقل."
+    },
+    "forgotPassword": {
+      "title": "إعادة تعيين كلمة المرور",
+      "subtitle": "أدخل بريدك الإلكتروني وسنرسل لك رابط إعادة التعيين",
+      "email": "البريد الإلكتروني",
+      "emailPlaceholder": "you@example.com",
+      "sending": "جارٍ الإرسال...",
+      "sendResetLink": "إرسال رابط إعادة التعيين",
+      "backToSignIn": "العودة لتسجيل الدخول",
+      "checkEmail": {
+        "title": "تحقق من بريدك الإلكتروني",
+        "message": "أرسلنا رابط إعادة تعيين كلمة المرور إلى <strong>{email}</strong>. اضغط على الرابط في البريد الإلكتروني لإنشاء كلمة مرور جديدة."
+      }
+    },
+    "resetPassword": {
+      "title": "تعيين كلمة مرور جديدة",
+      "subtitle": "أدخل كلمة مرورك الجديدة أدناه",
+      "verifying": "جارٍ التحقق من رابط إعادة التعيين...",
+      "newPassword": "كلمة المرور الجديدة",
+      "newPasswordPlaceholder": "8 أحرف على الأقل",
+      "confirmPassword": "تأكيد كلمة المرور الجديدة",
+      "confirmPasswordPlaceholder": "أعد إدخال كلمة المرور",
+      "updating": "جارٍ تحديث كلمة المرور...",
+      "updatePassword": "تحديث كلمة المرور",
+      "backToSignIn": "العودة لتسجيل الدخول",
+      "linkExpired": {
+        "title": "انتهت صلاحية الرابط",
+        "message": "انتهت صلاحية رابط إعادة التعيين هذا أو أنه غير صالح. يرجى طلب رابط جديد.",
+        "noCodeMessage": "لم يتم اكتشاف رابط إعادة التعيين. يرجى طلب إعادة تعيين كلمة المرور من صفحة تسجيل الدخول.",
+        "requestNewLink": "طلب رابط إعادة تعيين جديد"
+      },
+      "success": {
+        "title": "تم تحديث كلمة المرور",
+        "message": "تم تحديث كلمة مرورك بنجاح. يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة.",
+        "continueToSignIn": "المتابعة إلى تسجيل الدخول",
+        "redirecting": "سيتم توجيهك تلقائياً خلال ثوانٍ قليلة..."
+      },
+      "sessionRequired": {
+        "title": "مطلوب جلسة",
+        "message": "يرجى استخدام رابط إعادة التعيين من بريدك الإلكتروني للوصول إلى هذه الصفحة.",
+        "requestResetLink": "طلب رابط إعادة التعيين"
+      }
+    },
+    "setPassword": {
+      "title": "تعيين كلمة المرور",
+      "subtitle": "أنشئ كلمة مرور لحسابك في سولارا",
+      "settingPasswordFor": "تعيين كلمة المرور لـ",
+      "password": "كلمة المرور",
+      "passwordPlaceholder": "8 أحرف على الأقل",
+      "confirmPassword": "تأكيد كلمة المرور",
+      "confirmPasswordPlaceholder": "أعد إدخال كلمة المرور",
+      "settingPassword": "جارٍ تعيين كلمة المرور...",
+      "continueToOnboarding": "المتابعة إلى الإعداد",
+      "errors": {
+        "enterBoth": "يرجى إدخال كلمة المرور وتأكيدها",
+        "dontMatch": "كلمتا المرور غير متطابقتين",
+        "tooShort": "يجب أن تكون كلمة المرور 8 أحرف على الأقل"
+      }
+    },
+    "verifyEmail": {
+      "title": "تأكيد بريدك الإلكتروني",
+      "subtitle": "أرسلنا رابط التأكيد إلى بريدك الإلكتروني",
+      "resend": "إعادة إرسال بريد التأكيد"
+    }
+  },
+  "onboarding": {
+    "welcome": "مرحباً بك في سولارا",
+    "letsGetStarted": "لنبدأ",
+    "tellUsAbout": "أخبرنا عن نفسك",
+    "pageTitle": "أكمل ملفك الشخصي في الملاذ",
+    "pageSubtitle": "سنستخدم هذه المعلومات لإنشاء رؤاك الشخصية",
+    "firstName": "الاسم الأول",
+    "middleName": "الاسم الأوسط",
+    "lastName": "اسم العائلة",
+    "nickname": "الكنية (اختياري)",
+    "nicknamePlaceholder": "ماذا نناديك؟",
+    "nicknameHint": "إذا كان مختلفاً عن اسمك الأول",
+    "birthDetails": "تفاصيل الميلاد",
+    "birthDate": "تاريخ الميلاد",
+    "birthTime": "وقت الميلاد (اختياري)",
+    "birthTimeUnknown": "لا أعرف وقت ميلادي",
+    "birthTimeHint": "إذا كنت لا تعرف وقت ميلادك بالضبط، يمكنك تخطيه الآن وإضافته لاحقاً للحصول على خرائط وتخصيص أكثر دقة.",
+    "birthPlace": "مكان الميلاد",
+    "searchPlace": "ابحث عن مدينة ميلادك...",
+    "timezone": "المنطقة الزمنية: {timezone}",
+    "locationHint": "ابدأ الكتابة للبحث، ثم اختر من النتائج",
+    "locationWarning": "يرجى البحث واختيار مكان ميلادك من القائمة المنسدلة للمتابعة.",
+    "saving": "جارٍ حفظ بصمة ميلادك...",
+    "continue": "متابعة",
+    "skip": "تخطي الآن",
+    "complete": "إكمال الإعداد",
+    "settingsNote": "يمكنك تحديث هذه التفاصيل لاحقاً في الإعدادات",
+    "confirmingPayment": "جارٍ تأكيد الدفع...",
+    "confirmingPaymentMessage": "نحن نؤكد اشتراكك. عادة ما يستغرق هذا بضع ثوانٍ فقط.",
+    "errors": {
+      "firstNameRequired": "الاسم الأول مطلوب",
+      "lastNameRequired": "اسم العائلة مطلوب",
+      "birthDateRequired": "تاريخ الميلاد مطلوب",
+      "locationRequired": "يرجى اختيار مكان ميلادك من نتائج البحث",
+      "saveFailed": "فشل حفظ الملف الشخصي. يرجى المحاولة مرة أخرى."
+    }
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "subtitle": "قم بتحديث اسمك المفضل وبرجك وإحداثيات الميلاد",
+    "identity": {
+      "title": "الهوية",
+      "firstName": "الاسم الأول",
+      "middleName": "الاسم الأوسط",
+      "lastName": "اسم العائلة",
+      "nickname": "الكنية",
+      "nicknameHint": "إذا كان مختلفاً عن اسمك",
+      "birthNameHint": "اسم الميلاد يُستخدم لحسابات الأرقام",
+      "nameMissingBanner": "يرجى إضافة اسمك الأول واسم العائلة لتجربة أكثر تخصيصاً."
+    },
+    "email": {
+      "title": "البريد الإلكتروني",
+      "addEmailBanner": "أضف عنوان بريد إلكتروني حقيقي لتلقي التحديثات وتفعيل إعادة تعيين كلمة المرور.",
+      "placeholder": "your@email.com"
+    },
+    "password": {
+      "title": "كلمة المرور",
+      "current": "كلمة المرور الحالية",
+      "new": "كلمة المرور الجديدة",
+      "confirm": "تأكيد كلمة المرور الجديدة",
+      "change": "تغيير كلمة المرور",
+      "placeholder": "كلمة مرورك"
+    },
+    "birthDetails": {
+      "title": "تفاصيل الميلاد",
+      "date": "تاريخ الميلاد",
+      "time": "وقت الميلاد",
+      "timeUnknown": "لا أعرف وقت ميلادي",
+      "place": "مكان الميلاد",
+      "timezone": "المنطقة الزمنية"
+    },
+    "zodiac": {
+      "title": "البرج",
+      "select": "اختر برجك"
+    },
+    "language": {
+      "title": "اللغة",
+      "select": "اختر اللغة"
+    },
+    "social": {
+      "title": "رؤى اجتماعية",
+      "description": "اربط حساباتك الاجتماعية للحصول على رؤى مخصصة",
+      "connect": "ربط",
+      "disconnect": "إلغاء الربط",
+      "connected": "متصل"
+    },
+    "dangerZone": {
+      "title": "منطقة الخطر",
+      "hibernate": "تعليق الحساب",
+      "hibernateDescription": "قم بتعطيل حسابك مؤقتاً. يمكنك إعادة تفعيله في أي وقت.",
+      "delete": "حذف الحساب",
+      "deleteDescription": "احذف حسابك وجميع بياناتك نهائياً. لا يمكن التراجع عن هذا الإجراء.",
+      "confirmDelete": "هل أنت متأكد من رغبتك في حذف حسابك؟",
+      "typeToConfirm": "اكتب DELETE للتأكيد"
+    },
+    "saveChanges": "حفظ التغييرات",
+    "verificationExpired": "انتهت صلاحية التحقق. يرجى التحقق مرة أخرى."
+  },
+  "sanctuary": {
+    "greeting": {
+      "title": "صفاء هادئ، {name}.",
+      "defaultName": "صديق",
+      "defaultMessage": "رؤاك اليومية يتم إعدادها بواسطة الكون."
+    },
+    "tabs": {
+      "insights": "الرؤى",
+      "astrology": "الأبراج",
+      "numerology": "علم الأرقام",
+      "connections": "الروابط"
+    },
+    "timeframes": {
+      "today": "اليوم",
+      "week": "الأسبوع",
+      "month": "الشهر",
+      "year": "السنة"
+    },
+    "insights": {
+      "title": "ملاذك",
+      "label": "رؤى الملاذ",
+      "tuning": "جارٍ ضبط رؤاك...",
+      "ready": "رؤاك جاهزة.",
+      "localTimezone": "المنطقة الزمنية المحلية",
+      "greeting": "مرحباً بعودتك",
+      "sunriseGuidance": "إرشاد الشروق",
+      "energeticRhythm": "إيقاعك الطاقي لـ{timeframe}",
+      "coreThemesFor": "المواضيع الأساسية لـ{timeframe}",
+      "focusFor": "التركيز لـ{timeframe}",
+      "personalNarrative": "السرد الشخصي",
+      "coreThemes": "المواضيع الأساسية",
+      "focusForPeriod": "التركيز لهذه الفترة",
+      "journalPrompt": "سؤال للتأمل",
+      "tarot": {
+        "title": "بطاقة التاروت",
+        "label": "التاروت — النموذج اليومي",
+        "yourCard": "بطاقتك",
+        "matchError": "واجهنا مشكلة في مطابقة بطاقة التاروت هذه مع مجموعتنا."
+      },
+      "luckyCompass": {
+        "title": "بوصلة الحظ",
+        "label": "بوصلة الحظ — علامات الحظ والنور",
+        "numbers": "أرقام {timeframe}",
+        "powerWords": "كلمات القوة",
+        "handwrittenNote": "ملاحظة مكتوبة بخط اليد"
+      },
+      "emotionalCadence": {
+        "title": "الإيقاع العاطفي",
+        "label": "الإيقاع العاطفي — الإيقاع اليومي",
+        "dawn": "الفجر",
+        "midday": "الظهيرة",
+        "dusk": "الغسق",
+        "evening": "المساء",
+        "midnight": "منتصف الليل",
+        "morning": "الصباح"
+      },
+      "dailyReflection": {
+        "title": "تأمل يومي",
+        "subtitle": "دع ملاحظاتك خاصة ولطيفة.",
+        "placeholder": "بضع كلمات لسمائك اليوم…",
+        "saveHint": "اضغط ⌘+Enter أو Ctrl+Enter للحفظ"
+      },
+      "errors": {
+        "profileLoadError": "واجهنا مشكلة في تحميل ملفك الشخصي. يرجى المحاولة مرة أخرى، أو التواصل مع الدعم إذا استمرت المشكلة.",
+        "insightLoadError": "نواجه مشكلة في تحميل رؤيتك. قد تكون هذه مشكلة مؤقتة.",
+        "birthSignatureRequired": "قم بإعداد توقيع ميلادك",
+        "journalSaveError": "تعذر الحفظ. يرجى المحاولة مرة أخرى."
+      },
+      "socialInsights": {
+        "paused": "الرؤى الاجتماعية متوقفة مؤقتاً",
+        "pausedDescription": "قم بتشغيل الرؤى الاجتماعية لتعزيز قراءاتك بأنماط من حساباتك المتصلة."
+      },
+      "reactivated": "تم إعادة التفعيل — مرحباً بعودتك."
+    }
+  },
+  "numerology": {
+    "title": "أرقامك",
+    "subtitle": "الرياضيات وراء حياتك",
+    "calculating": "جارٍ حساب أرقامك...",
+    "systems": {
+      "pythagorean": "فيثاغوري",
+      "chaldean": "كلداني"
+    },
+    "errors": {
+      "nameRequired": "الاسم مطلوب",
+      "nameRequiredMessage": "نحتاج إلى اسمك الأول واسم عائلتك لحساب ملفك العددي. يرجى تحديث اسمك في الإعدادات.",
+      "birthDateRequired": "تاريخ الميلاد مطلوب",
+      "birthDateRequiredMessage": "نحتاج إلى تاريخ ميلادك لحساب ملفك العددي. يرجى تحديث تاريخ ميلادك في الإعدادات.",
+      "loadFailed": "تعذر تحميل الملف العددي"
+    },
+    "coreNumbers": {
+      "title": "الأرقام الأساسية",
+      "lifePath": "مسار الحياة",
+      "lifePathDesc": "هدف حياتك والمسار الذي تسلكه",
+      "expression": "التعبير",
+      "expressionDesc": "قدراتك ومواهبك الطبيعية",
+      "soulUrge": "دافع الروح",
+      "soulUrgeDesc": "دوافعك ورغباتك الداخلية",
+      "personality": "الشخصية",
+      "personalityDesc": "كيف يراك الآخرون",
+      "birthday": "يوم الميلاد",
+      "birthdayDesc": "مواهبك وقدراتك الطبيعية",
+      "maturity": "النضج",
+      "maturityDesc": "من ستصبح"
+    },
+    "cycles": {
+      "title": "الدورات الشخصية",
+      "personalYear": "السنة الشخصية",
+      "personalMonth": "الشهر الشخصي",
+      "personalDay": "اليوم الشخصي"
+    },
+    "lifePeriods": {
+      "title": "فترات الحياة",
+      "currentPinnacle": "القمة الحالية",
+      "period": "الفترة",
+      "ages": "الأعمار",
+      "onwards": "فما فوق",
+      "pinnacles": {
+        "first": "القمة الأولى",
+        "second": "القمة الثانية",
+        "third": "القمة الثالثة",
+        "fourth": "القمة الرابعة"
+      }
+    },
+    "challenges": {
+      "title": "تحديات الحياة",
+      "first": "التحدي الأول",
+      "second": "التحدي الثاني",
+      "third": "التحدي الثالث",
+      "main": "التحدي الرئيسي"
+    },
+    "luckyNumbers": {
+      "title": "الأرقام المحظوظة"
+    },
+    "karmicDebt": {
+      "title": "الدروس الكرمية"
+    }
+  },
+  "astrology": {
+    "title": "الأبراج",
+    "subtitle": "الضوء وراء حياتك",
+    "calculating": "جارٍ حساب خريطتك...",
+    "birthChart": {
+      "title": "خريطة الميلاد",
+      "subtitle": "بصمتك الكوكبية الفريدة"
+    },
+    "planets": {
+      "title": "الكواكب",
+      "subtitle": "بصمتك الكوكبية الفريدة",
+      "sun": "الشمس",
+      "sunDesc": "إحساسك الجوهري بالذات والحيوية.",
+      "moon": "القمر",
+      "moonDesc": "مشهدك العاطفي وعالمك الداخلي.",
+      "mercury": "عطارد",
+      "mercuryDesc": "كيف تفكر وتتواصل.",
+      "venus": "الزهرة",
+      "venusDesc": "ما تحبه وتجده جميلاً.",
+      "mars": "المريخ",
+      "marsDesc": "دافعك ورغبتك وطريقة عملك.",
+      "jupiter": "المشتري",
+      "jupiterDesc": "أين تبحث عن النمو والمعنى.",
+      "saturn": "زحل",
+      "saturnDesc": "دروسك ومجالات إتقانك.",
+      "uranus": "أورانوس",
+      "uranusDesc": "أين تبتكر وتتحرر.",
+      "neptune": "نبتون",
+      "neptuneDesc": "أحلامك وحدسك وطبيعتك الروحية.",
+      "pluto": "بلوتو",
+      "plutoDesc": "أعماقك وقوتك التحويلية.",
+      "northNode": "العقدة الشمالية",
+      "northNodeDesc": "دعوتك نحو النمو."
+    },
+    "houses": {
+      "title": "البيوت",
+      "subtitle": "مجالات الحياة الـ12 في خريطتك",
+      "first": "البيت الأول",
+      "second": "البيت الثاني",
+      "secondDesc": "علاقتك بالموارد والقيمة والاستقرار.",
+      "third": "البيت الثالث",
+      "fourth": "البيت الرابع",
+      "fourthDesc": "أساسك الداخلي ومنزلك وجذورك العاطفية.",
+      "fifth": "البيت الخامس",
+      "sixth": "البيت السادس",
+      "sixthDesc": "إيقاعاتك اليومية وعملك ورفاهيتك.",
+      "seventh": "البيت السابع",
+      "eighth": "البيت الثامن",
+      "ninth": "البيت التاسع",
+      "ninthDesc": "بحثك عن المعنى والإيمان والتوسع.",
+      "tenth": "البيت العاشر",
+      "tenthDesc": "دورك العام ومهنتك وإرثك المرئي.",
+      "eleventh": "البيت الحادي عشر",
+      "eleventhDesc": "رؤيتك للمجتمع والصداقة والمستقبل.",
+      "twelfth": "البيت الثاني عشر",
+      "twelfthDesc": "ملاذك الداخلي وعزلتك والمقدس."
+    },
+    "aspects": {
+      "title": "الجوانب",
+      "subtitle": "المحادثات بين كواكبك"
+    },
+    "patterns": {
+      "title": "الأنماط والمسار",
+      "chartShape": "شكل الخريطة",
+      "dominantElement": "العنصر السائد",
+      "dominantModality": "الطريقة السائدة",
+      "hemisphereEmphasis": "تركيز نصف الكرة",
+      "above": "فوق الأفق",
+      "below": "تحت الأفق",
+      "aboveDesc": "خريطتك موجهة نحو الظهور والتعبير الخارجي. غالباً ما تطلب منك الحياة الظهور والتفاعل مع العالم الخارجي.",
+      "belowDesc": "خريطتك موجهة نحو التأمل الداخلي والدقة. غالباً ما تتكشف الحياة من خلال المعالجة الداخلية والملاحظة الهادئة والعمل خلف الكواليس."
+    },
+    "errors": {
+      "birthDetailsRequired": "تفاصيل الميلاد مطلوبة",
+      "birthDetailsRequiredMessage": "نحتاج إلى تفاصيل ميلادك الكاملة لحساب خريطتك."
+    }
+  },
+  "connections": {
+    "title": "الروابط",
+    "subtitle": "ارسم خريطة الأشخاص في مدارك واستكشف رؤى العلاقات",
+    "yourConnections": "روابطك",
+    "loading": "جارٍ تحميل روابطك...",
+    "addConnection": "إضافة رابط",
+    "noConnections": "لا توجد روابط بعد. أضف شخصاً لبدء استكشاف رؤى العلاقات.",
+    "noConnectionsMessage": "أضف رابطك الأول لاستكشاف ديناميكيات علاقتك.",
+    "notes": "ملاحظات",
+    "notesPlaceholder": "دوّن أفكاراً وأنماطاً أو أشياء تريد تذكرها عن هذا الرابط...",
+    "saveNotes": "حفظ الملاحظات",
+    "saving": "جارٍ الحفظ...",
+    "saved": "تم الحفظ",
+    "spaceBetween": "المسافة بينكما",
+    "viewDailyBrief": "عرض الموجز اليومي",
+    "compatibility": "التوافق",
+    "synastry": "السيناستري",
+    "composite": "المركب",
+    "relationshipTypes": {
+      "partner": "شريك",
+      "child": "طفل",
+      "parent": "والد",
+      "sibling": "أخ/أخت",
+      "friend": "صديق",
+      "colleague": "زميل",
+      "other": "آخر"
+    },
+    "form": {
+      "firstName": "الاسم الأول",
+      "middleName": "الاسم الأوسط",
+      "lastName": "اسم العائلة",
+      "relationshipType": "نوع العلاقة",
+      "birthDate": "تاريخ الميلاد",
+      "birthTime": "وقت الميلاد",
+      "birthPlace": "مكان الميلاد",
+      "unknownTime": "لا أعرف وقت ميلادهم"
+    },
+    "born": "مولود"
+  },
+  "spaceBetween": {
+    "title": "المسافة بينكما",
+    "subtitle": "مخطط علاقتك مع {connectionName}",
+    "generating": "جارٍ إنشاء مخطط علاقتك...",
+    "generatingHint": "قد يستغرق هذا لحظة",
+    "tryAgain": "حاول مرة أخرى",
+    "discover": "اكتشف المسافة بينكما",
+    "discoverDescription": "أنشئ مخطط علاقتك الدائم مع {connectionName}. هذه الرؤية العميقة تُنشأ مرة واحدة وتُحفظ إلى الأبد.",
+    "generateBlueprint": "إنشاء المخطط",
+    "sections": {
+      "essence": "الجوهر",
+      "emotionalBlueprint": "المخطط العاطفي",
+      "communication": "التواصل",
+      "growthEdges": "حدود النمو",
+      "careGuide": "دليل الرعاية"
+    }
+  },
+  "location": {
+    "title": "ساعد سولارا في مزامنة سمائك",
+    "body": "لتوليد رؤاك في بداية يومك، تحتاج سولارا إلى معرفة موقعك التقريبي في العالم.\n\nنستخدم هذا فقط لحساب منطقتك الزمنية حتى يتم تحديث إرشاداتك اليومية والأسبوعية والشهرية في التوقيت المحلي الصحيح.\n\nإذا تخطيت هذا، سنستخدم UTC كإعداد افتراضي. ستظل سولارا تعمل، لكن توقيتك قد يبدو غير متناسق قليلاً.",
+    "allow": "السماح بالموقع",
+    "skip": "تخطي، استخدم UTC الآن"
+  },
+  "errors": {
+    "pageNotFound": "الصفحة غير موجودة",
+    "unauthorized": "غير مصرح",
+    "serverError": "خطأ في الخادم",
+    "networkError": "خطأ في الشبكة",
+    "rateLimited": "طلبات كثيرة جداً. يرجى المحاولة لاحقاً.",
+    "sessionExpired": "انتهت جلستك. يرجى تسجيل الدخول مرة أخرى."
+  },
+  "deletion": {
+    "pageTitle": "حالة حذف البيانات",
+    "noCode": "لم يتم توفير رمز التأكيد. يرجى استخدام الرابط من رسالة تأكيد حذف البيانات.",
+    "notFound": "لم يتم العثور على طلب الحذف. قد يكون رمز التأكيد غير صالح أو منتهي الصلاحية.",
+    "confirmationCode": "رمز التأكيد",
+    "status": "الحالة",
+    "requestReceived": "تم استلام الطلب",
+    "processed": "تمت المعالجة",
+    "errorDetails": "تفاصيل الخطأ",
+    "contactSupport": "يرجى التواصل معنا على solara@solarainsights.com للمساعدة.",
+    "questions": "أسئلة؟ تواصل معنا على",
+    "pending": {
+      "title": "قيد الانتظار",
+      "description": "تم استلام طلب حذف بياناتك وهو في انتظار المعالجة."
+    },
+    "processing": {
+      "title": "قيد المعالجة",
+      "description": "يتم حالياً حذف بياناتك من أنظمتنا."
+    },
+    "completed": {
+      "title": "مكتمل",
+      "description": "تم حذف بياناتك بنجاح من سولارا إنسايتس.",
+      "permanentNotice": "تم حذف جميع بياناتك الشخصية المرتبطة بحسابك على فيسبوك نهائياً من سولارا إنسايتس. لا يمكن التراجع عن هذا الإجراء."
+    },
+    "failed": {
+      "title": "فشل",
+      "description": "حدثت مشكلة في معالجة طلب الحذف. يرجى التواصل مع الدعم."
+    },
+    "userNotFound": {
+      "title": "لم يتم العثور على بيانات",
+      "description": "لم يتم العثور على حساب مرتبط بحسابك على فيسبوك. لا توجد بيانات تحتاج إلى الحذف."
+    }
+  },
+  "zodiacSigns": {
+    "aries": "الحمل",
+    "taurus": "الثور",
+    "gemini": "الجوزاء",
+    "cancer": "السرطان",
+    "leo": "الأسد",
+    "virgo": "العذراء",
+    "libra": "الميزان",
+    "scorpio": "العقرب",
+    "sagittarius": "القوس",
+    "capricorn": "الجدي",
+    "aquarius": "الدلو",
+    "pisces": "الحوت"
+  },
+  "tarot": {
+    "title": "اسأل البطاقات",
+    "questionLabel": "سؤالك",
+    "questionPlaceholder": "ما الذي تريد الإرشاد بشأنه اليوم؟",
+    "questionError": "يرجى إدخال سؤال (على الأقل {minLength} حرف)",
+    "charactersNeeded": "مطلوب {count} حرف إضافي",
+    "spreadLabel": "اختر نمط البطاقات",
+    "spreads": {
+      "single": "بطاقة واحدة",
+      "singleDesc": "نظرة سريعة",
+      "three": "ثلاث بطاقات",
+      "threeDesc": "الماضي، الحاضر، المستقبل",
+      "five": "خمس بطاقات",
+      "fiveDesc": "استكشاف عميق"
+    },
+    "buttons": {
+      "draw": "اسحب البطاقات",
+      "drawing": "جارٍ سحب البطاقات...",
+      "wait": "انتظر {seconds}ث..."
+    },
+    "loading": "جارٍ خلط البطاقات...",
+    "reading": {
+      "title": "قراءتك",
+      "reversed": "مقلوبة",
+      "synthesis": "الصورة الكبرى",
+      "actions": "الإجراءات المقترحة",
+      "reflection": "تأمل"
+    },
+    "cta": {
+      "message": "تريد قراءات أعمق وأكثر تخصيصًا؟",
+      "button": "انضم إلى Solara"
+    },
+    "errors": {
+      "generic": "لم نتمكن من إكمال قراءتك. يرجى المحاولة مرة أخرى.",
+      "rateLimit": "يرجى الانتظار {seconds} ثانية قبل السحب مرة أخرى."
+    }
+  },
+  "learn": {
+    "searchPlaceholder": "ابحث في الأدلة...",
+    "guidesFound": "تم العثور على {count} دليل",
+    "filterByTopic": "تصفية حسب الموضوع",
+    "clearAll": "مسح الكل"
+  }
+}
