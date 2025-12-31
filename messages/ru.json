@@ -559,7 +559,34 @@
     "saveNotes": "Сохранить заметки",
     "compatibility": "Совместимость",
     "synastry": "Синастрия",
-    "composite": "Композит"
+    "composite": "Композит",
+    "yourConnections": "YOUR CONNECTIONS",
+    "loading": "Loading your connections...",
+    "notesPlaceholder": "Jot down thoughts, patterns, or things you want to remember about this connection...",
+    "saving": "Saving...",
+    "saved": "Saved",
+    "spaceBetween": "Space Between",
+    "viewDailyBrief": "View daily brief",
+    "relationshipTypes": {
+      "partner": "Partner",
+      "child": "Child",
+      "parent": "Parent",
+      "sibling": "Sibling",
+      "friend": "Friend",
+      "colleague": "Colleague",
+      "other": "Other"
+    },
+    "form": {
+      "firstName": "First name",
+      "middleName": "Middle name",
+      "lastName": "Last name",
+      "relationshipType": "Relationship type",
+      "birthDate": "Birth date",
+      "birthTime": "Birth time",
+      "birthPlace": "Birth place",
+      "unknownTime": "I don't know their birth time"
+    },
+    "born": "Born"
   },
   "spaceBetween": {
     "title": "Пространство Между",

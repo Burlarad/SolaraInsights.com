@@ -49,7 +49,16 @@
       "password": "密碼",
       "forgotPassword": "忘記密碼？",
       "noAccount": "還沒有帳戶？",
-      "createAccount": "建立帳戶"
+      "createAccount": "建立帳戶",
+      "signInWith": "Sign in with",
+      "orSignInWithEmail": "Or sign in with email",
+      "emailPlaceholder": "you@example.com",
+      "forgot": "Forgot?",
+      "signingIn": "Signing in...",
+      "signInButton": "Sign in",
+      "signInError": "We couldn't sign you in with those details. Please check your email and password, or reset your password.",
+      "unexpectedError": "An unexpected error occurred. Please try again.",
+      "comingSoon": "{provider} sign-in coming soon"
     },
     "signUp": {
       "title": "建立帳戶",
@@ -59,18 +68,83 @@
       "password": "密碼",
       "confirmPassword": "確認密碼",
       "hasAccount": "已經有帳戶了？",
-      "terms": "註冊即表示您同意我們的服務條款和隱私政策"
+      "terms": "註冊即表示您同意我們的服務條款和隱私政策",
+      "fullName": "Full name",
+      "namePlaceholder": "Your name",
+      "emailPlaceholder": "you@example.com",
+      "passwordPlaceholder": "At least 8 characters",
+      "creatingAccount": "Creating account...",
+      "createAccountButton": "Create account",
+      "or": "or",
+      "continueWithFacebook": "Continue with Facebook",
+      "continueWithTikTok": "Continue with TikTok",
+      "signIn": "Sign in",
+      "passwordsDontMatch": "Passwords don't match. Please try again.",
+      "passwordTooShort": "Password must be at least 8 characters long."
     },
     "resetPassword": {
       "title": "重設密碼",
       "subtitle": "輸入您的電子郵件以接收重設連結",
       "sendLink": "發送連結",
-      "backToSignIn": "返回登入"
+      "backToSignIn": "返回登入",
+      "verifying": "Verifying your reset link...",
+      "newPassword": "New password",
+      "newPasswordPlaceholder": "At least 8 characters",
+      "confirmPassword": "Confirm new password",
+      "confirmPasswordPlaceholder": "Re-enter your password",
+      "updating": "Updating password...",
+      "updatePassword": "Update password",
+      "linkExpired": {
+        "title": "Link expired",
+        "message": "This reset link has expired or is invalid. Please request a new one.",
+        "noCodeMessage": "No reset link detected. Please request a password reset from the login page.",
+        "requestNewLink": "Request new reset link"
+      },
+      "success": {
+        "title": "Password updated",
+        "message": "Your password has been updated successfully. You can now sign in with your new password.",
+        "continueToSignIn": "Continue to sign in",
+        "redirecting": "You will be redirected automatically in a few seconds..."
+      },
+      "sessionRequired": {
+        "title": "Session required",
+        "message": "Please use the reset link from your email to access this page.",
+        "requestResetLink": "Request reset link"
+      }
     },
     "verifyEmail": {
       "title": "驗證您的電子郵件",
       "subtitle": "我們已向您的電子郵件發送驗證連結",
       "resend": "重新發送驗證郵件"
+    },
+    "forgotPassword": {
+      "title": "Reset your password",
+      "subtitle": "Enter your email and we'll send you a reset link",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "sending": "Sending...",
+      "sendResetLink": "Send reset link",
+      "backToSignIn": "Back to sign in",
+      "checkEmail": {
+        "title": "Check your email",
+        "message": "We've sent a password reset link to <strong>{email}</strong>. Click the link in the email to create a new password."
+      }
+    },
+    "setPassword": {
+      "title": "Set your password",
+      "subtitle": "Create a password for your Solara account",
+      "settingPasswordFor": "Setting password for",
+      "password": "Password",
+      "passwordPlaceholder": "At least 8 characters",
+      "confirmPassword": "Confirm password",
+      "confirmPasswordPlaceholder": "Re-enter your password",
+      "settingPassword": "Setting password...",
+      "continueToOnboarding": "Continue to onboarding",
+      "errors": {
+        "enterBoth": "Please enter and confirm your password",
+        "dontMatch": "Passwords do not match",
+        "tooShort": "Password must be at least 8 characters"
+      }
     }
   },
   "onboarding": {
@@ -85,7 +159,30 @@
     "searchPlace": "搜尋城市...",
     "continue": "繼續",
     "skip": "暫時跳過",
-    "complete": "完成設定"
+    "complete": "完成設定",
+    "pageTitle": "Complete your Sanctuary profile",
+    "pageSubtitle": "We'll use this information to generate your personalized insights",
+    "firstName": "First name",
+    "middleName": "Middle name",
+    "lastName": "Last name",
+    "nickname": "Nickname (optional)",
+    "nicknamePlaceholder": "What should we call you?",
+    "nicknameHint": "If different from your first name",
+    "birthTimeHint": "If you don't know your exact birth time, you can skip now and add it later for more accurate charts and personalization.",
+    "timezone": "Timezone: {timezone}",
+    "locationHint": "Start typing to search, then select from the results",
+    "locationWarning": "Please search and select your birth location from the dropdown to continue.",
+    "saving": "Saving your birth signature...",
+    "settingsNote": "You can always update these details later in Settings",
+    "confirmingPayment": "Confirming your payment...",
+    "confirmingPaymentMessage": "We're confirming your subscription. This usually takes just a few seconds.",
+    "errors": {
+      "firstNameRequired": "First name is required",
+      "lastNameRequired": "Last name is required",
+      "birthDateRequired": "Birth date is required",
+      "locationRequired": "Please select your birth location from the search results",
+      "saveFailed": "Failed to save profile. Please try again."
+    }
   },
   "settings": {
     "title": "設定",
@@ -318,7 +415,11 @@
       "pluto": "冥王星",
       "plutoDesc": "您的深度和轉化力量。",
       "northNode": "北交點",
-      "northNodeDesc": "您成長的邀請。"
+      "northNodeDesc": "您成長的邀請。",
+      "deepDiveTitle": "What Your Planets Mean For You",
+      "description": "These show how different parts of you express themselves—your drive, your communication style, how you love and relate.",
+      "chiron": "Chiron",
+      "chironDesc": "Where healing emerges from your deepest wounds."
     },
     "houses": {
       "title": "宮位",
@@ -341,11 +442,25 @@
       "eleventh": "第十一宮",
       "eleventhDesc": "您對社區、友誼和未來的願景。",
       "twelfth": "第十二宮",
-      "twelfthDesc": "您的內在聖所、獨處和神聖。"
+      "twelfthDesc": "您的內在聖所、獨處和神聖。",
+      "deepDiveTitle": "What Your Houses Mean For You",
+      "description": "Houses show where life themes unfold—which arenas of life ask the most of you, and where certain energies come alive.",
+      "firstDesc": "How you meet the world and present yourself.",
+      "thirdDesc": "How you communicate, learn, and connect nearby.",
+      "fifthDesc": "Where you create, play, and express joy.",
+      "seventhDesc": "How you partner, reflect, and relate one-to-one.",
+      "eighthDesc": "Where you merge, transform, and face the unknown."
     },
     "aspects": {
       "title": "相位",
-      "subtitle": "行星之間的對話"
+      "subtitle": "行星之間的對話",
+      "deepDiveTitle": "What Your Aspects Mean For You",
+      "description": "Aspects show how different inner parts of you interact—where they support, challenge, or intensify each other.",
+      "grid": "Aspect Grid",
+      "topAspects": "Top Aspects",
+      "allAspects": "All Aspects",
+      "showAll": "Show all {count} aspects",
+      "showFewer": "Show fewer aspects"
     },
     "patterns": {
       "title": "模式與道路",
@@ -356,11 +471,93 @@
       "above": "地平線以上",
       "below": "地平線以下",
       "aboveDesc": "您的星盤傾向於可見性和外在表達。生活經常要求您展現自己、被看見並與外在世界互動。",
-      "belowDesc": "您的星盤傾向於內在反思和細膩。生活經常通過內在處理、安靜觀察和幕後工作展開。"
+      "belowDesc": "您的星盤傾向於內在反思和細膩。生活經常通過內在處理、安靜觀察和幕後工作展開。",
+      "deepDiveTitle": "What Your Patterns Mean For You",
+      "subtitle": "Major configurations in your chart",
+      "description": "Patterns are large-scale energetic shapes in your chart—where several planets connect to form a recognizable theme or recurring dynamic.",
+      "noPatterns": "No major patterns detected in your chart.",
+      "tSquare": "T-Square",
+      "tSquareDesc": "A T-Square creates tension between three areas of life, asking you to find creative solutions. It often feels like productive friction—pressure that pushes you toward growth, innovation, and resilience. This pattern tends to keep you moving forward, even when stillness might feel easier.",
+      "grandTrine": "Grand Trine",
+      "grandTrineDesc": "A Grand Trine forms a triangle of ease and flow, where energy moves smoothly between three areas. This can feel like natural talent or effortless grace. The invitation is to activate this gift consciously rather than letting it remain passive—talent unused doesn't always become mastery."
     },
     "errors": {
       "birthDetailsRequired": "需要出生資料",
-      "birthDetailsRequiredMessage": "我們需要您完整的出生資料來計算您的星盤。"
+      "birthDetailsRequiredMessage": "我們需要您完整的出生資料來計算您的星盤。",
+      "signInRequired": "Please sign in to view your Soul Path.",
+      "incompleteProfile": "Complete your birth signature",
+      "incompleteProfileDesc": "We need your full birth date, time, and location in Settings before Solara can generate your Soul Path."
+    },
+    "sections": {
+      "narrative": "Personal Narrative",
+      "foundations": "Foundations",
+      "connections": "Aspects",
+      "patternsPath": "Patterns & Path"
+    },
+    "deepDive": {
+      "whenAligned": "When You're Aligned",
+      "whenOffCourse": "When You're Off Course",
+      "decisionRule": "Decision Rule"
+    },
+    "narrative": {
+      "title": "Your Personal Narrative",
+      "subtitle": "Your cosmic story and life themes",
+      "identity": "Identity",
+      "emotions": "Emotions",
+      "loveRelationships": "Love & Relationships",
+      "workMoney": "Work & Money",
+      "purposeGrowth": "Purpose & Growth",
+      "innerWorld": "Inner World",
+      "notAvailable": "Interpretation not available",
+      "notAvailableDesc": "We calculated your Soul Path, but couldn't generate a full interpretation right now. Your placements are saved — please try again in a moment."
+    },
+    "energyShape": {
+      "title": "Energy Shape",
+      "deepDiveTitle": "What Your Energy Shape Means For You",
+      "subtitle": "Element and modality balance",
+      "description": "This shows how energy moves through you—the underlying rhythm of your chart and where certain qualities concentrate or disperse.",
+      "chartType": "Chart Type",
+      "dayChart": "Day Chart",
+      "nightChart": "Night Chart",
+      "dayChartDesc": "Your chart is oriented toward visibility and outward expression. Life often asks you to show up, be seen, and engage with the external world.",
+      "nightChartDesc": "Your chart is oriented toward inner reflection and subtlety. Life often unfolds through inner processing, quiet observation, and behind-the-scenes work.",
+      "chartRuler": "Chart Ruler",
+      "chartRulerDesc": "This planet guides the overall direction of your life and filters how you engage with the world.",
+      "dominantPlanets": "Dominant Planets",
+      "dominantPlanetsDesc": "These planets shape your experience most strongly—they appear in multiple key positions or form important connections.",
+      "dominantSigns": "Dominant Signs",
+      "dominantSignsDesc": "These signs color how you move through the world. Their qualities show up repeatedly in how you express yourself.",
+      "elementModalityDesc": "Elements show where your energy naturally gathers—whether in inspiration (fire), grounding (earth), thought (air), or emotion (water). Modalities reflect how you engage—whether you initiate (cardinal), stabilize (fixed), or adapt (mutable)."
+    },
+    "intensityZones": {
+      "title": "Intensity Zones",
+      "deepDiveTitle": "What Your Intensity Zones Mean For You",
+      "subtitle": "Where energy clusters in your chart",
+      "description": "This shows where life feels concentrated—where multiple planets gather, creating areas of heightened focus and recurring themes.",
+      "signEmphasis": "Sign Emphasis",
+      "signEmphasisDesc": "Multiple planets in these signs amplify their qualities—you might notice these themes appearing repeatedly in how you think, feel, and respond.",
+      "houseEmphasis": "House Emphasis",
+      "houseEmphasisDesc": "These life areas ask a lot of you—they're where complexity, growth, and attention naturally gather.",
+      "stelliums": "Stelliums",
+      "stelliumDesc": "A stellium here creates a concentrated beam of attention—multiple inner parts converging on one theme. This area tends to feel vivid, complex, and central to your experience.",
+      "planets": "{count} planets"
+    },
+    "direction": {
+      "title": "Direction",
+      "deepDiveTitle": "What Your Direction Means For You",
+      "subtitle": "North Node, South Node, and life path",
+      "description": "This reflects growth, healing, and familiarity—where you're invited to stretch, where you naturally return, and where old wounds become sources of wisdom.",
+      "northNode": "North Node",
+      "northNodeDesc": "Your North Node is an invitation toward growth and unfamiliar territory. It points to qualities you're developing, even when they don't feel natural yet. This is where life asks you to stretch—not because you lack something, but because expansion lives here.",
+      "southNode": "South Node",
+      "southNodeDesc": "Your South Node represents familiar patterns and natural comfort. These are qualities you carry easily, perhaps from early life or past experience. The South Node isn't something to abandon, but rather a foundation to honor while you reach toward the North Node's invitation.",
+      "chiron": "Chiron",
+      "chironDesc": "Chiron shows where healing and teaching emerge from your deepest wounds. What once hurt can become a source of compassion and guidance for others. Chiron doesn't promise that the wound disappears, but that it becomes medicine."
+    },
+    "joy": {
+      "title": "Part of Fortune",
+      "description": "This reflects ease, joy, and natural alignment—where life feels generous and where you access flow without force.",
+      "meaning": "The Part of Fortune shows where natural joy and ease flow most readily in your life. This isn't about achievement or effort—it's where things align organically, where you feel instinctively at home."
     }
   },
   "connections": {
@@ -373,7 +570,34 @@
     "saveNotes": "儲存備註",
     "compatibility": "相容性",
     "synastry": "合盤",
-    "composite": "組合盤"
+    "composite": "組合盤",
+    "yourConnections": "YOUR CONNECTIONS",
+    "loading": "Loading your connections...",
+    "notesPlaceholder": "Jot down thoughts, patterns, or things you want to remember about this connection...",
+    "saving": "Saving...",
+    "saved": "Saved",
+    "spaceBetween": "Space Between",
+    "viewDailyBrief": "View daily brief",
+    "relationshipTypes": {
+      "partner": "Partner",
+      "child": "Child",
+      "parent": "Parent",
+      "sibling": "Sibling",
+      "friend": "Friend",
+      "colleague": "Colleague",
+      "other": "Other"
+    },
+    "form": {
+      "firstName": "First name",
+      "middleName": "Middle name",
+      "lastName": "Last name",
+      "relationshipType": "Relationship type",
+      "birthDate": "Birth date",
+      "birthTime": "Birth time",
+      "birthPlace": "Birth place",
+      "unknownTime": "I don't know their birth time"
+    },
+    "born": "Born"
   },
   "location": {
     "title": "幫助 Solara 同步您的天空",
@@ -400,7 +624,26 @@
     },
     "completed": {
       "title": "刪除完成",
-      "description": "您的資料已成功從 Solara Insights 刪除。"
+      "description": "您的資料已成功從 Solara Insights 刪除。",
+      "permanentNotice": "All your personal data associated with your Facebook account has been permanently deleted from Solara Insights. This action cannot be undone."
+    },
+    "pageTitle": "Data Deletion Status",
+    "noCode": "No confirmation code provided. Please use the link from your data deletion confirmation.",
+    "notFound": "Deletion request not found. The confirmation code may be invalid or expired.",
+    "confirmationCode": "Confirmation Code",
+    "status": "Status",
+    "requestReceived": "Request Received",
+    "processed": "Processed",
+    "errorDetails": "Error details",
+    "contactSupport": "Please contact us at solara@solarainsights.com for assistance.",
+    "questions": "Questions? Contact us at",
+    "failed": {
+      "title": "Failed",
+      "description": "There was an issue processing your deletion request. Please contact support."
+    },
+    "userNotFound": {
+      "title": "No Data Found",
+      "description": "No account was found associated with your Facebook account. No data needed to be deleted."
     }
   },
   "zodiacSigns": {
@@ -459,5 +702,22 @@
     "guidesFound": "找到{count}個指南",
     "filterByTopic": "按主題篩選",
     "clearAll": "清除全部"
+  },
+  "spaceBetween": {
+    "title": "The Space Between",
+    "subtitle": "Your relationship blueprint with {connectionName}",
+    "generating": "Generating your relationship blueprint...",
+    "generatingHint": "This may take a moment",
+    "tryAgain": "Try again",
+    "discover": "Discover the Space Between",
+    "discoverDescription": "Generate your permanent relationship blueprint with {connectionName}. This deep insight is created once and saved forever.",
+    "generateBlueprint": "Generate blueprint",
+    "sections": {
+      "essence": "Essence",
+      "emotionalBlueprint": "Emotional Blueprint",
+      "communication": "Communication",
+      "growthEdges": "Growth Edges",
+      "careGuide": "Care Guide"
+    }
   }
 }
