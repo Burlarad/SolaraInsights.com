@@ -7,9 +7,9 @@ import { cn } from "@/lib/utils";
 
 const tabs = [
   { label: "Insights", href: "/sanctuary" },
-  { label: "Personal Narrative", href: "/sanctuary/birth-chart" },
+  { label: "Astrology", href: "/sanctuary/birth-chart" },
+  { label: "Numerology", href: "/sanctuary/numerology" },
   { label: "Connections", href: "/sanctuary/connections" },
-  { label: "Library", href: "/sanctuary/library", disabled: true },
 ];
 
 export function SanctuaryTabs() {
@@ -95,15 +95,13 @@ export function SanctuaryTabs() {
           return (
             <Link
               key={tab.href}
-              href={tab.disabled ? "#" : tab.href}
+              href={tab.href}
               className={cn(
                 "pill text-sm font-medium transition-all",
                 isActive
                   ? "bg-accent-ink text-white shadow-sm"
-                  : "bg-transparent text-accent-ink hover:bg-white/80",
-                tab.disabled && "opacity-50 cursor-not-allowed"
+                  : "bg-transparent text-accent-ink hover:bg-white/80"
               )}
-              onClick={(e) => tab.disabled && e.preventDefault()}
             >
               {tab.label}
             </Link>
@@ -153,7 +151,7 @@ export function SanctuaryTabs() {
               <Link
                 key={tab.href}
                 ref={(el) => setTabRef(tab.href, el)}
-                href={tab.disabled ? "#" : tab.href}
+                href={tab.href}
                 className={cn(
                   "flex-shrink-0 snap-center",
                   "min-h-[44px] px-5 py-2.5 rounded-full",
@@ -161,23 +159,20 @@ export function SanctuaryTabs() {
                   "flex items-center justify-center",
                   isActive
                     ? "bg-accent-ink text-white shadow-sm"
-                    : "bg-transparent text-accent-ink hover:bg-white/80",
-                  tab.disabled && "opacity-50 cursor-not-allowed"
+                    : "bg-transparent text-accent-ink hover:bg-white/80"
                 )}
-                onClick={(e) => {
-                  if (tab.disabled) {
-                    e.preventDefault();
-                    return;
+                onClick={() => {
+                  // Center this tab on tap
+                  const target = tabRefs.current.get(tab.href);
+                  if (target) {
+                    setTimeout(() => {
+                      target.scrollIntoView({
+                        behavior: "smooth",
+                        inline: "center",
+                        block: "nearest",
+                      });
+                    }, 10);
                   }
-                  // Center this tab on tap (for non-disabled tabs)
-                  const target = e.currentTarget;
-                  setTimeout(() => {
-                    target.scrollIntoView({
-                      behavior: "smooth",
-                      inline: "center",
-                      block: "nearest",
-                    });
-                  }, 10);
                 }}
               >
                 {tab.label}

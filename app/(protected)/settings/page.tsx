@@ -80,6 +80,7 @@ export default function SettingsPage() {
   const [birthTime, setBirthTime] = useState("");
   const [unknownBirthTime, setUnknownBirthTime] = useState(false);
 
+
   // Location state - pre-resolved from PlacePicker
   const [birthPlace, setBirthPlace] = useState<PlaceSelection | null>(null);
   const [birthPlaceDisplay, setBirthPlaceDisplay] = useState("");
@@ -456,6 +457,7 @@ export default function SettingsPage() {
     try {
       // Build update payload with pre-resolved location data
       // Server will auto-compose full_name from first/middle/last
+      // Note: first_name, middle_name, last_name are used for numerology calculations
       const updatePayload: Record<string, any> = {
         first_name: firstName.trim() || null,
         middle_name: middleName.trim() || null,
@@ -921,36 +923,41 @@ export default function SettingsPage() {
               </div>
             )}
 
-            <div className="grid md:grid-cols-3 gap-5">
-              <div className="space-y-2">
-                <Label htmlFor="firstName">First name</Label>
-                <Input
-                  id="firstName"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="Jane"
-                />
-              </div>
+            <div className="space-y-3">
+              <div className="grid md:grid-cols-3 gap-5">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">First name</Label>
+                  <Input
+                    id="firstName"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="Jane"
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="middleName">Middle name</Label>
-                <Input
-                  id="middleName"
-                  value={middleName}
-                  onChange={(e) => setMiddleName(e.target.value)}
-                  placeholder="Optional"
-                />
-              </div>
+                <div className="space-y-2">
+                  <Label htmlFor="middleName">Middle name</Label>
+                  <Input
+                    id="middleName"
+                    value={middleName}
+                    onChange={(e) => setMiddleName(e.target.value)}
+                    placeholder="Optional"
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Last name</Label>
-                <Input
-                  id="lastName"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  placeholder="Doe"
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Last name</Label>
+                  <Input
+                    id="lastName"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Doe"
+                  />
+                </div>
               </div>
+              <p className="text-xs text-accent-ink/60">
+                Your birth name is used for numerology calculations
+              </p>
             </div>
 
             <div className="space-y-2">

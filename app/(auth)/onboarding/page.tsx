@@ -192,6 +192,7 @@ export default function OnboardingPage() {
       }
 
       // Save profile with split name fields - server will compose full_name
+      // Save profile - first_name, middle_name, last_name are used for numerology calculations
       await saveProfile({
         first_name: firstName.trim(),
         middle_name: middleName.trim() || null,

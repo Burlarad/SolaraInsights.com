@@ -9,6 +9,8 @@ export interface Profile {
   last_name: string | null;
   full_name: string | null; // Auto-composed from first + middle + last
   preferred_name: string | null; // UI label: "Nickname"
+  // Note: first_name, middle_name, last_name are used for numerology calculations
+
   email: string;
   birth_date: string | null; // ISO date string
   birth_time: string | null; // HH:MM format
@@ -66,6 +68,8 @@ export interface ProfileUpdate {
   last_name?: string | null;
   full_name?: string | null; // Auto-composed by server when first/last provided
   preferred_name?: string | null; // UI label: "Nickname"
+  // Note: first_name, middle_name, last_name are used for numerology calculations
+
   birth_date?: string | null;
   birth_time?: string | null;
   birth_city?: string | null;
