@@ -11,6 +11,7 @@ import { GreetingCard } from "@/components/sanctuary/GreetingCard";
 import { EmotionalCadenceTimeline } from "@/components/sanctuary/EmotionalCadenceTimeline";
 import { SocialConnectModal } from "@/components/sanctuary/SocialConnectModal";
 import { useSettings } from "@/providers/SettingsProvider";
+import { useGeolocation } from "@/hooks/useGeolocation";
 import { SanctuaryInsight, Timeframe, SocialProvider } from "@/types";
 import { findTarotCard } from "@/lib/tarot";
 import { findRune } from "@/lib/runes";
@@ -28,6 +29,7 @@ function SanctuaryContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { profile, loading: profileLoading, error: profileError, refreshProfile } = useSettings();
+  const { coords, timezone } = useGeolocation();
 
   const [timeframe, setTimeframe] = useState<Timeframe>("today");
   const [insight, setInsight] = useState<SanctuaryInsight | null>(null);
@@ -491,6 +493,10 @@ function SanctuaryContent() {
                   dawn={insight.emotionalCadence?.dawn ?? "—"}
                   midday={insight.emotionalCadence?.midday ?? "—"}
                   dusk={insight.emotionalCadence?.dusk ?? "—"}
+                  evening={insight.emotionalCadence?.evening ?? "—"}
+                  midnight={insight.emotionalCadence?.midnight ?? "—"}
+                  morning={insight.emotionalCadence?.morning ?? "—"}
+                  coords={coords}
                 />
               </CardContent>
             </Card>

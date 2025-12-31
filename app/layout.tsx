@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Crimson_Pro } from "next/font/google";
+import { GeolocationProvider } from "@/contexts/GeolocationContext";
 import { SettingsProvider } from "@/providers/SettingsProvider";
 import { HashTokenHandler } from "@/components/auth/HashTokenHandler";
 import "./globals.css";
@@ -33,10 +34,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${crimsonPro.variable}`}>
       <body>
-        <SettingsProvider>
-          <HashTokenHandler />
-          {children}
-        </SettingsProvider>
+        <GeolocationProvider>
+          <SettingsProvider>
+            <HashTokenHandler />
+            {children}
+          </SettingsProvider>
+        </GeolocationProvider>
       </body>
     </html>
   );

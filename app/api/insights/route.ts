@@ -490,9 +490,12 @@ Return a JSON object with this structure:
 {
   "personalNarrative": "Exactly 2 paragraphs, 8-12 sentences total. Include 1 micro-action (<=10 min). Follow Ayren voice rules.",
   "emotionalCadence": {
-    "dawn": "one-word emotional state",
-    "midday": "one-word emotional state",
-    "dusk": "one-word emotional state"
+    "dawn": "one-word emotional state for sunrise",
+    "midday": "one-word emotional state for noon",
+    "dusk": "one-word emotional state for sunset",
+    "evening": "one-word emotional state for after sunset",
+    "midnight": "one-word emotional state for midnight",
+    "morning": "one-word emotional state for pre-dawn"
   },
   "coreThemes": ["theme1", "theme2", "theme3"],
   "focusForPeriod": "one paragraph of practical focus",

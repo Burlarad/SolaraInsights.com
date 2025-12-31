@@ -13,9 +13,12 @@ import { SanctuaryInsight } from "@/types";
  * Default values for a normalized insight
  */
 const DEFAULT_EMOTIONAL_CADENCE = {
-  dawn: "calm",
-  midday: "steady",
+  dawn: "hopeful",
+  midday: "focused",
   dusk: "reflective",
+  evening: "peaceful",
+  midnight: "restful",
+  morning: "stirring",
 };
 
 const DEFAULT_TAROT = {
@@ -55,7 +58,14 @@ export function normalizeInsight(insight: Partial<SanctuaryInsight> | null | und
     // Return a completely empty but valid structure
     return {
       personalNarrative: "",
-      emotionalCadence: { ...DEFAULT_EMOTIONAL_CADENCE },
+      emotionalCadence: {
+        dawn: DEFAULT_EMOTIONAL_CADENCE.dawn,
+        midday: DEFAULT_EMOTIONAL_CADENCE.midday,
+        dusk: DEFAULT_EMOTIONAL_CADENCE.dusk,
+        evening: DEFAULT_EMOTIONAL_CADENCE.evening,
+        midnight: DEFAULT_EMOTIONAL_CADENCE.midnight,
+        morning: DEFAULT_EMOTIONAL_CADENCE.morning,
+      },
       coreThemes: [],
       focusForPeriod: "",
       tarot: { ...DEFAULT_TAROT },
@@ -75,11 +85,14 @@ export function normalizeInsight(insight: Partial<SanctuaryInsight> | null | und
     focusForPeriod: insight.focusForPeriod ?? "",
     journalPrompt: insight.journalPrompt ?? "",
 
-    // Emotional cadence - ensure all three time slots exist
+    // Emotional cadence - ensure all six time slots exist (day + night)
     emotionalCadence: {
       dawn: insight.emotionalCadence?.dawn ?? DEFAULT_EMOTIONAL_CADENCE.dawn,
       midday: insight.emotionalCadence?.midday ?? DEFAULT_EMOTIONAL_CADENCE.midday,
       dusk: insight.emotionalCadence?.dusk ?? DEFAULT_EMOTIONAL_CADENCE.dusk,
+      evening: insight.emotionalCadence?.evening ?? DEFAULT_EMOTIONAL_CADENCE.evening,
+      midnight: insight.emotionalCadence?.midnight ?? DEFAULT_EMOTIONAL_CADENCE.midnight,
+      morning: insight.emotionalCadence?.morning ?? DEFAULT_EMOTIONAL_CADENCE.morning,
     },
 
     // Arrays - ensure they're always arrays

@@ -106,6 +106,9 @@ export interface SanctuaryInsight {
     dawn: string;
     midday: string;
     dusk: string;
+    evening: string;
+    midnight: string;
+    morning: string;
   };
   coreThemes: string[]; // Short phrases
   focusForPeriod: string; // "Focus for today / this week / etc."
