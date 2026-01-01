@@ -1,16 +1,20 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 interface ZodiacCardProps {
-  name: string;
+  signKey: string;
   symbol: string;
   isSelected?: boolean;
   onClick?: () => void;
 }
 
-export function ZodiacCard({ name, symbol, isSelected, onClick }: ZodiacCardProps) {
+export function ZodiacCard({ signKey, symbol, isSelected, onClick }: ZodiacCardProps) {
+  const t = useTranslations("home");
+  const tSigns = useTranslations("zodiacSigns");
+
   return (
     <Card
       onClick={onClick}
@@ -22,7 +26,6 @@ export function ZodiacCard({ name, symbol, isSelected, onClick }: ZodiacCardProp
           : "border-border-subtle hover:border-accent-gold/50"
       )}
     >
-      {/* Icon circle with zodiac glyph */}
       <div className="flex items-center justify-center">
         <div
           className={cn(
@@ -36,17 +39,15 @@ export function ZodiacCard({ name, symbol, isSelected, onClick }: ZodiacCardProp
         </div>
       </div>
 
-      {/* Sign name */}
       <h3 className="font-cursive text-xl md:text-2xl font-normal text-accent-ink tracking-wide">
-        {name}
+        {tSigns(signKey)}
       </h3>
 
-      {/* Open reading label */}
       <p className={cn(
         "micro-label transition-colors",
         isSelected ? "text-accent-gold" : "text-accent-gold/70"
       )}>
-        {isSelected ? "SELECTED" : "OPEN READING"}
+        {isSelected ? t("selected") : t("openReading")}
       </p>
     </Card>
   );

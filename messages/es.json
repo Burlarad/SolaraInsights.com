@@ -707,6 +707,75 @@
     "searchPlaceholder": "Buscar guías...",
     "guidesFound": "{count} {count, plural, one {guía encontrada} other {guías encontradas}}",
     "filterByTopic": "Filtrar por tema",
-    "clearAll": "Limpiar todo"
+    "clearAll": "Limpiar todo",
+    "curateOrbit": "Crea tu propia órbita de estudio.",
+    "chooseFromGuides": "Elige entre guías de astrología, tarot, compatibilidad y las funciones que les dan vida.",
+    "onePageADay": "Una página al día mantiene la niebla alejada.",
+    "startHere": "EMPIEZA AQUÍ",
+    "recommendedPath": "Ruta recomendada",
+    "noGuidesFound": "No se encontraron guías",
+    "tryAdjusting": "Intenta ajustar tu búsqueda o filtros.",
+    "allGuides": "TODAS LAS GUÍAS",
+    "min": "MIN",
+    "start": "EMPEZAR",
+    "openGuide": "Abrir guía",
+    "backToLearn": "Volver al Centro de Aprendizaje",
+    "minRead": "min de lectura",
+    "previous": "Anterior",
+    "next": "Siguiente"
+  },
+  "learnCategories": {
+    "astrologyBasics": "Astrología Básica",
+    "astrologyIntermediate": "Astrología Intermedia",
+    "tarotBasics": "Tarot Básico",
+    "compatibility": "Compatibilidad"
+  },
+  "learnLevels": {
+    "beginner": "Principiante",
+    "intermediate": "Intermedio",
+    "advanced": "Avanzado"
+  },
+  "home": {
+    "enterSanctuary": "ENTRAR AL SANTUARIO",
+    "chooseExperience": "ELIGE TU EXPERIENCIA",
+    "dailyAlignment": "ALINEACIÓN DIARIA",
+    "chooseYourSign": "Elige tu signo",
+    "selected": "SELECCIONADO",
+    "openReading": "ABRIR LECTURA",
+    "askTheCards": "Pregunta a las cartas",
+    "enterQuestion": "Ingresa tu pregunta y saca tu tirada.",
+    "exploreCompatibility": "Explora la compatibilidad",
+    "selectTwoSigns": "Selecciona dos signos para descubrir su conexión cósmica."
+  },
+  "experiences": {
+    "horoscope": "Horóscopo",
+    "tarot": "Tarot",
+    "compatibility": "Compatibilidad"
+  },
+  "footer": {
+    "privacyPolicy": "Política de Privacidad",
+    "termsOfService": "Términos de Servicio",
+    "about": "Acerca de",
+    "copyright": "© 2025 Solara Insights — Creado con amor bajo la luz de las estrellas."
+  },
+  "compatibility": {
+    "title": "Explora la Compatibilidad",
+    "yourSign": "TU SIGNO",
+    "theirSign": "SU SIGNO",
+    "selectYourSign": "Selecciona tu signo",
+    "selectTheirSign": "Selecciona su signo",
+    "tryAgain": "Intentar de nuevo",
+    "consultingStars": "Consultando las estrellas...",
+    "strengths": "FORTALEZAS",
+    "potentialFriction": "FRICCIÓN POTENCIAL",
+    "howToMakeItWork": "CÓMO HACERLO FUNCIONAR",
+    "communicationStyle": "ESTILO DE COMUNICACIÓN",
+    "loveIntimacy": "AMOR E INTIMIDAD",
+    "trustSecurity": "CONFIANZA Y SEGURIDAD",
+    "longTermPotential": "POTENCIAL A LARGO PLAZO",
+    "bestMoveThisWeek": "MEJOR MOVIMIENTO ESTA SEMANA",
+    "wantPersonalized": "¿Quieres compatibilidad personalizada basada en tus cartas natales completas?",
+    "joinSolara": "Únete a Solara",
+    "pleaseWait": "Por favor espera {seconds}s antes de solicitar de nuevo..."
   }
 }

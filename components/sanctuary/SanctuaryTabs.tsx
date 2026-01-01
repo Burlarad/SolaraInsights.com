@@ -3,29 +3,31 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRef, useEffect, useState, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
-const tabs = [
-  { label: "Insights", href: "/sanctuary" },
-  { label: "Astrology", href: "/sanctuary/birth-chart" },
-  { label: "Numerology", href: "/sanctuary/numerology" },
-  { label: "Connections", href: "/sanctuary/connections" },
-];
+const TAB_KEYS = ["insights", "connections", "astrology", "numerology"] as const;
+
+const TAB_HREFS: Record<typeof TAB_KEYS[number], string> = {
+  insights: "/sanctuary",
+  astrology: "/sanctuary/birth-chart",
+  numerology: "/sanctuary/numerology",
+  connections: "/sanctuary/connections",
+};
 
 export function SanctuaryTabs() {
+  const t = useTranslations("sanctuary.tabs");
   const pathname = usePathname();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
   const [showLeftFade, setShowLeftFade] = useState(false);
   const [showRightFade, setShowRightFade] = useState(true);
 
-  // Check if we're on mobile
   const isMobile = useCallback(() => {
     if (typeof window === "undefined") return false;
     return window.matchMedia("(max-width: 767px)").matches;
   }, []);
 
-  // Update fade visibility based on scroll position
   const updateFades = useCallback(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
@@ -33,19 +35,15 @@ export function SanctuaryTabs() {
     const { scrollLeft, scrollWidth, clientWidth } = container;
     const maxScroll = scrollWidth - clientWidth;
 
-    // Show left fade if scrolled right
     setShowLeftFade(scrollLeft > 8);
-    // Show right fade if more content to the right
     setShowRightFade(scrollLeft < maxScroll - 8);
   }, []);
 
-  // Center the active tab on mount and when pathname changes
   useEffect(() => {
     if (!isMobile()) return;
 
     const activeTab = tabRefs.current.get(pathname);
     if (activeTab) {
-      // Small delay to ensure layout is complete
       setTimeout(() => {
         activeTab.scrollIntoView({
           behavior: "smooth",
@@ -55,16 +53,13 @@ export function SanctuaryTabs() {
       }, 50);
     }
 
-    // Update fades after centering
     setTimeout(updateFades, 150);
   }, [pathname, isMobile, updateFades]);
 
-  // Set up scroll listener for fade updates
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
-    // Initial fade check
     updateFades();
 
     container.addEventListener("scroll", updateFades, { passive: true });
@@ -76,7 +71,6 @@ export function SanctuaryTabs() {
     };
   }, [updateFades]);
 
-  // Store ref for each tab
   const setTabRef = useCallback((href: string, el: HTMLAnchorElement | null) => {
     if (el) {
       tabRefs.current.set(href, el);
@@ -87,15 +81,16 @@ export function SanctuaryTabs() {
 
   return (
     <>
-      {/* Desktop: Original inline layout */}
+      {/* Desktop */}
       <div className="hidden md:inline-flex gap-2 p-1 bg-white/50 rounded-full">
-        {tabs.map((tab) => {
-          const isActive = pathname === tab.href;
+        {TAB_KEYS.map((key) => {
+          const href = TAB_HREFS[key];
+          const isActive = pathname === href;
 
           return (
             <Link
-              key={tab.href}
-              href={tab.href}
+              key={key}
+              href={href}
               className={cn(
                 "pill font-cursive text-xl md:text-2xl font-normal transition-all",
                 isActive
@@ -103,15 +98,14 @@ export function SanctuaryTabs() {
                   : "bg-transparent text-accent-ink hover:bg-white/80"
               )}
             >
-              {tab.label}
+              {t(key)}
             </Link>
           );
         })}
       </div>
 
-      {/* Mobile: Scrollable tabs with fades */}
+      {/* Mobile */}
       <div className="md:hidden relative w-full min-w-0">
-        {/* Left fade */}
         <div
           className={cn(
             "absolute left-0 top-0 bottom-0 w-6 z-10 pointer-events-none transition-opacity duration-200",
@@ -120,7 +114,6 @@ export function SanctuaryTabs() {
           )}
         />
 
-        {/* Right fade */}
         <div
           className={cn(
             "absolute right-0 top-0 bottom-0 w-6 z-10 pointer-events-none transition-opacity duration-200",
@@ -129,7 +122,6 @@ export function SanctuaryTabs() {
           )}
         />
 
-        {/* Scroll container */}
         <div
           ref={scrollContainerRef}
           className={cn(
@@ -139,19 +131,17 @@ export function SanctuaryTabs() {
             "scrollbar-none",
             "[-webkit-overflow-scrolling:touch]"
           )}
-          style={{
-            scrollbarWidth: "none",
-            msOverflowStyle: "none",
-          }}
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
-          {tabs.map((tab) => {
-            const isActive = pathname === tab.href;
+          {TAB_KEYS.map((key) => {
+            const href = TAB_HREFS[key];
+            const isActive = pathname === href;
 
             return (
               <Link
-                key={tab.href}
-                ref={(el) => setTabRef(tab.href, el)}
-                href={tab.href}
+                key={key}
+                ref={(el) => setTabRef(href, el)}
+                href={href}
                 className={cn(
                   "flex-shrink-0 snap-center",
                   "min-h-[44px] px-5 py-2.5 rounded-full",
@@ -162,8 +152,7 @@ export function SanctuaryTabs() {
                     : "bg-transparent text-accent-ink hover:bg-white/80"
                 )}
                 onClick={() => {
-                  // Center this tab on tap
-                  const target = tabRefs.current.get(tab.href);
+                  const target = tabRefs.current.get(href);
                   if (target) {
                     setTimeout(() => {
                       target.scrollIntoView({
@@ -175,7 +164,7 @@ export function SanctuaryTabs() {
                   }
                 }}
               >
-                {tab.label}
+                {t(key)}
               </Link>
             );
           })}

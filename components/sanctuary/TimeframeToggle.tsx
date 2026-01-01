@@ -1,9 +1,9 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { TogglePills } from "@/components/shared/TogglePills";
 
-// Only Today and Year available for subscribers
-const TIMEFRAME_OPTIONS = ["Today", "Year"];
+const TIMEFRAME_KEYS = ["today", "year"] as const;
 
 interface TimeframeToggleProps {
   value: string;
@@ -11,13 +11,18 @@ interface TimeframeToggleProps {
 }
 
 export function TimeframeToggle({ value, onChange }: TimeframeToggleProps) {
+  const t = useTranslations("sanctuary.timeframes");
+
+  const options = TIMEFRAME_KEYS.map((key) => ({
+    key,
+    label: t(key),
+  }));
+
   return (
-    <div className="flex flex-col gap-2">
-      <TogglePills
-        options={TIMEFRAME_OPTIONS}
-        value={value}
-        onChange={onChange}
-      />
-    </div>
+    <TogglePills
+      options={options}
+      value={value}
+      onChange={onChange}
+    />
   );
 }

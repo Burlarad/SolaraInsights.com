@@ -1,17 +1,16 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ZODIAC_SIGNS } from "@/lib/constants";
 import { PublicCompatibilityResponse } from "@/types";
 
-// Generate UUID using native crypto API
 function generateUUID(): string {
   return crypto.randomUUID();
 }
 
-// Scroll element to exact center of viewport
 function scrollToCenter(el: HTMLElement) {
   const rect = el.getBoundingClientRect();
   const absoluteTop = rect.top + window.scrollY;
@@ -20,6 +19,9 @@ function scrollToCenter(el: HTMLElement) {
 }
 
 export function CompatibilityArena() {
+  const t = useTranslations("compatibility");
+  const tSigns = useTranslations("zodiacSigns");
+
   const [signA, setSignA] = useState<string>("");
   const [signB, setSignB] = useState<string>("");
   const [reading, setReading] = useState<PublicCompatibilityResponse | null>(null);
@@ -34,7 +36,6 @@ export function CompatibilityArena() {
   const lastPairRef = useRef<string>("");
   const requestIdRef = useRef<string>("");
 
-  // Cleanup intervals on unmount
   useEffect(() => {
     return () => {
       if (cooldownInterval.current) clearInterval(cooldownInterval.current);
@@ -42,7 +43,6 @@ export function CompatibilityArena() {
     };
   }, []);
 
-  // Cooldown countdown
   useEffect(() => {
     if (cooldownRemaining > 0) {
       cooldownInterval.current = setInterval(() => {
@@ -61,9 +61,7 @@ export function CompatibilityArena() {
     };
   }, [cooldownRemaining]);
 
-  // Fetch compatibility reading
   const fetchCompatibility = useCallback(async (a: string, b: string) => {
-    // Generate a new requestId for idempotency
     const requestId = generateUUID();
     requestIdRef.current = requestId;
 
@@ -75,30 +73,23 @@ export function CompatibilityArena() {
       const response = await fetch("/api/public-compatibility", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          signA: a,
-          signB: b,
-          requestId,
-        }),
+        body: JSON.stringify({ signA: a, signB: b, requestId }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        // Handle rate limit / cooldown
         if (response.status === 429) {
           const retryAfter = data.retryAfterSeconds || 10;
           setCooldownRemaining(retryAfter);
           setError(data.message || `Please wait ${retryAfter} seconds.`);
           return;
         }
-
         throw new Error(data.message || "Failed to load compatibility");
       }
 
       setReading(data as PublicCompatibilityResponse);
 
-      // Scroll to output with glow
       requestAnimationFrame(() => {
         if (outputRef.current) {
           scrollToCenter(outputRef.current);
@@ -108,49 +99,29 @@ export function CompatibilityArena() {
           }, 300);
         }
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error loading compatibility:", err);
-      setError(err.message || "We couldn't load the reading. Please try again.");
+      setError(err instanceof Error ? err.message : "We couldn't load the reading. Please try again.");
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // Auto-generate when both signs are selected (debounced)
   useEffect(() => {
-    // Clear any pending debounce
-    if (debounceTimeout.current) {
-      clearTimeout(debounceTimeout.current);
-    }
+    if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
+    if (!signA || !signB) return;
 
-    // Both signs must be selected
-    if (!signA || !signB) {
-      return;
-    }
-
-    // Create pair key to check if it changed
     const pairKey = [signA, signB].sort().join("__");
+    if (pairKey === lastPairRef.current) return;
+    if (cooldownRemaining > 0) return;
 
-    // Don't refetch if same pair
-    if (pairKey === lastPairRef.current) {
-      return;
-    }
-
-    // Don't fetch during cooldown
-    if (cooldownRemaining > 0) {
-      return;
-    }
-
-    // Debounce by 300ms
     debounceTimeout.current = setTimeout(() => {
       lastPairRef.current = pairKey;
       fetchCompatibility(signA, signB);
     }, 300);
 
     return () => {
-      if (debounceTimeout.current) {
-        clearTimeout(debounceTimeout.current);
-      }
+      if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
     };
   }, [signA, signB, cooldownRemaining, fetchCompatibility]);
 
@@ -168,25 +139,22 @@ export function CompatibilityArena() {
 
   const handleTryAgain = () => {
     if (signA && signB) {
-      lastPairRef.current = ""; // Reset to allow refetch
+      lastPairRef.current = "";
       fetchCompatibility(signA, signB);
     }
   };
 
   return (
     <div className="space-y-8">
-      {/* Input Section */}
       <Card className="bg-shell border-accent-gold/20">
         <CardHeader className="pb-4">
-          <CardTitle className="text-xl md:text-2xl">Explore Compatibility</CardTitle>
+          <CardTitle className="text-xl md:text-2xl">{t("title")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Sign Selectors */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Your Sign */}
             <div>
               <label htmlFor="sign-a" className="micro-label mb-2 block">
-                YOUR SIGN
+                {t("yourSign")}
               </label>
               <select
                 id="sign-a"
@@ -195,19 +163,18 @@ export function CompatibilityArena() {
                 disabled={loading}
                 className="w-full p-4 rounded-lg border border-border-subtle bg-white text-base text-accent-ink focus:outline-none focus:ring-2 focus:ring-accent-gold/30 focus:border-accent-gold disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <option value="">Select your sign</option>
+                <option value="">{t("selectYourSign")}</option>
                 {ZODIAC_SIGNS.map((sign) => (
                   <option key={sign.key} value={sign.key}>
-                    {sign.symbol} {sign.name}
+                    {sign.symbol} {tSigns(sign.key)}
                   </option>
                 ))}
               </select>
             </div>
 
-            {/* Their Sign */}
             <div>
               <label htmlFor="sign-b" className="micro-label mb-2 block">
-                THEIR SIGN
+                {t("theirSign")}
               </label>
               <select
                 id="sign-b"
@@ -216,20 +183,19 @@ export function CompatibilityArena() {
                 disabled={loading}
                 className="w-full p-4 rounded-lg border border-border-subtle bg-white text-base text-accent-ink focus:outline-none focus:ring-2 focus:ring-accent-gold/30 focus:border-accent-gold disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <option value="">Select their sign</option>
+                <option value="">{t("selectTheirSign")}</option>
                 {ZODIAC_SIGNS.map((sign) => (
                   <option key={sign.key} value={sign.key}>
-                    {sign.symbol} {sign.name}
+                    {sign.symbol} {tSigns(sign.key)}
                   </option>
                 ))}
               </select>
             </div>
           </div>
 
-          {/* Status Messages */}
           {cooldownRemaining > 0 && (
             <p className="text-center text-accent-ink/60 text-sm">
-              Please wait {cooldownRemaining}s before requesting again...
+              {t("pleaseWait", { seconds: cooldownRemaining })}
             </p>
           )}
 
@@ -242,16 +208,14 @@ export function CompatibilityArena() {
                 disabled={cooldownRemaining > 0}
                 className="min-h-[44px]"
               >
-                Try again
+                {t("tryAgain")}
               </Button>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Output Section */}
       <div ref={outputRef}>
-        {/* Loading State */}
         {loading && (
           <Card className="bg-shell border-accent-gold/20 animate-in fade-in-50 duration-300">
             <CardContent className="py-12">
@@ -262,20 +226,15 @@ export function CompatibilityArena() {
                 <div className="h-4 bg-accent-muted rounded w-4/5" />
                 <div className="h-4 bg-accent-muted rounded w-full" />
               </div>
-              <p className="text-center text-accent-ink/60 mt-6">
-                Consulting the stars...
-              </p>
+              <p className="text-center text-accent-ink/60 mt-6">{t("consultingStars")}</p>
             </CardContent>
           </Card>
         )}
 
-        {/* Reading Output */}
         {reading && !loading && (
           <Card
             className={`bg-shell border-accent-gold/20 animate-in fade-in-50 duration-300 transition-shadow ${
-              showGlow
-                ? "ring-2 ring-accent-gold/50 shadow-[0_0_20px_rgba(212,175,55,0.3)]"
-                : ""
+              showGlow ? "ring-2 ring-accent-gold/50 shadow-[0_0_20px_rgba(212,175,55,0.3)]" : ""
             }`}
           >
             <CardHeader className="pb-4">
@@ -283,17 +242,15 @@ export function CompatibilityArena() {
             </CardHeader>
 
             <CardContent className="space-y-8">
-              {/* Summary */}
               <div className="text-accent-ink/80 leading-relaxed space-y-4">
                 {reading.summary.split("\n\n").map((p, i) => (
                   <p key={i}>{p}</p>
                 ))}
               </div>
 
-              {/* Strengths */}
               {reading.strengths.length > 0 && (
                 <div>
-                  <p className="micro-label mb-3">STRENGTHS</p>
+                  <p className="micro-label mb-3">{t("strengths")}</p>
                   <ul className="space-y-2">
                     {reading.strengths.map((item, i) => (
                       <li key={i} className="flex items-start gap-3 text-accent-ink/80">
@@ -305,10 +262,9 @@ export function CompatibilityArena() {
                 </div>
               )}
 
-              {/* Friction Points */}
               {reading.frictionPoints.length > 0 && (
                 <div>
-                  <p className="micro-label mb-3">POTENTIAL FRICTION</p>
+                  <p className="micro-label mb-3">{t("potentialFriction")}</p>
                   <ul className="space-y-2">
                     {reading.frictionPoints.map((item, i) => (
                       <li key={i} className="flex items-start gap-3 text-accent-ink/80">
@@ -320,10 +276,9 @@ export function CompatibilityArena() {
                 </div>
               )}
 
-              {/* How to Make It Work */}
               {reading.howToMakeItWork.length > 0 && (
                 <div>
-                  <p className="micro-label mb-3">HOW TO MAKE IT WORK</p>
+                  <p className="micro-label mb-3">{t("howToMakeItWork")}</p>
                   <ul className="space-y-2">
                     {reading.howToMakeItWork.map((item, i) => (
                       <li key={i} className="flex items-start gap-3 text-accent-ink/80">
@@ -335,9 +290,8 @@ export function CompatibilityArena() {
                 </div>
               )}
 
-              {/* Communication Style */}
               <div>
-                <p className="micro-label mb-3">COMMUNICATION STYLE</p>
+                <p className="micro-label mb-3">{t("communicationStyle")}</p>
                 <div className="text-accent-ink/80 leading-relaxed space-y-4">
                   {reading.communicationStyle.split("\n\n").map((p, i) => (
                     <p key={i}>{p}</p>
@@ -345,9 +299,8 @@ export function CompatibilityArena() {
                 </div>
               </div>
 
-              {/* Love & Intimacy */}
               <div>
-                <p className="micro-label mb-3">LOVE & INTIMACY</p>
+                <p className="micro-label mb-3">{t("loveIntimacy")}</p>
                 <div className="text-accent-ink/80 leading-relaxed space-y-4">
                   {reading.loveAndIntimacy.split("\n\n").map((p, i) => (
                     <p key={i}>{p}</p>
@@ -355,9 +308,8 @@ export function CompatibilityArena() {
                 </div>
               </div>
 
-              {/* Trust & Security */}
               <div>
-                <p className="micro-label mb-3">TRUST & SECURITY</p>
+                <p className="micro-label mb-3">{t("trustSecurity")}</p>
                 <div className="text-accent-ink/80 leading-relaxed space-y-4">
                   {reading.trustAndSecurity.split("\n\n").map((p, i) => (
                     <p key={i}>{p}</p>
@@ -365,9 +317,8 @@ export function CompatibilityArena() {
                 </div>
               </div>
 
-              {/* Long-Term Potential */}
               <div>
-                <p className="micro-label mb-3">LONG-TERM POTENTIAL</p>
+                <p className="micro-label mb-3">{t("longTermPotential")}</p>
                 <div className="text-accent-ink/80 leading-relaxed space-y-4">
                   {reading.longTermPotential.split("\n\n").map((p, i) => (
                     <p key={i}>{p}</p>
@@ -375,19 +326,15 @@ export function CompatibilityArena() {
                 </div>
               </div>
 
-              {/* Best Move This Week */}
               <div className="bg-accent-gold/5 border border-accent-gold/20 rounded-lg p-4">
-                <p className="micro-label mb-2">BEST MOVE THIS WEEK</p>
+                <p className="micro-label mb-2">{t("bestMoveThisWeek")}</p>
                 <p className="text-accent-ink italic">{reading.bestMoveThisWeek}</p>
               </div>
 
-              {/* CTA for sign up */}
               <div className="pt-6 border-t border-border-subtle text-center space-y-3">
-                <p className="text-sm text-accent-ink/60">
-                  Want personalized compatibility based on your full birth charts?
-                </p>
+                <p className="text-sm text-accent-ink/60">{t("wantPersonalized")}</p>
                 <Button variant="gold" asChild className="min-h-[48px]">
-                  <a href="/join">Join Solara</a>
+                  <a href="/join">{t("joinSolara")}</a>
                 </Button>
               </div>
             </CardContent>

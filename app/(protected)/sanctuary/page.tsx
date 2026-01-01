@@ -377,7 +377,7 @@ function SanctuaryContent() {
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <SanctuaryTabs />
         <div className="flex justify-center md:justify-end">
-          <TimeframeToggle value={timeframeLabel} onChange={(v) => setTimeframe(v.toLowerCase() as Timeframe)} />
+          <TimeframeToggle value={timeframe} onChange={(v) => setTimeframe(v as Timeframe)} />
         </div>
       </div>
 

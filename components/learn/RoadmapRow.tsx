@@ -1,7 +1,9 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { LearnGuideCard } from "./LearnGuideCard";
 import { LEARN_ITEMS, LearnItem } from "@/lib/learn/content";
 
-// Curated roadmap order - astrology foundations path
 const ROADMAP_SLUGS = [
   "astrology-101",
   "big-three",
@@ -11,12 +13,12 @@ const ROADMAP_SLUGS = [
 ];
 
 interface RoadmapRowProps {
-  /** Override the default roadmap items */
   items?: LearnItem[];
 }
 
 export function RoadmapRow({ items }: RoadmapRowProps) {
-  // Use provided items or default curated roadmap
+  const t = useTranslations("learn");
+
   const roadmapItems =
     items ||
     ROADMAP_SLUGS.map((slug) => LEARN_ITEMS.find((item) => item.slug === slug)).filter(
@@ -28,9 +30,9 @@ export function RoadmapRow({ items }: RoadmapRowProps) {
   return (
     <section>
       <div className="flex items-center gap-3 mb-4">
-        <h2 className="micro-label">START HERE</h2>
+        <h2 className="micro-label">{t("startHere")}</h2>
         <span className="text-xs bg-accent-gold/10 text-accent-gold px-2 py-0.5 rounded-full">
-          Recommended path
+          {t("recommendedPath")}
         </span>
       </div>
 

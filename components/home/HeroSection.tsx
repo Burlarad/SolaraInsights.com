@@ -1,18 +1,16 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { SolaraLogo } from "@/components/layout/SolaraLogo";
 import { PrimaryCTA } from "@/components/shared/PrimaryCTA";
 import { TogglePills } from "@/components/shared/TogglePills";
-import { TIMEFRAMES, EXPERIENCES } from "@/lib/constants";
-
-type Experience = "Horoscope" | "Tarot" | "Compatibility";
-type Timeframe = "Today" | "Week" | "Month";
+import { TIMEFRAME_KEYS, EXPERIENCE_KEYS, type TimeframeKey, type ExperienceKey } from "@/lib/constants";
 
 interface HeroSectionProps {
-  experience: Experience;
-  timeframe: Timeframe;
-  onExperienceChange: (value: Experience) => void;
-  onTimeframeChange: (value: Timeframe) => void;
+  experience: ExperienceKey;
+  timeframe: TimeframeKey;
+  onExperienceChange: (value: ExperienceKey) => void;
+  onTimeframeChange: (value: TimeframeKey) => void;
 }
 
 export function HeroSection({
@@ -21,59 +19,63 @@ export function HeroSection({
   onExperienceChange,
   onTimeframeChange,
 }: HeroSectionProps) {
+  const t = useTranslations("home");
+  const tExp = useTranslations("experiences");
+  const tTime = useTranslations("sanctuary.timeframes");
+
+  const experienceOptions = EXPERIENCE_KEYS.map((key) => ({
+    key,
+    label: tExp(key),
+  }));
+
+  const timeframeOptions = TIMEFRAME_KEYS.map((key) => ({
+    key,
+    label: tTime(key),
+  }));
+
   return (
     <section className="max-w-5xl mx-auto px-6 py-16 text-center">
-      {/* Logo + wordmark + tagline */}
       <SolaraLogo size="lg" className="mb-8" />
 
-      {/* Primary CTA */}
       <div className="mb-12">
-        <PrimaryCTA href="/sanctuary">ENTER SANCTUARY</PrimaryCTA>
+        <PrimaryCTA href="/sanctuary">{t("enterSanctuary")}</PrimaryCTA>
       </div>
 
-      {/* Toggles */}
       <div className="space-y-6 mb-12">
-        {/* Choose Your Experience - FIRST */}
         <div>
-          <p className="micro-label mb-3">CHOOSE YOUR EXPERIENCE</p>
+          <p className="micro-label mb-3">{t("chooseExperience")}</p>
           <TogglePills
-            options={[...EXPERIENCES]}
+            options={experienceOptions}
             value={experience}
-            onChange={(val) => onExperienceChange(val as Experience)}
+            onChange={(val) => onExperienceChange(val as ExperienceKey)}
           />
         </div>
 
-        {/* Daily Alignment - ONLY shown for Horoscope */}
-        {experience === "Horoscope" && (
+        {experience === "horoscope" && (
           <div>
-            <p className="micro-label mb-3">DAILY ALIGNMENT</p>
+            <p className="micro-label mb-3">{t("dailyAlignment")}</p>
             <TogglePills
-              options={[...TIMEFRAMES]}
+              options={timeframeOptions}
               value={timeframe}
-              onChange={(val) => onTimeframeChange(val as Timeframe)}
+              onChange={(val) => onTimeframeChange(val as TimeframeKey)}
             />
           </div>
         )}
       </div>
 
-      {/* Section heading - varies by experience */}
       <div className="mb-8">
-        {experience === "Tarot" ? (
+        {experience === "tarot" ? (
           <>
-            <h2 className="text-3xl font-semibold mb-2">Ask the Cards</h2>
-            <p className="text-base text-accent-ink/70">
-              Enter your question and draw your spread.
-            </p>
+            <h2 className="text-3xl font-semibold mb-2">{t("askTheCards")}</h2>
+            <p className="text-base text-accent-ink/70">{t("enterQuestion")}</p>
           </>
-        ) : experience === "Compatibility" ? (
+        ) : experience === "compatibility" ? (
           <>
-            <h2 className="text-3xl font-semibold mb-2">Explore Compatibility</h2>
-            <p className="text-base text-accent-ink/70">
-              Select two signs to discover their cosmic connection.
-            </p>
+            <h2 className="text-3xl font-semibold mb-2">{t("exploreCompatibility")}</h2>
+            <p className="text-base text-accent-ink/70">{t("selectTwoSigns")}</p>
           </>
         ) : (
-          <h2 className="text-3xl font-semibold">Choose your sign</h2>
+          <h2 className="text-3xl font-semibold">{t("chooseYourSign")}</h2>
         )}
       </div>
     </section>

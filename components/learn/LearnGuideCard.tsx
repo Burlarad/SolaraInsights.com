@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
 import { Chip } from "@/components/shared/Chip";
 import { Clock, ArrowRight } from "lucide-react";
@@ -7,7 +10,6 @@ import { LearnItem } from "@/lib/learn/content";
 interface LearnGuideCardProps {
   item: LearnItem;
   variant?: "default" | "compact" | "roadmap";
-  /** Step number for roadmap variant */
   stepNumber?: number;
 }
 
@@ -16,6 +18,7 @@ export function LearnGuideCard({
   variant = "default",
   stepNumber,
 }: LearnGuideCardProps) {
+  const t = useTranslations("learn");
   const { slug, title, description, category, level, minutes, tags } = item;
 
   // Roadmap variant - horizontal scroll card with step number
@@ -31,7 +34,7 @@ export function LearnGuideCard({
             )}
             <div className="flex items-center gap-1 text-xs text-accent-ink/60">
               <Clock className="h-3 w-3" aria-hidden="true" />
-              <span>{minutes} MIN</span>
+              <span>{minutes} {t("min")}</span>
             </div>
           </div>
           <div className="flex-1">
@@ -43,7 +46,7 @@ export function LearnGuideCard({
             </p>
           </div>
           <div className="flex items-center gap-2 text-sm text-accent-gold mt-auto">
-            <span>START</span>
+            <span>{t("start")}</span>
             <ArrowRight
               className="h-4 w-4 group-hover:translate-x-1 transition-transform"
               aria-hidden="true"
@@ -60,7 +63,7 @@ export function LearnGuideCard({
         <Card className="min-w-[280px] p-6 flex flex-col gap-4 bg-white hover:shadow-lg transition-shadow">
           <div className="flex items-center gap-2 text-xs text-accent-ink/60">
             <Clock className="h-3 w-3" aria-hidden="true" />
-            <span>{minutes} MIN</span>
+            <span>{minutes} {t("min")}</span>
           </div>
           <div>
             <h3 className="text-lg font-semibold mb-2 group-hover:text-accent-gold transition-colors">
@@ -71,7 +74,7 @@ export function LearnGuideCard({
             </p>
           </div>
           <div className="flex items-center gap-2 text-sm text-accent-gold mt-auto">
-            <span>OPEN GUIDE</span>
+            <span>{t("openGuide")}</span>
             <ArrowRight
               className="h-4 w-4 group-hover:translate-x-1 transition-transform"
               aria-hidden="true"
@@ -97,7 +100,7 @@ export function LearnGuideCard({
           <div className="absolute top-4 left-4 flex items-center gap-3">
             <div className="flex items-center gap-1 bg-white/90 pill text-xs">
               <Clock className="h-3 w-3" aria-hidden="true" />
-              <span>{minutes} MIN</span>
+              <span>{minutes} {t("min")}</span>
             </div>
             <span className="micro-label bg-white/90 pill">{level}</span>
           </div>
@@ -122,7 +125,7 @@ export function LearnGuideCard({
           </div>
 
           <div className="flex items-center gap-2 text-sm text-accent-gold">
-            <span>Open guide</span>
+            <span>{t("openGuide")}</span>
             <ArrowRight
               className="h-4 w-4 group-hover:translate-x-1 transition-transform"
               aria-hidden="true"

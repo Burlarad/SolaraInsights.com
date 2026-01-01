@@ -707,6 +707,75 @@
     "searchPlaceholder": "गाइड खोजें...",
     "guidesFound": "{count} गाइड मिले",
     "filterByTopic": "विषय के अनुसार फ़िल्टर करें",
-    "clearAll": "सभी साफ़ करें"
+    "clearAll": "सभी साफ़ करें",
+    "curateOrbit": "Curate your own study orbit.",
+    "chooseFromGuides": "Choose from guides on astrology, tarot, compatibility, and the features that bring them to life.",
+    "onePageADay": "One page a day keeps the fog away.",
+    "startHere": "START HERE",
+    "recommendedPath": "Recommended path",
+    "noGuidesFound": "No guides found",
+    "tryAdjusting": "Try adjusting your search or filters.",
+    "allGuides": "ALL GUIDES",
+    "min": "MIN",
+    "start": "START",
+    "openGuide": "Open guide",
+    "backToLearn": "Back to Learn Center",
+    "minRead": "min read",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "learnCategories": {
+    "astrologyBasics": "Astrology Basics",
+    "astrologyIntermediate": "Astrology Intermediate",
+    "tarotBasics": "Tarot Basics",
+    "compatibility": "Compatibility"
+  },
+  "learnLevels": {
+    "beginner": "Beginner",
+    "intermediate": "Intermediate",
+    "advanced": "Advanced"
+  },
+  "home": {
+    "enterSanctuary": "ENTER SANCTUARY",
+    "chooseExperience": "CHOOSE YOUR EXPERIENCE",
+    "dailyAlignment": "DAILY ALIGNMENT",
+    "chooseYourSign": "Choose your sign",
+    "selected": "SELECTED",
+    "openReading": "OPEN READING",
+    "askTheCards": "Ask the Cards",
+    "enterQuestion": "Enter your question and draw your spread.",
+    "exploreCompatibility": "Explore Compatibility",
+    "selectTwoSigns": "Select two signs to discover their cosmic connection."
+  },
+  "experiences": {
+    "horoscope": "Horoscope",
+    "tarot": "Tarot",
+    "compatibility": "Compatibility"
+  },
+  "footer": {
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "about": "About",
+    "copyright": "© 2025 Solara Insights — Built with care under the light of the stars."
+  },
+  "compatibility": {
+    "title": "Explore Compatibility",
+    "yourSign": "YOUR SIGN",
+    "theirSign": "THEIR SIGN",
+    "selectYourSign": "Select your sign",
+    "selectTheirSign": "Select their sign",
+    "tryAgain": "Try again",
+    "consultingStars": "Consulting the stars...",
+    "strengths": "STRENGTHS",
+    "potentialFriction": "POTENTIAL FRICTION",
+    "howToMakeItWork": "HOW TO MAKE IT WORK",
+    "communicationStyle": "COMMUNICATION STYLE",
+    "loveIntimacy": "LOVE & INTIMACY",
+    "trustSecurity": "TRUST & SECURITY",
+    "longTermPotential": "LONG-TERM POTENTIAL",
+    "bestMoveThisWeek": "BEST MOVE THIS WEEK",
+    "wantPersonalized": "Want personalized compatibility based on your full birth charts?",
+    "joinSolara": "Join Solara",
+    "pleaseWait": "Please wait {seconds}s before requesting again..."
   }
 }

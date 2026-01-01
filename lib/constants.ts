@@ -14,5 +14,9 @@ export const ZODIAC_SIGNS = [
   { name: "Sagittarius", key: "sagittarius", symbol: "♐︎" },
 ] as const;
 
-export const TIMEFRAMES = ["Today", "Week", "Month"] as const;
-export const EXPERIENCES = ["Horoscope", "Tarot", "Compatibility"] as const;
+// Keys for timeframe and experience toggles (translate using i18n)
+export const TIMEFRAME_KEYS = ["today", "week", "month"] as const;
+export const EXPERIENCE_KEYS = ["horoscope", "tarot", "compatibility"] as const;
+
+export type TimeframeKey = (typeof TIMEFRAME_KEYS)[number];
+export type ExperienceKey = (typeof EXPERIENCE_KEYS)[number];

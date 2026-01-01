@@ -302,7 +302,7 @@ export default function BirthChartPage() {
             <select
               value={activeSection}
               onChange={(e) => setActiveSection(e.target.value as SoulPathSection)}
-              className="w-full px-4 py-3 rounded-lg border border-accent-soft bg-white text-accent-ink text-base font-medium focus:outline-none focus:ring-2 focus:ring-accent"
+              className="w-full px-4 py-3 rounded-lg border border-accent-soft bg-white text-accent-ink font-cursive text-xl font-normal focus:outline-none focus:ring-2 focus:ring-accent"
             >
               {SECTIONS.map((section) => (
                 <option key={section.id} value={section.id}>
@@ -319,7 +319,7 @@ export default function BirthChartPage() {
                 <button
                   key={section.id}
                   onClick={() => setActiveSection(section.id)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  className={`px-4 py-2 rounded-full font-cursive text-xl font-normal transition-all ${
                     activeSection === section.id
                       ? "bg-white/70 border border-border-subtle shadow-sm text-accent-ink"
                       : "bg-transparent border border-transparent hover:bg-white/40 text-accent-ink/70"

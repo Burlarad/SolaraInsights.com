@@ -1,15 +1,15 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { SolaraLogo } from "@/components/layout/SolaraLogo";
 import { Chip } from "@/components/shared/Chip";
-import { Clock, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import { Clock } from "lucide-react";
 import {
   LEARN_ITEMS,
   getLearnItemBySlug,
   getPrevNextLearnItems,
 } from "@/lib/learn/content";
+import { BackToLearn, GuideNavigation, MinutesRead } from "@/components/learn/GuideNavigation";
 
 // Guide content components
 import { GuideAstrology101 } from "@/components/learn/guides/astrology-101";
@@ -77,27 +77,18 @@ export default async function LearnGuidePage({ params }: PageProps) {
 
   return (
     <div className="max-w-3xl mx-auto px-4 md:px-6 py-8 md:py-12">
-      {/* Solara Logo */}
       <div className="flex justify-center items-center pt-4 pb-6">
         <SolaraLogo />
       </div>
 
-      {/* Back link */}
-      <Link
-        href="/learn"
-        className="inline-flex items-center gap-2 text-sm text-accent-ink/60 hover:text-accent-gold transition-colors mb-8"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to Learn Center
-      </Link>
+      <BackToLearn />
 
-      {/* Guide header */}
       <header className="mb-8">
         <div className="flex flex-wrap items-center gap-3 mb-4">
           <span className="micro-label">{item.category.toUpperCase()}</span>
           <div className="flex items-center gap-1 text-sm text-accent-ink/60">
             <Clock className="h-3 w-3" aria-hidden="true" />
-            <span>{item.minutes} min read</span>
+            <MinutesRead minutes={item.minutes} />
           </div>
           <span className="text-xs bg-accent-muted text-accent-ink/70 px-2 py-0.5 rounded-full">
             {item.level}
@@ -116,71 +107,13 @@ export default async function LearnGuidePage({ params }: PageProps) {
         </div>
       </header>
 
-      {/* Content area */}
       <Card className="p-6 md:p-8">
         <CardContent className="p-0 prose prose-lg max-w-none">
           {GUIDE_COMPONENTS[slug]}
         </CardContent>
       </Card>
 
-      {/* Prev/Next navigation */}
-      {(prev || next) && (
-        <nav className="mt-12 flex flex-col md:flex-row gap-4" aria-label="Guide navigation">
-          {prev ? (
-            <Link
-              href={`/learn/${prev.slug}`}
-              className="flex-1 group flex items-center gap-3 p-4 rounded-lg border border-accent-muted hover:bg-accent-muted/30 hover:border-accent-gold/50 transition-colors min-h-[72px]"
-            >
-              <ChevronLeft
-                className="h-5 w-5 text-accent-ink/40 group-hover:text-accent-gold transition-colors flex-shrink-0"
-                aria-hidden="true"
-              />
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-accent-ink/50 uppercase tracking-wide mb-1">
-                  Previous
-                </p>
-                <p className="font-medium truncate group-hover:text-accent-gold transition-colors">
-                  {prev.title}
-                </p>
-                <div className="flex items-center gap-2 text-sm text-accent-ink/60">
-                  <span>{prev.minutes} min</span>
-                  <span>&middot;</span>
-                  <span>{prev.level}</span>
-                </div>
-              </div>
-            </Link>
-          ) : (
-            <div className="flex-1 hidden md:block" />
-          )}
-
-          {next ? (
-            <Link
-              href={`/learn/${next.slug}`}
-              className="flex-1 group flex items-center gap-3 p-4 rounded-lg border border-accent-muted hover:bg-accent-muted/30 hover:border-accent-gold/50 transition-colors min-h-[72px] md:text-right"
-            >
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-accent-ink/50 uppercase tracking-wide mb-1">
-                  Next
-                </p>
-                <p className="font-medium truncate group-hover:text-accent-gold transition-colors">
-                  {next.title}
-                </p>
-                <div className="flex items-center gap-2 text-sm text-accent-ink/60 md:justify-end">
-                  <span>{next.minutes} min</span>
-                  <span>&middot;</span>
-                  <span>{next.level}</span>
-                </div>
-              </div>
-              <ChevronRight
-                className="h-5 w-5 text-accent-ink/40 group-hover:text-accent-gold transition-colors flex-shrink-0"
-                aria-hidden="true"
-              />
-            </Link>
-          ) : (
-            <div className="flex-1 hidden md:block" />
-          )}
-        </nav>
-      )}
+      <GuideNavigation prev={prev} next={next} />
     </div>
   );
 }

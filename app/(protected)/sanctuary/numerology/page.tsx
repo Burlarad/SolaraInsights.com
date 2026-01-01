@@ -195,7 +195,7 @@ export default function NumerologyPage() {
         <div className="flex gap-2 p-1 bg-white/50 rounded-full flex-shrink-0">
           <button
             onClick={() => setSystem("pythagorean")}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+            className={`px-4 py-2 rounded-full font-cursive text-xl font-normal transition-all ${
               system === "pythagorean"
                 ? "bg-accent-ink text-white"
                 : "text-accent-ink hover:bg-white/80"
@@ -205,7 +205,7 @@ export default function NumerologyPage() {
           </button>
           <button
             onClick={() => setSystem("chaldean")}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+            className={`px-4 py-2 rounded-full font-cursive text-xl font-normal transition-all ${
               system === "chaldean"
                 ? "bg-accent-ink text-white"
                 : "text-accent-ink hover:bg-white/80"
