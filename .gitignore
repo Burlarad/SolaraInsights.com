@@ -5,26 +5,20 @@
 /.pnp
 .pnp.js
 .yarn/install-state.gz
-
 # testing
 /coverage
-
 # next.js
 /.next/
 /out/
-
 # production
 /build
-
 # misc
 .DS_Store
 *.pem
-
 # debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
 # local env files
 .env
 .env*.local
@@ -33,18 +27,20 @@ yarn-error.log*
 .env.production
 .env_render
 !.env.example
-
 # env backups
 .env.bak
 .env.local.bak
 *.bak
-
 # vercel
 .vercel
-
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
 # claude
 .claude
+# Prevent duplicate lockfiles from being committed
+package-lock*.json
+!package-lock.json
+# Prevent alternative lockfiles
+yarn.lock
+pnpm-lock.yaml

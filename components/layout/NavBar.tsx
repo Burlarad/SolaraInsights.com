@@ -131,7 +131,7 @@ export function NavBar() {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-border-subtle">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
         <div className="flex items-center justify-between">
           {/* Left: Brand pill */}
           <Link
@@ -148,7 +148,7 @@ export function NavBar() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "pill font-cursive text-2xl font-normal tracking-wide transition-colors",
+                  "pill px-4 py-2 font-cursive text-xl font-normal tracking-wide transition-colors whitespace-nowrap",
                   pathname === link.href
                     ? "bg-accent-ink text-white"
                     : "bg-white border border-border-subtle text-accent-ink hover:bg-shell"
@@ -164,7 +164,7 @@ export function NavBar() {
                 {user ? (
                   <button
                     onClick={handleSignOut}
-                    className="pill bg-white border border-border-subtle text-accent-ink hover:bg-shell font-cursive text-2xl font-normal tracking-wide flex items-center gap-2"
+                    className="pill px-4 py-2 bg-white border border-border-subtle text-accent-ink hover:bg-shell font-cursive text-xl font-normal tracking-wide flex items-center gap-2 whitespace-nowrap"
                   >
                     <LogOut className="h-3 w-3" />
                     {t("signOut").toUpperCase()}
@@ -172,7 +172,7 @@ export function NavBar() {
                 ) : (
                   <Link
                     href="/sign-in"
-                    className="pill bg-accent-gold text-accent-ink font-cursive text-2xl font-normal tracking-wide"
+                    className="pill px-4 py-2 bg-accent-gold text-accent-ink font-cursive text-xl font-normal tracking-wide whitespace-nowrap"
                   >
                     {t("signIn").toUpperCase()}
                   </Link>
@@ -185,7 +185,7 @@ export function NavBar() {
               <button
                 onClick={() => setShowLanguageMenu(!showLanguageMenu)}
                 disabled={savingLanguage}
-                className="pill bg-white border border-border-subtle text-accent-ink hover:bg-shell font-cursive text-2xl font-normal tracking-wide flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="pill px-4 py-2 bg-white border border-border-subtle text-accent-ink hover:bg-shell font-cursive text-xl font-normal tracking-wide flex items-center gap-2 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {currentLanguage.flag} {currentLanguage.label}
                 <ChevronDown className={cn("h-3 w-3 transition-transform", showLanguageMenu && "rotate-180")} />

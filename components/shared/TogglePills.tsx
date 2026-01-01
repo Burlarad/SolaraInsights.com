@@ -26,7 +26,7 @@ export function TogglePills({ options, value, onChange, className }: TogglePills
           key={option}
           onClick={() => onChange(option)}
           className={cn(
-            "pill font-cursive text-2xl font-normal transition-all whitespace-nowrap snap-center flex-shrink-0",
+            "pill font-cursive text-xl md:text-2xl font-normal transition-all whitespace-nowrap snap-center flex-shrink-0",
             value === option
               ? "bg-accent-ink text-white shadow-sm"
               : "bg-transparent text-accent-ink hover:bg-white/80"

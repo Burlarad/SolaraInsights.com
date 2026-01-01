@@ -10,7 +10,7 @@ interface SolaraLogoProps {
 
 export function SolaraLogo({ size = "lg", className }: SolaraLogoProps) {
   const discSize = size === "lg" ? "h-24 w-24" : "h-12 w-12";
-  const wordmarkSize = size === "lg" ? "text-6xl" : "text-3xl";
+  const wordmarkSize = size === "lg" ? "text-4xl md:text-6xl" : "text-3xl";
 
   return (
     <div className={cn("flex flex-col items-center gap-4", className)}>

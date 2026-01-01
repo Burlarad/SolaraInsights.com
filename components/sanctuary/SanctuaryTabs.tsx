@@ -97,7 +97,7 @@ export function SanctuaryTabs() {
               key={tab.href}
               href={tab.href}
               className={cn(
-                "pill font-cursive text-2xl font-normal transition-all",
+                "pill font-cursive text-xl md:text-2xl font-normal transition-all",
                 isActive
                   ? "bg-accent-ink text-white shadow-sm"
                   : "bg-transparent text-accent-ink hover:bg-white/80"
@@ -155,7 +155,7 @@ export function SanctuaryTabs() {
                 className={cn(
                   "flex-shrink-0 snap-center",
                   "min-h-[44px] px-5 py-2.5 rounded-full",
-                  "font-cursive text-2xl font-normal transition-all",
+                  "font-cursive text-xl font-normal transition-all",
                   "flex items-center justify-center",
                   isActive
                     ? "bg-accent-ink text-white shadow-sm"
