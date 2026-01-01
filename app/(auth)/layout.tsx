@@ -11,7 +11,7 @@ export default function AuthLayout({
       {/* Simple header with logo */}
       <header className="py-8 px-6">
         <div className="max-w-md mx-auto">
-          <SolaraLogo size="sm" />
+          <SolaraLogo />
         </div>
       </header>
 

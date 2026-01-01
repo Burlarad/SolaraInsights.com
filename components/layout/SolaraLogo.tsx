@@ -13,7 +13,7 @@ export function SolaraLogo({ size = "lg", className }: SolaraLogoProps) {
   const wordmarkSize = size === "lg" ? "text-4xl md:text-6xl" : "text-3xl";
 
   return (
-    <div className={cn("flex flex-col items-center gap-4", className)}>
+    <div className={cn("flex flex-col items-center gap-4 opacity-60", className)}>
       {/* Golden disc + reflection */}
       <div className="relative flex items-center justify-center">
         <div

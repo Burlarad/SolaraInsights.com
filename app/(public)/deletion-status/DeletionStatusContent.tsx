@@ -23,7 +23,7 @@ export function DeletionStatusContent({ code, request, error }: DeletionStatusCo
       <div className="max-w-2xl mx-auto px-6 py-16">
         {/* Solara Logo - subtle */}
         <div className="flex justify-center items-center pt-2 pb-4">
-          <SolaraLogo size="sm" className="opacity-50 scale-75" />
+          <SolaraLogo />
         </div>
         <h1 className="text-3xl font-bold text-center mb-8">{t("pageTitle")}</h1>
         <Card className="p-8">
@@ -42,7 +42,7 @@ export function DeletionStatusContent({ code, request, error }: DeletionStatusCo
       <div className="max-w-2xl mx-auto px-6 py-16">
         {/* Solara Logo - subtle */}
         <div className="flex justify-center items-center pt-2 pb-4">
-          <SolaraLogo size="sm" className="opacity-50 scale-75" />
+          <SolaraLogo />
         </div>
         <h1 className="text-3xl font-bold text-center mb-8">{t("pageTitle")}</h1>
         <Card className="p-8">
@@ -90,7 +90,7 @@ export function DeletionStatusContent({ code, request, error }: DeletionStatusCo
     <div className="max-w-2xl mx-auto px-6 py-16">
       {/* Solara Logo - subtle */}
       <div className="flex justify-center items-center pt-2 pb-4">
-        <SolaraLogo size="sm" className="opacity-50 scale-75" />
+        <SolaraLogo />
       </div>
       <h1 className="text-3xl font-bold text-center mb-8">{t("pageTitle")}</h1>
 

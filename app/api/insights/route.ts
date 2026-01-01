@@ -18,9 +18,12 @@ import { parseMetadataFromSummary, getSummaryTextOnly } from "@/lib/social/summa
 import { normalizeInsight } from "@/lib/insights/normalizeInsight";
 import { createApiErrorResponse, generateRequestId, INSIGHTS_ERROR_CODES } from "@/lib/api/errorResponse";
 import { isUserSocialStale, triggerSocialSyncFireAndForget } from "@/lib/social/staleness";
+import { buildYearContext, hasGlobalEventsForYear } from "@/lib/insights/yearContext";
+import { loadStoredBirthChart } from "@/lib/birthChart/storage";
+import { AYREN_MODE_SOULPRINT_LONG } from "@/lib/ai/voice";
 
-// Bump to v3 to invalidate legacy cached insights that may be missing fields
-const PROMPT_VERSION = 3;
+// Bump to v4 to invalidate legacy cached insights (year tab now uses global events)
+const PROMPT_VERSION = 4;
 
 // Human-friendly rate limits (only applies on cache miss / generation)
 // Users can navigate Today→Week→Month→Year freely since cache hits bypass these
@@ -345,6 +348,48 @@ export async function POST(req: NextRequest) {
       : null;
 
     // ========================================
+    // YEAR CONTEXT: Load global events + user transits for year tab
+    // ========================================
+    let yearContext: string | null = null;
+    if (timeframe === "year") {
+      const currentYear = new Date().getFullYear();
+      console.log(`[Insights] Loading year context for ${currentYear}`);
+
+      // Check if global events exist for this year
+      const hasEvents = await hasGlobalEventsForYear(supabase, currentYear);
+
+      if (hasEvents) {
+        // Try to load user's natal placements for transit calculation
+        let natalPlacements: Array<{ name: string; longitude: number | null }> = [];
+        try {
+          const birthChart = await loadStoredBirthChart(user.id);
+          if (birthChart?.placements?.planets) {
+            natalPlacements = birthChart.placements.planets.map((p) => ({
+              name: p.name,
+              longitude: p.longitude,
+            }));
+            console.log(`[Insights] Loaded ${natalPlacements.length} natal placements for transit calculation`);
+          }
+        } catch (birthChartError) {
+          console.warn("[Insights] Failed to load birth chart for transits:", birthChartError);
+          // Continue without user transits - global events still valuable
+        }
+
+        // Build year context with global events + optional user transits
+        try {
+          const context = await buildYearContext(supabase, currentYear, natalPlacements);
+          yearContext = context.formattedContext;
+          console.log(`[Insights] Built year context: ${context.globalEvents.length} global events, ${context.userTransits.length} user transits`);
+        } catch (contextError) {
+          console.error("[Insights] Failed to build year context:", contextError);
+          // Continue without year context - AI can still generate generic yearly insight
+        }
+      } else {
+        console.log(`[Insights] No global events for ${currentYear}, generating without astrological context`);
+      }
+    }
+
+    // ========================================
     // P0: REDIS AVAILABILITY CHECK (fail closed)
     // ========================================
     if (!isRedisAvailable()) {
@@ -432,8 +477,11 @@ SOCIAL SIGNAL METADATA (internal use only, never mention to user):
 - humorStyle: ${socialMetadata.humorStyle}`
       : "";
 
-    // Construct the OpenAI prompt using Ayren voice
-    const systemPrompt = `${AYREN_MODE_SHORT}
+    // Construct the OpenAI prompt using appropriate Ayren voice
+    // Year tab uses long-form voice for expansive yearly narrative
+    const ayrenVoice = timeframe === "year" ? AYREN_MODE_SOULPRINT_LONG : AYREN_MODE_SHORT;
+
+    const systemPrompt = `${ayrenVoice}
 ${PRO_SOCIAL_NUDGE_INSTRUCTION}
 ${HUMOR_INSTRUCTION}
 ${LOW_SIGNAL_GUARDRAIL}
@@ -467,6 +515,14 @@ Current date: ${new Date().toISOString()}
 Period: ${periodKey} (${timeframe})
 Timeframe: ${timeframe}
 ${focusQuestion ? `Focus question: ${focusQuestion}` : ""}
+
+${yearContext ? `
+ASTROLOGICAL YEAR CONTEXT (use this to personalize the yearly insight):
+
+${yearContext}
+
+Use this astronomical data to create a meaningful yearly narrative. Reference specific planetary events and personal transits where relevant.
+` : ""}
 
 ${socialContext ? `Social context (optional, do not mention platforms directly):
 

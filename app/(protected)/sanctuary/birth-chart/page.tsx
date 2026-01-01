@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { SanctuaryTabs } from "@/components/sanctuary/SanctuaryTabs";
+import { SolaraLogo } from "@/components/layout/SolaraLogo";
 import type { FullBirthChartInsight, TabDeepDive } from "@/types/natalAI";
 import { SolaraCard } from "@/components/ui/solara-card";
 import { Button } from "@/components/ui/button";
@@ -239,6 +240,11 @@ export default function BirthChartPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12 space-y-8">
+      {/* Solara Logo */}
+      <div className="flex justify-center items-center pt-4 pb-8">
+        <SolaraLogo />
+      </div>
+
       {/* Page Header */}
       <div className="space-y-2">
         <h1 className="text-2xl font-semibold">{t("title")}</h1>

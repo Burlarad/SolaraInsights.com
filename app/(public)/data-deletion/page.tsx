@@ -13,7 +13,7 @@ export default function DataDeletionPage() {
     <div className="max-w-4xl mx-auto px-6 py-16">
       {/* Solara Logo - subtle */}
       <div className="flex justify-center items-center pt-2 pb-4">
-        <SolaraLogo size="sm" className="opacity-50 scale-75" />
+        <SolaraLogo />
       </div>
 
       <h1 className="text-4xl font-bold text-center mb-4">Data Deletion Instructions</h1>

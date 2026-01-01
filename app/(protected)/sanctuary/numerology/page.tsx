@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SanctuaryTabs } from "@/components/sanctuary/SanctuaryTabs";
+import { SolaraLogo } from "@/components/layout/SolaraLogo";
 import type { NumerologyResponse, NumerologySystem } from "@/types/numerology";
 import type { NumerologyInsight } from "@/types/numerologyAI";
 import {
@@ -65,6 +66,9 @@ export default function NumerologyPage() {
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-6 py-12 space-y-8">
+        <div className="flex justify-center items-center pt-4 pb-8">
+          <SolaraLogo />
+        </div>
         <div className="space-y-2">
           <h1 className="text-2xl font-semibold">{t("title")}</h1>
           <p className="text-sm text-accent-ink/70">{t("subtitle")}</p>
@@ -83,6 +87,9 @@ export default function NumerologyPage() {
   if (error === "birth_name_required") {
     return (
       <div className="max-w-7xl mx-auto px-6 py-12 space-y-8">
+        <div className="flex justify-center items-center pt-4 pb-8">
+          <SolaraLogo />
+        </div>
         <div className="space-y-2">
           <h1 className="text-2xl font-semibold">{t("title")}</h1>
           <p className="text-sm text-accent-ink/70">{t("subtitle")}</p>
@@ -106,6 +113,9 @@ export default function NumerologyPage() {
   if (error === "birth_date_required") {
     return (
       <div className="max-w-7xl mx-auto px-6 py-12 space-y-8">
+        <div className="flex justify-center items-center pt-4 pb-8">
+          <SolaraLogo />
+        </div>
         <div className="space-y-2">
           <h1 className="text-2xl font-semibold">{t("title")}</h1>
           <p className="text-sm text-accent-ink/70">{t("subtitle")}</p>
@@ -129,6 +139,9 @@ export default function NumerologyPage() {
   if (error || !data) {
     return (
       <div className="max-w-7xl mx-auto px-6 py-12 space-y-8">
+        <div className="flex justify-center items-center pt-4 pb-8">
+          <SolaraLogo />
+        </div>
         <div className="space-y-2">
           <h1 className="text-2xl font-semibold">{t("title")}</h1>
           <p className="text-sm text-accent-ink/70">{t("subtitle")}</p>
@@ -165,6 +178,11 @@ export default function NumerologyPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12 space-y-8">
+      {/* Solara Logo */}
+      <div className="flex justify-center items-center pt-4 pb-8">
+        <SolaraLogo />
+      </div>
+
       {/* Page Header */}
       <div className="space-y-2">
         <h1 className="text-2xl font-semibold">{t("title")}</h1>

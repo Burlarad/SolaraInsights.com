@@ -20,6 +20,7 @@ interface SunTimes {
   sunset: Date;
 }
 
+// Arc configuration for the timeline curve
 const ARC = {
   viewBox: { width: 400, height: 80 },
   bezier: {
@@ -28,7 +29,25 @@ const ARC = {
     P2: { x: 390, y: 65 },
   },
   path: "M 10 65 Q 200 5 390 65",
-};
+} as const;
+
+// Position markers on the arc (aligned with grid-cols-3)
+const MARKERS = {
+  LEFT: 0.167,   // 16.67% - dawn/evening
+  PEAK: 0.5,     // 50% - midday/midnight
+  RIGHT: 0.833,  // 83.33% - dusk/morning
+} as const;
+
+// Time intervals in milliseconds
+const INTERVALS = {
+  ONE_HOUR: 60 * 60 * 1000,
+  ONE_MINUTE: 60 * 1000,
+  THIRTY_MINUTES: 30 * 60 * 1000,
+} as const;
+
+// Sun ray angles for rendering
+const SUN_RAY_ANGLES = [0, 45, 90, 135, 180, 225, 270, 315] as const;
+const SUN_RAY_ANGLES_SPARSE = [0, 60, 120, 180, 240, 300] as const;
 
 function getSunTimes(coords: { lat: number; lon: number } | null): SunTimes {
   const now = new Date();
@@ -74,23 +93,44 @@ interface CelestialIconProps {
   weather: WeatherCondition;
 }
 
+// Reusable sun ray rendering
+function SunRays({
+  angles,
+  innerRadius,
+  outerRadius,
+  strokeWidth = 2,
+  animate = false
+}: {
+  angles: readonly number[];
+  innerRadius: number;
+  outerRadius: number;
+  strokeWidth?: number;
+  animate?: boolean;
+}) {
+  return (
+    <>
+      {angles.map((angle) => (
+        <line
+          key={angle}
+          x1={innerRadius} y1="0" x2={outerRadius} y2="0"
+          stroke="#FBBF24"
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          transform={`rotate(${angle})`}
+          className={animate ? "animate-pulse" : undefined}
+        />
+      ))}
+    </>
+  );
+}
+
 function CelestialIcon({ type, weather }: CelestialIconProps) {
   // Clear sun with rays
   if (type === "sun" && weather === "clear") {
     return (
       <g>
         <circle r="10" fill="url(#sunGradient)" />
-        {[0, 45, 90, 135, 180, 225, 270, 315].map((angle) => (
-          <line
-            key={angle}
-            x1="14" y1="0" x2="20" y2="0"
-            stroke="#FBBF24"
-            strokeWidth="2"
-            strokeLinecap="round"
-            transform={`rotate(${angle})`}
-            className="animate-pulse"
-          />
-        ))}
+        <SunRays angles={SUN_RAY_ANGLES} innerRadius={14} outerRadius={20} animate />
       </g>
     );
   }
@@ -101,16 +141,7 @@ function CelestialIcon({ type, weather }: CelestialIconProps) {
       <g>
         <g transform="translate(-5, -5)">
           <circle r="8" fill="url(#sunGradient)" />
-          {[0, 60, 120, 180, 240, 300].map((angle) => (
-            <line
-              key={angle}
-              x1="10" y1="0" x2="14" y2="0"
-              stroke="#FBBF24"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              transform={`rotate(${angle})`}
-            />
-          ))}
+          <SunRays angles={SUN_RAY_ANGLES_SPARSE} innerRadius={10} outerRadius={14} strokeWidth={1.5} />
         </g>
         <g transform="translate(4, 4)">
           <ellipse rx="10" ry="6" fill="#F3F4F6" />
@@ -193,11 +224,15 @@ function CelestialIcon({ type, weather }: CelestialIconProps) {
   // Clear moon with stars
   if (type === "moon" && weather === "clear") {
     return (
-      <g>
-        <circle r="10" fill="url(#moonGradient)" mask="url(#crescentMask)" />
-        <circle cx="14" cy="-8" r="1" fill="#FEF3C7" className="animate-pulse" />
-        <circle cx="-12" cy="6" r="0.8" fill="#FEF3C7" className="animate-pulse" style={{ animationDelay: "0.5s" }} />
-        <circle cx="10" cy="10" r="1.2" fill="#FEF3C7" className="animate-pulse" style={{ animationDelay: "1s" }} />
+      <g filter="url(#moonGlow)">
+        {/* Moon body with crescent mask */}
+        <circle cx="0" cy="0" r="10" fill="url(#moonGradient)" mask="url(#crescentMask)" />
+        {/* Subtle outline for visibility */}
+        <circle cx="0" cy="0" r="10" fill="none" stroke="#A78BFA" strokeWidth="0.5" opacity="0.5" />
+        {/* Stars */}
+        <circle cx="16" cy="-10" r="1.2" fill="#FEF3C7" className="animate-pulse" />
+        <circle cx="-14" cy="8" r="1" fill="#FEF3C7" className="animate-pulse" style={{ animationDelay: "0.5s" }} />
+        <circle cx="12" cy="12" r="1.4" fill="#FEF3C7" className="animate-pulse" style={{ animationDelay: "1s" }} />
       </g>
     );
   }
@@ -205,9 +240,10 @@ function CelestialIcon({ type, weather }: CelestialIconProps) {
   // Partly cloudy moon
   if (type === "moon" && weather === "partly_cloudy") {
     return (
-      <g>
+      <g filter="url(#moonGlow)">
         <g transform="translate(-4, -4)">
-          <circle r="8" fill="url(#moonGradient)" mask="url(#crescentMaskSmall)" />
+          <circle cx="0" cy="0" r="8" fill="url(#moonGradient)" mask="url(#crescentMaskSmall)" />
+          <circle cx="0" cy="0" r="8" fill="none" stroke="#A78BFA" strokeWidth="0.5" opacity="0.4" />
         </g>
         <g transform="translate(3, 3)">
           <ellipse rx="8" ry="5" fill="#E5E7EB" />
@@ -222,8 +258,8 @@ function CelestialIcon({ type, weather }: CelestialIconProps) {
   if (type === "moon" && weather === "cloudy") {
     return (
       <g>
-        <circle r="5" fill="#A78BFA" opacity="0.3" transform="translate(-4, -4)" />
-        <ellipse rx="12" ry="7" fill="#6B7280" />
+        <circle cx="-4" cy="-4" r="6" fill="#A78BFA" opacity="0.4" />
+        <ellipse cx="0" cy="0" rx="12" ry="7" fill="#6B7280" />
         <ellipse cx="-6" cy="-2" rx="5" ry="3" fill="#9CA3AF" />
         <ellipse cx="5" cy="-1" rx="4" ry="2.5" fill="#9CA3AF" />
       </g>
@@ -234,8 +270,8 @@ function CelestialIcon({ type, weather }: CelestialIconProps) {
   if (type === "moon" && weather === "foggy") {
     return (
       <g>
-        <circle r="12" fill="#DDD6FE" opacity="0.3" />
-        <circle r="6" fill="#A78BFA" opacity="0.5" />
+        <circle cx="0" cy="0" r="14" fill="#DDD6FE" opacity="0.3" />
+        <circle cx="0" cy="0" r="8" fill="#A78BFA" opacity="0.6" />
       </g>
     );
   }
@@ -245,24 +281,16 @@ function CelestialIcon({ type, weather }: CelestialIconProps) {
     return (
       <g>
         <circle r="10" fill="url(#sunGradient)" />
-        {[0, 45, 90, 135, 180, 225, 270, 315].map((angle) => (
-          <line
-            key={angle}
-            x1="14" y1="0" x2="20" y2="0"
-            stroke="#FBBF24"
-            strokeWidth="2"
-            strokeLinecap="round"
-            transform={`rotate(${angle})`}
-          />
-        ))}
+        <SunRays angles={SUN_RAY_ANGLES} innerRadius={14} outerRadius={20} />
       </g>
     );
   }
 
   // Default moon
   return (
-    <g>
-      <circle r="10" fill="url(#moonGradient)" mask="url(#crescentMask)" />
+    <g filter="url(#moonGlow)">
+      <circle cx="0" cy="0" r="10" fill="url(#moonGradient)" mask="url(#crescentMask)" />
+      <circle cx="0" cy="0" r="10" fill="none" stroke="#A78BFA" strokeWidth="0.5" opacity="0.5" />
     </g>
   );
 }
@@ -295,17 +323,12 @@ export function EmotionalCadenceTimeline({
   // Calculate position on arc based on current time
   const updatePosition = useCallback(() => {
     const now = new Date();
-
-    // Grid-cols-3 marker positions
-    const leftT = 0.167;
-    const peakT = 0.5;
-    const rightT = 0.833;
+    const { LEFT, PEAK, RIGHT } = MARKERS;
 
     if (isDay) {
-      // DAYTIME: sunrise at leftT, noon at peakT, sunset at rightT
-      const bufferMs = 60 * 60 * 1000; // 1 hour buffer
-      const arcStart = sunTimes.sunrise.getTime() - bufferMs;
-      const arcEnd = sunTimes.sunset.getTime() + bufferMs;
+      // DAYTIME: sunrise at LEFT, noon at PEAK, sunset at RIGHT
+      const arcStart = sunTimes.sunrise.getTime() - INTERVALS.ONE_HOUR;
+      const arcEnd = sunTimes.sunset.getTime() + INTERVALS.ONE_HOUR;
 
       const sunriseTime = sunTimes.sunrise.getTime();
       const noonTime = sunTimes.solarNoon.getTime();
@@ -314,21 +337,21 @@ export function EmotionalCadenceTimeline({
 
       let t: number;
       if (nowTime < sunriseTime) {
-        // Before sunrise: 0 → leftT
+        // Before sunrise: 0 → LEFT
         const progress = (nowTime - arcStart) / (sunriseTime - arcStart);
-        t = progress * leftT;
+        t = progress * LEFT;
       } else if (nowTime < noonTime) {
-        // Sunrise → noon: leftT → peakT
+        // Sunrise → noon: LEFT → PEAK
         const progress = (nowTime - sunriseTime) / (noonTime - sunriseTime);
-        t = leftT + progress * (peakT - leftT);
+        t = LEFT + progress * (PEAK - LEFT);
       } else if (nowTime < sunsetTime) {
-        // Noon → sunset: peakT → rightT
+        // Noon → sunset: PEAK → RIGHT
         const progress = (nowTime - noonTime) / (sunsetTime - noonTime);
-        t = peakT + progress * (rightT - peakT);
+        t = PEAK + progress * (RIGHT - PEAK);
       } else {
-        // After sunset: rightT → 1
+        // After sunset: RIGHT → 1
         const progress = (nowTime - sunsetTime) / (arcEnd - sunsetTime);
-        t = rightT + progress * (1 - rightT);
+        t = RIGHT + progress * (1 - RIGHT);
       }
 
       setPosition(Math.max(0, Math.min(1, t)));
@@ -360,13 +383,13 @@ export function EmotionalCadenceTimeline({
 
       let t: number;
       if (nowTime < midnightTimeMs) {
-        // Evening: sunset → midnight = leftT → peakT
+        // Evening: sunset → midnight = LEFT → PEAK
         const progress = (nowTime - nightStartTime) / (midnightTimeMs - nightStartTime);
-        t = leftT + progress * (peakT - leftT);
+        t = LEFT + progress * (PEAK - LEFT);
       } else {
-        // Pre-dawn: midnight → sunrise = peakT → rightT
+        // Pre-dawn: midnight → sunrise = PEAK → RIGHT
         const progress = (nowTime - midnightTimeMs) / (nightEndTime - midnightTimeMs);
-        t = peakT + progress * (rightT - peakT);
+        t = PEAK + progress * (RIGHT - PEAK);
       }
 
       setPosition(Math.max(0, Math.min(1, t)));
@@ -376,11 +399,11 @@ export function EmotionalCadenceTimeline({
   // Update position on mount and every minute
   useEffect(() => {
     updatePosition();
-    const interval = setInterval(updatePosition, 60000);
+    const interval = setInterval(updatePosition, INTERVALS.ONE_MINUTE);
     return () => clearInterval(interval);
   }, [updatePosition]);
 
-  // Fetch weather
+  // Fetch weather data periodically
   useEffect(() => {
     if (!coords) return;
 
@@ -394,7 +417,7 @@ export function EmotionalCadenceTimeline({
     };
 
     fetchWeatherData();
-    const interval = setInterval(fetchWeatherData, 30 * 60 * 1000);
+    const interval = setInterval(fetchWeatherData, INTERVALS.THIRTY_MINUTES);
     return () => clearInterval(interval);
   }, [coords]);
 
@@ -465,15 +488,24 @@ export function EmotionalCadenceTimeline({
               <stop offset="100%" stopColor="#A78BFA" />
             </radialGradient>
 
-            {/* Crescent masks */}
+            {/* Crescent masks - show more moon for better visibility */}
             <mask id="crescentMask">
-              <circle r="10" fill="white" />
-              <circle cx="5" cy="-3" r="8" fill="black" />
+              <circle cx="0" cy="0" r="10" fill="white" />
+              <circle cx="7" cy="-2" r="7" fill="black" />
             </mask>
             <mask id="crescentMaskSmall">
-              <circle r="8" fill="white" />
-              <circle cx="4" cy="-2" r="6" fill="black" />
+              <circle cx="0" cy="0" r="8" fill="white" />
+              <circle cx="6" cy="-2" r="5.5" fill="black" />
             </mask>
+
+            {/* Moon glow filter for better visibility */}
+            <filter id="moonGlow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+              <feMerge>
+                <feMergeNode in="coloredBlur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
           </defs>
 
           {/* Arc path */}

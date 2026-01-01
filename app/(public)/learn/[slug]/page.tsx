@@ -79,7 +79,7 @@ export default async function LearnGuidePage({ params }: PageProps) {
     <div className="max-w-3xl mx-auto px-4 md:px-6 py-8 md:py-12">
       {/* Solara Logo */}
       <div className="flex justify-center items-center pt-4 pb-6">
-        <SolaraLogo size="sm" />
+        <SolaraLogo />
       </div>
 
       {/* Back link */}

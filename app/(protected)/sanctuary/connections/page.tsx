@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SanctuaryTabs } from "@/components/sanctuary/SanctuaryTabs";
+import { SolaraLogo } from "@/components/layout/SolaraLogo";
 import { SpaceBetweenSheet } from "@/components/sanctuary/SpaceBetweenSheet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -644,6 +645,11 @@ export default function ConnectionsPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12 space-y-8">
+      {/* Solara Logo */}
+      <div className="flex justify-center items-center pt-4 pb-8">
+        <SolaraLogo />
+      </div>
+
       <div className="flex items-center justify-between">
         <SanctuaryTabs />
       </div>

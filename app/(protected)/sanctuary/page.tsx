@@ -369,8 +369,8 @@ function SanctuaryContent() {
       )}
 
       {/* Solara Logo - blended into background */}
-      <div className="flex justify-center items-center pt-4 pb-8 opacity-60">
-        <SolaraLogo size="sm" />
+      <div className="flex justify-center items-center pt-4 pb-8">
+        <SolaraLogo />
       </div>
 
       {/* Tabs and timeframe */}
