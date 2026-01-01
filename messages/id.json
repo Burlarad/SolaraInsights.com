@@ -377,7 +377,184 @@
       "title": "Angka Keberuntungan"
     },
     "karmicDebt": {
+      "13": {
+        "label": "Ketekunan",
+        "meaning": "Belajar ketekunan dan fokus. Kemalasan atau jalan pintas di masa lalu membutuhkan upaya ekstra untuk membangun fondasi yang kokoh.",
+        "lesson": "Membangun melalui kerja yang mantap dan jujur alih-alih jalan pintas"
+      },
+      "14": {
+        "label": "Moderasi",
+        "meaning": "Belajar moderasi dan komitmen. Penyalahgunaan kebebasan di masa lalu membutuhkan pengembangan pengendalian diri dan tanggung jawab.",
+        "lesson": "Merangkul batasan sehat sambil menghormati komitmen"
+      },
+      "16": {
+        "label": "Kerendahan hati",
+        "meaning": "Belajar kerendahan hati dan koneksi otentik. Tindakan yang didorong ego di masa lalu membutuhkan pembangunan kembali kepercayaan dan integritas.",
+        "lesson": "Menumbuhkan kerendahan hati yang tulus dan membangun kembali dari dalam"
+      },
+      "19": {
+        "label": "Kemandirian",
+        "meaning": "Belajar kemandirian dengan welas asih. Keegoisan di masa lalu membutuhkan keseimbangan kekuatan pribadi dengan pelayanan kepada orang lain.",
+        "lesson": "Menyeimbangkan kemandirian dengan keterbukaan terhadap orang lain"
+      },
       "title": "Pelajaran Karma"
+    },
+    "numbers": {
+      "0": {
+        "keyword": "Kekosongan",
+        "brief": "Potensi tak terbatas dan sumber ilahi.",
+        "description": "Nol mewakili potensi tak terbatas, kekosongan dari mana semua hal muncul.",
+        "energy": "Potensi, ketidakterbatasan, keutuhan, sumber ilahi",
+        "dayGuidance": "Hari dengan potensi tak terbatas. Semua jalan terbuka.",
+        "monthGuidance": "Bulan dengan kemungkinan tak terbatas.",
+        "yearGuidance": "Tahun koneksi spiritual yang mendalam."
+      },
+      "1": {
+        "keyword": "Perintis",
+        "brief": "Perintis, pemimpin, dan individualis.",
+        "description": "Energi satu adalah tentang awal baru, kemandirian, dan menempa jalan sendiri.",
+        "energy": "Kepemimpinan, inisiatif, awal baru, kemandirian",
+        "dayGuidance": "Ambil inisiatif hari ini. Mulai sesuatu yang baru.",
+        "monthGuidance": "Bulan untuk awal baru dan memimpin.",
+        "yearGuidance": "Tahun awal baru dan kepemimpinan."
+      },
+      "2": {
+        "keyword": "Diplomat",
+        "brief": "Pembuat perdamaian, mitra, dan jiwa sensitif.",
+        "description": "Energi dua adalah tentang kerja sama, keseimbangan, dan bekerja dengan orang lain.",
+        "energy": "Kemitraan, keseimbangan, kerja sama, intuisi",
+        "dayGuidance": "Fokus pada kolaborasi hari ini.",
+        "monthGuidance": "Bulan untuk memelihara hubungan.",
+        "yearGuidance": "Tahun kemitraan dan kesabaran."
+      },
+      "3": {
+        "keyword": "Kreatif",
+        "brief": "Seniman, komunikator, dan semangat yang gembira.",
+        "description": "Energi tiga adalah tentang ekspresi diri, kreativitas, dan kegembiraan.",
+        "energy": "Kreativitas, ekspresi, kegembiraan, komunikasi",
+        "dayGuidance": "Ekspresikan diri dengan bebas hari ini.",
+        "monthGuidance": "Bulan untuk proyek kreatif.",
+        "yearGuidance": "Tahun ekspansi kreatif."
+      },
+      "4": {
+        "keyword": "Pembangun",
+        "brief": "Arsitek, pekerja, dan fondasi praktis.",
+        "description": "Energi empat adalah tentang struktur, kerja keras, dan membangun fondasi yang kokoh.",
+        "energy": "Struktur, disiplin, kerja keras, stabilitas",
+        "dayGuidance": "Fokus pada tugas praktis hari ini.",
+        "monthGuidance": "Bulan untuk kerja keras dan membangun struktur.",
+        "yearGuidance": "Tahun membangun dan kerja keras."
+      },
+      "5": {
+        "keyword": "Petualang",
+        "brief": "Penjelajah, pencari kebebasan, dan agen perubahan.",
+        "description": "Energi lima adalah tentang kebebasan, perubahan, dan pengalaman baru.",
+        "energy": "Kebebasan, perubahan, petualangan, keserbagunaan",
+        "dayGuidance": "Rangkul perubahan hari ini.",
+        "monthGuidance": "Bulan perubahan dan variasi.",
+        "yearGuidance": "Tahun perubahan besar dan kebebasan baru."
+      },
+      "6": {
+        "keyword": "Pengasuh",
+        "brief": "Pengasuh, penyembuh, dan penjaga harmoni.",
+        "description": "Energi enam adalah tentang cinta, tanggung jawab, dan harmoni rumah tangga.",
+        "energy": "Cinta, tanggung jawab, harmoni, pelayanan",
+        "dayGuidance": "Fokus pada rumah dan orang yang dicintai hari ini.",
+        "monthGuidance": "Bulan untuk keluarga dan tanggung jawab.",
+        "yearGuidance": "Tahun yang berfokus pada rumah dan keluarga."
+      },
+      "7": {
+        "keyword": "Pencari",
+        "brief": "Mistikus, analis, dan pencari spiritual.",
+        "description": "Energi tujuh adalah tentang introspeksi, kebijaksanaan, dan kedalaman spiritual.",
+        "energy": "Kebijaksanaan, introspeksi, spiritualitas, analisis",
+        "dayGuidance": "Cari kesendirian dan refleksi hari ini.",
+        "monthGuidance": "Bulan untuk pekerjaan batin dan belajar.",
+        "yearGuidance": "Tahun pertumbuhan spiritual."
+      },
+      "8": {
+        "keyword": "Pembangkit Tenaga",
+        "brief": "Pencapaian, otoritas, dan penguasa kelimpahan.",
+        "description": "Energi delapan adalah tentang kekuatan, kesuksesan, dan pencapaian material.",
+        "energy": "Kekuatan, kelimpahan, pencapaian, otoritas",
+        "dayGuidance": "Fokus pada bisnis dan keuangan hari ini.",
+        "monthGuidance": "Bulan untuk kemajuan karier.",
+        "yearGuidance": "Tahun pencapaian dan pengakuan."
+      },
+      "9": {
+        "keyword": "Kemanusiaan",
+        "brief": "Penyembuh yang berbelas kasih dan pecinta universal.",
+        "description": "Energi sembilan adalah tentang penyelesaian, belas kasih, dan cinta universal.",
+        "energy": "Penyelesaian, belas kasih, kebijaksanaan, pelepasan",
+        "dayGuidance": "Lepaskan apa yang tidak lagi melayani Anda hari ini.",
+        "monthGuidance": "Bulan akhir dan penyelesaian.",
+        "yearGuidance": "Tahun penyelesaian dan pelepasan."
+      },
+      "11": {
+        "keyword": "Master Intuitif",
+        "brief": "Pembawa pesan spiritual dan visioner yang tercerahkan.",
+        "description": "Sebelas adalah angka master dari wawasan spiritual dan intuisi yang diperkuat.",
+        "energy": "Intuisi, inspirasi, wawasan spiritual, visi",
+        "dayGuidance": "Percaya sepenuhnya pada intuisi Anda hari ini.",
+        "monthGuidance": "Bulan intuisi yang meningkat.",
+        "yearGuidance": "Tahun kebangkitan spiritual."
+      },
+      "22": {
+        "keyword": "Master Pembangun",
+        "brief": "Arsitek impian dan pembangun warisan.",
+        "description": "Dua puluh dua adalah angka master dari idealisme praktis.",
+        "energy": "Penguasaan, pembangunan skala besar, visi praktis, warisan",
+        "dayGuidance": "Berpikir besar hari ini.",
+        "monthGuidance": "Bulan untuk proyek ambisius.",
+        "yearGuidance": "Tahun untuk membangun warisan Anda."
+      },
+      "33": {
+        "keyword": "Master Guru",
+        "brief": "Penyembuh kosmik dan pengangkat kemanusiaan.",
+        "description": "Tiga puluh tiga adalah angka master dari pengajaran yang berbelas kasih.",
+        "energy": "Penyembuhan, pengajaran, pelayanan tanpa pamrih, cinta kosmik",
+        "dayGuidance": "Kehadiran penyembuhan Anda diperkuat hari ini.",
+        "monthGuidance": "Bulan untuk pekerjaan penyembuhan.",
+        "yearGuidance": "Tahun pelayanan dan pengajaran yang mendalam."
+      }
+    },
+    "pinnacles": {
+      "meanings": {
+        "1": "Kemandirian, kepemimpinan, dan merintis jalan baru",
+        "2": "Kerja sama, hubungan, dan sensitivitas emosional",
+        "3": "Ekspresi kreatif, komunikasi, dan kegembiraan",
+        "4": "Membangun, struktur, dan meletakkan fondasi kokoh",
+        "5": "Perubahan, kebebasan, dan pengalaman baru",
+        "6": "Keluarga, tanggung jawab, dan mengasuh orang lain",
+        "7": "Introspeksi, pertumbuhan spiritual, dan kebijaksanaan",
+        "8": "Pencapaian material, kekuatan, dan pengakuan",
+        "9": "Pelayanan kemanusiaan, penyelesaian, dan kebijaksanaan"
+      }
+    },
+    "challengeMeanings": {
+      "0": "Pilihan semua tantangan - kebebasan memilih jalan Anda",
+      "1": "Belajar kemandirian sambil menghindari dominasi",
+      "2": "Menyeimbangkan sensitivitas dengan kekuatan",
+      "3": "Mengekspresikan diri tanpa menyebarkan energi",
+      "4": "Membangun disiplin tanpa menjadi kaku",
+      "5": "Merangkul perubahan tanpa ceroboh",
+      "6": "Memberi tanpa kemartiran atau campur tangan",
+      "7": "Mempercayai intuisi sambil tetap membumi",
+      "8": "Menggunakan kekuatan secara bertanggung jawab tanpa materialisme"
+    },
+    "luckyKeywords": {
+      "1": "Inisiatif",
+      "2": "Keseimbangan",
+      "3": "Ekspresi",
+      "4": "Fondasi",
+      "5": "Kebebasan",
+      "6": "Harmoni",
+      "7": "Kebijaksanaan",
+      "8": "Kesuksesan",
+      "9": "Belas kasih",
+      "11": "Intuisi",
+      "22": "Visi",
+      "33": "Penyembuhan"
     }
   },
   "astrology": {
@@ -764,7 +941,7 @@
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
     "about": "About",
-    "copyright": "© 2025 Solara Insights — Built with care under the light of the stars."
+    "copyright": "© {year} Solara Insights — Dibuat dengan penuh perhatian di bawah cahaya bintang."
   },
   "compatibility": {
     "title": "Explore Compatibility",

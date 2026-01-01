@@ -24,7 +24,7 @@ export function Footer() {
             </Link>
           </div>
           <p className="text-center text-sm text-accent-ink/70">
-            {t("copyright")}
+            {t("copyright", { year: new Date().getFullYear() })}
           </p>
         </div>
       </div>

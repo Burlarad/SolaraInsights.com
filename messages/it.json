@@ -377,7 +377,184 @@
       "title": "Numeri fortunati"
     },
     "karmicDebt": {
+      "13": {
+        "label": "Perseveranza",
+        "meaning": "Imparare perseveranza e concentrazione. La pigrizia passata o le scorciatoie richiedono uno sforzo extra per costruire basi solide.",
+        "lesson": "Costruire attraverso un lavoro costante e onesto invece di scorciatoie"
+      },
+      "14": {
+        "label": "Moderazione",
+        "meaning": "Imparare moderazione e impegno. L'abuso passato della liberta richiede sviluppare autocontrollo e responsabilita.",
+        "lesson": "Abbracciare limiti sani onorando gli impegni"
+      },
+      "16": {
+        "label": "Umilta",
+        "meaning": "Imparare umilta e connessione autentica. Le azioni passate guidate dall'ego richiedono ricostruire fiducia e integrita.",
+        "lesson": "Coltivare umilta genuina e ricostruire dall'interno"
+      },
+      "19": {
+        "label": "Indipendenza",
+        "meaning": "Imparare indipendenza con compassione. L'egoismo passato richiede bilanciare il potere personale con il servizio agli altri.",
+        "lesson": "Bilanciare l'autosufficienza con l'apertura verso gli altri"
+      },
       "title": "Lezioni karmiche"
+    },
+    "numbers": {
+      "0": {
+        "keyword": "Il Vuoto",
+        "brief": "Il potenziale infinito e la fonte divina.",
+        "description": "Lo zero rappresenta il potenziale illimitato, il vuoto da cui emergono tutte le cose.",
+        "energy": "Potenziale, infinito, completezza, fonte divina",
+        "dayGuidance": "Un giorno di potenziale infinito. Tutti i percorsi sono aperti.",
+        "monthGuidance": "Un mese di possibilita illimitate.",
+        "yearGuidance": "Un anno di profonda connessione spirituale."
+      },
+      "1": {
+        "keyword": "Il Pioniere",
+        "brief": "Il pioniere, leader e individualista.",
+        "description": "L'energia dell'uno riguarda nuovi inizi, autosufficienza e forgiare il proprio percorso.",
+        "energy": "Leadership, iniziativa, nuovi inizi, indipendenza",
+        "dayGuidance": "Prendi l'iniziativa oggi. Inizia qualcosa di nuovo.",
+        "monthGuidance": "Un mese per nuovi inizi e prendere il comando.",
+        "yearGuidance": "Un anno di nuovi inizi e assumere la leadership."
+      },
+      "2": {
+        "keyword": "Il Diplomatico",
+        "brief": "Il pacificatore, partner e anima sensibile.",
+        "description": "L'energia del due riguarda cooperazione, equilibrio e lavorare con gli altri.",
+        "energy": "Partnership, equilibrio, cooperazione, intuizione",
+        "dayGuidance": "Concentrati sulla collaborazione oggi.",
+        "monthGuidance": "Un mese per nutrire le relazioni e trovare equilibrio.",
+        "yearGuidance": "Un anno di partnership, pazienza e attenzione ai dettagli."
+      },
+      "3": {
+        "keyword": "Il Creativo",
+        "brief": "L'artista, comunicatore e spirito gioioso.",
+        "description": "L'energia del tre riguarda l'auto-espressione, la creativita e la gioia.",
+        "energy": "Creativita, espressione, gioia, comunicazione",
+        "dayGuidance": "Esprimiti liberamente oggi.",
+        "monthGuidance": "Un mese per progetti creativi e attivita sociali.",
+        "yearGuidance": "Un anno di espansione creativa e auto-espressione."
+      },
+      "4": {
+        "keyword": "Il Costruttore",
+        "brief": "L'architetto, lavoratore e fondazione pratica.",
+        "description": "L'energia del quattro riguarda struttura, duro lavoro e costruire basi solide.",
+        "energy": "Struttura, disciplina, duro lavoro, stabilita",
+        "dayGuidance": "Concentrati su compiti pratici oggi.",
+        "monthGuidance": "Un mese per il duro lavoro e costruire struttura.",
+        "yearGuidance": "Un anno di costruzione e duro lavoro."
+      },
+      "5": {
+        "keyword": "L'Avventuriero",
+        "brief": "L'esploratore, cercatore di liberta e agente del cambiamento.",
+        "description": "L'energia del cinque riguarda liberta, cambiamento e nuove esperienze.",
+        "energy": "Liberta, cambiamento, avventura, versatilita",
+        "dayGuidance": "Abbraccia il cambiamento oggi.",
+        "monthGuidance": "Un mese di cambiamento e varieta.",
+        "yearGuidance": "Un anno di grandi cambiamenti e nuova liberta."
+      },
+      "6": {
+        "keyword": "Il Nutritore",
+        "brief": "Il custode, guaritore e guardiano dell'armonia.",
+        "description": "L'energia del sei riguarda amore, responsabilita e armonia domestica.",
+        "energy": "Amore, responsabilita, armonia, servizio",
+        "dayGuidance": "Concentrati su casa e persone care oggi.",
+        "monthGuidance": "Un mese per famiglia, casa e responsabilita.",
+        "yearGuidance": "Un anno centrato su casa, famiglia e responsabilita."
+      },
+      "7": {
+        "keyword": "Il Cercatore",
+        "brief": "Il mistico, analista e cercatore spirituale.",
+        "description": "L'energia del sette riguarda introspezione, saggezza e profondita spirituale.",
+        "energy": "Saggezza, introspezione, spiritualita, analisi",
+        "dayGuidance": "Cerca solitudine e riflessione oggi.",
+        "monthGuidance": "Un mese per il lavoro interiore e lo studio.",
+        "yearGuidance": "Un anno di crescita spirituale e sviluppo interiore."
+      },
+      "8": {
+        "keyword": "La Centrale",
+        "brief": "Il realizzatore, autorita e maestro dell'abbondanza.",
+        "description": "L'energia dell'otto riguarda potere, successo e realizzazione materiale.",
+        "energy": "Potere, abbondanza, realizzazione, autorita",
+        "dayGuidance": "Concentrati su affari e finanze oggi.",
+        "monthGuidance": "Un mese per l'avanzamento di carriera.",
+        "yearGuidance": "Un anno di realizzazione e riconoscimento."
+      },
+      "9": {
+        "keyword": "L'Umanitario",
+        "brief": "Il guaritore compassionevole e amante universale.",
+        "description": "L'energia del nove riguarda completamento, compassione e amore universale.",
+        "energy": "Completamento, compassione, saggezza, rilascio",
+        "dayGuidance": "Rilascia cio che non ti serve piu oggi.",
+        "monthGuidance": "Un mese di conclusioni e completamento.",
+        "yearGuidance": "Un anno di completamento e rilascio."
+      },
+      "11": {
+        "keyword": "Il Maestro Intuitivo",
+        "brief": "Il messaggero spirituale e visionario illuminato.",
+        "description": "Undici e un numero maestro di intuizione spirituale amplificata.",
+        "energy": "Intuizione, ispirazione, visione spirituale",
+        "dayGuidance": "Fidati completamente della tua intuizione oggi.",
+        "monthGuidance": "Un mese di intuizione elevata.",
+        "yearGuidance": "Un anno di risveglio spirituale."
+      },
+      "22": {
+        "keyword": "Il Maestro Costruttore",
+        "brief": "L'architetto dei sogni e costruttore di eredita.",
+        "description": "Ventidue e un numero maestro di idealismo pratico e realizzazione su larga scala.",
+        "energy": "Maestria, costruzione su larga scala, visione pratica, eredita",
+        "dayGuidance": "Pensa in grande oggi.",
+        "monthGuidance": "Un mese per progetti ambiziosi.",
+        "yearGuidance": "Un anno per costruire la tua eredita."
+      },
+      "33": {
+        "keyword": "Il Maestro Insegnante",
+        "brief": "Il guaritore cosmico e elevatore dell'umanita.",
+        "description": "Trentatre e un numero maestro di insegnamento compassionevole e servizio disinteressato.",
+        "energy": "Guarigione, insegnamento, servizio disinteressato, amore cosmico",
+        "dayGuidance": "La tua presenza guaritrice e amplificata oggi.",
+        "monthGuidance": "Un mese per il lavoro di guarigione.",
+        "yearGuidance": "Un anno di servizio e insegnamento profondi."
+      }
+    },
+    "pinnacles": {
+      "meanings": {
+        "1": "Indipendenza, leadership e aprire nuovi percorsi",
+        "2": "Cooperazione, relazioni e sensibilita emotiva",
+        "3": "Espressione creativa, comunicazione e gioia",
+        "4": "Costruzione, struttura e stabilire basi solide",
+        "5": "Cambiamento, liberta e nuove esperienze",
+        "6": "Famiglia, responsabilita e nutrire gli altri",
+        "7": "Introspezione, crescita spirituale e saggezza",
+        "8": "Realizzazione materiale, potere e riconoscimento",
+        "9": "Servizio umanitario, completamento e saggezza"
+      }
+    },
+    "challengeMeanings": {
+      "0": "Scelta di tutte le sfide - liberta di scegliere il tuo percorso",
+      "1": "Imparare indipendenza evitando la dominazione",
+      "2": "Bilanciare sensibilita con forza",
+      "3": "Esprimersi senza disperdere energia",
+      "4": "Costruire disciplina senza diventare rigido",
+      "5": "Abbracciare il cambiamento senza avventatezza",
+      "6": "Dare senza martirio o interferenza",
+      "7": "Fidarsi dell'intuizione rimanendo radicato",
+      "8": "Usare il potere responsabilmente senza materialismo"
+    },
+    "luckyKeywords": {
+      "1": "Iniziativa",
+      "2": "Equilibrio",
+      "3": "Espressione",
+      "4": "Fondazione",
+      "5": "Liberta",
+      "6": "Armonia",
+      "7": "Saggezza",
+      "8": "Successo",
+      "9": "Compassione",
+      "11": "Intuizione",
+      "22": "Visione",
+      "33": "Guarigione"
     }
   },
   "astrology": {
@@ -764,7 +941,7 @@
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
     "about": "About",
-    "copyright": "© 2025 Solara Insights — Built with care under the light of the stars."
+    "copyright": "© {year} Solara Insights — Creato con cura sotto la luce delle stelle."
   },
   "compatibility": {
     "title": "Explore Compatibility",

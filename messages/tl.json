@@ -377,7 +377,184 @@
       "title": "Mga Lucky Numbers"
     },
     "karmicDebt": {
+      "13": {
+        "label": "Pagtitiyaga",
+        "meaning": "Pag-aaral ng pagtitiyaga at pokus. Ang katamaran o mga shortcut sa nakaraan ay nangangailangan ng karagdagang pagsisikap upang makapagtayo ng matibay na pundasyon.",
+        "lesson": "Magtayo sa pamamagitan ng matatag, tapat na trabaho sa halip na mga shortcut"
+      },
+      "14": {
+        "label": "Pagpipigil",
+        "meaning": "Pag-aaral ng pagpipigil at pangako. Ang pang-aabuso sa kalayaan sa nakaraan ay nangangailangan ng pagpapaunlad ng pagpipigil sa sarili at pananagutan.",
+        "lesson": "Yakapin ang malusog na mga hangganan habang iginagalang ang mga pangako"
+      },
+      "16": {
+        "label": "Kababaang-loob",
+        "meaning": "Pag-aaral ng kababaang-loob at tunay na koneksyon. Ang mga aksyong hinihimok ng ego sa nakaraan ay nangangailangan ng muling pagtatayo ng tiwala at integridad.",
+        "lesson": "Linangin ang tunay na kababaang-loob at muling itayo mula sa loob"
+      },
+      "19": {
+        "label": "Kalayaan",
+        "meaning": "Pag-aaral ng kalayaan na may habag. Ang pagkamakasarili sa nakaraan ay nangangailangan ng pagbabalanse ng personal na kapangyarihan sa paglilingkod sa iba.",
+        "lesson": "Balansehin ang pag-asa sa sarili sa pagiging bukas sa iba"
+      },
       "title": "Mga Karmic Lessons"
+    },
+    "numbers": {
+      "0": {
+        "keyword": "Ang Kawalan",
+        "brief": "Walang hanggang potensyal at banal na pinagmulan.",
+        "description": "Ang zero ay kumakatawan sa walang hanggang potensyal, ang kawalan kung saan lumalabas ang lahat ng bagay.",
+        "energy": "Potensyal, walang hanggan, kabuuan, banal na pinagmulan",
+        "dayGuidance": "Isang araw ng walang hanggang potensyal. Lahat ng landas ay bukas.",
+        "monthGuidance": "Isang buwan ng walang hanggang posibilidad.",
+        "yearGuidance": "Isang taon ng malalim na espirituwal na koneksyon."
+      },
+      "1": {
+        "keyword": "Ang Tagapanguna",
+        "brief": "Ang tagapanguna, lider, at indibidwalista.",
+        "description": "Ang enerhiya ng isa ay tungkol sa mga bagong simula, pag-asa sa sarili, at paghubog ng sariling landas.",
+        "energy": "Pamumuno, inisyatiba, mga bagong simula, kalayaan",
+        "dayGuidance": "Magsimula ng inisyatiba ngayon. Magsimula ng bagong bagay.",
+        "monthGuidance": "Isang buwan para sa mga bagong simula at pamumuno.",
+        "yearGuidance": "Isang taon ng mga bagong simula at pamumuno."
+      },
+      "2": {
+        "keyword": "Ang Diplomasiko",
+        "brief": "Ang tagapagtatag ng kapayapaan, kasosyo, at sensitibong kaluluwa.",
+        "description": "Ang enerhiya ng dalawa ay tungkol sa kooperasyon, balanse, at pakikipagtulungan sa iba.",
+        "energy": "Pakikipagsosyo, balanse, kooperasyon, intuisyon",
+        "dayGuidance": "Magpokus sa kolaborasyon ngayon.",
+        "monthGuidance": "Isang buwan para sa pag-aalaga ng mga relasyon.",
+        "yearGuidance": "Isang taon ng pakikipagsosyo at pasensya."
+      },
+      "3": {
+        "keyword": "Ang Malikhaing",
+        "brief": "Ang artista, komunikador, at masayang espiritu.",
+        "description": "Ang enerhiya ng tatlo ay tungkol sa pagpapahayag ng sarili, kreatividad, at kagalakan.",
+        "energy": "Kreatividad, pagpapahayag, kagalakan, komunikasyon",
+        "dayGuidance": "Magpahayag nang malaya ngayon.",
+        "monthGuidance": "Isang buwan para sa mga malikhaing proyekto.",
+        "yearGuidance": "Isang taon ng malikhaing pagpapalawak."
+      },
+      "4": {
+        "keyword": "Ang Tagapagtayo",
+        "brief": "Ang arkitekto, manggagawa, at praktikal na pundasyon.",
+        "description": "Ang enerhiya ng apat ay tungkol sa istraktura, pagsusumikap, at pagtatayo ng matibay na pundasyon.",
+        "energy": "Istraktura, disiplina, pagsusumikap, katatagan",
+        "dayGuidance": "Magpokus sa mga praktikal na gawain ngayon.",
+        "monthGuidance": "Isang buwan para sa pagsusumikap at pagtatayo ng istraktura.",
+        "yearGuidance": "Isang taon ng pagtatayo at pagsusumikap."
+      },
+      "5": {
+        "keyword": "Ang Makipagsapalaran",
+        "brief": "Ang manlalakbay, naghahanap ng kalayaan, at ahente ng pagbabago.",
+        "description": "Ang enerhiya ng lima ay tungkol sa kalayaan, pagbabago, at mga bagong karanasan.",
+        "energy": "Kalayaan, pagbabago, pakikipagsapalaran, kagalingan",
+        "dayGuidance": "Yakapin ang pagbabago ngayon.",
+        "monthGuidance": "Isang buwan ng pagbabago at pagkakaiba-iba.",
+        "yearGuidance": "Isang taon ng malalaking pagbabago at bagong kalayaan."
+      },
+      "6": {
+        "keyword": "Ang Tagapag-alaga",
+        "brief": "Ang tagapag-alaga, tagapagpagaling, at tagapangalaga ng pagkakaisa.",
+        "description": "Ang enerhiya ng anim ay tungkol sa pagmamahal, responsibilidad, at pagkakaisa sa tahanan.",
+        "energy": "Pagmamahal, responsibilidad, pagkakaisa, paglilingkod",
+        "dayGuidance": "Magpokus sa tahanan at mga mahal sa buhay ngayon.",
+        "monthGuidance": "Isang buwan para sa pamilya at responsibilidad.",
+        "yearGuidance": "Isang taon na nakatuon sa tahanan at pamilya."
+      },
+      "7": {
+        "keyword": "Ang Mananaliksik",
+        "brief": "Ang mistiko, analista, at espirituwal na mananaliksik.",
+        "description": "Ang enerhiya ng pito ay tungkol sa pagsasaliksik sa sarili, karunungan, at espirituwal na lalim.",
+        "energy": "Karunungan, pagsasaliksik sa sarili, espiritwalidad, pagsusuri",
+        "dayGuidance": "Maghanap ng pag-iisa at pagmumuni-muni ngayon.",
+        "monthGuidance": "Isang buwan para sa panloob na gawain at pag-aaral.",
+        "yearGuidance": "Isang taon ng espirituwal na paglago."
+      },
+      "8": {
+        "keyword": "Ang Makapangyarihan",
+        "brief": "Ang nagtatamo, may awtoridad, at master ng kasaganaan.",
+        "description": "Ang enerhiya ng walo ay tungkol sa kapangyarihan, tagumpay, at materyal na tagumpay.",
+        "energy": "Kapangyarihan, kasaganaan, tagumpay, awtoridad",
+        "dayGuidance": "Magpokus sa negosyo at pananalapi ngayon.",
+        "monthGuidance": "Isang buwan para sa pag-unlad ng karera.",
+        "yearGuidance": "Isang taon ng tagumpay at pagkilala."
+      },
+      "9": {
+        "keyword": "Ang Makataong",
+        "brief": "Ang mahabagin na tagapagpagaling at pangkalahatang mangingibig.",
+        "description": "Ang enerhiya ng siyam ay tungkol sa pagkumpleto, habag, at pangkalahatang pagmamahal.",
+        "energy": "Pagkumpleto, habag, karunungan, pagpapalaya",
+        "dayGuidance": "Pakawalan ang hindi na naglilingkod sa iyo ngayon.",
+        "monthGuidance": "Isang buwan ng mga pagtatapos at pagkumpleto.",
+        "yearGuidance": "Isang taon ng pagkumpleto at pagpapalaya."
+      },
+      "11": {
+        "keyword": "Master ng Intuisyon",
+        "brief": "Ang espirituwal na mensahero at naliwanagang bisyonaryo.",
+        "description": "Ang labing-isa ay isang master number ng espirituwal na pananaw at pinahusay na intuisyon.",
+        "energy": "Intuisyon, inspirasyon, espirituwal na pananaw, bisyon",
+        "dayGuidance": "Magtiwala nang buo sa iyong intuisyon ngayon.",
+        "monthGuidance": "Isang buwan ng pinahusay na intuisyon.",
+        "yearGuidance": "Isang taon ng espirituwal na paggising."
+      },
+      "22": {
+        "keyword": "Master na Tagapagtayo",
+        "brief": "Ang arkitekto ng mga pangarap at tagapagtayo ng mga pamana.",
+        "description": "Ang dalawampu't dalawa ay isang master number ng praktikal na idealismo.",
+        "energy": "Pagkadalubhasa, malakihang pagtatayo, praktikal na bisyon, pamana",
+        "dayGuidance": "Mag-isip nang malaki ngayon.",
+        "monthGuidance": "Isang buwan para sa mga ambisyosong proyekto.",
+        "yearGuidance": "Isang taon para itayo ang iyong pamana."
+      },
+      "33": {
+        "keyword": "Master na Guro",
+        "brief": "Ang kosmikong tagapagpagaling at tagapagangat ng sangkatauhan.",
+        "description": "Ang tatlumpu't tatlo ay isang master number ng mahabagin na pagtuturo.",
+        "energy": "Pagpapagaling, pagtuturo, walang pag-iimbot na paglilingkod, kosmikong pagmamahal",
+        "dayGuidance": "Ang iyong pagpapagaling na presensya ay pinahusay ngayon.",
+        "monthGuidance": "Isang buwan para sa gawain ng pagpapagaling.",
+        "yearGuidance": "Isang taon ng malalim na paglilingkod at pagtuturo."
+      }
+    },
+    "pinnacles": {
+      "meanings": {
+        "1": "Kalayaan, pamumuno, at pagtuklas ng mga bagong landas",
+        "2": "Kooperasyon, mga relasyon, at emosyonal na pagiging sensitibo",
+        "3": "Malikhaing pagpapahayag, komunikasyon, at kagalakan",
+        "4": "Pagtatayo, istraktura, at paglalagay ng matibay na pundasyon",
+        "5": "Pagbabago, kalayaan, at mga bagong karanasan",
+        "6": "Pamilya, responsibilidad, at pag-aalaga sa iba",
+        "7": "Pagsasaliksik sa sarili, espirituwal na paglago, at karunungan",
+        "8": "Materyal na tagumpay, kapangyarihan, at pagkilala",
+        "9": "Makataong paglilingkod, pagkumpleto, at karunungan"
+      }
+    },
+    "challengeMeanings": {
+      "0": "Pagpili ng lahat ng hamon - kalayaang pumili ng iyong landas",
+      "1": "Pag-aaral ng kalayaan habang iniiwasan ang dominasyon",
+      "2": "Pagbabalanse ng pagiging sensitibo sa lakas",
+      "3": "Pagpapahayag ng sarili nang hindi nakakalat ang enerhiya",
+      "4": "Pagtatayo ng disiplina nang hindi nagiging mahigpit",
+      "5": "Pagtanggap ng pagbabago nang walang kapabayaan",
+      "6": "Pagbibigay nang walang pagkamatir o pakikialam",
+      "7": "Pagtitiwala sa intuisyon habang nananatiling nakatuntong",
+      "8": "Paggamit ng kapangyarihan nang may pananagutan nang walang materyalismo"
+    },
+    "luckyKeywords": {
+      "1": "Inisyatiba",
+      "2": "Balanse",
+      "3": "Pagpapahayag",
+      "4": "Pundasyon",
+      "5": "Kalayaan",
+      "6": "Pagkakaisa",
+      "7": "Karunungan",
+      "8": "Tagumpay",
+      "9": "Habag",
+      "11": "Intuisyon",
+      "22": "Bisyon",
+      "33": "Pagpapagaling"
     }
   },
   "astrology": {
@@ -764,7 +941,7 @@
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
     "about": "About",
-    "copyright": "© 2025 Solara Insights — Built with care under the light of the stars."
+    "copyright": "© {year} Solara Insights — Nilikha nang may pag-iingat sa ilalim ng liwanag ng mga bituin."
   },
   "compatibility": {
     "title": "Explore Compatibility",

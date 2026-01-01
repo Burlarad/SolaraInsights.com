@@ -377,7 +377,184 @@
       "title": "Números da sorte"
     },
     "karmicDebt": {
+      "13": {
+        "label": "Perseveranca",
+        "meaning": "Aprendendo perseveranca e foco. Preguica passada ou atalhos requerem esforco extra para construir bases solidas.",
+        "lesson": "Construir atraves de trabalho constante e honesto em vez de atalhos"
+      },
+      "14": {
+        "label": "Moderacao",
+        "meaning": "Aprendendo moderacao e compromisso. Abuso passado da liberdade requer desenvolver autocontrole e responsabilidade.",
+        "lesson": "Abracar limites saudaveis enquanto honra compromissos"
+      },
+      "16": {
+        "label": "Humildade",
+        "meaning": "Aprendendo humildade e conexao autentica. Acoes passadas movidas pelo ego requerem reconstruir confianca e integridade.",
+        "lesson": "Cultivar humildade genuina e reconstruir de dentro"
+      },
+      "19": {
+        "label": "Independencia",
+        "meaning": "Aprendendo independencia com compaixao. Egoismo passado requer equilibrar poder pessoal com servico aos outros.",
+        "lesson": "Equilibrar autossuficiencia com abertura para os outros"
+      },
       "title": "Lições cármicas"
+    },
+    "numbers": {
+      "0": {
+        "keyword": "O Vazio",
+        "brief": "O potencial infinito e fonte divina.",
+        "description": "Zero representa potencial ilimitado, o vazio do qual todas as coisas emergem.",
+        "energy": "Potencial, infinito, totalidade, fonte divina",
+        "dayGuidance": "Um dia de potencial infinito. Todos os caminhos estao abertos.",
+        "monthGuidance": "Um mes de possibilidades ilimitadas. Permaneca aberto a orientacao divina.",
+        "yearGuidance": "Um ano de conexao espiritual profunda. O universo apoia seu caminho mais elevado."
+      },
+      "1": {
+        "keyword": "O Pioneiro",
+        "brief": "O pioneiro, lider e individualista.",
+        "description": "A energia do um e sobre novos comecos, autossuficiencia e forjar seu proprio caminho.",
+        "energy": "Lideranca, iniciativa, novos comecos, independencia",
+        "dayGuidance": "Tome a iniciativa hoje. Comece algo novo e confie em seus instintos.",
+        "monthGuidance": "Um mes para novos comecos e assumir a lideranca.",
+        "yearGuidance": "Um ano de novos comecos e assumir lideranca. Novos capitulos importantes comecam agora."
+      },
+      "2": {
+        "keyword": "O Diplomata",
+        "brief": "O pacificador, parceiro e alma sensivel.",
+        "description": "A energia do dois e sobre cooperacao, equilibrio e trabalhar com outros.",
+        "energy": "Parceria, equilibrio, cooperacao, intuicao",
+        "dayGuidance": "Foque na colaboracao hoje. Ouca mais do que fala.",
+        "monthGuidance": "Um mes para nutrir relacionamentos e encontrar equilibrio.",
+        "yearGuidance": "Um ano de parcerias, paciencia e atencao aos detalhes."
+      },
+      "3": {
+        "keyword": "O Criativo",
+        "brief": "O artista, comunicador e espirito alegre.",
+        "description": "A energia do tres e sobre autoexpressao, criatividade e alegria.",
+        "energy": "Criatividade, expressao, alegria, comunicacao",
+        "dayGuidance": "Expresse-se livremente hoje. Crie, comunique e conecte-se socialmente.",
+        "monthGuidance": "Um mes para projetos criativos e atividades sociais.",
+        "yearGuidance": "Um ano de expansao criativa e autoexpressao."
+      },
+      "4": {
+        "keyword": "O Construtor",
+        "brief": "O arquiteto, trabalhador e fundacao pratica.",
+        "description": "A energia do quatro e sobre estrutura, trabalho duro e construir fundacoes solidas.",
+        "energy": "Estrutura, disciplina, trabalho duro, estabilidade",
+        "dayGuidance": "Foque em tarefas praticas hoje. Construa sistemas e organize.",
+        "monthGuidance": "Um mes para trabalho duro e construir estrutura.",
+        "yearGuidance": "Um ano de construcao e trabalho duro. Discipline e persistencia dao frutos."
+      },
+      "5": {
+        "keyword": "O Aventureiro",
+        "brief": "O explorador, buscador de liberdade e agente de mudanca.",
+        "description": "A energia do cinco e sobre liberdade, mudanca e novas experiencias.",
+        "energy": "Liberdade, mudanca, aventura, versatilidade",
+        "dayGuidance": "Abrace a mudanca hoje. Tente algo novo e seja flexivel.",
+        "monthGuidance": "Um mes de mudanca e variedade. Viaje e explore.",
+        "yearGuidance": "Um ano de grandes mudancas e nova liberdade."
+      },
+      "6": {
+        "keyword": "O Nutridor",
+        "brief": "O cuidador, curador e guardiao da harmonia.",
+        "description": "A energia do seis e sobre amor, responsabilidade e harmonia domestica.",
+        "energy": "Amor, responsabilidade, harmonia, servico",
+        "dayGuidance": "Foque no lar e entes queridos hoje. Nutra relacionamentos.",
+        "monthGuidance": "Um mes para familia, lar e responsabilidades.",
+        "yearGuidance": "Um ano centrado no lar, familia e responsabilidades."
+      },
+      "7": {
+        "keyword": "O Buscador",
+        "brief": "O mistico, analista e buscador espiritual.",
+        "description": "A energia do sete e sobre introspeccao, sabedoria e profundidade espiritual.",
+        "energy": "Sabedoria, introspeccao, espiritualidade, analise",
+        "dayGuidance": "Busque solidao e reflexao hoje. Pesquise, estude ou medite.",
+        "monthGuidance": "Um mes para trabalho interior e estudo.",
+        "yearGuidance": "Um ano de crescimento espiritual e desenvolvimento interior."
+      },
+      "8": {
+        "keyword": "A Potencia",
+        "brief": "O realizador, autoridade e mestre da abundancia.",
+        "description": "A energia do oito e sobre poder, sucesso e realizacao material.",
+        "energy": "Poder, abundancia, realizacao, autoridade",
+        "dayGuidance": "Foque em negocios e financas hoje. Faca movimentos de poder.",
+        "monthGuidance": "Um mes para avanco na carreira e assuntos financeiros.",
+        "yearGuidance": "Um ano de realizacao e reconhecimento."
+      },
+      "9": {
+        "keyword": "O Humanitario",
+        "brief": "O curador compassivo e amante universal.",
+        "description": "A energia do nove e sobre conclusao, compaixao e amor universal.",
+        "energy": "Conclusao, compaixao, sabedoria, liberacao",
+        "dayGuidance": "Libere o que nao serve mais hoje. De generosamente.",
+        "monthGuidance": "Um mes de finais e conclusao.",
+        "yearGuidance": "Um ano de conclusao e liberacao. Deixe ir o velho."
+      },
+      "11": {
+        "keyword": "O Mestre Intuitivo",
+        "brief": "O mensageiro espiritual e visionario iluminado.",
+        "description": "Onze e um numero mestre de percepcao espiritual e intuicao amplificada.",
+        "energy": "Intuicao, inspiracao, percepcao espiritual, visao",
+        "dayGuidance": "Confie completamente em sua intuicao hoje.",
+        "monthGuidance": "Um mes de intuicao elevada e downloads espirituais.",
+        "yearGuidance": "Um ano de despertar espiritual e avancos intuitivos."
+      },
+      "22": {
+        "keyword": "O Mestre Construtor",
+        "brief": "O arquiteto de sonhos e construtor de legados.",
+        "description": "Vinte e dois e um numero mestre de idealismo pratico e realizacao em grande escala.",
+        "energy": "Maestria, construcao em grande escala, visao pratica, legado",
+        "dayGuidance": "Pense grande hoje. Sua capacidade de manifestar grandes visoes esta amplificada.",
+        "monthGuidance": "Um mes para projetos ambiciosos e maestria pratica.",
+        "yearGuidance": "Um ano para construir seu legado."
+      },
+      "33": {
+        "keyword": "O Mestre Professor",
+        "brief": "O curador cosmico e elevador da humanidade.",
+        "description": "Trinta e tres e um numero mestre de ensino compassivo e servico altruista.",
+        "energy": "Cura, ensino, servico altruista, amor cosmico",
+        "dayGuidance": "Sua presenca curativa esta amplificada hoje. Ensine atraves do amor.",
+        "monthGuidance": "Um mes para trabalho de cura e ensino espiritual.",
+        "yearGuidance": "Um ano de servico e ensino profundos."
+      }
+    },
+    "pinnacles": {
+      "meanings": {
+        "1": "Independencia, lideranca e abrir novos caminhos",
+        "2": "Cooperacao, relacionamentos e sensibilidade emocional",
+        "3": "Expressao criativa, comunicacao e alegria",
+        "4": "Construcao, estrutura e estabelecer fundacoes solidas",
+        "5": "Mudanca, liberdade e novas experiencias",
+        "6": "Familia, responsabilidade e nutrir os outros",
+        "7": "Introspeccao, crescimento espiritual e sabedoria",
+        "8": "Realizacao material, poder e reconhecimento",
+        "9": "Servico humanitario, conclusao e sabedoria"
+      }
+    },
+    "challengeMeanings": {
+      "0": "Escolha de todos os desafios - liberdade para escolher seu caminho",
+      "1": "Aprender independencia evitando dominacao",
+      "2": "Equilibrar sensibilidade com forca",
+      "3": "Expressar-se sem dispersar energia",
+      "4": "Construir disciplina sem se tornar rigido",
+      "5": "Abracar mudanca sem imprudencia",
+      "6": "Dar sem martirio ou interferencia",
+      "7": "Confiar na intuicao permanecendo aterrado",
+      "8": "Usar poder responsavelmente sem materialismo"
+    },
+    "luckyKeywords": {
+      "1": "Iniciativa",
+      "2": "Equilibrio",
+      "3": "Expressao",
+      "4": "Fundacao",
+      "5": "Liberdade",
+      "6": "Harmonia",
+      "7": "Sabedoria",
+      "8": "Sucesso",
+      "9": "Compaixao",
+      "11": "Intuicao",
+      "22": "Visao",
+      "33": "Cura"
     }
   },
   "astrology": {
@@ -764,7 +941,7 @@
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
     "about": "About",
-    "copyright": "© 2025 Solara Insights — Built with care under the light of the stars."
+    "copyright": "© {year} Solara Insights — Criado com carinho sob a luz das estrelas."
   },
   "compatibility": {
     "title": "Explore Compatibility",

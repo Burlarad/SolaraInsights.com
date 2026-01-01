@@ -377,7 +377,184 @@
       "title": "Geluksgetallen"
     },
     "karmicDebt": {
+      "13": {
+        "label": "Doorzettingsvermogen",
+        "meaning": "Doorzettingsvermogen en focus leren. Luiheid of kortere wegen uit het verleden vereisen extra inspanning.",
+        "lesson": "Bouwen door gestaag, eerlijk werk in plaats van kortere wegen"
+      },
+      "14": {
+        "label": "Matigheid",
+        "meaning": "Matigheid en toewijding leren. Misbruik van vrijheid uit het verleden vereist zelfbeheersing.",
+        "lesson": "Gezonde grenzen omarmen terwijl je verplichtingen nakomt"
+      },
+      "16": {
+        "label": "Nederigheid",
+        "meaning": "Nederigheid en authentieke verbinding leren. Ego-gedreven acties uit het verleden vereisen herstel van vertrouwen.",
+        "lesson": "Oprechte nederigheid cultiveren en van binnenuit herbouwen"
+      },
+      "19": {
+        "label": "Onafhankelijkheid",
+        "meaning": "Onafhankelijkheid met compassie leren. Zelfzucht uit het verleden vereist balans tussen persoonlijke kracht en dienst aan anderen.",
+        "lesson": "Zelfstandigheid balanceren met openheid naar anderen"
+      },
       "title": "Karmische Lessen"
+    },
+    "numbers": {
+      "0": {
+        "keyword": "De Leegte",
+        "brief": "Het oneindige potentieel en goddelijke bron.",
+        "description": "Nul vertegenwoordigt onbeperkt potentieel, de leegte waaruit alle dingen ontstaan.",
+        "energy": "Potentieel, oneindigheid, heelheid, goddelijke bron",
+        "dayGuidance": "Een dag van oneindig potentieel. Alle paden staan open.",
+        "monthGuidance": "Een maand van onbeperkte mogelijkheden.",
+        "yearGuidance": "Een jaar van diepe spirituele verbinding."
+      },
+      "1": {
+        "keyword": "De Pionier",
+        "brief": "De pionier, leider en individualist.",
+        "description": "De energie van een gaat over nieuwe beginnen en je eigen weg banen.",
+        "energy": "Leiderschap, initiatief, nieuwe beginnen, onafhankelijkheid",
+        "dayGuidance": "Neem vandaag het initiatief. Begin iets nieuws.",
+        "monthGuidance": "Een maand voor nieuwe beginnen en de leiding nemen.",
+        "yearGuidance": "Een jaar van nieuwe beginnen en leiderschap."
+      },
+      "2": {
+        "keyword": "De Diplomaat",
+        "brief": "De vredestichter, partner en gevoelige ziel.",
+        "description": "De energie van twee gaat over samenwerking, balans en met anderen werken.",
+        "energy": "Partnerschap, balans, samenwerking, intuitie",
+        "dayGuidance": "Focus vandaag op samenwerking.",
+        "monthGuidance": "Een maand voor het koesteren van relaties.",
+        "yearGuidance": "Een jaar van partnerschappen en geduld."
+      },
+      "3": {
+        "keyword": "De Creatieveling",
+        "brief": "De kunstenaar, communicator en vrolijke geest.",
+        "description": "De energie van drie gaat over zelfexpressie, creativiteit en vreugde.",
+        "energy": "Creativiteit, expressie, vreugde, communicatie",
+        "dayGuidance": "Druk jezelf vrij uit vandaag.",
+        "monthGuidance": "Een maand voor creatieve projecten.",
+        "yearGuidance": "Een jaar van creatieve expansie."
+      },
+      "4": {
+        "keyword": "De Bouwer",
+        "brief": "De architect, werker en praktische basis.",
+        "description": "De energie van vier gaat over structuur, hard werken en solide fundamenten bouwen.",
+        "energy": "Structuur, discipline, hard werken, stabiliteit",
+        "dayGuidance": "Focus vandaag op praktische taken.",
+        "monthGuidance": "Een maand voor hard werken en structuur bouwen.",
+        "yearGuidance": "Een jaar van bouwen en hard werken."
+      },
+      "5": {
+        "keyword": "De Avonturier",
+        "brief": "De ontdekker, vrijheidszoeker en veranderingsagent.",
+        "description": "De energie van vijf gaat over vrijheid, verandering en nieuwe ervaringen.",
+        "energy": "Vrijheid, verandering, avontuur, veelzijdigheid",
+        "dayGuidance": "Omarm verandering vandaag.",
+        "monthGuidance": "Een maand van verandering en variatie.",
+        "yearGuidance": "Een jaar van grote veranderingen en nieuwe vrijheid."
+      },
+      "6": {
+        "keyword": "De Verzorger",
+        "brief": "De verzorger, genezer en bewaker van harmonie.",
+        "description": "De energie van zes gaat over liefde, verantwoordelijkheid en huiselijke harmonie.",
+        "energy": "Liefde, verantwoordelijkheid, harmonie, dienst",
+        "dayGuidance": "Focus vandaag op thuis en dierbaren.",
+        "monthGuidance": "Een maand voor familie en verantwoordelijkheden.",
+        "yearGuidance": "Een jaar gericht op thuis en familie."
+      },
+      "7": {
+        "keyword": "De Zoeker",
+        "brief": "De mysticus, analist en spirituele zoeker.",
+        "description": "De energie van zeven gaat over introspectie, wijsheid en spirituele diepte.",
+        "energy": "Wijsheid, introspectie, spiritualiteit, analyse",
+        "dayGuidance": "Zoek eenzaamheid en reflectie vandaag.",
+        "monthGuidance": "Een maand voor innerlijk werk en studie.",
+        "yearGuidance": "Een jaar van spirituele groei."
+      },
+      "8": {
+        "keyword": "De Krachtcentrale",
+        "brief": "De bereiker, autoriteit en meester van overvloed.",
+        "description": "De energie van acht gaat over macht, succes en materiele prestatie.",
+        "energy": "Macht, overvloed, prestatie, autoriteit",
+        "dayGuidance": "Focus vandaag op zaken en financien.",
+        "monthGuidance": "Een maand voor carriere-vooruitgang.",
+        "yearGuidance": "Een jaar van prestatie en erkenning."
+      },
+      "9": {
+        "keyword": "De Humanitair",
+        "brief": "De compassievolle genezer en universele minnaar.",
+        "description": "De energie van negen gaat over voltooiing, compassie en universele liefde.",
+        "energy": "Voltooiing, compassie, wijsheid, loslaten",
+        "dayGuidance": "Laat los wat je niet meer dient vandaag.",
+        "monthGuidance": "Een maand van eindes en voltooiing.",
+        "yearGuidance": "Een jaar van voltooiing en loslaten."
+      },
+      "11": {
+        "keyword": "De Meester-Intuitief",
+        "brief": "De spirituele boodschapper en verlichte visionair.",
+        "description": "Elf is een meestergetal van spiritueel inzicht en versterkte intuitie.",
+        "energy": "Intuitie, inspiratie, spiritueel inzicht, visie",
+        "dayGuidance": "Vertrouw vandaag volledig op je intuitie.",
+        "monthGuidance": "Een maand van verhoogde intuitie.",
+        "yearGuidance": "Een jaar van spiritueel ontwaken."
+      },
+      "22": {
+        "keyword": "De Meester-Bouwer",
+        "brief": "De architect van dromen en bouwer van erfenissen.",
+        "description": "Tweeentwintig is een meestergetal van praktisch idealisme.",
+        "energy": "Meesterschap, grootschalig bouwen, praktische visie, erfenis",
+        "dayGuidance": "Denk vandaag groot.",
+        "monthGuidance": "Een maand voor ambitieuze projecten.",
+        "yearGuidance": "Een jaar om je erfenis te bouwen."
+      },
+      "33": {
+        "keyword": "De Meester-Leraar",
+        "brief": "De kosmische genezer en verhefter van de mensheid.",
+        "description": "Drieendertig is een meestergetal van compassievol onderwijzen.",
+        "energy": "Genezing, onderwijs, onzelfzuchtige dienst, kosmische liefde",
+        "dayGuidance": "Je genezende aanwezigheid is vandaag versterkt.",
+        "monthGuidance": "Een maand voor genezingswerk.",
+        "yearGuidance": "Een jaar van diepe dienst en onderwijs."
+      }
+    },
+    "pinnacles": {
+      "meanings": {
+        "1": "Onafhankelijkheid, leiderschap en nieuwe wegen banen",
+        "2": "Samenwerking, relaties en emotionele gevoeligheid",
+        "3": "Creatieve expressie, communicatie en vreugde",
+        "4": "Bouwen, structuur en solide fundamenten leggen",
+        "5": "Verandering, vrijheid en nieuwe ervaringen",
+        "6": "Familie, verantwoordelijkheid en anderen verzorgen",
+        "7": "Introspectie, spirituele groei en wijsheid",
+        "8": "Materiele prestatie, macht en erkenning",
+        "9": "Humanitaire dienst, voltooiing en wijsheid"
+      }
+    },
+    "challengeMeanings": {
+      "0": "Keuze van alle uitdagingen - vrijheid om je pad te kiezen",
+      "1": "Onafhankelijkheid leren zonder dominantie",
+      "2": "Gevoeligheid balanceren met kracht",
+      "3": "Jezelf uitdrukken zonder energie te verstrooien",
+      "4": "Discipline opbouwen zonder rigide te worden",
+      "5": "Verandering omarmen zonder roekeloosheid",
+      "6": "Geven zonder martelaarschap of inmenging",
+      "7": "Intuitie vertrouwen terwijl je gegrond blijft",
+      "8": "Macht verantwoordelijk gebruiken zonder materialisme"
+    },
+    "luckyKeywords": {
+      "1": "Initiatief",
+      "2": "Balans",
+      "3": "Expressie",
+      "4": "Fundament",
+      "5": "Vrijheid",
+      "6": "Harmonie",
+      "7": "Wijsheid",
+      "8": "Succes",
+      "9": "Compassie",
+      "11": "Intuitie",
+      "22": "Visie",
+      "33": "Genezing"
     }
   },
   "astrology": {
@@ -764,7 +941,7 @@
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
     "about": "About",
-    "copyright": "© 2025 Solara Insights — Built with care under the light of the stars."
+    "copyright": "© {year} Solara Insights — Met zorg gebouwd onder het licht van de sterren."
   },
   "compatibility": {
     "title": "Explore Compatibility",

@@ -7,16 +7,6 @@ import { SanctuaryTabs } from "@/components/sanctuary/SanctuaryTabs";
 import { SolaraLogo } from "@/components/layout/SolaraLogo";
 import type { NumerologyResponse, NumerologySystem } from "@/types/numerology";
 import type { NumerologyInsight } from "@/types/numerologyAI";
-import {
-  getPinnacleMeaning,
-  getChallengeMeaning,
-  getPersonalYearMeaning,
-  getPersonalYearKeyword,
-  getLuckyNumberMeaning,
-  getKarmicDebtMeaning,
-  getKarmicDebtLabel,
-} from "@/lib/numerology";
-import { getNumberMeaning } from "@/lib/numerology/meanings";
 import { useTranslations } from "next-intl";
 
 export default function NumerologyPage() {
@@ -225,36 +215,42 @@ export default function NumerologyPage() {
             number={coreNumbers.lifePath.value}
             master={coreNumbers.lifePath.master}
             contextDescription={t("coreNumbers.lifePathDesc")}
+            t={t}
           />
           <CoreNumberCard
             label={t("coreNumbers.expression")}
             number={coreNumbers.expression.value}
             master={coreNumbers.expression.master}
             contextDescription={t("coreNumbers.expressionDesc")}
+            t={t}
           />
           <CoreNumberCard
             label={t("coreNumbers.soulUrge")}
             number={coreNumbers.soulUrge.value}
             master={coreNumbers.soulUrge.master}
             contextDescription={t("coreNumbers.soulUrgeDesc")}
+            t={t}
           />
           <CoreNumberCard
             label={t("coreNumbers.personality")}
             number={coreNumbers.personality.value}
             master={coreNumbers.personality.master}
             contextDescription={t("coreNumbers.personalityDesc")}
+            t={t}
           />
           <CoreNumberCard
             label={t("coreNumbers.birthday")}
             number={coreNumbers.birthday.value}
             master={coreNumbers.birthday.master}
             contextDescription={t("coreNumbers.birthdayDesc")}
+            t={t}
           />
           <CoreNumberCard
             label={t("coreNumbers.maturity")}
             number={coreNumbers.maturity.value}
             master={coreNumbers.maturity.master}
             contextDescription={t("coreNumbers.maturityDesc")}
+            t={t}
           />
         </div>
       </section>
@@ -272,11 +268,11 @@ export default function NumerologyPage() {
               <div className="flex items-baseline gap-2 mb-2">
                 <p className="text-3xl font-bold text-accent-gold">{cycles.personalYear}</p>
                 <span className="text-sm font-medium text-accent-ink/70">
-                  {getNumberMeaning(cycles.personalYear).keyword}
+                  {t(`numbers.${cycles.personalYear}.keyword`)}
                 </span>
               </div>
               <p className="text-sm text-accent-ink/80 leading-relaxed">
-                {getNumberMeaning(cycles.personalYear).yearGuidance}
+                {t(`numbers.${cycles.personalYear}.yearGuidance`)}
               </p>
             </CardContent>
           </Card>
@@ -290,11 +286,11 @@ export default function NumerologyPage() {
               <div className="flex items-baseline gap-2 mb-2">
                 <p className="text-3xl font-bold text-accent-gold">{cycles.personalMonth}</p>
                 <span className="text-sm font-medium text-accent-ink/70">
-                  {getNumberMeaning(cycles.personalMonth).keyword}
+                  {t(`numbers.${cycles.personalMonth}.keyword`)}
                 </span>
               </div>
               <p className="text-sm text-accent-ink/80 leading-relaxed">
-                {getNumberMeaning(cycles.personalMonth).monthGuidance}
+                {t(`numbers.${cycles.personalMonth}.monthGuidance`)}
               </p>
             </CardContent>
           </Card>
@@ -308,11 +304,11 @@ export default function NumerologyPage() {
               <div className="flex items-baseline gap-2 mb-2">
                 <p className="text-3xl font-bold text-accent-gold">{cycles.personalDay}</p>
                 <span className="text-sm font-medium text-accent-ink/70">
-                  {getNumberMeaning(cycles.personalDay).keyword}
+                  {t(`numbers.${cycles.personalDay}.keyword`)}
                 </span>
               </div>
               <p className="text-sm text-accent-ink/80 leading-relaxed">
-                {getNumberMeaning(cycles.personalDay).dayGuidance}
+                {t(`numbers.${cycles.personalDay}.dayGuidance`)}
               </p>
             </CardContent>
           </Card>
@@ -330,7 +326,7 @@ export default function NumerologyPage() {
                 <div className="flex items-baseline gap-2">
                   <p className="text-4xl font-bold text-accent-gold">{currentPinnacle.number}</p>
                   <span className="text-sm font-medium text-accent-ink/70">
-                    {getNumberMeaning(currentPinnacle.number).keyword}
+                    {t(`numbers.${currentPinnacle.number}.keyword`)}
                   </span>
                 </div>
               </div>
@@ -341,7 +337,7 @@ export default function NumerologyPage() {
                 </p>
               </div>
             </div>
-            <p className="text-accent-ink/80">{getNumberMeaning(currentPinnacle.number).description}</p>
+            <p className="text-accent-ink/80">{t(`numbers.${currentPinnacle.number}.description`)}</p>
           </CardContent>
         </Card>
 
@@ -354,7 +350,6 @@ export default function NumerologyPage() {
                 (i === 1 && currentAge >= pinnacles.first.endAge && currentAge < pinnacles.second.endAge) ||
                 (i === 2 && currentAge >= pinnacles.second.endAge && currentAge < pinnacles.third.endAge) ||
                 (i === 3 && currentAge >= pinnacles.third.endAge);
-              const pinnacleMeaning = getNumberMeaning(p.number);
 
               return (
                 <div
@@ -373,14 +368,14 @@ export default function NumerologyPage() {
                       {p.number}
                     </p>
                     <span className="text-xs font-medium text-accent-ink/60">
-                      {pinnacleMeaning.keyword}
+                      {t(`numbers.${p.number}.keyword`)}
                     </span>
                   </div>
                   <p className="text-xs text-accent-ink/50 mb-2">
                     {t("lifePeriods.ages")} {p.startAge || 0} - {p.endAge || t("lifePeriods.onwards")}
                   </p>
                   <p className="text-xs text-accent-ink/70 line-clamp-2">
-                    {pinnacleMeaning.brief}
+                    {t(`numbers.${p.number}.brief`)}
                   </p>
                 </div>
               );
@@ -395,7 +390,6 @@ export default function NumerologyPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[challenges.first, challenges.second, challenges.third, challenges.fourth].map(
             (c, i) => {
-              const challengeMeaning = getNumberMeaning(c);
               return (
                 <Card key={i} className="bg-white border-border-subtle">
                   <CardContent className="p-4">
@@ -405,11 +399,11 @@ export default function NumerologyPage() {
                     <div className="flex items-baseline gap-2 mb-2">
                       <p className="text-2xl font-bold text-accent-ink">{c}</p>
                       <span className="text-xs font-medium text-accent-ink/60">
-                        {challengeMeaning.keyword}
+                        {t(`numbers.${c}.keyword`)}
                       </span>
                     </div>
                     <p className="text-xs text-accent-ink/70 line-clamp-2">
-                      {getChallengeMeaning(c)}
+                      {t(`challengeMeanings.${c}`)}
                     </p>
                   </CardContent>
                 </Card>
@@ -424,7 +418,6 @@ export default function NumerologyPage() {
         <h2 className="text-lg font-semibold text-accent-gold mb-4">{t("luckyNumbers.title")}</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {luckyNumbers.all.map((num, i) => {
-            const numMeaning = getNumberMeaning(num);
             const isMaster = num === 11 || num === 22 || num === 33;
             return (
               <Card
@@ -444,12 +437,12 @@ export default function NumerologyPage() {
                     {num}
                   </div>
                   <p className="text-sm font-medium text-accent-ink mb-1">
-                    {numMeaning.keyword}
+                    {t(`numbers.${num}.keyword`)}
                   </p>
                   {isMaster && (
                     <p className="text-xs text-accent-gold font-medium mb-1">{tCommon("masterNumber")}</p>
                   )}
-                  <p className="text-xs text-accent-ink/60">{numMeaning.energy}</p>
+                  <p className="text-xs text-accent-ink/60">{t(`numbers.${num}.energy`)}</p>
                 </CardContent>
               </Card>
             );
@@ -471,10 +464,10 @@ export default function NumerologyPage() {
                     </div>
                     <div>
                       <p className="font-medium text-accent-ink">
-                        Karmic Debt {num}: {getKarmicDebtLabel(num as 13 | 14 | 16 | 19)}
+                        {t("karmicDebt.title")} {num}: {t(`karmicDebt.${num}.label`)}
                       </p>
                       <p className="text-sm text-accent-ink/70 mt-1">
-                        {getKarmicDebtMeaning(num as 13 | 14 | 16 | 19)}
+                        {t(`karmicDebt.${num}.meaning`)}
                       </p>
                     </div>
                   </div>
@@ -494,13 +487,15 @@ function CoreNumberCard({
   number,
   master,
   contextDescription,
+  t,
 }: {
   label: string;
   number: number;
   master?: number;
   contextDescription: string;
+  t: (key: string) => string;
 }) {
-  const meaning = getNumberMeaning(master || number);
+  const displayNumber = master || number;
 
   return (
     <Card className="bg-white border-border-subtle hover:shadow-md transition-shadow">
@@ -512,12 +507,12 @@ function CoreNumberCard({
             <span className="text-sm text-accent-gold/60">({master})</span>
           )}
           <span className="text-sm font-medium text-accent-ink/70">
-            {meaning.keyword}
+            {t(`numbers.${displayNumber}.keyword`)}
           </span>
         </div>
         <p className="text-xs text-accent-ink/50 mb-3">{contextDescription}</p>
         <p className="text-sm text-accent-ink/80 leading-relaxed">
-          {meaning.description}
+          {t(`numbers.${displayNumber}.description`)}
         </p>
       </CardContent>
     </Card>

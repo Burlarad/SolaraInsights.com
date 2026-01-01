@@ -377,7 +377,184 @@
       "title": "Nombres chanceux"
     },
     "karmicDebt": {
+      "13": {
+        "label": "Persévérance",
+        "meaning": "Apprendre la persévérance et la concentration. La paresse passée ou les raccourcis nécessitent des efforts supplémentaires pour construire des bases solides.",
+        "lesson": "Construire par un travail constant et honnête plutôt que par des raccourcis"
+      },
+      "14": {
+        "label": "Modération",
+        "meaning": "Apprendre la modération et l'engagement. L'abus passé de liberté nécessite de développer la maîtrise de soi et la responsabilité.",
+        "lesson": "Adopter des limites saines tout en honorant ses engagements"
+      },
+      "16": {
+        "label": "Humilité",
+        "meaning": "Apprendre l'humilité et la connexion authentique. Les actions passées guidées par l'ego nécessitent de reconstruire la confiance et l'intégrité.",
+        "lesson": "Cultiver une humilité authentique et se reconstruire de l'intérieur"
+      },
+      "19": {
+        "label": "Indépendance",
+        "meaning": "Apprendre l'indépendance avec compassion. L'égoïsme passé nécessite d'équilibrer le pouvoir personnel avec le service aux autres.",
+        "lesson": "Équilibrer l'autonomie avec l'ouverture aux autres"
+      },
       "title": "Leçons karmiques"
+    },
+    "numbers": {
+      "0": {
+        "keyword": "Le Vide",
+        "brief": "Le potentiel infini et la source divine.",
+        "description": "Le zéro représente le potentiel illimité, le vide d'où émergent toutes choses. Il porte la vibration de l'éternité, de la plénitude et du divin. C'est le nombre des possibilités infinies.",
+        "energy": "Potentiel, infini, plénitude, source divine",
+        "dayGuidance": "Un jour de potentiel infini. Tous les chemins sont ouverts. Faites confiance à la guidance de l'univers.",
+        "monthGuidance": "Un mois de possibilités illimitées. Restez ouvert à la guidance divine et aux nouveaux départs.",
+        "yearGuidance": "Une année de connexion spirituelle profonde. L'univers soutient votre chemin le plus élevé."
+      },
+      "1": {
+        "keyword": "Le Pionnier",
+        "brief": "Le pionnier, leader et individualiste.",
+        "description": "L'énergie du un concerne les nouveaux départs, l'autonomie et forger votre propre chemin. Elle porte la vibration de l'originalité, de l'ambition et du courage de se tenir seul. C'est le nombre de l'initiative et de l'action indépendante.",
+        "energy": "Leadership, initiative, nouveaux départs, indépendance",
+        "dayGuidance": "Prenez l'initiative aujourd'hui. Commencez quelque chose de nouveau, prenez des décisions audacieuses et faites confiance à vos instincts pour diriger.",
+        "monthGuidance": "Un mois pour de nouveaux départs et prendre les commandes. Plantez des graines pour les projets que vous voulez voir grandir. Affirmez-vous.",
+        "yearGuidance": "Une année de nouveaux départs, de semences plantées et de prise de leadership. De nouveaux chapitres majeurs commencent maintenant."
+      },
+      "2": {
+        "keyword": "Le Diplomate",
+        "brief": "Le pacificateur, partenaire et âme sensible.",
+        "description": "L'énergie du deux concerne la coopération, l'équilibre et le travail avec les autres. Elle porte la vibration de la diplomatie, de la patience et de la sensibilité émotionnelle. C'est le nombre des relations et de la réceptivité intuitive.",
+        "energy": "Partenariat, équilibre, coopération, intuition",
+        "dayGuidance": "Concentrez-vous sur la collaboration aujourd'hui. Écoutez plus que vous ne parlez. Les partenariats et le compromis apportent le succès.",
+        "monthGuidance": "Un mois pour cultiver les relations et trouver l'équilibre. La patience est récompensée. Travaillez en coulisses.",
+        "yearGuidance": "Une année de partenariats, de patience et d'attention aux détails. Laissez les choses se développer lentement. Soutenez les autres."
+      },
+      "3": {
+        "keyword": "Le Créatif",
+        "brief": "L'artiste, communicateur et esprit joyeux.",
+        "description": "L'énergie du trois concerne l'expression de soi, la créativité et la joie. Elle porte la vibration de la communication, de l'optimisme et du talent artistique. C'est le nombre de l'inspiration et de la connexion sociale.",
+        "energy": "Créativité, expression, joie, communication",
+        "dayGuidance": "Exprimez-vous librement aujourd'hui. Créez, communiquez et connectez-vous socialement. Laissez la joie guider vos actions.",
+        "monthGuidance": "Un mois pour les projets créatifs et les activités sociales. Partagez vos idées. Embrassez l'optimisme et l'enjouement.",
+        "yearGuidance": "Une année d'expansion créative et d'expression de soi. Votre voix compte. Poursuivez les opportunités artistiques et sociales."
+      },
+      "4": {
+        "keyword": "Le Bâtisseur",
+        "brief": "L'architecte, travailleur et fondation pratique.",
+        "description": "L'énergie du quatre concerne la structure, le travail acharné et la construction de fondations solides. Elle porte la vibration de la discipline, de l'organisation et de l'accomplissement pratique. C'est le nombre de la stabilité et de l'effort déterminé.",
+        "energy": "Structure, discipline, travail acharné, stabilité",
+        "dayGuidance": "Concentrez-vous sur les tâches pratiques aujourd'hui. Construisez des systèmes, organisez et travaillez. Les fondations solides comptent.",
+        "monthGuidance": "Un mois pour le travail acharné et la construction de structures. Organisez-vous. Concentrez-vous sur les responsabilités et les objectifs à long terme.",
+        "yearGuidance": "Une année de construction et de travail acharné. Posez les fondations pour l'avenir. La discipline et la persévérance portent leurs fruits."
+      },
+      "5": {
+        "keyword": "L'Aventurier",
+        "brief": "L'explorateur, chercheur de liberté et agent du changement.",
+        "description": "L'énergie du cinq concerne la liberté, le changement et les nouvelles expériences. Elle porte la vibration de l'aventure, de la polyvalence et du mouvement dynamique. C'est le nombre de la transformation et de l'exploration sensorielle.",
+        "energy": "Liberté, changement, aventure, polyvalence",
+        "dayGuidance": "Embrassez le changement aujourd'hui. Essayez quelque chose de nouveau, soyez flexible et accueillez les opportunités inattendues.",
+        "monthGuidance": "Un mois de changement et de variété. Voyagez, explorez et sortez de la routine. L'adaptabilité est la clé.",
+        "yearGuidance": "Une année de changements majeurs et de nouvelle liberté. La vie s'accélère. Embrassez l'aventure et libérez-vous de ce qui vous retient."
+      },
+      "6": {
+        "keyword": "Le Nourricier",
+        "brief": "Le soignant, guérisseur et gardien de l'harmonie.",
+        "description": "L'énergie du six concerne l'amour, la responsabilité et l'harmonie domestique. Elle porte la vibration de la bienveillance, de la beauté et du service aux autres. C'est le nombre du foyer, de la famille et de la guérison.",
+        "energy": "Amour, responsabilité, harmonie, service",
+        "dayGuidance": "Concentrez-vous sur le foyer et les êtres chers aujourd'hui. Nourrissez les relations. Créez beauté et harmonie dans votre espace.",
+        "monthGuidance": "Un mois pour la famille, le foyer et les responsabilités. Prenez soin des autres. Concentrez-vous sur l'harmonie domestique et la beauté.",
+        "yearGuidance": "Une année centrée sur le foyer, la famille et les responsabilités. Les relations s'approfondissent. Le service aux autres apporte l'accomplissement."
+      },
+      "7": {
+        "keyword": "Le Chercheur",
+        "brief": "Le mystique, analyste et chercheur spirituel.",
+        "description": "L'énergie du sept concerne l'introspection, la sagesse et la profondeur spirituelle. Elle porte la vibration de l'analyse, de l'intuition et de la connaissance intérieure. C'est le nombre de la contemplation et de la compréhension profonde.",
+        "energy": "Sagesse, introspection, spiritualité, analyse",
+        "dayGuidance": "Cherchez la solitude et la réflexion aujourd'hui. Recherchez, étudiez ou méditez. Pas idéal pour les grandes réunions sociales.",
+        "monthGuidance": "Un mois pour le travail intérieur et l'étude. Cherchez la connaissance. Faites confiance à votre intuition. La qualité plutôt que la quantité en tout.",
+        "yearGuidance": "Une année de croissance spirituelle et de développement intérieur. Étudiez, réfléchissez et faites confiance à votre intuition. Les réponses viennent de l'intérieur."
+      },
+      "8": {
+        "keyword": "La Centrale",
+        "brief": "L'accomplisseur, autorité et maître de l'abondance.",
+        "description": "L'énergie du huit concerne le pouvoir, le succès et l'accomplissement matériel. Elle porte la vibration de l'autorité, de l'ambition et de l'équilibre karmique. C'est le nombre de la manifestation et de la capacité exécutive.",
+        "energy": "Pouvoir, abondance, accomplissement, autorité",
+        "dayGuidance": "Concentrez-vous sur les affaires et les finances aujourd'hui. Faites des mouvements de pouvoir. Votre autorité et compétence sont reconnues.",
+        "monthGuidance": "Un mois pour l'avancement de carrière et les questions financières. Assumez votre pouvoir. Les affaires sont favorisées.",
+        "yearGuidance": "Une année d'accomplissement et de reconnaissance. La carrière atteint son apogée. Les opportunités financières arrivent. Utilisez le pouvoir sagement."
+      },
+      "9": {
+        "keyword": "L'Humanitaire",
+        "brief": "Le guérisseur compatissant et amoureux universel.",
+        "description": "L'énergie du neuf concerne l'achèvement, la compassion et l'amour universel. Elle porte la vibration de la sagesse, de l'humanitarisme et du lâcher-prise. C'est le nombre des fins qui font place aux nouveaux départs.",
+        "energy": "Achèvement, compassion, sagesse, libération",
+        "dayGuidance": "Libérez ce qui ne vous sert plus aujourd'hui. Donnez généreusement. Concentrez-vous sur le bien commun et la clôture.",
+        "monthGuidance": "Un mois de fins et d'achèvement. Réglez les affaires en suspens. Le pardon et la compassion apportent la paix.",
+        "yearGuidance": "Une année d'achèvement et de libération. Laissez aller l'ancien. Le travail humanitaire vous comble. Préparez-vous pour un nouveau cycle."
+      },
+      "11": {
+        "keyword": "Le Maître Intuitif",
+        "brief": "Le messager spirituel et visionnaire illuminé.",
+        "description": "Le onze est un nombre maître de perception spirituelle et d'intuition amplifiée. Il porte la vibration de l'inspiration, de l'illumination et de la sagesse canalisée. C'est le nombre du maître spirituel et de la conscience psychique.",
+        "energy": "Intuition, inspiration, perception spirituelle, vision",
+        "dayGuidance": "Faites entièrement confiance à votre intuition aujourd'hui. Les perceptions spirituelles coulent librement. Vous pouvez inspirer les autres profondément.",
+        "monthGuidance": "Un mois d'intuition accrue et de téléchargements spirituels. Partagez votre vision. L'inspiration frappe de façon inattendue.",
+        "yearGuidance": "Une année d'éveil spirituel et de percées intuitives. Votre vision peut inspirer beaucoup. Honorez votre sensibilité."
+      },
+      "22": {
+        "keyword": "Le Maître Bâtisseur",
+        "brief": "L'architecte des rêves et bâtisseur d'héritages.",
+        "description": "Le vingt-deux est un nombre maître d'idéalisme pratique et d'accomplissement à grande échelle. Il porte la vibration de transformer les visions en réalité et de construire des structures durables. C'est le nombre du maître architecte.",
+        "energy": "Maîtrise, construction à grande échelle, vision pratique, héritage",
+        "dayGuidance": "Voyez grand aujourd'hui. Votre capacité à manifester de grandes visions est amplifiée. Construisez quelque chose qui dure.",
+        "monthGuidance": "Un mois pour des projets ambitieux et la maîtrise pratique. Transformez les rêves en réalité concrète. Dirigez de grandes initiatives.",
+        "yearGuidance": "Une année pour construire votre héritage. Les grandes visions peuvent devenir réalité. Vous avez le pouvoir de créer des structures durables."
+      },
+      "33": {
+        "keyword": "Le Maître Enseignant",
+        "brief": "Le guérisseur cosmique et élévateur de l'humanité.",
+        "description": "Le trente-trois est un nombre maître d'enseignement compatissant et de service désintéressé. Il porte la vibration du maître guérisseur, guide spirituel et élévateur de l'humanité. C'est le nombre du parent cosmique.",
+        "energy": "Guérison, enseignement, service désintéressé, amour cosmique",
+        "dayGuidance": "Votre présence guérisseuse est amplifiée aujourd'hui. Enseignez par l'amour. Votre compassion peut transformer les autres.",
+        "monthGuidance": "Un mois pour le travail de guérison et l'enseignement spirituel. Servez les autres de façon désintéressée. Votre guidance élève beaucoup.",
+        "yearGuidance": "Une année de service et d'enseignement profonds. Vous êtes appelé à guérir et élever. L'amour cosmique coule à travers vous."
+      }
+    },
+    "pinnacles": {
+      "meanings": {
+        "1": "Indépendance, leadership et tracer de nouvelles voies",
+        "2": "Coopération, relations et sensibilité émotionnelle",
+        "3": "Expression créative, communication et joie",
+        "4": "Construction, structure et établissement de bases solides",
+        "5": "Changement, liberté et nouvelles expériences",
+        "6": "Famille, responsabilité et prendre soin des autres",
+        "7": "Introspection, croissance spirituelle et sagesse",
+        "8": "Accomplissement matériel, pouvoir et reconnaissance",
+        "9": "Service humanitaire, achèvement et sagesse"
+      }
+    },
+    "challengeMeanings": {
+      "0": "Choix de tous les défis - liberté de choisir votre chemin",
+      "1": "Apprendre l'indépendance en évitant la domination",
+      "2": "Équilibrer la sensibilité avec la force",
+      "3": "S'exprimer sans disperser l'énergie",
+      "4": "Construire la discipline sans devenir rigide",
+      "5": "Embrasser le changement sans témérité",
+      "6": "Donner sans martyrisme ou interférence",
+      "7": "Faire confiance à l'intuition tout en restant ancré",
+      "8": "Utiliser le pouvoir de façon responsable sans matérialisme"
+    },
+    "luckyKeywords": {
+      "1": "Initiative",
+      "2": "Équilibre",
+      "3": "Expression",
+      "4": "Fondation",
+      "5": "Liberté",
+      "6": "Harmonie",
+      "7": "Sagesse",
+      "8": "Succès",
+      "9": "Compassion",
+      "11": "Intuition",
+      "22": "Vision",
+      "33": "Guérison"
     }
   },
   "astrology": {
@@ -764,7 +941,7 @@
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
     "about": "About",
-    "copyright": "© 2025 Solara Insights — Built with care under the light of the stars."
+    "copyright": "© {year} Solara Insights — Créé avec soin sous la lumière des étoiles."
   },
   "compatibility": {
     "title": "Explore Compatibility",

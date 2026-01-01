@@ -377,7 +377,184 @@
       "title": "Szczęśliwe Liczby"
     },
     "karmicDebt": {
+      "13": {
+        "label": "Wytrwalosc",
+        "meaning": "Nauka wytrwalosci i skupienia. Przeszle lenistwo lub drazenie na skroty wymaga dodatkowego wysilku.",
+        "lesson": "Budowac przez stala, uczciwa prace zamiast skrotow"
+      },
+      "14": {
+        "label": "Umiar",
+        "meaning": "Nauka umiaru i zaangazowania. Przeszle naduzycie wolnosci wymaga rozwijania samokontroli.",
+        "lesson": "Przyjac zdrowe granice honorujac zobowiazania"
+      },
+      "16": {
+        "label": "Pokora",
+        "meaning": "Nauka pokory i autentycznej polaczenia. Przeszle dzialania kierowane ego wymagaja odbudowy zaufania.",
+        "lesson": "Kultywowac prawdziwa pokorze i odbudowywac od wewnatrz"
+      },
+      "19": {
+        "label": "Niezaleznosc",
+        "meaning": "Nauka niezaleznosci ze wspolczuciem. Przeszly egoizm wymaga rownowazenia osobistej mocy ze sluzba innym.",
+        "lesson": "Rownowazye samodzielnosc z otwartoscia na innych"
+      },
       "title": "Lekcje Karmiczne"
+    },
+    "numbers": {
+      "0": {
+        "keyword": "Pustka",
+        "brief": "Nieskonczone mozliwosci i boskie zrodlo.",
+        "description": "Zero reprezentuje nieograniczone mozliwosci, pustke z ktorej wyrastaja wszystkie rzeczy.",
+        "energy": "Potencjal, nieskonczonosc, pelnia, boskie zrodlo",
+        "dayGuidance": "Dzien nieskonczonego potencjalu. Wszystkie drogi sa otwarte.",
+        "monthGuidance": "Miesiac nieograniczonych mozliwosci.",
+        "yearGuidance": "Rok glebokie polaczenia duchowego."
+      },
+      "1": {
+        "keyword": "Pionier",
+        "brief": "Pionier, lider i indywidualista.",
+        "description": "Energia jedynki dotyczy nowych poczatkow i ksztaltowania wlasnej drogi.",
+        "energy": "Przywodztwo, inicjatywa, nowe poczatki, niezaleznosc",
+        "dayGuidance": "Przejdz inicjatywe dzisiaj. Zacznij cos nowego.",
+        "monthGuidance": "Miesiac na nowe poczatki i przejecie prowadzenia.",
+        "yearGuidance": "Rok nowych poczatkow i przywodztwa."
+      },
+      "2": {
+        "keyword": "Dyplomata",
+        "brief": "Rozjemca, partner i wrazliwa dusza.",
+        "description": "Energia dwojki dotyczy wspolpracy, rownowagi i pracy z innymi.",
+        "energy": "Partnerstwo, rownowaga, wspolpraca, intuicja",
+        "dayGuidance": "Skup sie dzisiaj na wspolpracy.",
+        "monthGuidance": "Miesiac na pielegnowanie relacji.",
+        "yearGuidance": "Rok partnerstw i cierpliwosci."
+      },
+      "3": {
+        "keyword": "Kreatywny",
+        "brief": "Artysta, komunikator i radosny duch.",
+        "description": "Energia trojki dotyczy samoekspresji, kreatywnosci i radosci.",
+        "energy": "Kreatywnosc, ekspresja, radosc, komunikacja",
+        "dayGuidance": "Wyrazaj sie swobodnie dzisiaj.",
+        "monthGuidance": "Miesiac na kreatywne projekty.",
+        "yearGuidance": "Rok kreatywnej ekspansji."
+      },
+      "4": {
+        "keyword": "Budowniczy",
+        "brief": "Architekt, pracownik i praktyczny fundament.",
+        "description": "Energia czworki dotyczy struktury, ciezkiej pracy i budowania solidnych fundamentow.",
+        "energy": "Struktura, dyscyplina, ciezka praca, stabilnosc",
+        "dayGuidance": "Skup sie na praktycznych zadaniach dzisiaj.",
+        "monthGuidance": "Miesiac na ciezka prace i budowanie struktury.",
+        "yearGuidance": "Rok budowania i ciezkiej pracy."
+      },
+      "5": {
+        "keyword": "Poszukiwacz przygod",
+        "brief": "Odkrywca, poszukiwacz wolnosci i agent zmian.",
+        "description": "Energia piatki dotyczy wolnosci, zmian i nowych doswiadczen.",
+        "energy": "Wolnosc, zmiana, przygoda, wszechstronnosc",
+        "dayGuidance": "Przyjmij zmiane dzisiaj.",
+        "monthGuidance": "Miesiac zmian i roznorodnosci.",
+        "yearGuidance": "Rok wielkich zmian i nowej wolnosci."
+      },
+      "6": {
+        "keyword": "Opiekun",
+        "brief": "Opiekun, uzdrowiciel i straz harmonii.",
+        "description": "Energia szostki dotyczy milosci, odpowiedzialnosci i harmonii domowej.",
+        "energy": "Milosc, odpowiedzialnosc, harmonia, sluzba",
+        "dayGuidance": "Skup sie na domu i bliskich dzisiaj.",
+        "monthGuidance": "Miesiac dla rodziny i odpowiedzialnosci.",
+        "yearGuidance": "Rok skoncentrowany na domu i rodzinie."
+      },
+      "7": {
+        "keyword": "Poszukiwacz",
+        "brief": "Mistyk, analityk i duchowy poszukiwacz.",
+        "description": "Energia siodemki dotyczy introspekcji, madrosci i duchowej glebokosci.",
+        "energy": "Madrosc, introspekcja, duchowosc, analiza",
+        "dayGuidance": "Szukaj samotnosci i refleksji dzisiaj.",
+        "monthGuidance": "Miesiac na prace wewnetrzna i studia.",
+        "yearGuidance": "Rok duchowego wzrostu."
+      },
+      "8": {
+        "keyword": "Potega",
+        "brief": "Osiagacz, autorytet i mistrz obfitosci.",
+        "description": "Energia osemki dotyczy mocy, sukcesu i materialnych osiagniec.",
+        "energy": "Moc, obfitosc, osiagniecia, autorytet",
+        "dayGuidance": "Skup sie na biznesie i finansach dzisiaj.",
+        "monthGuidance": "Miesiac na awans zawodowy.",
+        "yearGuidance": "Rok osiagniec i uznania."
+      },
+      "9": {
+        "keyword": "Humanitarysta",
+        "brief": "Wspolczujacy uzdrowiciel i uniwersalny kochanek.",
+        "description": "Energia dziewiatki dotyczy zakonczenia, wspolczucia i uniwersalnej milosci.",
+        "energy": "Zakonczenie, wspolczucie, madrosc, uwolnienie",
+        "dayGuidance": "Puscic to co ci juz nie sluzy dzisiaj.",
+        "monthGuidance": "Miesiac zakonczen i dopelnienia.",
+        "yearGuidance": "Rok zakonczenia i uwolnienia."
+      },
+      "11": {
+        "keyword": "Mistrz Intuicji",
+        "brief": "Duchowy poslaniec i oswiecony wizjoner.",
+        "description": "Jedenastka to liczba mistrzowska duchowego wgladu i wzmocnionej intuicji.",
+        "energy": "Intuicja, inspiracja, duchowy wglad, wizja",
+        "dayGuidance": "Calkowicie zaufaj swojej intuicji dzisiaj.",
+        "monthGuidance": "Miesiac podwyzszonej intuicji.",
+        "yearGuidance": "Rok duchowego przebudzenia."
+      },
+      "22": {
+        "keyword": "Mistrz Budowniczy",
+        "brief": "Architekt marzen i budowniczy spadkow.",
+        "description": "Dwadziescia dwa to liczba mistrzowska praktycznego idealizmu.",
+        "energy": "Mistrzostwo, budowanie na wielka skale, praktyczna wizja, spadek",
+        "dayGuidance": "Mysl dzisiaj na wielka skale.",
+        "monthGuidance": "Miesiac na ambitne projekty.",
+        "yearGuidance": "Rok budowania swojego dziedzictwa."
+      },
+      "33": {
+        "keyword": "Mistrz Nauczyciel",
+        "brief": "Kosmiczny uzdrowiciel i podnoszacy ludzkosc.",
+        "description": "Trzydziesci trzy to liczba mistrzowska wspolczujacego nauczania.",
+        "energy": "Uzdrawianie, nauczanie, bezinteresowna sluzba, kosmiczna milosc",
+        "dayGuidance": "Twoja uzdrawiajaca obecnosc jest dzisiaj wzmocniona.",
+        "monthGuidance": "Miesiac na prace uzdrawiajaca.",
+        "yearGuidance": "Rok glebokie sluzby i nauczania."
+      }
+    },
+    "pinnacles": {
+      "meanings": {
+        "1": "Niezaleznosc, przywodztwo i torowanie nowych sciezek",
+        "2": "Wspolpraca, relacje i wrazliwosc emocjonalna",
+        "3": "Kreatywna ekspresja, komunikacja i radosc",
+        "4": "Budowanie, struktura i kladenie solidnych fundamentow",
+        "5": "Zmiana, wolnosc i nowe doswiadczenia",
+        "6": "Rodzina, odpowiedzialnosc i opieka nad innymi",
+        "7": "Introspekcja, wzrost duchowy i madrosc",
+        "8": "Materialne osiagniecia, moc i uznanie",
+        "9": "Sluzba humanitarna, zakonczenie i madrosc"
+      }
+    },
+    "challengeMeanings": {
+      "0": "Wybor wszystkich wyzwan - wolnosc wyboru swojej sciezki",
+      "1": "Nauka niezaleznosci unikajac dominacji",
+      "2": "Rownowazenie wrazliwosci z sila",
+      "3": "Wyrazanie siebie bez rozpraszania energii",
+      "4": "Budowanie dyscypliny bez stawania sie sztywnym",
+      "5": "Przyjmowanie zmian bez lekkomyslnosci",
+      "6": "Dawanie bez meczenstwa lub ingerencji",
+      "7": "Zaufanie intuicji pozostajac uziemionym",
+      "8": "Odpowiedzialne uzywanie mocy bez materializmu"
+    },
+    "luckyKeywords": {
+      "1": "Inicjatywa",
+      "2": "Rownowaga",
+      "3": "Ekspresja",
+      "4": "Fundament",
+      "5": "Wolnosc",
+      "6": "Harmonia",
+      "7": "Madrosc",
+      "8": "Sukces",
+      "9": "Wspolczucie",
+      "11": "Intuicja",
+      "22": "Wizja",
+      "33": "Uzdrawianie"
     }
   },
   "astrology": {
@@ -764,7 +941,7 @@
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
     "about": "About",
-    "copyright": "© 2025 Solara Insights — Built with care under the light of the stars."
+    "copyright": "© {year} Solara Insights — Stworzone z troska pod swiatlem gwiazd."
   },
   "compatibility": {
     "title": "Explore Compatibility",

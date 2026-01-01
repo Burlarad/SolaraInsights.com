@@ -377,7 +377,184 @@
       "title": "Số may mắn"
     },
     "karmicDebt": {
+      "13": {
+        "label": "Kien tri",
+        "meaning": "Hoc kien tri va tap trung. Su luoi bieng hoac di duong tat trong qua khu doi hoi no luc them de xay dung nen tang vung chac.",
+        "lesson": "Xay dung thong qua cong viec on dinh, trung thuc thay vi di duong tat"
+      },
+      "14": {
+        "label": "Dieu do",
+        "meaning": "Hoc dieu do va cam ket. Viec lam dung tu do trong qua khu doi hoi phat trien tu kiem soat va trach nhiem.",
+        "lesson": "Don nhan ranh gioi lanh manh trong khi ton trong cam ket"
+      },
+      "16": {
+        "label": "Khiem ton",
+        "meaning": "Hoc khiem ton va ket noi chan thuc. Hanh dong do ban nga trong qua khu doi hoi xay dung lai niem tin va su chinh truc.",
+        "lesson": "Nuoi duong su khiem ton that su va xay dung lai tu ben trong"
+      },
+      "19": {
+        "label": "Doc lap",
+        "meaning": "Hoc doc lap voi long trac an. Su ich ky trong qua khu doi hoi can bang quyen luc ca nhan voi phuc vu nguoi khac.",
+        "lesson": "Can bang tu luc voi su coi mo voi nguoi khac"
+      },
       "title": "Bài học nghiệp quả"
+    },
+    "numbers": {
+      "0": {
+        "keyword": "Hu khong",
+        "brief": "Tiem nang vo han va nguon than thanh.",
+        "description": "So 0 dai dien cho tiem nang vo han, hu khong tu do moi thu xuat hien.",
+        "energy": "Tiem nang, vo tan, tron ven, nguon than thanh",
+        "dayGuidance": "Mot ngay cua tiem nang vo han. Tat ca cac con duong deu mo.",
+        "monthGuidance": "Mot thang cua kha nang vo han.",
+        "yearGuidance": "Mot nam cua ket noi tam linh sau sac."
+      },
+      "1": {
+        "keyword": "Nguoi tien phong",
+        "brief": "Nguoi tien phong, lanh dao va ca nhan.",
+        "description": "Nang luong cua so 1 la ve su bat dau moi, tu luc va tao ra con duong rieng.",
+        "energy": "Lanh dao, chu dong, khoi dau moi, doc lap",
+        "dayGuidance": "Hay chu dong hom nay. Bat dau dieu gi do moi.",
+        "monthGuidance": "Mot thang cho khoi dau moi va lanh dao.",
+        "yearGuidance": "Mot nam cua khoi dau moi va lanh dao."
+      },
+      "2": {
+        "keyword": "Nha ngoai giao",
+        "brief": "Nguoi hoa giai, doi tac va tam hon nhay cam.",
+        "description": "Nang luong cua so 2 la ve hop tac, can bang va lam viec voi nguoi khac.",
+        "energy": "Doi tac, can bang, hop tac, truc giac",
+        "dayGuidance": "Tap trung vao hop tac hom nay.",
+        "monthGuidance": "Mot thang de nuoi duong cac moi quan he.",
+        "yearGuidance": "Mot nam cua doi tac va kien nhan."
+      },
+      "3": {
+        "keyword": "Nguoi sang tao",
+        "brief": "Nghe si, nguoi truyen dat va tinh than vui ve.",
+        "description": "Nang luong cua so 3 la ve tu bieu dat, sang tao va niem vui.",
+        "energy": "Sang tao, bieu dat, niem vui, giao tiep",
+        "dayGuidance": "Hay tu do bieu dat ban than hom nay.",
+        "monthGuidance": "Mot thang cho cac du an sang tao.",
+        "yearGuidance": "Mot nam cua su mo rong sang tao."
+      },
+      "4": {
+        "keyword": "Nguoi xay dung",
+        "brief": "Kien truc su, nguoi lao dong va nen tang thuc te.",
+        "description": "Nang luong cua so 4 la ve cau truc, lam viec cham chi va xay dung nen tang vung chac.",
+        "energy": "Cau truc, ky luat, lam viec cham chi, on dinh",
+        "dayGuidance": "Tap trung vao cac nhiem vu thuc te hom nay.",
+        "monthGuidance": "Mot thang cho cong viec cham chi va xay dung cau truc.",
+        "yearGuidance": "Mot nam xay dung va lam viec cham chi."
+      },
+      "5": {
+        "keyword": "Nguoi phieu luu",
+        "brief": "Nha tham hiem, nguoi tim kiem tu do va tac nhan thay doi.",
+        "description": "Nang luong cua so 5 la ve tu do, thay doi va trai nghiem moi.",
+        "energy": "Tu do, thay doi, phieu luu, da nang",
+        "dayGuidance": "Don nhan thay doi hom nay.",
+        "monthGuidance": "Mot thang cua thay doi va da dang.",
+        "yearGuidance": "Mot nam cua nhung thay doi lon va tu do moi."
+      },
+      "6": {
+        "keyword": "Nguoi nuoi duong",
+        "brief": "Nguoi cham soc, nguoi chua lanh va nguoi bao ve su hoa hop.",
+        "description": "Nang luong cua so 6 la ve tinh yeu, trach nhiem va hoa hop gia dinh.",
+        "energy": "Tinh yeu, trach nhiem, hoa hop, phuc vu",
+        "dayGuidance": "Tap trung vao gia dinh va nguoi than hom nay.",
+        "monthGuidance": "Mot thang cho gia dinh va trach nhiem.",
+        "yearGuidance": "Mot nam tap trung vao gia dinh."
+      },
+      "7": {
+        "keyword": "Nguoi tim kiem",
+        "brief": "Nha huyen bi, nha phan tich va nguoi tim kiem tam linh.",
+        "description": "Nang luong cua so 7 la ve noi quan, tri tue va chieu sau tam linh.",
+        "energy": "Tri tue, noi quan, tam linh, phan tich",
+        "dayGuidance": "Tim kiem su co don va suy ngam hom nay.",
+        "monthGuidance": "Mot thang cho cong viec noi tam va hoc tap.",
+        "yearGuidance": "Mot nam cua su truong thanh tam linh."
+      },
+      "8": {
+        "keyword": "Nguoi quyen luc",
+        "brief": "Nguoi thanh dat, nguoi co tham quyen va chuyen gia ve su giau co.",
+        "description": "Nang luong cua so 8 la ve quyen luc, thanh cong va thanh tuu vat chat.",
+        "energy": "Quyen luc, giau co, thanh tuu, tham quyen",
+        "dayGuidance": "Tap trung vao kinh doanh va tai chinh hom nay.",
+        "monthGuidance": "Mot thang cho tien bo su nghiep.",
+        "yearGuidance": "Mot nam cua thanh tuu va su cong nhan."
+      },
+      "9": {
+        "keyword": "Nha nhan dao",
+        "brief": "Nguoi chua lanh co long trac an va nguoi yeu thuong pho quat.",
+        "description": "Nang luong cua so 9 la ve su hoan thanh, long trac an va tinh yeu pho quat.",
+        "energy": "Hoan thanh, trac an, tri tue, giai phong",
+        "dayGuidance": "Buong bo nhung gi khong con phuc vu ban hom nay.",
+        "monthGuidance": "Mot thang cua su ket thuc va hoan thanh.",
+        "yearGuidance": "Mot nam cua su hoan thanh va giai phong."
+      },
+      "11": {
+        "keyword": "Bac thay truc giac",
+        "brief": "Su gia tam linh va nguoi nhin xa tro sang.",
+        "description": "So 11 la so bac thay cua cai nhin tam linh va truc giac duoc khuech dai.",
+        "energy": "Truc giac, cam hung, cai nhin tam linh, tam nhin",
+        "dayGuidance": "Hoan toan tin tuong truc giac cua ban hom nay.",
+        "monthGuidance": "Mot thang cua truc giac nang cao.",
+        "yearGuidance": "Mot nam cua su thuc tinh tam linh."
+      },
+      "22": {
+        "keyword": "Bac thay xay dung",
+        "brief": "Kien truc su cua uoc mo va nguoi xay dung di san.",
+        "description": "So 22 la so bac thay cua chu nghia ly tuong thuc te.",
+        "energy": "Thong thao, xay dung quy mo lon, tam nhin thuc te, di san",
+        "dayGuidance": "Hay nghi lon hom nay.",
+        "monthGuidance": "Mot thang cho cac du an tham vong.",
+        "yearGuidance": "Mot nam de xay dung di san cua ban."
+      },
+      "33": {
+        "keyword": "Bac thay giang day",
+        "brief": "Nguoi chua lanh vu tru va nguoi nang cao nhan loai.",
+        "description": "So 33 la so bac thay cua viec giang day voi long trac an.",
+        "energy": "Chua lanh, giang day, phuc vu vo tu, tinh yeu vu tru",
+        "dayGuidance": "Su hien dien chua lanh cua ban duoc khuech dai hom nay.",
+        "monthGuidance": "Mot thang cho cong viec chua lanh.",
+        "yearGuidance": "Mot nam cua su phuc vu va giang day sau sac."
+      }
+    },
+    "pinnacles": {
+      "meanings": {
+        "1": "Doc lap, lanh dao va mo duong moi",
+        "2": "Hop tac, moi quan he va nhay cam cam xuc",
+        "3": "Bieu dat sang tao, giao tiep va niem vui",
+        "4": "Xay dung, cau truc va dat nen tang vung chac",
+        "5": "Thay doi, tu do va trai nghiem moi",
+        "6": "Gia dinh, trach nhiem va nuoi duong nguoi khac",
+        "7": "Noi quan, truong thanh tam linh va tri tue",
+        "8": "Thanh tuu vat chat, quyen luc va cong nhan",
+        "9": "Phuc vu nhan dao, hoan thanh va tri tue"
+      }
+    },
+    "challengeMeanings": {
+      "0": "Lua chon cua tat ca thach thuc - tu do chon duong di",
+      "1": "Hoc doc lap trong khi tranh thong tri",
+      "2": "Can bang nhay cam voi suc manh",
+      "3": "Bieu dat ban than khong phan tan nang luong",
+      "4": "Xay dung ky luat khong tro nen cung nhac",
+      "5": "Don nhan thay doi khong lieu linh",
+      "6": "Cho di khong tu dao hoac can thiep",
+      "7": "Tin tuong truc giac trong khi giu vung dat",
+      "8": "Su dung quyen luc co trach nhiem khong vat chat"
+    },
+    "luckyKeywords": {
+      "1": "Chu dong",
+      "2": "Can bang",
+      "3": "Bieu dat",
+      "4": "Nen tang",
+      "5": "Tu do",
+      "6": "Hoa hop",
+      "7": "Tri tue",
+      "8": "Thanh cong",
+      "9": "Trac an",
+      "11": "Truc giac",
+      "22": "Tam nhin",
+      "33": "Chua lanh"
     }
   },
   "astrology": {
@@ -756,7 +933,7 @@
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
     "about": "About",
-    "copyright": "© 2025 Solara Insights — Built with care under the light of the stars."
+    "copyright": "© {year} Solara Insights — Duoc tao nen voi tam huyet duoi anh sang cac vi sao."
   },
   "compatibility": {
     "title": "Explore Compatibility",

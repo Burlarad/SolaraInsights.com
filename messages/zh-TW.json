@@ -380,7 +380,184 @@
       "title": "幸運數字"
     },
     "karmicDebt": {
+      "13": {
+        "label": "毅力",
+        "meaning": "學習毅力和專注。過去的懶惰或走捷徑需要額外的努力來建立堅實的基礎。",
+        "lesson": "通過穩定、誠實的工作來建設，而不是走捷徑"
+      },
+      "14": {
+        "label": "節制",
+        "meaning": "學習節制和承諾。過去濫用自由需要發展自我控制和責任感。",
+        "lesson": "在履行承諾的同時接受健康的界限"
+      },
+      "16": {
+        "label": "謙遜",
+        "meaning": "學習謙遜和真實的連結。過去由自我驅動的行為需要重建信任和誠信。",
+        "lesson": "培養真正的謙遜，從內在重建"
+      },
+      "19": {
+        "label": "獨立",
+        "meaning": "學習帶有同情心的獨立。過去的自私需要平衡個人力量與服務他人。",
+        "lesson": "平衡自力更生與對他人的開放"
+      },
       "title": "業力課題"
+    },
+    "numbers": {
+      "0": {
+        "keyword": "虛空",
+        "brief": "無限潛能與神聖源頭。",
+        "description": "零代表無限的潛能，萬物從中湧現的虛空。",
+        "energy": "潛能、無限、完整、神聖源頭",
+        "dayGuidance": "無限潛能的一天。所有道路都是開放的。",
+        "monthGuidance": "無限可能的一個月。",
+        "yearGuidance": "深度靈性連結的一年。"
+      },
+      "1": {
+        "keyword": "先驅者",
+        "brief": "先驅、領袖和個人主義者。",
+        "description": "一的能量關於新的開始、自力更生和開創自己的道路。",
+        "energy": "領導力、主動性、新開始、獨立",
+        "dayGuidance": "今天採取主動。開始新事物。",
+        "monthGuidance": "新開始和領導的月份。",
+        "yearGuidance": "新開始和領導的一年。"
+      },
+      "2": {
+        "keyword": "外交家",
+        "brief": "和平締造者、伴侶和敏感的靈魂。",
+        "description": "二的能量關於合作、平衡和與他人共事。",
+        "energy": "夥伴關係、平衡、合作、直覺",
+        "dayGuidance": "今天專注於合作。",
+        "monthGuidance": "培養關係的月份。",
+        "yearGuidance": "夥伴關係和耐心的一年。"
+      },
+      "3": {
+        "keyword": "創意者",
+        "brief": "藝術家、溝通者和快樂的精神。",
+        "description": "三的能量關於自我表達、創造力和喜悅。",
+        "energy": "創造力、表達、喜悅、溝通",
+        "dayGuidance": "今天自由表達自己。",
+        "monthGuidance": "創意項目的月份。",
+        "yearGuidance": "創意擴展的一年。"
+      },
+      "4": {
+        "keyword": "建設者",
+        "brief": "建築師、工人和實際的基礎。",
+        "description": "四的能量關於結構、努力工作和建立堅實的基礎。",
+        "energy": "結構、紀律、努力工作、穩定",
+        "dayGuidance": "今天專注於實際任務。",
+        "monthGuidance": "努力工作和建立結構的月份。",
+        "yearGuidance": "建設和努力工作的一年。"
+      },
+      "5": {
+        "keyword": "冒險家",
+        "brief": "探索者、自由追求者和變革推動者。",
+        "description": "五的能量關於自由、變化和新體驗。",
+        "energy": "自由、變化、冒險、多樣性",
+        "dayGuidance": "今天擁抱變化。",
+        "monthGuidance": "變化和多樣性的月份。",
+        "yearGuidance": "重大變化和新自由的一年。"
+      },
+      "6": {
+        "keyword": "養育者",
+        "brief": "照顧者、療癒者和和諧的守護者。",
+        "description": "六的能量關於愛、責任和家庭和諧。",
+        "energy": "愛、責任、和諧、服務",
+        "dayGuidance": "今天專注於家庭和親人。",
+        "monthGuidance": "家庭和責任的月份。",
+        "yearGuidance": "專注於家庭和家人的一年。"
+      },
+      "7": {
+        "keyword": "探索者",
+        "brief": "神秘主義者、分析師和靈性追求者。",
+        "description": "七的能量關於內省、智慧和靈性深度。",
+        "energy": "智慧、內省、靈性、分析",
+        "dayGuidance": "今天尋找獨處和反思。",
+        "monthGuidance": "內在工作和學習的月份。",
+        "yearGuidance": "靈性成長的一年。"
+      },
+      "8": {
+        "keyword": "強力者",
+        "brief": "成就者、權威和富足大師。",
+        "description": "八的能量關於力量、成功和物質成就。",
+        "energy": "力量、富足、成就、權威",
+        "dayGuidance": "今天專注於商業和財務。",
+        "monthGuidance": "職業發展的月份。",
+        "yearGuidance": "成就和認可的一年。"
+      },
+      "9": {
+        "keyword": "人道主義者",
+        "brief": "富有同情心的療癒者和博愛者。",
+        "description": "九的能量關於完成、同情和普世之愛。",
+        "energy": "完成、同情、智慧、釋放",
+        "dayGuidance": "今天放下不再服務於你的東西。",
+        "monthGuidance": "結束和完成的月份。",
+        "yearGuidance": "完成和釋放的一年。"
+      },
+      "11": {
+        "keyword": "直覺大師",
+        "brief": "靈性使者和開悟的遠見者。",
+        "description": "十一是靈性洞察力和增強直覺的大師數字。",
+        "energy": "直覺、靈感、靈性洞察、願景",
+        "dayGuidance": "今天完全信任你的直覺。",
+        "monthGuidance": "直覺增強的月份。",
+        "yearGuidance": "靈性覺醒的一年。"
+      },
+      "22": {
+        "keyword": "建築大師",
+        "brief": "夢想的建築師和遺產的建設者。",
+        "description": "二十二是實際理想主義的大師數字。",
+        "energy": "精通、大規模建設、實際願景、遺產",
+        "dayGuidance": "今天要有遠大的想法。",
+        "monthGuidance": "雄心項目的月份。",
+        "yearGuidance": "建立你的遺產的一年。"
+      },
+      "33": {
+        "keyword": "教學大師",
+        "brief": "宇宙療癒者和人類的提升者。",
+        "description": "三十三是富有同情心教學的大師數字。",
+        "energy": "療癒、教學、無私服務、宇宙之愛",
+        "dayGuidance": "今天你的療癒存在被放大。",
+        "monthGuidance": "療癒工作的月份。",
+        "yearGuidance": "深度服務和教學的一年。"
+      }
+    },
+    "pinnacles": {
+      "meanings": {
+        "1": "獨立、領導力和開創新路",
+        "2": "合作、關係和情感敏感度",
+        "3": "創意表達、溝通和喜悅",
+        "4": "建設、結構和奠定堅實基礎",
+        "5": "變化、自由和新體驗",
+        "6": "家庭、責任和養育他人",
+        "7": "內省、靈性成長和智慧",
+        "8": "物質成就、力量和認可",
+        "9": "人道服務、完成和智慧"
+      }
+    },
+    "challengeMeanings": {
+      "0": "所有挑戰的選擇 - 選擇你道路的自由",
+      "1": "學習獨立同時避免支配",
+      "2": "平衡敏感度與力量",
+      "3": "表達自己而不分散能量",
+      "4": "建立紀律而不變得僵化",
+      "5": "擁抱變化而不魯莽",
+      "6": "給予而不殉道或干涉",
+      "7": "信任直覺同時保持接地",
+      "8": "負責任地使用力量而不物質主義"
+    },
+    "luckyKeywords": {
+      "1": "主動",
+      "2": "平衡",
+      "3": "表達",
+      "4": "基礎",
+      "5": "自由",
+      "6": "和諧",
+      "7": "智慧",
+      "8": "成功",
+      "9": "同情",
+      "11": "直覺",
+      "22": "願景",
+      "33": "療癒"
     }
   },
   "astrology": {
@@ -750,7 +927,7 @@
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
     "about": "About",
-    "copyright": "© 2025 Solara Insights — Built with care under the light of the stars."
+    "copyright": "© {year} Solara Insights — 在星光下精心打造。"
   },
   "compatibility": {
     "title": "Explore Compatibility",
