@@ -110,7 +110,7 @@ export function SanctuaryTabs() {
       </div>
 
       {/* Mobile: Scrollable tabs with fades */}
-      <div className="md:hidden relative">
+      <div className="md:hidden relative w-full min-w-0">
         {/* Left fade */}
         <div
           className={cn(
@@ -133,7 +133,7 @@ export function SanctuaryTabs() {
         <div
           ref={scrollContainerRef}
           className={cn(
-            "flex gap-2 p-1 bg-white/50 rounded-full",
+            "w-full flex gap-2 p-1 bg-white/50 rounded-full",
             "overflow-x-auto overscroll-x-contain",
             "snap-x snap-mandatory",
             "scrollbar-none",
