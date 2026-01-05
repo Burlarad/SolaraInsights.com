@@ -953,6 +953,8 @@
     "bestMoveThisWeek": "BEST MOVE THIS WEEK",
     "wantPersonalized": "Want personalized compatibility based on your full birth charts?",
     "joinSolara": "Join Solara",
-    "pleaseWait": "Please wait {seconds}s before requesting again..."
+    "pleaseWait": "Please wait {seconds}s before requesting again...",
+    "growthOpportunities": "GROWTH OPPORTUNITIES THIS YEAR",
+    "watchPoints": "WATCH POINTS"
   }
 }

@@ -21,6 +21,8 @@ import { isUserSocialStale, triggerSocialSyncFireAndForget } from "@/lib/social/
 import { buildYearContext, hasGlobalEventsForYear } from "@/lib/insights/yearContext";
 import { loadStoredBirthChart } from "@/lib/birthChart/storage";
 import { AYREN_MODE_SOULPRINT_LONG } from "@/lib/ai/voice";
+import { resolveLocaleAuth, getCriticalLanguageBlock } from "@/lib/i18n/resolveLocale";
+import { localeNames, isValidLocale } from "@/i18n";
 
 // Bump to v4 to invalidate legacy cached insights (year tab now uses global events)
 const PROMPT_VERSION = 4;
@@ -63,7 +65,7 @@ function getTtlSeconds(timeframe: string): number {
 export async function POST(req: NextRequest) {
   // Parse request body first (outside try block for error handling)
   const body: InsightsRequest = await req.json();
-  const { timeframe, focusQuestion } = body;
+  const { timeframe, focusQuestion, language: bodyLanguage } = body;
 
   // Get authenticated user (outside try block so we can use in catch)
   const supabase = await createServerSupabaseClient();
@@ -175,8 +177,14 @@ export async function POST(req: NextRequest) {
       : timeframe === "month" ? periodKeys.monthly
       : periodKeys.yearly;
 
-    // Get user's language preference (default to English)
-    const targetLanguage = profile.language || "en";
+    // Get user's language preference with fallback chain:
+    // 1. body.language (UI override - allows instant language switch)
+    // 2. profile.language (stored preference)
+    // 3. cookie → Accept-Language → cf-ipcountry → "en"
+    const targetLanguage = (bodyLanguage && isValidLocale(bodyLanguage))
+      ? bodyLanguage
+      : resolveLocaleAuth(req, profile.language);
+    const languageName = localeNames[targetLanguage] || "English";
 
     // Build cache and lock keys
     const cacheKey = buildInsightCacheKey(user.id, timeframe, periodKey, targetLanguage, PROMPT_VERSION);
@@ -481,6 +489,8 @@ SOCIAL SIGNAL METADATA (internal use only, never mention to user):
     // Year tab uses long-form voice for expansive yearly narrative
     const ayrenVoice = timeframe === "year" ? AYREN_MODE_SOULPRINT_LONG : AYREN_MODE_SHORT;
 
+    const languageBlock = getCriticalLanguageBlock(languageName, targetLanguage);
+
     const systemPrompt = `${ayrenVoice}
 ${PRO_SOCIAL_NUDGE_INSTRUCTION}
 ${HUMOR_INSTRUCTION}
@@ -490,9 +500,7 @@ CONTEXT:
 This is a PERSONALIZED insight for a specific person based on their birth chart and current transits.
 ${socialMetadataContext}
 
-LANGUAGE:
-- Write ALL narrative text in language code: ${targetLanguage}
-- Field names in JSON remain in English, but all content values must be in the user's language
+${languageBlock}
 
 OUTPUT FORMAT:
 Respond with ONLY valid JSON. No markdown, no explanations—just the JSON object.`;

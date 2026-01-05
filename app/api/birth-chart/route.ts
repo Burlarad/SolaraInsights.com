@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient, createAdminSupabaseClient } from "@/lib/supabase/server";
 import { getCurrentSoulPath, computeBirthInputHash } from "@/lib/soulPath/storage";
 import { getOrComputeBirthChart } from "@/lib/birthChart/storage";
@@ -14,6 +14,8 @@ import { AYREN_MODE_SOULPRINT_LONG } from "@/lib/ai/voice";
 import { validateBirthChartInsight, validateBatchedTabDeepDives, TAB_DEEP_DIVE_KEYS } from "@/lib/validation/schemas";
 import { isValidBirthTimezone } from "@/lib/location/detection";
 import { logTokenAudit } from "@/lib/ai/tokenAudit";
+import { resolveLocaleAuth, getCriticalLanguageBlock } from "@/lib/i18n/resolveLocale";
+import { localeNames } from "@/i18n";
 
 // Must match SOUL_PATH_SCHEMA_VERSION from lib/soulPath/storage.ts
 // Incremented when placements structure changes
@@ -509,7 +511,7 @@ Return a SINGLE JSON object with this EXACT structure:
 - If birth time is null/approximate, gently note house themes are approximate
 `;
 
-export async function POST() {
+export async function POST(req: NextRequest) {
   try {
     // Get authenticated user
     const supabase = await createServerSupabaseClient();
@@ -651,7 +653,9 @@ export async function POST() {
     // STEP B: Check for cached AI narrative
     // ========================================
 
-    const targetLanguage = profile.language || "en";
+    // Get user's language preference with fallback chain (profile → cookie → Accept-Language → cf-ipcountry → "en")
+    const targetLanguage = resolveLocaleAuth(req, profile.language);
+    const languageName = localeNames[targetLanguage] || "English";
 
     // Compute birth input hash for cache validation
     const currentBirthInputHash = computeBirthInputHash(profile);

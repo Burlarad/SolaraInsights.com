@@ -17,6 +17,11 @@ import {
   checkTarotRateLimits,
   getTarotRateLimitHeaders,
 } from "@/lib/cache/tarotRateLimit";
+import {
+  resolveLocale,
+  getCriticalLanguageBlock,
+} from "@/lib/i18n/resolveLocale";
+import { localeNames, type Locale } from "@/i18n";
 
 // Idempotency cache TTL: 60 seconds
 const IDEMPOTENCY_TTL = 60;
@@ -48,7 +53,10 @@ export async function POST(req: NextRequest) {
 
     const { question, spread, requestId, timezone, language, userContext } =
       validation.data;
-    const targetLanguage = language || "en";
+
+    // Resolve target language with fallback chain (body → cookie → Accept-Language → cf-ipcountry → "en")
+    const targetLanguage = resolveLocale(req, language);
+    const languageName = localeNames[targetLanguage] || "English";
 
     // ========================================
     // 2. IDEMPOTENCY CHECK (idempotency hits are FREE)
@@ -157,6 +165,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const languageBlock = getCriticalLanguageBlock(languageName, targetLanguage);
+
     const systemPrompt = `${AYREN_MODE_SHORT}
 
 CONTEXT:
@@ -172,9 +182,7 @@ CRITICAL CARD DRAWING RULES:
 SPREAD POSITIONS:
 ${positions.map((p, i) => `Position ${i + 1}: ${p}`).join("\n")}
 
-LANGUAGE:
-- Write ALL interpretation content in language code: ${targetLanguage}
-- JSON field names stay in English
+${languageBlock}
 
 OUTPUT FORMAT:
 Respond with ONLY valid JSON. No markdown, no explanations—just the JSON object.`;

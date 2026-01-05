@@ -16,14 +16,13 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 import {
-  locales,
   localeNames,
   localeFlags,
-  defaultLocale,
-  isValidLocale,
+  locales,
   type Locale,
 } from "@/i18n";
 import { useTranslations } from "next-intl";
+import { useLocaleContext } from "@/providers/IntlProvider";
 
 type NavLinkKey = "home" | "about" | "learn" | "sanctuary" | "settings";
 
@@ -49,6 +48,7 @@ export function NavBar() {
   const pathname = usePathname();
   const router = useRouter();
   const { profile, saveProfile } = useSettings();
+  const { locale: currentLocale, setLocaleImmediate, refreshLocale } = useLocaleContext();
   const t = useTranslations("nav");
   const tSettings = useTranslations("settings");
   const [user, setUser] = useState<User | null>(null);
@@ -59,11 +59,24 @@ export function NavBar() {
   const languageMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Get initial user
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user);
-      setLoading(false);
-    });
+    // Get initial user - handle auth errors gracefully
+    supabase.auth.getUser()
+      .then(({ data, error }) => {
+        // Ignore "Refresh Token Not Found" - normal for logged-out users
+        if (error && !error.message?.includes("Refresh Token")) {
+          console.warn("Auth check (non-critical):", error.message);
+        }
+        setUser(data?.user || null);
+        setLoading(false);
+      })
+      .catch((err) => {
+        // Catch any auth errors - logged-out state is normal
+        if (!err.message?.includes("Refresh Token")) {
+          console.warn("Auth check failed:", err.message);
+        }
+        setUser(null);
+        setLoading(false);
+      });
 
     // Listen for auth changes
     const {
@@ -104,11 +117,37 @@ export function NavBar() {
   };
 
   const handleLanguageChange = async (languageCode: string) => {
-    if (!profile) return;
-
     setSavingLanguage(true);
     try {
-      await saveProfile({ language: languageCode });
+      // 1. Update UI immediately (instant feedback)
+      setLocaleImmediate(languageCode as Locale);
+
+      // 2. Persist to secure httpOnly cookie via API
+      const response = await fetch("/api/locale", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ locale: languageCode }),
+      });
+
+      if (!response.ok) {
+        console.warn("Failed to persist locale cookie");
+      }
+
+      // 3. Refresh to sync state (optional, immediate update already applied)
+      await refreshLocale();
+
+      // 4. Save to profile if logged in (debounced, non-blocking)
+      if (profile) {
+        // Debounce profile save to avoid rapid writes during quick language switching
+        setTimeout(async () => {
+          try {
+            await saveProfile({ language: languageCode });
+          } catch (profileError) {
+            // Don't block UI on profile save failure
+            console.warn("Failed to save language to profile:", profileError);
+          }
+        }, 500);
+      }
       setShowLanguageMenu(false);
     } catch (error) {
       console.error("Failed to update language:", error);
@@ -122,9 +161,8 @@ export function NavBar() {
     ? [...publicNavLinks, ...protectedNavLinks]
     : publicNavLinks;
 
-  // Get current language from profile or default to English
-  const profileLang = profile?.language || "";
-  const currentLanguageCode = isValidLocale(profileLang) ? profileLang : defaultLocale;
+  // Get current language from locale context (already resolved with fallback chain)
+  const currentLanguageCode = currentLocale;
   const currentLanguage =
     languageOptions.find((lang) => lang.code === currentLanguageCode) ||
     languageOptions[0];

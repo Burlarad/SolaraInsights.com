@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { openai, OPENAI_MODELS } from "@/lib/openai/client";
 import { PublicHoroscopeResponse } from "@/types";
 import { getCache, setCache, getDayKey, acquireLockFailClosed, releaseLock, REDIS_UNAVAILABLE_RESPONSE } from "@/lib/cache/redis";
-import { checkRateLimit, checkBurstLimit, getClientIP, createRateLimitResponse } from "@/lib/cache/rateLimit";
+import { checkRateLimit, checkBurstLimit, getAnonId, createRateLimitResponse } from "@/lib/cache/rateLimit";
 import { trackAiUsage } from "@/lib/ai/trackUsage";
 import { checkBudget, incrementBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai/costControl";
 import { publicHoroscopeSchema, validateRequest } from "@/lib/validation/schemas";
 import { logTokenAudit } from "@/lib/ai/tokenAudit";
 import { AYREN_MODE_SHORT } from "@/lib/ai/voice";
+import { resolveLocale } from "@/lib/i18n/resolveLocale";
+import { localeNames, type Locale } from "@/i18n";
 
 // Rate limits (per IP - anonymous endpoint)
 // Human-friendly: cache hits are FREE, only cache misses count toward limits
@@ -19,7 +21,8 @@ const BURST_WINDOW = 10;
 const PROMPT_VERSION = 2;
 
 export async function POST(req: NextRequest) {
-  const clientIP = getClientIP(req);
+  // Use session+IP combo for rate limiting (more fair for shared networks)
+  const anonId = getAnonId(req);
 
   let lockKey: string | undefined;
   let lockAcquired = false;
@@ -35,7 +38,11 @@ export async function POST(req: NextRequest) {
     }
 
     const { sign, timeframe, timezone, language } = validation.data;
-    const targetLanguage = language || "en";
+
+    // Resolve language with robust fallback chain:
+    // 1. Explicit body language → 2. Cookie → 3. Accept-Language → 4. cf-ipcountry → 5. "en"
+    const targetLanguage = resolveLocale(req, language);
+    const languageName = localeNames[targetLanguage as Locale] || "English";
 
     // Title-case the sign for display in prompts (e.g., "aries" -> "Aries")
     const signDisplayName = sign.charAt(0).toUpperCase() + sign.slice(1);
@@ -80,7 +87,7 @@ export async function POST(req: NextRequest) {
     // ========================================
 
     // Burst protection (bot defense - stricter for anonymous)
-    const burstResult = await checkBurstLimit(`pubhoroscope:${clientIP}`, BURST_LIMIT, BURST_WINDOW);
+    const burstResult = await checkBurstLimit(`pubhoroscope:${anonId}`, BURST_LIMIT, BURST_WINDOW);
     if (!burstResult.success) {
       return NextResponse.json(
         createRateLimitResponse(BURST_WINDOW, "You're moving too fast — slow down a bit."),
@@ -90,7 +97,7 @@ export async function POST(req: NextRequest) {
 
     // Sustained rate limit check
     const rateLimitResult = await checkRateLimit(
-      `pubhoroscope:rate:${clientIP}`,
+      `pubhoroscope:rate:${anonId}`,
       RATE_LIMIT,
       RATE_WINDOW_SECONDS
     );
@@ -161,33 +168,31 @@ export async function POST(req: NextRequest) {
 CONTEXT:
 This is a PUBLIC, non-personalized reading for ${signDisplayName}. Keep it general but still warm and insightful.
 
-LANGUAGE:
-- Write ALL content in language code: ${targetLanguage}
-- Field names in JSON remain in English, but all content values must be in the user's language
+CRITICAL LANGUAGE REQUIREMENT:
+- You MUST write the ENTIRE response in ${languageName} (language code: ${targetLanguage})
+- The title, summary, and keyThemes must ALL be in ${languageName}
+- Do NOT include any English text in the response (unless ${targetLanguage} is "en")
+- JSON field names stay in English, but ALL values must be in ${languageName}
+- Maintain the mystical, premium Solara tone in ${languageName}
 
 OUTPUT FORMAT:
 Respond with ONLY valid JSON. No markdown, no explanations—just the JSON object.`;
-
-    const timeframeLabel =
-      timeframe === "today"
-        ? "Today's"
-        : timeframe === "week"
-        ? "This Week's"
-        : "This Month's";
 
     const userPrompt = `Generate a ${timeframe} horoscope for ${signDisplayName}.
 
 Current date: ${new Date().toISOString()}
 Timeframe: ${timeframe}
+Output language: ${languageName} (${targetLanguage})
 
-Return JSON:
+Return JSON with ALL text values in ${languageName}:
 {
-  "title": "${timeframeLabel} Energy for ${signDisplayName}",
-  "summary": "Exactly 2 paragraphs, 8-12 sentences total. Include 1 micro-action (<=10 min).",
-  "keyThemes": ["theme1", "theme2", "theme3"]
+  "title": "[Translate: Today's/This Week's/This Month's Energy for ${signDisplayName}]",
+  "summary": "Exactly 2 paragraphs, 8-12 sentences total in ${languageName}. Include 1 micro-action (<=10 min).",
+  "keyThemes": ["theme1 in ${languageName}", "theme2 in ${languageName}", "theme3 in ${languageName}"]
 }
 
-Follow the Ayren voice rules strictly: 2 paragraphs, non-deterministic wording, calm-power close.`;
+Follow the Ayren voice rules strictly: 2 paragraphs, non-deterministic wording, calm-power close.
+REMINDER: Write everything in ${languageName}, not English.`;
 
     // Call OpenAI
     const completion = await openai.chat.completions.create({

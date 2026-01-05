@@ -10,6 +10,7 @@ import { checkBudget, incrementBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai
 import { AYREN_MODE_SHORT, PRO_SOCIAL_NUDGE_INSTRUCTION, HUMOR_INSTRUCTION, LOW_SIGNAL_GUARDRAIL } from "@/lib/ai/voice";
 import { parseMetadataFromSummary, getSummaryTextOnly } from "@/lib/social/summarize";
 import { logTokenAudit } from "@/lib/ai/tokenAudit";
+import { resolveLocaleAuth } from "@/lib/i18n/resolveLocale";
 
 // Human-friendly rate limits for connection briefs (only on cache miss)
 // Connections page may load many cards at once, so limits are generous
@@ -101,7 +102,8 @@ export async function POST(req: NextRequest) {
     const timezone = profile.timezone || "America/New_York";
     const localDateKey = getDayKey(timezone);
     const localDate = localDateKey.replace("day:", ""); // "YYYY-MM-DD"
-    const language = profile.language || "en";
+    // Get user's language preference with fallback chain (profile → cookie → Accept-Language → cf-ipcountry → "en")
+    const language = resolveLocaleAuth(req, profile.language);
 
     // ========================================
     // LOAD SOCIAL SUMMARIES (if any)

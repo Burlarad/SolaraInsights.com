@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, Suspense } from "react";
+import { useState, useEffect, useCallback, Suspense, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,7 +17,7 @@ import { findTarotCard } from "@/lib/tarot";
 // FEATURE DISABLED: Rune Whisper / Daily Sigil
 // import { findRune } from "@/lib/runes";
 import { pickRotatingMessage, getErrorCategory, type ApiErrorResponse } from "@/lib/ui/pickRotatingMessage";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 interface ErrorInfo {
   message: string;
@@ -32,8 +32,12 @@ function SanctuaryContent() {
   const searchParams = useSearchParams();
   const { profile, loading: profileLoading, error: profileError, refreshProfile } = useSettings();
   const { coords } = useGeolocation();
+  const locale = useLocale();
   const t = useTranslations("sanctuary");
   const tCommon = useTranslations("common");
+
+  // Ref for AbortController to prevent stampede on rapid changes
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const [timeframe, setTimeframe] = useState<Timeframe>("today");
   const [insight, setInsight] = useState<SanctuaryInsight | null>(null);
@@ -167,6 +171,12 @@ function SanctuaryContent() {
   };
 
   const loadInsight = useCallback(async () => {
+    // Abort any in-flight request to prevent stampede
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+
     setLoading(true);
     setError(null);
     setErrorInfo(null);
@@ -176,7 +186,8 @@ function SanctuaryContent() {
       const response = await fetch("/api/insights", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ timeframe }),
+        body: JSON.stringify({ timeframe, language: locale }),
+        signal: abortControllerRef.current.signal,
       });
 
       if (response.status === 401) {
@@ -231,6 +242,10 @@ function SanctuaryContent() {
       // Load journal entry after insight is loaded
       loadJournalEntry();
     } catch (err: any) {
+      // Ignore AbortError (expected when request is cancelled)
+      if (err.name === "AbortError") {
+        return;
+      }
       console.error("Error loading insights:", err);
       const rotatingMessage = pickRotatingMessage({
         category: "provider_500",
@@ -244,7 +259,7 @@ function SanctuaryContent() {
     } finally {
       setLoading(false);
     }
-  }, [timeframe, attemptCount, router]);
+  }, [timeframe, locale, attemptCount, router]);
 
   const loadJournalEntry = async () => {
     try {
@@ -308,11 +323,19 @@ function SanctuaryContent() {
     }
   };
 
+  // Use stable primitive deps to prevent unnecessary re-fetches
+  // Refetch when: timeframe changes, profile loads, locale changes
   useEffect(() => {
-    if (!profileLoading && profile) {
+    if (!profileLoading && profile?.id) {
       loadInsight();
     }
-  }, [timeframe, profileLoading, profile]);
+    // Cleanup: abort on unmount or dep change
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, [timeframe, profileLoading, profile?.id, locale, loadInsight]);
 
   const timeframeLabel = t(`timeframes.${timeframe}`);
 

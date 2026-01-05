@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
-import { useTranslations } from "next-intl";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ZODIAC_SIGNS } from "@/lib/constants";
@@ -21,6 +21,7 @@ function scrollToCenter(el: HTMLElement) {
 export function CompatibilityArena() {
   const t = useTranslations("compatibility");
   const tSigns = useTranslations("zodiacSigns");
+  const locale = useLocale();
 
   const [signA, setSignA] = useState<string>("");
   const [signB, setSignB] = useState<string>("");
@@ -35,11 +36,13 @@ export function CompatibilityArena() {
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
   const lastPairRef = useRef<string>("");
   const requestIdRef = useRef<string>("");
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     return () => {
       if (cooldownInterval.current) clearInterval(cooldownInterval.current);
       if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
+      if (abortControllerRef.current) abortControllerRef.current.abort();
     };
   }, []);
 
@@ -62,6 +65,12 @@ export function CompatibilityArena() {
   }, [cooldownRemaining]);
 
   const fetchCompatibility = useCallback(async (a: string, b: string) => {
+    // Abort any in-flight request to prevent stampede
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+
     const requestId = generateUUID();
     requestIdRef.current = requestId;
 
@@ -73,7 +82,14 @@ export function CompatibilityArena() {
       const response = await fetch("/api/public-compatibility", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ signA: a, signB: b, requestId }),
+        body: JSON.stringify({
+          signA: a,
+          signB: b,
+          requestId,
+          language: locale,
+          year: new Date().getFullYear(),
+        }),
+        signal: abortControllerRef.current.signal,
       });
 
       const data = await response.json();
@@ -100,12 +116,25 @@ export function CompatibilityArena() {
         }
       });
     } catch (err: unknown) {
+      // Ignore AbortError (expected when request is cancelled)
+      if (err instanceof Error && err.name === "AbortError") {
+        return;
+      }
       console.error("Error loading compatibility:", err);
       setError(err instanceof Error ? err.message : "We couldn't load the reading. Please try again.");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [locale]);
+
+  // Reset when locale changes to fetch in new language
+  useEffect(() => {
+    if (signA && signB && reading) {
+      lastPairRef.current = ""; // Force refetch
+      fetchCompatibility(signA, signB);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locale]);
 
   useEffect(() => {
     if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
@@ -325,6 +354,49 @@ export function CompatibilityArena() {
                   ))}
                 </div>
               </div>
+
+              {/* Yearly Content (if available) */}
+              {reading.yearlyTheme && (
+                <div className="bg-gradient-to-br from-accent-gold/10 to-accent-gold/5 border border-accent-gold/30 rounded-lg p-6 space-y-4">
+                  <h3 className="text-lg font-semibold text-accent-ink">{reading.yearlyTheme}</h3>
+
+                  {reading.cosmicClimate && (
+                    <div className="text-accent-ink/80 leading-relaxed space-y-4">
+                      {reading.cosmicClimate.split("\n\n").map((p, i) => (
+                        <p key={i}>{p}</p>
+                      ))}
+                    </div>
+                  )}
+
+                  {reading.growthOpportunities && reading.growthOpportunities.length > 0 && (
+                    <div>
+                      <p className="micro-label mb-2">{t("growthOpportunities")}</p>
+                      <ul className="space-y-2">
+                        {reading.growthOpportunities.map((item, i) => (
+                          <li key={i} className="flex items-start gap-3 text-accent-ink/80">
+                            <span className="text-green-600 font-bold">↑</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {reading.watchPoints && reading.watchPoints.length > 0 && (
+                    <div>
+                      <p className="micro-label mb-2">{t("watchPoints")}</p>
+                      <ul className="space-y-2">
+                        {reading.watchPoints.map((item, i) => (
+                          <li key={i} className="flex items-start gap-3 text-accent-ink/80">
+                            <span className="text-amber-600 font-bold">⚠</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="bg-accent-gold/5 border border-accent-gold/20 rounded-lg p-4">
                 <p className="micro-label mb-2">{t("bestMoveThisWeek")}</p>

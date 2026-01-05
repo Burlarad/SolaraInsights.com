@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from "react";
 import Image from "next/image";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PublicTarotResponse, TarotSpread } from "@/types";
@@ -11,18 +11,6 @@ import { getTarotImageUrlFromCardId } from "@/lib/tarot";
 // Generate UUID using native crypto API
 function generateUUID(): string {
   return crypto.randomUUID();
-}
-
-// Get user's preferred language (browser default or could be from profile)
-function getUserLanguage(): string {
-  if (typeof navigator !== "undefined") {
-    // Get primary language code (e.g., "en" from "en-US")
-    const lang = navigator.language?.split("-")[0];
-    if (lang && lang.length >= 2) {
-      return lang;
-    }
-  }
-  return "en";
 }
 
 const MIN_QUESTION_LENGTH = 10;
@@ -37,6 +25,7 @@ function scrollToCenter(el: HTMLElement) {
 
 export function TarotArena() {
   const t = useTranslations("tarot");
+  const locale = useLocale();
 
   const [question, setQuestion] = useState("");
   const [spread, setSpread] = useState<TarotSpread>(3);
@@ -63,6 +52,11 @@ export function TarotArena() {
       }
     };
   }, []);
+
+  // Reset reading when locale changes (user will need to redraw for new language)
+  useEffect(() => {
+    setReading(null);
+  }, [locale]);
 
   // Cooldown countdown
   useEffect(() => {
@@ -101,7 +95,6 @@ export function TarotArena() {
 
     try {
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const language = getUserLanguage();
       const requestId = generateUUID();
 
       const response = await fetch("/api/public-tarot", {
@@ -112,7 +105,7 @@ export function TarotArena() {
           spread,
           requestId,
           timezone,
-          language,
+          language: locale,
         }),
       });
 

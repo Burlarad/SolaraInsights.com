@@ -26,10 +26,22 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       setLoading(true);
       setError(null);
 
-      // Get current user
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      // Get current user - wrap in try/catch to handle auth errors gracefully
+      let user = null;
+      try {
+        const { data, error: authError } = await supabase.auth.getUser();
+        // Ignore "Refresh Token Not Found" - this is normal for logged-out users
+        if (authError && !authError.message?.includes("Refresh Token")) {
+          console.warn("Auth error (non-critical):", authError.message);
+        }
+        user = data?.user || null;
+      } catch (authErr: any) {
+        // Catch any auth errors - logged-out state is normal, not an error
+        if (!authErr.message?.includes("Refresh Token")) {
+          console.warn("Auth check failed (non-critical):", authErr.message);
+        }
+        user = null;
+      }
 
       if (!user) {
         setProfile(null);

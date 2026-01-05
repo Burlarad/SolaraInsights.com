@@ -12,7 +12,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import tzLookup from "tz-lookup";
 import { getCache, setCache } from "@/lib/cache/redis";
-import { checkRateLimit, checkBurstLimit, getClientIP, createRateLimitResponse } from "@/lib/cache/rateLimit";
+import { checkRateLimit, checkBurstLimit, getAnonId, createRateLimitResponse } from "@/lib/cache/rateLimit";
 
 // ========================================
 // Types
@@ -318,10 +318,11 @@ export async function POST(req: NextRequest) {
     // ========================================
     // 4. RATE LIMITING (only on cache miss)
     // ========================================
-    const clientIP = getClientIP(req);
+    // Use session+IP combo for rate limiting (more fair for shared networks)
+    const anonId = getAnonId(req);
 
     // Burst protection (bot defense - stricter for anonymous)
-    const burstResult = await checkBurstLimit(`locsearch:${clientIP}`, BURST_LIMIT, BURST_WINDOW);
+    const burstResult = await checkBurstLimit(`locsearch:${anonId}`, BURST_LIMIT, BURST_WINDOW);
     if (!burstResult.success) {
       return NextResponse.json(
         createRateLimitResponse(BURST_WINDOW, "You're searching too fast — slow down a bit."),
@@ -331,7 +332,7 @@ export async function POST(req: NextRequest) {
 
     // Sustained rate limit check
     const rateLimitResult = await checkRateLimit(
-      `locsearch:rate:${clientIP}`,
+      `locsearch:rate:${anonId}`,
       IP_RATE_LIMIT,
       IP_RATE_WINDOW
     );

@@ -91,6 +91,7 @@ export type Timeframe = "today" | "week" | "month" | "year";
 export interface InsightsRequest {
   timeframe: Timeframe;
   focusQuestion?: string;
+  language?: string; // Language code (e.g., "en", "es"), allows UI to override immediately
 }
 
 export interface PublicHoroscopeRequest {
@@ -390,9 +391,15 @@ export interface PublicCompatibilityRequest {
   signA: string; // lowercase zodiac sign
   signB: string; // lowercase zodiac sign
   requestId: string; // UUID for idempotency
+  year?: number; // Optional year for yearly overlay
+  timezone?: string; // Optional timezone
+  language?: string; // Optional language code
 }
 
-export interface PublicCompatibilityContent {
+/**
+ * Core compatibility content - stable archetype, cached per pair+locale
+ */
+export interface PublicCompatibilityCore {
   pairKey: string; // e.g., "scorpio__taurus"
   title: string; // e.g., "Taurus + Scorpio"
   summary: string; // 2-3 paragraph overview
@@ -403,12 +410,56 @@ export interface PublicCompatibilityContent {
   loveAndIntimacy: string; // 1-2 paragraphs
   trustAndSecurity: string; // 1-2 paragraphs
   longTermPotential: string; // 1-2 paragraphs
+}
+
+/**
+ * Yearly overlay content - time-sensitive, cached per pair+year+locale
+ */
+export interface PublicCompatibilityYearly {
+  year: number;
+  yearlyTheme: string; // "2025: The Year of..." headline
+  cosmicClimate: string; // 1-2 paragraphs on planetary transits affecting pair
+  growthOpportunities: string[]; // 3 opportunities for the year
+  watchPoints: string[]; // 3 things to be mindful of
   bestMoveThisWeek: string; // One concrete micro-action
 }
 
-export interface PublicCompatibilityResponse extends PublicCompatibilityContent {
+/**
+ * Legacy compatibility content interface (for backward compatibility)
+ * @deprecated Use PublicCompatibilityCore + PublicCompatibilityYearly instead
+ */
+export interface PublicCompatibilityContent {
+  pairKey: string;
+  title: string;
+  summary: string;
+  strengths: string[];
+  frictionPoints: string[];
+  howToMakeItWork: string[];
+  communicationStyle: string;
+  loveAndIntimacy: string;
+  trustAndSecurity: string;
+  longTermPotential: string;
+  bestMoveThisWeek: string;
+}
+
+/**
+ * Full compatibility response - merges Core + Yearly content
+ */
+export interface PublicCompatibilityResponse extends PublicCompatibilityCore {
+  // Yearly overlay fields
+  year?: number;
+  yearlyTheme?: string;
+  cosmicClimate?: string;
+  growthOpportunities?: string[];
+  watchPoints?: string[];
+  bestMoveThisWeek: string; // From yearly or generated fresh
+  // Metadata
   generatedAt: string;
   fromCache: boolean;
+  cacheStatus?: {
+    core: "hit" | "miss";
+    yearly: "hit" | "miss" | "skipped";
+  };
 }
 
 // ============================================================================

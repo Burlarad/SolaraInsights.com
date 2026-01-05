@@ -229,6 +229,51 @@ export function getClientIP(request: Request): string {
 }
 
 /**
+ * Cookie name for anonymous session ID (set by middleware)
+ */
+const SESSION_COOKIE = "__Host-solara_sid";
+
+/**
+ * Get session ID from secure httpOnly cookie.
+ * Returns the __Host-solara_sid cookie value or "no-session" fallback.
+ */
+export function getSessionId(request: Request): string {
+  const cookieHeader = request.headers.get("cookie");
+  if (!cookieHeader) return "no-session";
+
+  // Parse cookie value
+  const match = cookieHeader.match(new RegExp(`${SESSION_COOKIE}=([^;]+)`));
+  return match?.[1] || "no-session";
+}
+
+/**
+ * Get anonymous identifier: session + IP combo.
+ * More reliable than IP-only for shared networks (NAT, VPN, corporate).
+ *
+ * Priority:
+ * 1. session:IP (best - unique per browser, per network)
+ * 2. session-only (if IP unknown)
+ * 3. IP-only (if no session cookie)
+ */
+export function getAnonId(request: Request): string {
+  const sessionId = getSessionId(request);
+  const clientIP = getClientIP(request);
+
+  // If we have both, combine them
+  if (sessionId !== "no-session" && clientIP !== "unknown") {
+    return `${sessionId}:${clientIP}`;
+  }
+
+  // Prefer session if IP is unknown
+  if (sessionId !== "no-session") {
+    return sessionId;
+  }
+
+  // Fall back to IP if no session
+  return clientIP;
+}
+
+/**
  * Check burst rate limit (short window, strict limit).
  * Used to block rapid-fire spam/bot attacks.
  *

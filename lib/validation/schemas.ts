@@ -29,6 +29,9 @@ export const publicCompatibilitySchema = z.object({
   signA: zodiacSign,
   signB: zodiacSign,
   requestId: z.string().uuid("requestId must be a valid UUID"),
+  year: z.number().int().min(2024).max(2030).optional(),
+  timezone: timezone.optional(),
+  language: language.optional(),
 });
 
 // Public tarot request

@@ -19,6 +19,7 @@ import { trackAiUsage } from "@/lib/ai/trackUsage";
 import { checkBudget, incrementBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai/costControl";
 import { AYREN_MODE_SHORT } from "@/lib/ai/voice";
 import { logTokenAudit } from "@/lib/ai/tokenAudit";
+import { resolveLocaleAuth } from "@/lib/i18n/resolveLocale";
 
 // Rate limits for connection insight (per user)
 // Human-friendly: cache hits are FREE, only cache misses count
@@ -146,7 +147,8 @@ export async function POST(req: NextRequest) {
 
     // Connection insights refresh at the viewer's (profile's) midnight
     const periodKey = getDayKey(profile.timezone);
-    const language = profile.language || "en";
+    // Get user's language preference with fallback chain (profile → cookie → Accept-Language → cf-ipcountry → "en")
+    const language = resolveLocaleAuth(req, profile.language);
     const cacheKey = `connectionInsight:v1:p${PROMPT_VERSION}:${user.id}:${connectionId}:${requestTimeframe}:${periodKey}:${language}`;
 
     // Check cache

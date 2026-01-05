@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
-import { useTranslations } from "next-intl";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { ZodiacCard } from "./ZodiacCard";
 import { ZODIAC_SIGNS, type ExperienceKey, type TimeframeKey } from "@/lib/constants";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,6 +24,7 @@ export function ZodiacGrid({ timeframe, experience }: ZodiacGridProps) {
   const t = useTranslations("common");
   const tSigns = useTranslations("zodiacSigns");
   const tTime = useTranslations("sanctuary.timeframes");
+  const locale = useLocale();
 
   const [selectedSign, setSelectedSign] = useState<(typeof ZODIAC_SIGNS)[number] | null>(null);
   const [horoscope, setHoroscope] = useState<PublicHoroscopeResponse | null>(null);
@@ -32,8 +33,24 @@ export function ZodiacGrid({ timeframe, experience }: ZodiacGridProps) {
   const [showGlow, setShowGlow] = useState(false);
 
   const horoscopeRef = useRef<HTMLDivElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   const loadHoroscope = useCallback(async (signKey: string, tf: TimeframeKey) => {
+    // Abort any in-flight request to prevent stampede
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+
     setLoading(true);
     setError(null);
 
@@ -47,7 +64,9 @@ export function ZodiacGrid({ timeframe, experience }: ZodiacGridProps) {
           sign: signKey,
           timeframe: tf,
           timezone,
+          language: locale,
         }),
+        signal: abortControllerRef.current.signal,
       });
 
       if (!response.ok) {
@@ -58,12 +77,15 @@ export function ZodiacGrid({ timeframe, experience }: ZodiacGridProps) {
       const data: PublicHoroscopeResponse = await response.json();
       setHoroscope(data);
     } catch (err: unknown) {
-      console.error("Error loading horoscope:", err);
-      setError("We couldn't open this reading. Please try again.");
+      // Ignore AbortError (expected when request is cancelled)
+      if (err instanceof Error && err.name === "AbortError") {
+        return;
+      }
+      setError(t("errors.horoscopeLoadFailed") || "We couldn't open this reading. Please try again.");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [locale, t]);
 
   const handleSignClick = (sign: (typeof ZODIAC_SIGNS)[number]) => {
     setSelectedSign(sign);
@@ -93,6 +115,17 @@ export function ZodiacGrid({ timeframe, experience }: ZodiacGridProps) {
       loadHoroscope(selectedSign.key, timeframe);
     }
   }
+
+  // Refetch horoscope when locale changes (user switched language)
+  const prevLocaleRef = useRef(locale);
+  useEffect(() => {
+    if (prevLocaleRef.current !== locale) {
+      prevLocaleRef.current = locale;
+      if (selectedSign && experience === "horoscope" && horoscope) {
+        loadHoroscope(selectedSign.key, timeframe);
+      }
+    }
+  }, [locale, selectedSign, experience, horoscope, timeframe, loadHoroscope]);
 
   const handleTryAgain = () => {
     if (selectedSign) {

@@ -10,6 +10,7 @@ import { checkBudget, incrementBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai
 import { AYREN_MODE_SOULPRINT_LONG } from "@/lib/ai/voice";
 import { logTokenAudit } from "@/lib/ai/tokenAudit";
 import { parseMetadataFromSummary, getSummaryTextOnly } from "@/lib/social/summarize";
+import { resolveLocaleAuth } from "@/lib/i18n/resolveLocale";
 
 /**
  * Get the current quarter key (e.g., "2025Q1")
@@ -166,7 +167,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const language = profile.language || "en";
+    // Get user's language preference with fallback chain (profile → cookie → Accept-Language → cf-ipcountry → "en")
+    const language = resolveLocaleAuth(req, profile.language);
     const currentQuarter = getQuarterKey();
 
     // ========================================
