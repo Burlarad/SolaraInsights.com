@@ -1,0 +1,3 @@
+-- Placeholder migration to match production migration history.
+-- Version 20250106000000 exists on remote but was missing in this repo.
+-- Intentionally empty: the schema changes already exist in production.

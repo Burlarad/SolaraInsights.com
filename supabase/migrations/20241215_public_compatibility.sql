@@ -23,11 +23,19 @@ COMMENT ON COLUMN public_compatibility.content_en_json IS 'Full compatibility JS
 ALTER TABLE public_compatibility ENABLE ROW LEVEL SECURITY;
 
 -- Anyone can read compatibility data
-CREATE POLICY "public_compatibility_select_policy" ON public_compatibility
-  FOR SELECT
-  USING (true);
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='public_compatibility' AND policyname='public_compatibility_select_policy') THEN
+    CREATE POLICY "public_compatibility_select_policy" ON public_compatibility
+      FOR SELECT
+      USING (true);
+  END IF;
+END $$;
 
 -- Only service role can insert (API uses admin client)
-CREATE POLICY "public_compatibility_insert_policy" ON public_compatibility
-  FOR INSERT
-  WITH CHECK (false);
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='public_compatibility' AND policyname='public_compatibility_insert_policy') THEN
+    CREATE POLICY "public_compatibility_insert_policy" ON public_compatibility
+      FOR INSERT
+      WITH CHECK (false);
+  END IF;
+END $$;

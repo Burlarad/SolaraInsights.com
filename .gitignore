@@ -26,7 +26,10 @@ yarn-error.log*
 .env.test
 .env.production
 .env_render
+# Keep example/template files in repo (safe - no secrets)
 !.env.example
+!.env.local.example
+!.env.production.example
 # env backups
 .env.bak
 .env.local.bak
@@ -44,3 +47,15 @@ package-lock*.json
 # Prevent alternative lockfiles
 yarn.lock
 pnpm-lock.yaml
+
+# --- Supabase CLI tool state (never commit) ---
+supabase/.temp/
+supabase/.branches/
+
+# --- Local audit artifacts (never commit) ---
+db_audit/
+db_audit_bundle.tgz
+local_migrations.txt
+remote_migrations.txt
+prod_schema.sql
+
