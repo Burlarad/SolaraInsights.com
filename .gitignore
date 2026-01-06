@@ -62,3 +62,6 @@ prod_schema.sql
 
 # Local schema dumps (do not commit)
 docs/schema/
+
+# Local schema dumps (do not commit)
+docs/schema/
