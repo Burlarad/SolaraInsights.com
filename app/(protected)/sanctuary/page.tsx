@@ -38,13 +38,20 @@ function SanctuaryContent() {
 
   // Ref for AbortController to prevent stampede on rapid changes
   const abortControllerRef = useRef<AbortController | null>(null);
+  // Ref for attempt count (doesn't trigger re-renders, prevents infinite loop)
+  const attemptCountRef = useRef(0);
+  // Ref for deduplication - tracks the last requested key to avoid duplicate fetches
+  const lastRequestKeyRef = useRef<string | null>(null);
+  // Ref for 429 backoff - stores the timestamp when we're allowed to retry
+  const retryAfterRef = useRef<number>(0);
+  // Ref to track if a request is currently in flight (avoids stale closure with loading state)
+  const isLoadingRef = useRef(false);
 
   const [timeframe, setTimeframe] = useState<Timeframe>("today");
   const [insight, setInsight] = useState<SanctuaryInsight | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errorInfo, setErrorInfo] = useState<ErrorInfo | null>(null);
-  const [attemptCount, setAttemptCount] = useState(0);
 
   // Journal state
   const [journalContent, setJournalContent] = useState("");
@@ -171,16 +178,40 @@ function SanctuaryContent() {
   };
 
   const loadInsight = useCallback(async () => {
+    // Dedupe: Build request key and check if we're already fetching this exact request
+    const requestKey = `${timeframe}:${locale}`;
+    if (lastRequestKeyRef.current === requestKey && isLoadingRef.current) {
+      console.log("[Sanctuary] Skipping duplicate request:", requestKey);
+      return;
+    }
+
+    // 429 backoff: Check if we're still in cooldown period
+    const now = Date.now();
+    if (retryAfterRef.current > now) {
+      const waitSeconds = Math.ceil((retryAfterRef.current - now) / 1000);
+      console.log(`[Sanctuary] In 429 backoff, wait ${waitSeconds}s`);
+      setError(`Please wait ${waitSeconds} seconds before trying again.`);
+      setErrorInfo({
+        message: `Rate limited. Retry in ${waitSeconds}s.`,
+        retryAfterSeconds: waitSeconds,
+        status: 429,
+      });
+      return;
+    }
+
     // Abort any in-flight request to prevent stampede
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
     abortControllerRef.current = new AbortController();
+    lastRequestKeyRef.current = requestKey;
 
+    isLoadingRef.current = true;
     setLoading(true);
     setError(null);
     setErrorInfo(null);
-    setAttemptCount((prev) => prev + 1);
+    attemptCountRef.current += 1;
+    const currentAttempt = attemptCountRef.current;
 
     try {
       const response = await fetch("/api/insights", {
@@ -199,10 +230,9 @@ function SanctuaryContent() {
       const contentType = response.headers.get("content-type") || "";
       if (!contentType.includes("application/json")) {
         // Non-JSON response (HTML error page, etc.)
-        const category = getErrorCategory(response.status);
         const rotatingMessage = pickRotatingMessage({
           category: "non_json_response",
-          attempt: attemptCount + 1,
+          attempt: currentAttempt,
         });
         setError(rotatingMessage);
         setErrorInfo({
@@ -218,9 +248,16 @@ function SanctuaryContent() {
         // Parse error response with errorCode and requestId
         const apiError = data as ApiErrorResponse;
         const category = getErrorCategory(response.status, apiError.errorCode);
+
+        // Handle 429 with client-side backoff
+        if (response.status === 429 && apiError.retryAfterSeconds) {
+          retryAfterRef.current = Date.now() + apiError.retryAfterSeconds * 1000;
+          console.log(`[Sanctuary] 429 received, backing off for ${apiError.retryAfterSeconds}s`);
+        }
+
         const rotatingMessage = pickRotatingMessage({
           category,
-          attempt: attemptCount + 1,
+          attempt: currentAttempt,
           retryAfterSeconds: apiError.retryAfterSeconds,
         });
 
@@ -237,7 +274,7 @@ function SanctuaryContent() {
 
       const insightData: SanctuaryInsight = data;
       setInsight(insightData);
-      setAttemptCount(0); // Reset on success
+      attemptCountRef.current = 0; // Reset on success
 
       // Load journal entry after insight is loaded
       loadJournalEntry();
@@ -249,7 +286,7 @@ function SanctuaryContent() {
       console.error("Error loading insights:", err);
       const rotatingMessage = pickRotatingMessage({
         category: "provider_500",
-        attempt: attemptCount + 1,
+        attempt: currentAttempt,
       });
       setError(rotatingMessage);
       setErrorInfo({
@@ -257,9 +294,10 @@ function SanctuaryContent() {
         status: 500,
       });
     } finally {
+      isLoadingRef.current = false;
       setLoading(false);
     }
-  }, [timeframe, locale, attemptCount, router]);
+  }, [timeframe, locale, router]);
 
   const loadJournalEntry = async () => {
     try {

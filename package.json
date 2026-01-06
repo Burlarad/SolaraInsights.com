@@ -11,7 +11,12 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "supabase:local:start": "supabase start",
+    "supabase:local:stop": "supabase stop",
+    "supabase:local:status": "supabase status",
+    "supabase:local:reset": "supabase db reset",
+    "supabase:local:logs": "supabase logs"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.1.0",

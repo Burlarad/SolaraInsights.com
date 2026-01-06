@@ -1,20 +1,26 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
+import { validateSupabaseConfig, logSupabaseConfig } from "./config";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
+// Validate configuration on module load
+const configValidation = validateSupabaseConfig();
+if (!configValidation.isValid) {
   throw new Error(
-    "Missing Supabase environment variables: NEXT_PUBLIC_SUPABASE_URL and/or NEXT_PUBLIC_SUPABASE_ANON_KEY"
+    `Supabase configuration error: ${configValidation.errors.join(", ")}`
   );
 }
 
-// Type assertion: After the check above, we know these are strings
-const url: string = supabaseUrl;
-const key: string = supabaseAnonKey;
+// Log configuration safely (development only)
+logSupabaseConfig();
+
+// Type assertion: After validation, we know these are strings
+const url: string = supabaseUrl!;
+const key: string = supabaseAnonKey!;
 
 /**
  * Creates a Supabase client for use in Server Components and Route Handlers.

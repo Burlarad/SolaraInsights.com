@@ -1,17 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { locales, type Locale, isValidLocale } from "@/i18n";
-
-/**
- * Secure locale endpoint for httpOnly cookie management
- *
- * GET: Returns current locale from __Host-solara_locale cookie
- * POST: Sets locale in __Host-solara_locale cookie (httpOnly, secure)
- *
- * This endpoint is required because httpOnly cookies cannot be set by JavaScript.
- */
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { Locale, defaultLocale, isValidLocale, locales } from "@/i18n";
 
 const LOCALE_COOKIE = "__Host-solara_locale";
-const COOKIE_MAX_AGE = 365 * 24 * 60 * 60; // 1 year
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
 
 /**
  * GET /api/locale
@@ -20,10 +12,8 @@ const COOKIE_MAX_AGE = 365 * 24 * 60 * 60; // 1 year
 export async function GET(req: NextRequest) {
   const cookieLocale = req.cookies.get(LOCALE_COOKIE)?.value;
 
-  // Validate and return
-  const locale: Locale = cookieLocale && isValidLocale(cookieLocale)
-    ? cookieLocale
-    : "en";
+  const locale: Locale =
+    cookieLocale && isValidLocale(cookieLocale) ? cookieLocale : defaultLocale;
 
   return NextResponse.json({ locale });
 }
@@ -31,13 +21,14 @@ export async function GET(req: NextRequest) {
 /**
  * POST /api/locale
  * Sets the locale in the secure httpOnly cookie
+ * If signed in: also persists the locale to profiles.language in Supabase.
  *
  * Body: { locale: string }
  */
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { locale } = body;
+    const { locale } = body ?? {};
 
     // Validate locale
     if (!locale || typeof locale !== "string") {
@@ -59,7 +50,7 @@ export async function POST(req: NextRequest) {
 
     const isProduction = process.env.NODE_ENV === "production";
 
-    // Create response with cookie
+    // Always set cookie (works for guests + immediate UI switching)
     const response = NextResponse.json({ ok: true, locale });
 
     response.cookies.set({
@@ -71,6 +62,34 @@ export async function POST(req: NextRequest) {
       path: "/",
       maxAge: COOKIE_MAX_AGE,
     });
+
+    // Best-interest behavior:
+    // - If logged in, also persist to Supabase so it's remembered across devices
+    // - If anything fails (no session, RLS, transient DB), DO NOT break the user toggle
+    try {
+      const supabase = await createServerSupabaseClient();
+      const { data: userData } = await supabase.auth.getUser();
+      const user = userData?.user;
+
+      if (user?.id) {
+        const { error } = await supabase
+          .from("profiles")
+          .update({
+            language: locale,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", user.id);
+
+        if (error) {
+          console.warn("[/api/locale] Failed to persist profile language:", {
+            userId: user.id,
+            error,
+          });
+        }
+      }
+    } catch (persistErr) {
+      console.warn("[/api/locale] Locale persisted failed (non-fatal):", persistErr);
+    }
 
     return response;
   } catch (error) {

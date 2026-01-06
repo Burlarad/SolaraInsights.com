@@ -284,6 +284,7 @@ export async function POST(req: NextRequest) {
     const burstResult = await checkBurstLimit(`insights:${user.id}`, BURST_LIMIT, BURST_WINDOW);
     if (!burstResult.success) {
       const retryAfter = Math.ceil((burstResult.resetAt - Date.now()) / 1000);
+      console.log(`[Insights] 429 BURST: user=${user.id} count=${burstResult.count}/${BURST_LIMIT} retry=${retryAfter}s backend=${burstResult.backend}`);
       return createApiErrorResponse({
         error: "rate_limited",
         message: "Slow down — you're generating insights too quickly.",
@@ -301,6 +302,7 @@ export async function POST(req: NextRequest) {
       const elapsed = Math.floor((Date.now() - lastRequestTime) / 1000);
       const remaining = COOLDOWN_SECONDS - elapsed;
       if (remaining > 0) {
+        console.log(`[Insights] 429 COOLDOWN: user=${user.id} elapsed=${elapsed}s remaining=${remaining}s`);
         return createApiErrorResponse({
           error: "rate_limited",
           message: "Just a moment — your next insight is brewing.",
@@ -320,6 +322,7 @@ export async function POST(req: NextRequest) {
     );
     if (!rateLimitResult.success) {
       const retryAfter = Math.ceil((rateLimitResult.resetAt - Date.now()) / 1000);
+      console.log(`[Insights] 429 SUSTAINED: user=${user.id} count=${rateLimitResult.count}/${USER_RATE_LIMIT} retry=${retryAfter}s backend=${rateLimitResult.backend}`);
       return createApiErrorResponse({
         error: "rate_limited",
         message: `You've reached your hourly limit. Try again in ${Math.ceil(retryAfter / 60)} minutes.`,

@@ -34,6 +34,10 @@ export function ZodiacGrid({ timeframe, experience }: ZodiacGridProps) {
 
   const horoscopeRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  // Ref for 429 backoff - stores the timestamp when we're allowed to retry
+  const retryAfterRef = useRef<number>(0);
+  // Ref to track if a request is currently in flight
+  const isLoadingRef = useRef(false);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -45,12 +49,22 @@ export function ZodiacGrid({ timeframe, experience }: ZodiacGridProps) {
   }, []);
 
   const loadHoroscope = useCallback(async (signKey: string, tf: TimeframeKey) => {
+    // 429 backoff: Check if we're still in cooldown period
+    const now = Date.now();
+    if (retryAfterRef.current > now) {
+      const waitSeconds = Math.ceil((retryAfterRef.current - now) / 1000);
+      console.log(`[ZodiacGrid] In 429 backoff, wait ${waitSeconds}s`);
+      setError(`Please wait ${waitSeconds} seconds before trying again.`);
+      return;
+    }
+
     // Abort any in-flight request to prevent stampede
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
     abortControllerRef.current = new AbortController();
 
+    isLoadingRef.current = true;
     setLoading(true);
     setError(null);
 
@@ -71,6 +85,13 @@ export function ZodiacGrid({ timeframe, experience }: ZodiacGridProps) {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+
+        // Handle 429 with client-side backoff
+        if (response.status === 429 && errorData.retryAfterSeconds) {
+          retryAfterRef.current = Date.now() + errorData.retryAfterSeconds * 1000;
+          console.log(`[ZodiacGrid] 429 received, backing off for ${errorData.retryAfterSeconds}s`);
+        }
+
         throw new Error(errorData.message || "Failed to load horoscope");
       }
 
@@ -83,6 +104,7 @@ export function ZodiacGrid({ timeframe, experience }: ZodiacGridProps) {
       }
       setError(t("errors.horoscopeLoadFailed") || "We couldn't open this reading. Please try again.");
     } finally {
+      isLoadingRef.current = false;
       setLoading(false);
     }
   }, [locale, t]);
