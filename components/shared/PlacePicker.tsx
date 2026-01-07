@@ -74,6 +74,8 @@ export function PlacePicker({
   const hasUserTypedRef = useRef(false);
 
   // Sync query with initialValue when it changes asynchronously (e.g., profile loads)
+  // INTENTIONAL: We only want this to run when initialValue changes (profile hydration),
+  // NOT when query changes. Adding query to deps would cause unwanted re-runs when user types.
   useEffect(() => {
     // Only update if:
     // 1. initialValue is non-empty
@@ -87,7 +89,8 @@ export function PlacePicker({
       setQuery(initialValue);
       selectedLabelRef.current = initialValue;
     }
-  }, [initialValue]); // Only depend on initialValue, not query
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialValue]);
 
   // Debounced search function
   const searchLocations = useCallback(async (searchQuery: string) => {

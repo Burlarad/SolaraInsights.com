@@ -123,116 +123,7 @@ export default function ConnectionsPage() {
   const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const observerRef = useRef<IntersectionObserver | null>(null);
 
-  // Load connections on mount
-  useEffect(() => {
-    loadConnections();
-  }, []);
-
-  // Setup IntersectionObserver for lazy brief generation
-  useEffect(() => {
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const connectionId = entry.target.getAttribute("data-connection-id");
-            if (connectionId) {
-              const connection = connections.find((c) => c.id === connectionId);
-              if (connection && !connection.todayBrief && !loadingBriefIds.has(connectionId)) {
-                generateBriefForConnection(connectionId);
-              }
-            }
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-
-    // Observe all cards
-    cardRefs.current.forEach((element) => {
-      observerRef.current?.observe(element);
-    });
-
-    return () => {
-      observerRef.current?.disconnect();
-    };
-  }, [connections, loadingBriefIds]);
-
-  // Supabase Realtime subscription for unlock status changes
-  useEffect(() => {
-    const supabase = createBrowserSupabaseClient();
-
-    const channel = supabase
-      .channel("connections-unlock-changes")
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "connections",
-        },
-        (payload) => {
-          const updated = payload.new as Connection;
-          // Update the connection in local state if it's one of ours
-          setConnections((prev) =>
-            prev.map((c) =>
-              c.id === updated.id
-                ? {
-                    ...c,
-                    is_mutual: updated.is_mutual,
-                    space_between_enabled: updated.space_between_enabled,
-                    is_space_between_unlocked: updated.is_space_between_unlocked,
-                    linked_profile_id: updated.linked_profile_id,
-                  }
-                : c
-            )
-          );
-
-          // Auto-close sheet if Space Between becomes locked
-          if (
-            spaceSheetConnectionId === updated.id &&
-            spaceSheetOpen &&
-            !updated.is_space_between_unlocked
-          ) {
-            setSpaceSheetOpen(false);
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [spaceSheetConnectionId, spaceSheetOpen]);
-
-  const loadConnections = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await fetch("/api/connections");
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to load connections");
-      }
-
-      const loadedConnections = data.connections || [];
-      setConnections(loadedConnections);
-
-      // Initialize notes map
-      const notes: Record<string, string> = {};
-      loadedConnections.forEach((c: Connection) => {
-        notes[c.id] = c.notes || "";
-      });
-      setNotesMap(notes);
-    } catch (err: any) {
-      console.error("Error loading connections:", err);
-      setError(err.message || "Unable to load connections. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Generate brief for a connection (lazy loaded on intersection)
   const generateBriefForConnection = useCallback(
     async (connectionId: string) => {
       if (loadingBriefIds.has(connectionId)) return;
@@ -340,6 +231,116 @@ export default function ConnectionsPage() {
     },
     [loadingBriefIds, briefAttempts]
   );
+
+  // Load connections on mount
+  useEffect(() => {
+    loadConnections();
+  }, []);
+
+  // Setup IntersectionObserver for lazy brief generation
+  useEffect(() => {
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const connectionId = entry.target.getAttribute("data-connection-id");
+            if (connectionId) {
+              const connection = connections.find((c) => c.id === connectionId);
+              if (connection && !connection.todayBrief && !loadingBriefIds.has(connectionId)) {
+                generateBriefForConnection(connectionId);
+              }
+            }
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    // Observe all cards
+    cardRefs.current.forEach((element) => {
+      observerRef.current?.observe(element);
+    });
+
+    return () => {
+      observerRef.current?.disconnect();
+    };
+  }, [connections, loadingBriefIds, generateBriefForConnection]);
+
+  // Supabase Realtime subscription for unlock status changes
+  useEffect(() => {
+    const supabase = createBrowserSupabaseClient();
+
+    const channel = supabase
+      .channel("connections-unlock-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "connections",
+        },
+        (payload) => {
+          const updated = payload.new as Connection;
+          // Update the connection in local state if it's one of ours
+          setConnections((prev) =>
+            prev.map((c) =>
+              c.id === updated.id
+                ? {
+                    ...c,
+                    is_mutual: updated.is_mutual,
+                    space_between_enabled: updated.space_between_enabled,
+                    is_space_between_unlocked: updated.is_space_between_unlocked,
+                    linked_profile_id: updated.linked_profile_id,
+                  }
+                : c
+            )
+          );
+
+          // Auto-close sheet if Space Between becomes locked
+          if (
+            spaceSheetConnectionId === updated.id &&
+            spaceSheetOpen &&
+            !updated.is_space_between_unlocked
+          ) {
+            setSpaceSheetOpen(false);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [spaceSheetConnectionId, spaceSheetOpen]);
+
+  const loadConnections = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch("/api/connections");
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to load connections");
+      }
+
+      const loadedConnections = data.connections || [];
+      setConnections(loadedConnections);
+
+      // Initialize notes map
+      const notes: Record<string, string> = {};
+      loadedConnections.forEach((c: Connection) => {
+        notes[c.id] = c.notes || "";
+      });
+      setNotesMap(notes);
+    } catch (err: any) {
+      console.error("Error loading connections:", err);
+      setError(err.message || "Unable to load connections. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddConnection = async (e: React.FormEvent) => {
     e.preventDefault();
