@@ -228,7 +228,7 @@ export default function BirthChartPage() {
 
   useEffect(() => {
     fetchBirthChart();
-  }, []);
+  }, [fetchBirthChart]);
 
   // Build sections array with translations
   const SECTIONS: { id: SoulPathSection; label: string }[] = [

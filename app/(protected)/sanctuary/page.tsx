@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, Suspense, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SanctuaryTabs } from "@/components/sanctuary/SanctuaryTabs";
@@ -177,6 +178,27 @@ function SanctuaryContent() {
     }
   };
 
+  const loadJournalEntry = useCallback(async () => {
+    try {
+      // Get today's date in YYYY-MM-DD format
+      const today = new Date().toISOString().split("T")[0];
+
+      const response = await fetch(
+        `/api/journal?date=${today}&timeframe=${timeframe}`
+      );
+
+      if (!response.ok) {
+        console.error("Failed to load journal entry");
+        return;
+      }
+
+      const data = await response.json();
+      setJournalContent(data.content || "");
+    } catch (err: any) {
+      console.error("Error loading journal entry:", err);
+    }
+  }, [timeframe]);
+
   const loadInsight = useCallback(async () => {
     // Dedupe: Build request key and check if we're already fetching this exact request
     const requestKey = `${timeframe}:${locale}`;
@@ -297,28 +319,7 @@ function SanctuaryContent() {
       isLoadingRef.current = false;
       setLoading(false);
     }
-  }, [timeframe, locale, router]);
-
-  const loadJournalEntry = async () => {
-    try {
-      // Get today's date in YYYY-MM-DD format
-      const today = new Date().toISOString().split("T")[0];
-
-      const response = await fetch(
-        `/api/journal?date=${today}&timeframe=${timeframe}`
-      );
-
-      if (!response.ok) {
-        console.error("Failed to load journal entry");
-        return;
-      }
-
-      const data = await response.json();
-      setJournalContent(data.content || "");
-    } catch (err: any) {
-      console.error("Error loading journal entry:", err);
-    }
-  };
+  }, [timeframe, locale, router, loadJournalEntry]);
 
   const saveJournalEntry = async () => {
     setIsSavingJournal(true);
@@ -601,9 +602,11 @@ function SanctuaryContent() {
                   const tarotCard = insight.tarot?.cardName ? findTarotCard(insight.tarot.cardName) : null;
                   return tarotCard ? (
                     <div className="mb-4 flex justify-center">
-                      <img
+                      <Image
                         src={tarotCard.imageUrl}
                         alt={tarotCard.name}
+                        width={128}
+                        height={192}
                         className="h-48 w-auto rounded-xl object-contain shadow-md"
                       />
                     </div>

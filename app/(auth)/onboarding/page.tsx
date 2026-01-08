@@ -110,7 +110,7 @@ export default function OnboardingPage() {
         saveProfile({ onboarding_started_at: new Date().toISOString() } as any);
       }
     }
-  }, [profile]);
+  }, [profile, saveProfile]);
 
   // Check membership and onboarding status
   useEffect(() => {
