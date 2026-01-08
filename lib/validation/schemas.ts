@@ -4,24 +4,44 @@
 
 import { z } from "zod";
 
+// ========================================
 // Common validators
+// ========================================
+
 const zodiacSign = z.enum([
-  "aries", "taurus", "gemini", "cancer",
-  "leo", "virgo", "libra", "scorpio",
-  "sagittarius", "capricorn", "aquarius", "pisces",
+  "aries",
+  "taurus",
+  "gemini",
+  "cancer",
+  "leo",
+  "virgo",
+  "libra",
+  "scorpio",
+  "sagittarius",
+  "capricorn",
+  "aquarius",
+  "pisces",
 ]);
 
 const timeframe = z.enum(["today", "week", "month", "year"]);
 const publicTimeframe = z.enum(["today", "week", "month"]);
-const language = z.string().min(2).max(5).default("en");
+
 const timezone = z.string().min(1).max(50);
+
+// Language: default must be applied AFTER optional or it won’t actually default.
+const language = z.string().min(2).max(5);
+const languageDefault = language.optional().default("en");
+
+// ========================================
+// Public request schemas
+// ========================================
 
 // Public horoscope request
 export const publicHoroscopeSchema = z.object({
   sign: zodiacSign,
   timeframe: publicTimeframe,
-  timezone: timezone,
-  language: language.optional(),
+  timezone,
+  language: languageDefault,
 });
 
 // Public compatibility request
@@ -31,41 +51,47 @@ export const publicCompatibilitySchema = z.object({
   requestId: z.string().uuid("requestId must be a valid UUID"),
   year: z.number().int().min(2024).max(2030).optional(),
   timezone: timezone.optional(),
-  language: language.optional(),
+  language: languageDefault,
 });
 
 // Public tarot request
 export const publicTarotSchema = z.object({
-  question: z.string()
+  question: z
+    .string()
     .min(10, "Question must be at least 10 characters")
     .max(500, "Question must be at most 500 characters")
-    .refine(
-      (q) => q.trim().length >= 10,
-      { message: "Question cannot be only whitespace" }
-    ),
+    .refine((q) => q.trim().length >= 10, {
+      message: "Question cannot be only whitespace",
+    }),
   spread: z.union([z.literal(1), z.literal(3), z.literal(5)]),
   requestId: z.string().uuid("requestId must be a valid UUID"),
-  timezone: timezone,
-  language: language.optional(),
+  timezone,
+  language: languageDefault,
   // Optional userContext for quiet personalization (logged-in users)
-  userContext: z.object({
-    preferredName: z.string().optional(),
-    astroSummary: z.string().optional(),
-    socialInsightsSummary: z.string().optional(),
-  }).optional(),
+  userContext: z
+    .object({
+      preferredName: z.string().optional(),
+      astroSummary: z.string().optional(),
+      socialInsightsSummary: z.string().optional(),
+    })
+    .optional(),
 });
+
+// ========================================
+// Authenticated / internal request schemas
+// ========================================
 
 // Insights request
 export const insightsSchema = z.object({
-  timeframe: timeframe,
-  language: language.optional(),
+  timeframe,
+  language: languageDefault,
 });
 
 // Connection insight request
 export const connectionInsightSchema = z.object({
   connectionId: z.string().uuid(),
   timeframe: timeframe.optional().default("today"),
-  language: language.optional(),
+  language: languageDefault,
 });
 
 // Profile update request
@@ -75,9 +101,9 @@ export const profileUpdateSchema = z.object({
   birth_time: z.string().regex(/^\d{2}:\d{2}$/).optional().nullable(),
   birth_place: z.string().max(200).optional().nullable(),
   birth_lat: z.number().min(-90).max(90).optional().nullable(),
-  birth_lng: z.number().min(-180).max(180).optional().nullable(),
+  birth_lon: z.number().min(-180).max(180).optional().nullable(), // <- lon (not lng)
   timezone: timezone.optional(),
-  language: language.optional(),
+  language: languageDefault,
   is_onboarded: z.boolean().optional(),
 });
 
@@ -100,7 +126,7 @@ export const connectionSchema = z.object({
 
 // Birth chart request
 export const birthChartSchema = z.object({
-  language: language.optional(),
+  language: languageDefault,
 });
 
 // Stripe checkout request
@@ -115,36 +141,27 @@ export const stripeCheckoutSchema = z.object({
 
 // Generic Tab Deep Dive schema (reusable for all Soul Print tabs)
 // Note: practice field was removed - stone tablet vibe doesn't include homework
-export const tabDeepDiveSchema = z.object({
-  meaning: z.string()
-    .min(100, "meaning must be at least 100 characters")
-    .refine(
-      (val) => val.includes("\n\n"),
-      { message: "meaning must contain at least 2 paragraphs (separated by blank line)" }
-    ),
-  aligned: z.array(z.string().min(10))
-    .length(3, "aligned must have exactly 3 items"),
-  offCourse: z.array(z.string().min(10))
-    .length(3, "offCourse must have exactly 3 items"),
-  decisionRule: z.string()
-    .min(20, "decisionRule must be at least 20 characters")
-    .max(300, "decisionRule must be at most 300 characters"),
-  promptVersion: z.number().int().positive(),
-}).passthrough(); // Allow extra fields (backward compat for existing stored practice)
+export const tabDeepDiveSchema = z
+  .object({
+    meaning: z
+      .string()
+      .min(100, "meaning must be at least 100 characters")
+      .refine((val) => val.includes("\n\n"), {
+        message:
+          "meaning must contain at least 2 paragraphs (separated by blank line)",
+      }),
+    aligned: z.array(z.string().min(10)).length(3, "aligned must have exactly 3 items"),
+    offCourse: z.array(z.string().min(10)).length(3, "offCourse must have exactly 3 items"),
+    decisionRule: z
+      .string()
+      .min(20, "decisionRule must be at least 20 characters")
+      .max(300, "decisionRule must be at most 300 characters"),
+    promptVersion: z.number().int().positive(),
+  })
+  .passthrough(); // Allow extra fields (backward compat for existing stored practice)
 
 // Type inference for tab deep dive
 export type ValidatedTabDeepDive = z.infer<typeof tabDeepDiveSchema>;
-
-/**
- * Joy Deep Dive schema
- * @deprecated Use tabDeepDiveSchema instead. Kept for backwards compatibility.
- */
-export const joyDeepDiveSchema = tabDeepDiveSchema;
-
-/**
- * @deprecated Use ValidatedTabDeepDive instead.
- */
-export type ValidatedJoyDeepDive = ValidatedTabDeepDive;
 
 // Tab keys for validation
 export const TAB_DEEP_DIVE_KEYS = [
@@ -164,7 +181,9 @@ export type TabDeepDiveKey = (typeof TAB_DEEP_DIVE_KEYS)[number];
 export function validateTabDeepDive(
   data: unknown,
   tabKey: string
-): { success: true; data: ValidatedTabDeepDive } | { success: false; error: string; fields: string[] } {
+):
+  | { success: true; data: ValidatedTabDeepDive }
+  | { success: false; error: string; fields: string[] } {
   const result = tabDeepDiveSchema.safeParse(data);
 
   if (!result.success) {
@@ -178,16 +197,6 @@ export function validateTabDeepDive(
   return { success: true, data: result.data };
 }
 
-/**
- * Validate Joy Deep Dive
- * @deprecated Use validateTabDeepDive instead.
- */
-export function validateJoyDeepDive(
-  data: unknown
-): { success: true; data: ValidatedJoyDeepDive } | { success: false; error: string; fields: string[] } {
-  return validateTabDeepDive(data, "joy");
-}
-
 // Batched Tab Deep Dives validation result
 export type BatchedTabDeepDivesResult = {
   valid: Partial<Record<TabDeepDiveKey, ValidatedTabDeepDive>>;
@@ -195,9 +204,7 @@ export type BatchedTabDeepDivesResult = {
 };
 
 // Helper to validate all tab deep dives from a batched response
-export function validateBatchedTabDeepDives(
-  data: unknown
-): BatchedTabDeepDivesResult {
+export function validateBatchedTabDeepDives(data: unknown): BatchedTabDeepDivesResult {
   const result: BatchedTabDeepDivesResult = {
     valid: {},
     invalid: [],
@@ -259,7 +266,9 @@ export type ValidatedBirthChartInsight = z.infer<typeof fullBirthChartInsightSch
 // Helper to validate FullBirthChartInsight
 export function validateBirthChartInsight(
   data: unknown
-): { success: true; data: ValidatedBirthChartInsight } | { success: false; error: string; fields: string[] } {
+):
+  | { success: true; data: ValidatedBirthChartInsight }
+  | { success: false; error: string; fields: string[] } {
   const result = fullBirthChartInsightSchema.safeParse(data);
 
   if (!result.success) {
