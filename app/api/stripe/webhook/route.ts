@@ -9,6 +9,22 @@ import { welcomeEmail } from "@/lib/email/templates";
 type MembershipPlan = "individual" | "family";
 
 /**
+ * Foundation Ledger entry for tracking payments
+ * Used for the give-back program
+ */
+interface FoundationLedgerEntry {
+  entry_type: "accrual" | "disbursement";
+  amount_cents: number;
+  source: string;
+  meta: Record<string, unknown>;
+  stripe_event_id: string;
+  country_code: string | null;
+  region_code: string | null;
+  city: string | null;
+  user_id: string | null;
+}
+
+/**
  * Resolve the membership plan from a checkout session.
  *
  * Priority:
@@ -141,6 +157,13 @@ export async function POST(req: NextRequest) {
 
       case "customer.subscription.deleted":
         await handleSubscriptionDeleted(event.data.object as Stripe.Subscription);
+        break;
+
+      case "invoice.payment_succeeded":
+        await handleInvoicePaymentSucceeded(
+          event.data.object as Stripe.Invoice,
+          event.id
+        );
         break;
 
       default:
@@ -410,4 +433,184 @@ async function sendWelcomeEmail(email: string, plan: MembershipPlan) {
     console.error("[Webhook] Failed to send welcome email:", error);
     // Don't throw - email failure shouldn't fail the webhook
   }
+}
+
+/**
+ * Handle invoice.payment_succeeded
+ * Records an accrual entry in foundation_ledger for the give-back program.
+ *
+ * This handles:
+ * - Initial subscription payments
+ * - Recurring subscription renewals
+ * - One-time payments
+ *
+ * Amount choice: We use `amount_paid` (net amount after discounts/credits)
+ * rather than `total` to reflect actual revenue received.
+ */
+async function handleInvoicePaymentSucceeded(
+  invoice: Stripe.Invoice,
+  stripeEventId: string
+) {
+  console.log("[Webhook] ========== INVOICE PAYMENT SUCCEEDED ==========");
+  console.log(`[Webhook] Invoice ID: ${invoice.id}`);
+  console.log(`[Webhook] Event ID: ${stripeEventId}`);
+  console.log(`[Webhook] Amount paid: ${invoice.amount_paid} ${invoice.currency}`);
+
+  // Skip $0 invoices (trials, free plans)
+  if (invoice.amount_paid <= 0) {
+    console.log("[Webhook] Skipping $0 invoice (trial or free plan)");
+    return;
+  }
+
+  const supabase = createAdminSupabaseClient();
+
+  // Extract location from customer billing address
+  const location = await extractBillingLocation(invoice);
+
+  // Try to find user by Stripe customer ID
+  const customerId = typeof invoice.customer === "string"
+    ? invoice.customer
+    : invoice.customer?.id;
+
+  let userId: string | null = null;
+  if (customerId) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("stripe_customer_id", customerId)
+      .single();
+
+    if (profile) {
+      userId = profile.id;
+      console.log(`[Webhook] Mapped to user: ${userId}`);
+    }
+  }
+
+  // Extract subscription and price info
+  const subscriptionId = typeof invoice.subscription === "string"
+    ? invoice.subscription
+    : invoice.subscription?.id ?? null;
+
+  let priceId: string | null = null;
+  let productId: string | null = null;
+
+  if (invoice.lines?.data?.[0]) {
+    const lineItem = invoice.lines.data[0];
+    if (lineItem.price) {
+      priceId = lineItem.price.id;
+      productId = typeof lineItem.price.product === "string"
+        ? lineItem.price.product
+        : lineItem.price.product?.id ?? null;
+    }
+  }
+
+  // Build the ledger entry
+  const ledgerEntry: FoundationLedgerEntry = {
+    entry_type: "accrual",
+    amount_cents: invoice.amount_paid,
+    source: "stripe:invoice.payment_succeeded",
+    stripe_event_id: stripeEventId,
+    country_code: location.countryCode,
+    region_code: location.regionCode,
+    city: location.city,
+    user_id: userId,
+    meta: {
+      stripe_event_id: stripeEventId,
+      invoice_id: invoice.id,
+      customer_id: customerId,
+      subscription_id: subscriptionId,
+      price_id: priceId,
+      product_id: productId,
+      amount_total: invoice.total,
+      amount_paid: invoice.amount_paid,
+      currency: invoice.currency,
+      created: invoice.created,
+      user_id_if_mapped: userId,
+      billing_reason: invoice.billing_reason,
+    },
+  };
+
+  console.log("[Webhook] Recording foundation ledger entry:", JSON.stringify(ledgerEntry, null, 2));
+
+  // Insert with idempotency check (unique constraint on stripe_event_id)
+  const { error } = await supabase
+    .from("foundation_ledger")
+    .insert(ledgerEntry);
+
+  if (error) {
+    // Check for duplicate key violation (idempotency)
+    if (error.code === "23505" && error.message.includes("stripe_event_id")) {
+      console.log(`[Webhook] Duplicate event ${stripeEventId} - already processed, skipping`);
+      return;
+    }
+
+    console.error("[Webhook] Failed to record foundation ledger entry:", error);
+    // Don't throw - ledger failures shouldn't fail the webhook
+    // This prevents Stripe from retrying and double-counting
+    return;
+  }
+
+  console.log(`[Webhook] Foundation ledger entry recorded: ${invoice.amount_paid} cents`);
+  console.log("[Webhook] ========== INVOICE PROCESSING COMPLETE ==========");
+}
+
+/**
+ * Extract billing location from invoice/customer
+ *
+ * Priority:
+ * 1. Invoice customer_address (most specific to this transaction)
+ * 2. Customer default address (fallback)
+ *
+ * Returns ISO-style codes:
+ * - countryCode: ISO 3166-1 alpha-2 (e.g., "US")
+ * - regionCode: ISO 3166-2 format (e.g., "US-VA")
+ * - city: Free text city name
+ */
+async function extractBillingLocation(
+  invoice: Stripe.Invoice
+): Promise<{
+  countryCode: string | null;
+  regionCode: string | null;
+  city: string | null;
+}> {
+  // Try invoice-level address first
+  const address = invoice.customer_address;
+
+  if (address?.country) {
+    const countryCode = address.country; // Already ISO 3166-1 alpha-2
+    const regionCode = address.state
+      ? `${countryCode}-${address.state}` // Format: US-VA, GB-ENG, etc.
+      : null;
+    const city = address.city || null;
+
+    console.log(`[Webhook] Location from invoice: ${countryCode}, ${regionCode}, ${city}`);
+    return { countryCode, regionCode, city };
+  }
+
+  // Fallback: Try to get from customer object
+  const customerId = typeof invoice.customer === "string"
+    ? invoice.customer
+    : invoice.customer?.id;
+
+  if (customerId) {
+    try {
+      const customer = await stripe.customers.retrieve(customerId);
+
+      if (customer && !customer.deleted && customer.address?.country) {
+        const countryCode = customer.address.country;
+        const regionCode = customer.address.state
+          ? `${countryCode}-${customer.address.state}`
+          : null;
+        const city = customer.address.city || null;
+
+        console.log(`[Webhook] Location from customer: ${countryCode}, ${regionCode}, ${city}`);
+        return { countryCode, regionCode, city };
+      }
+    } catch (err: any) {
+      console.error(`[Webhook] Failed to retrieve customer for location: ${err.message}`);
+    }
+  }
+
+  console.log("[Webhook] No billing location available");
+  return { countryCode: null, regionCode: null, city: null };
 }
