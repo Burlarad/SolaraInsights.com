@@ -26,10 +26,6 @@ yarn-error.log*
 .env.test
 .env.production
 .env_render
-# Keep example/template files in repo (safe - no secrets)
-!.env.example
-!.env.local.example
-!.env.production.example
 # env backups
 .env.bak
 .env.local.bak
