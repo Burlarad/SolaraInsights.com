@@ -88,6 +88,21 @@ export function validateSupabaseConfig(): {
   };
 }
 
+function isBuildTime(): boolean {
+  // Next.js build phase OR npm build lifecycle OR direct `next build`
+  const phase = process.env.NEXT_PHASE || "";
+  const lifecycle = process.env.npm_lifecycle_event || "";
+  const argv = Array.isArray(process.argv) ? process.argv.join(" ") : "";
+
+  return (
+    lifecycle === "build" ||
+    lifecycle === "prebuild" ||
+    lifecycle === "postbuild" ||
+    phase.toLowerCase().includes("build") ||
+    (argv.includes("next") && argv.includes("build"))
+  );
+}
+
 /**
  * Log Supabase configuration safely.
  * CRITICAL: Never logs API keys - only URL origin and project ref.
@@ -95,13 +110,26 @@ export function validateSupabaseConfig(): {
  * Only runs in development or when explicitly enabled.
  */
 export function logSupabaseConfig(): void {
-  // Only log in development or when debug is enabled
+  // Avoid noisy logs during `next build` / `npm run build`
+  // (You can still force it with NEXT_PUBLIC_SOLARA_DEBUG_BUILD=1)
+  if (isBuildTime() && process.env.NEXT_PUBLIC_SOLARA_DEBUG_BUILD !== "1") {
+    return;
+  }
+
+  // Only log in development, or when explicitly enabled
   if (
     process.env.NODE_ENV !== "development" &&
     process.env.NEXT_PUBLIC_SOLARA_DEBUG !== "1"
   ) {
     return;
   }
+
+  // Log at most once per server process
+  const g = globalThis as unknown as { __solaraSupabaseConfigLogged?: boolean };
+  if (g.__solaraSupabaseConfigLogged) {
+    return;
+  }
+  g.__solaraSupabaseConfigLogged = true;
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || "NOT_SET";
   const env = getSupabaseEnvironment();
@@ -137,5 +165,7 @@ export function logSupabaseConfig(): void {
 // Auto-log on module load in development
 if (typeof window === "undefined") {
   // Server-side only
+  // Avoid any logging during build unless explicitly requested.
+  // (Build-time logs can be very noisy and misleading when `.env.local` points to local Supabase.)
   logSupabaseConfig();
 }
