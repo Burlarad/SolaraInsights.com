@@ -1,6 +1,5 @@
 import { createAdminSupabaseClient } from "@/lib/supabase/server";
 import {
-  estimateCostUsd,
   estimateCostCents,
   getPricingSnapshot,
   PRICING_PROVIDER,
@@ -81,12 +80,11 @@ export async function trackAiUsage(event: AiUsageEvent): Promise<void> {
   try {
     const admin = createAdminSupabaseClient();
 
-    // Calculate estimated cost
-    const estimatedCostUsd = estimateCostUsd(
-      event.model,
-      event.inputTokens,
-      event.outputTokens
-    );
+    // Defensive total token fallback
+    const totalTokens =
+      typeof event.totalTokens === "number"
+        ? event.totalTokens
+        : (event.inputTokens || 0) + (event.outputTokens || 0);
 
     // Calculate cost in cents for integer storage
     const costCents = estimateCostCents(
@@ -118,8 +116,7 @@ export async function trackAiUsage(event: AiUsageEvent): Promise<void> {
       cache_status: event.cacheStatus,
       input_tokens: event.inputTokens,
       output_tokens: event.outputTokens,
-      total_tokens: event.totalTokens,
-      estimated_cost_usd: estimatedCostUsd,
+      total_tokens: totalTokens,
       cost_cents: costCents,
       currency: "usd",
       provider,

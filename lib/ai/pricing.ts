@@ -87,8 +87,36 @@ export function estimateCostUsd(
 }
 
 /**
+ * Estimate the cost of an OpenAI API call in *micros* (integer).
+ *
+ * Why micros?
+ * - Many calls cost less than $0.01, which rounds to 0 cents.
+ * - Storing micros keeps small-but-real costs visible and auditable.
+ *
+ * Definition:
+ * - 1 USD = 1,000,000 micros
+ *
+ * @param model - OpenAI model name
+ * @param inputTokens - Number of input tokens consumed
+ * @param outputTokens - Number of output tokens generated
+ * @returns Estimated cost in USD micros (rounded), or 0 if model pricing not found
+ */
+export function estimateCostMicros(
+  model: string,
+  inputTokens: number,
+  outputTokens: number
+): number {
+  const costUsd = estimateCostUsd(model, inputTokens, outputTokens);
+  // $1.00 = 1_000_000 micros
+  return Math.round(costUsd * 1_000_000);
+}
+
+/**
  * Estimate the cost of an OpenAI API call in cents (integer).
- * Used for storage in database to avoid floating point issues.
+ *
+ * NOTE:
+ * - This is convenient for display, but tiny calls may round to 0.
+ * - Prefer `estimateCostMicros` for storage and rollups.
  *
  * @param model - OpenAI model name
  * @param inputTokens - Number of input tokens consumed
@@ -100,8 +128,9 @@ export function estimateCostCents(
   inputTokens: number,
   outputTokens: number
 ): number {
-  const costUsd = estimateCostUsd(model, inputTokens, outputTokens);
-  return Math.round(costUsd * 100);
+  const micros = estimateCostMicros(model, inputTokens, outputTokens);
+  // 1 cent = $0.01 = 10,000 micros
+  return Math.round(micros / 10_000);
 }
 
 /**

@@ -30,20 +30,18 @@ interface FoundationLedgerEntry {
  * Priority:
  * 1. session.metadata.plan (if present and valid)
  * 2. Infer from line item price ID (compare against configured price ids)
- *
- * @returns The resolved plan info, or null if unable to determine
  */
 async function resolvePlanFromSession(
   session: Stripe.Checkout.Session
 ): Promise<{ plan: MembershipPlan; priceId: string; source: "metadata" | "price_id" } | null> {
-  // 1. Check metadata first
+  // 1) Check metadata first
   const metadataPlan = session.metadata?.plan;
   if (metadataPlan === "individual" || metadataPlan === "family") {
     console.log(`[Webhook] Plan resolved from metadata: ${metadataPlan}`);
     return { plan: metadataPlan, priceId: "(from metadata)", source: "metadata" };
   }
 
-  // 2. Retrieve session with expanded line_items to get price ID
+  // 2) Retrieve session with expanded line_items to get price ID
   console.log(`[Webhook] No valid metadata.plan, retrieving session with line_items...`);
 
   let expandedSession: Stripe.Checkout.Session;
@@ -56,7 +54,6 @@ async function resolvePlanFromSession(
     return null;
   }
 
-  // Get the first line item's price ID
   const lineItems = expandedSession.line_items?.data;
   if (!lineItems || lineItems.length === 0) {
     console.error(`[Webhook] No line items found in session ${session.id}`);
@@ -73,7 +70,7 @@ async function resolvePlanFromSession(
   const priceId = price.id;
   console.log(`[Webhook] Found price ID: ${priceId}`);
 
-  // 3. Compare against configured price IDs
+  // 3) Compare against configured price IDs
   const individualPriceId = STRIPE_CONFIG.priceIds.sanctuary;
   const familyPriceId = STRIPE_CONFIG.priceIds.family;
 
@@ -87,7 +84,7 @@ async function resolvePlanFromSession(
     return { plan: "family", priceId, source: "price_id" };
   }
 
-  // 4. No match found
+  // 4) No match found
   console.error(`[Webhook] Unknown price ID: ${priceId}`);
   console.error(`[Webhook] Expected individual: ${individualPriceId || "(not set)"}`);
   console.error(`[Webhook] Expected family: ${familyPriceId || "(not set)"}`);
@@ -158,10 +155,6 @@ export async function POST(req: NextRequest) {
 /**
  * Handle checkout.session.completed
  * Creates or updates user profile with membership details
- *
- * Works with both:
- * - Custom checkout (has metadata.plan and metadata.userId)
- * - Pricing Table checkout (no metadata, must infer from price ID)
  */
 async function handleCheckoutCompleted(
   session: Stripe.Checkout.Session
@@ -198,6 +191,7 @@ async function handleCheckoutCompleted(
 
   const supabase = createAdminSupabaseClient();
 
+  // Find or create user
   let profileUserId: string;
 
   if (metadataUserId) {
@@ -206,11 +200,7 @@ async function handleCheckoutCompleted(
   } else {
     console.log(`[Webhook] No metadata.userId, finding/creating user by email...`);
 
-    const { data: existingProfile } = await supabase
-      .from("profiles")
-      .select("id")
-      .ilike("email", email)
-      .single();
+    const { data: existingProfile } = await supabase.from("profiles").select("id").ilike("email", email).single();
 
     if (existingProfile) {
       console.log(`[Webhook] Found existing profile: ${existingProfile.id}`);
@@ -254,6 +244,7 @@ async function handleCheckoutCompleted(
     }
   }
 
+  // Fetch subscription to get trial status
   let subscriptionStatus: "trialing" | "active" | null = null;
   if (subscriptionId && typeof subscriptionId === "string") {
     try {
@@ -276,10 +267,11 @@ async function handleCheckoutCompleted(
 
   console.log(`[Webhook] Updating profile ${profileUserId} with:`, JSON.stringify(updateData, null, 2));
 
-  const { error: updateError, count } = await supabase
+  const { data: updatedRows, error: updateError } = await supabase
     .from("profiles")
     .update(updateData)
-    .eq("id", profileUserId);
+    .eq("id", profileUserId)
+    .select("id");
 
   if (updateError) {
     const error = `Failed to update profile: ${updateError.message}`;
@@ -287,7 +279,7 @@ async function handleCheckoutCompleted(
     return { success: false, error };
   }
 
-  console.log(`[Webhook] Profile updated successfully (rows affected: ${count ?? "unknown"})`);
+  console.log(`[Webhook] Profile updated successfully (rows affected: ${updatedRows?.length ?? 0})`);
   console.log("[Webhook] ========== CHECKOUT COMPLETE ==========");
 
   await sendWelcomeEmail(email, plan);
@@ -407,6 +399,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice, stripeEven
   console.log(`[Webhook] Event ID: ${stripeEventId}`);
   console.log(`[Webhook] Amount paid: ${invoice.amount_paid} ${invoice.currency}`);
 
+  // Skip $0 invoices (trials, free plans)
   if (invoice.amount_paid <= 0) {
     console.log("[Webhook] Skipping $0 invoice (trial or free plan)");
     return;
@@ -414,8 +407,10 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice, stripeEven
 
   const supabase = createAdminSupabaseClient();
 
+  // Extract location
   const location = await extractBillingLocation(invoice);
 
+  // Try to find user by Stripe customer ID
   const customerId = typeof invoice.customer === "string" ? invoice.customer : invoice.customer?.id;
 
   let userId: string | null = null;
@@ -432,8 +427,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice, stripeEven
     }
   }
 
-  // Extract subscription and price/product info.
-  // Stripe's TypeScript types vary by API version; keep this robust and compile-safe.
+  // Extract subscription + price/product (robust across Stripe type versions)
   const invoiceAny = invoice as Stripe.Invoice & {
     subscription?: string | Stripe.Subscription | null;
   };
@@ -448,7 +442,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice, stripeEven
 
   const firstLineAny = (invoice as any)?.lines?.data?.[0] as any;
 
-  // Common shape: firstLine.price is either a string price id or a Price object.
+  // Common shape: line.price
   const linePrice = firstLineAny?.price;
   if (typeof linePrice === "string") {
     priceId = linePrice;
@@ -458,7 +452,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice, stripeEven
     productId = typeof prod === "string" ? prod : prod?.id ?? null;
   }
 
-  // Newer shape: pricing.price_details contains price/product (strings or objects)
+  // Newer shape: pricing.price_details
   if (!priceId) {
     const pd = firstLineAny?.pricing?.price_details;
 
@@ -509,6 +503,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice, stripeEven
   const { error } = await supabase.from("foundation_ledger").insert(ledgerEntry);
 
   if (error) {
+    // Idempotency: unique constraint on stripe_event_id
     if (error.code === "23505" && error.message.includes("stripe_event_id")) {
       console.log(`[Webhook] Duplicate event ${stripeEventId} - already processed, skipping`);
       return;
@@ -532,10 +527,11 @@ async function extractBillingLocation(
   regionCode: string | null;
   city: string | null;
 }> {
+  // Invoice-level address first
   const address = invoice.customer_address;
 
   if (address?.country) {
-    const countryCode = address.country;
+    const countryCode = address.country; // ISO 3166-1 alpha-2
     const regionCode = address.state ? `${countryCode}-${address.state}` : null;
     const city = address.city || null;
 
@@ -543,6 +539,7 @@ async function extractBillingLocation(
     return { countryCode, regionCode, city };
   }
 
+  // Fallback: customer default address
   const customerId = typeof invoice.customer === "string" ? invoice.customer : invoice.customer?.id;
 
   if (customerId) {
