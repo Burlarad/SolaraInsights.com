@@ -1,0 +1,3 @@
+-- NOOP: Superseded by 20260112182325_remove_dangerous_grants_v2.sql
+-- This migration was reverted/abandoned but kept to satisfy migration history alignment.
+-- Do not delete unless you also repair/reset migration history everywhere (local + remote).
