@@ -86,11 +86,10 @@ export async function trackAiUsage(event: AiUsageEvent): Promise<void> {
         ? event.totalTokens
         : (event.inputTokens || 0) + (event.outputTokens || 0);
 
-    // Calculate cost in cents for integer storage
-    const costCents = estimateCostCents(
-      event.model,
-      event.inputTokens,
-      event.outputTokens
+    // Calculate cost in micros for integer storage (USD: $1.00 = 1_000_000 micros)
+    // pricing.ts currently estimates in cents; convert cents -> micros to avoid rounding small costs to 0.
+    const costMicros = Math.round(
+      estimateCostCents(event.model, event.inputTokens, event.outputTokens) * 10_000
     );
 
     // Get pricing snapshot for audit trail
@@ -117,7 +116,7 @@ export async function trackAiUsage(event: AiUsageEvent): Promise<void> {
       input_tokens: event.inputTokens,
       output_tokens: event.outputTokens,
       total_tokens: totalTokens,
-      cost_cents: costCents,
+      cost_micros: costMicros,
       currency: "usd",
       provider,
       user_id: event.userId || null,
@@ -138,7 +137,7 @@ export async function trackAiUsage(event: AiUsageEvent): Promise<void> {
     }
 
     // Update daily rollup (fire-and-forget, don't await to avoid latency)
-    void updateDailyRollup(admin, event, costCents, provider);
+    void updateDailyRollup(admin, event, costMicros, provider);
   } catch (error: unknown) {
     // Swallow all errors - telemetry must never break the main flow
     const message = error instanceof Error ? error.message : String(error);
@@ -153,24 +152,26 @@ export async function trackAiUsage(event: AiUsageEvent): Promise<void> {
 async function updateDailyRollup(
   admin: ReturnType<typeof createAdminSupabaseClient>,
   event: AiUsageEvent,
-  costCents: number,
+  costMicros: number,
   provider: string
 ): Promise<void> {
   try {
-    // Get today's date in UTC
-    const today = new Date().toISOString().split("T")[0];
-
-    // Call the upsert function
-    const { error } = await admin.rpc("upsert_ai_usage_rollup", {
-      p_day: today,
-      p_feature: event.featureLabel,
-      p_model: event.model,
-      p_provider: provider,
-      p_is_cache_hit: event.cacheStatus === "hit",
-      p_tokens_in: event.inputTokens,
-      p_tokens_out: event.outputTokens,
-      p_cost_cents: costCents,
+    // v2 rollup function (micros + usage_date computed from created_at)
+    const { error } = await admin.rpc("upsert_ai_usage_rollup_daily", {
+      p_created_at: new Date().toISOString(),
+      p_provider: provider || "openai",
       p_currency: "usd",
+      p_feature_label: event.featureLabel,
+      p_route: event.route ?? null,
+      p_model: event.model,
+      p_prompt_version: event.promptVersion ?? null,
+      p_user_id: event.userId ?? null,
+      p_input_tokens: event.inputTokens ?? 0,
+      p_output_tokens: event.outputTokens ?? 0,
+      p_total_tokens: typeof event.totalTokens === "number"
+        ? event.totalTokens
+        : (event.inputTokens ?? 0) + (event.outputTokens ?? 0),
+      p_cost_micros: costMicros,
     });
 
     if (error) {
@@ -192,10 +193,10 @@ export async function getDailyUsageSummary(
   endDate: string
 ): Promise<{
   totalCalls: number;
-  totalCostCents: number;
+  totalCostMicros: number;
   totalTokens: number;
-  byFeature: Record<string, { calls: number; costCents: number; tokens: number }>;
-  byModel: Record<string, { calls: number; costCents: number; tokens: number }>;
+  byFeature: Record<string, { calls: number; costMicros: number; tokens: number }>;
+  byModel: Record<string, { calls: number; costMicros: number; tokens: number }>;
 } | null> {
   try {
     const admin = createAdminSupabaseClient();
@@ -203,8 +204,8 @@ export async function getDailyUsageSummary(
     const { data, error } = await admin
       .from("ai_usage_rollup_daily")
       .select("*")
-      .gte("day", startDate)
-      .lte("day", endDate);
+      .gte("usage_date", startDate)
+      .lte("usage_date", endDate);
 
     if (error || !data) {
       console.warn(`[AI Tracking] Failed to get daily summary:`, error?.message);
@@ -212,34 +213,41 @@ export async function getDailyUsageSummary(
     }
 
     let totalCalls = 0;
-    let totalCostCents = 0;
+    let totalCostMicros = 0;
     let totalTokens = 0;
-    const byFeature: Record<string, { calls: number; costCents: number; tokens: number }> = {};
-    const byModel: Record<string, { calls: number; costCents: number; tokens: number }> = {};
+    const byFeature: Record<string, { calls: number; costMicros: number; tokens: number }> = {};
+    const byModel: Record<string, { calls: number; costMicros: number; tokens: number }> = {};
 
-    for (const row of data) {
-      totalCalls += row.calls;
-      totalCostCents += row.cost_cents;
-      totalTokens += row.tokens_total;
+    for (const row of data as any[]) {
+      const calls = Number(row.request_count ?? 0);
+      const costMicros = Number(row.cost_micros ?? 0);
+      const tokens = Number(row.total_tokens ?? 0);
+
+      totalCalls += calls;
+      totalCostMicros += costMicros;
+      totalTokens += tokens;
+
+      const feature = String(row.feature_label ?? "unknown");
+      const model = String(row.model ?? "unknown");
 
       // Aggregate by feature
-      if (!byFeature[row.feature]) {
-        byFeature[row.feature] = { calls: 0, costCents: 0, tokens: 0 };
+      if (!byFeature[feature]) {
+        byFeature[feature] = { calls: 0, costMicros: 0, tokens: 0 };
       }
-      byFeature[row.feature].calls += row.calls;
-      byFeature[row.feature].costCents += row.cost_cents;
-      byFeature[row.feature].tokens += row.tokens_total;
+      byFeature[feature].calls += calls;
+      byFeature[feature].costMicros += costMicros;
+      byFeature[feature].tokens += tokens;
 
       // Aggregate by model
-      if (!byModel[row.model]) {
-        byModel[row.model] = { calls: 0, costCents: 0, tokens: 0 };
+      if (!byModel[model]) {
+        byModel[model] = { calls: 0, costMicros: 0, tokens: 0 };
       }
-      byModel[row.model].calls += row.calls;
-      byModel[row.model].costCents += row.cost_cents;
-      byModel[row.model].tokens += row.tokens_total;
+      byModel[model].calls += calls;
+      byModel[model].costMicros += costMicros;
+      byModel[model].tokens += tokens;
     }
 
-    return { totalCalls, totalCostCents, totalTokens, byFeature, byModel };
+    return { totalCalls, totalCostMicros, totalTokens, byFeature, byModel };
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     console.warn(`[AI Tracking] Error getting daily summary:`, message);
