@@ -7,6 +7,7 @@ import { ZodiacGrid } from "@/components/home/ZodiacGrid";
 import { TarotArena } from "@/components/home/TarotArena";
 import { CompatibilityArena } from "@/components/home/CompatibilityArena";
 import { SolaraPath } from "@/components/home/SolaraPath";
+import { LearnPreview } from "@/components/home/LearnPreview";
 import { type ExperienceKey, type TimeframeKey } from "@/lib/constants";
 
 function HomeContent() {
@@ -53,11 +54,8 @@ function HomeContent() {
           <CompatibilityArena />
         </section>
       ) : experience === "learn" ? (
-        <section className="max-w-5xl mx-auto px-4 sm:px-6 pb-16">
-          {/* Learn preview - will be implemented in Phase 9 */}
-          <div className="text-center py-12">
-            <p className="text-accent-ink/60">Learn content coming soon...</p>
-          </div>
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 pb-16">
+          <LearnPreview />
         </section>
       ) : (
         <>
