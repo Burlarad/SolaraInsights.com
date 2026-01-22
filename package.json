@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "rm -rf .next node_modules/.cache",
+    "prebuild": "rm -rf .next/cache node_modules/.cache",
     "build": "next build",
+    "postbuild": "test -f .next/server/middleware-manifest.json || (echo 'Build incomplete! Missing .next/server/middleware-manifest.json' && exit 1)",
     "start": "next start",
     "lint": "eslint . --ext .ts,.tsx",
     "test": "vitest run",

@@ -53,8 +53,8 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Fetch all social summaries for this user (regular client is fine here)
-    const { data: summaries, error: summariesError } = await supabase
+    // Fetch all social summaries for this user (service role required; RLS blocks regular users)
+    const { data: summaries, error: summariesError } = await serviceSupabase
       .from("social_summaries")
       .select("provider")
       .eq("user_id", user.id);

@@ -1,13 +1,16 @@
 import Stripe from "stripe";
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  console.warn("STRIPE_SECRET_KEY is not set; Stripe client will be created with an empty key.");
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
+if (!STRIPE_SECRET_KEY) {
+  throw new Error(
+    "Missing STRIPE_SECRET_KEY. Set it in .env.local (dev) and .env (prod). Refusing to start to avoid silent payment failures."
+  );
 }
 
 /**
  * Server-side Stripe client
  */
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
+export const stripe = new Stripe(STRIPE_SECRET_KEY, {
   typescript: true,
 });
 
