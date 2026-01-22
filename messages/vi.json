@@ -274,7 +274,6 @@
       "personalNarrative": "Câu chuyện cá nhân",
       "coreThemes": "Chủ đề chính",
       "focusForPeriod": "Trọng tâm cho giai đoạn này",
-      "journalPrompt": "Gợi ý nhật ký",
       "tarot": {
         "title": "Lá bài Tarot",
         "label": "RÚT BÀI TAROT — NGUYÊN MẪU HÀNG NGÀY",
@@ -298,17 +297,10 @@
         "midnight": "Nửa đêm",
         "morning": "Sáng"
       },
-      "dailyReflection": {
-        "title": "Suy ngẫm hàng ngày",
-        "subtitle": "Hãy để ghi chú của bạn riêng tư và nhẹ nhàng.",
-        "placeholder": "Vài lời cho bầu trời của bạn hôm nay…",
-        "saveHint": "Nhấn ⌘+Enter hoặc Ctrl+Enter để lưu"
-      },
       "errors": {
         "profileLoadError": "Chúng tôi gặp sự cố khi tải hồ sơ của bạn. Vui lòng thử lại, hoặc liên hệ hỗ trợ nếu vấn đề tiếp tục.",
         "insightLoadError": "Chúng tôi đang gặp sự cố khi tải thông tin của bạn. Đây có thể là sự cố tạm thời.",
-        "birthSignatureRequired": "Thiết lập chữ ký sinh",
-        "journalSaveError": "Không thể lưu. Vui lòng thử lại."
+        "birthSignatureRequired": "Thiết lập chữ ký sinh"
       },
       "socialInsights": {
         "paused": "Thông tin xã hội đã tạm dừng",

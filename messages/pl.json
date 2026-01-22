@@ -274,7 +274,6 @@
       "personalNarrative": "Osobista Narracja",
       "coreThemes": "Główne Tematy",
       "focusForPeriod": "Koncentracja na ten okres",
-      "journalPrompt": "Podpowiedź do Dziennika",
       "tarot": {
         "title": "Karta Tarota",
         "label": "LOSOWANIE TAROTA — CODZIENNY ARCHETYP",
@@ -298,17 +297,10 @@
         "midnight": "Północ",
         "morning": "Poranek"
       },
-      "dailyReflection": {
-        "title": "Codzienna refleksja",
-        "subtitle": "Niech twoje notatki pozostaną prywatne i łagodne.",
-        "placeholder": "Kilka słów dla twojego nieba dzisiaj…",
-        "saveHint": "Naciśnij ⌘+Enter lub Ctrl+Enter, aby zapisać"
-      },
       "errors": {
         "profileLoadError": "Mieliśmy problem z załadowaniem twojego profilu. Spróbuj ponownie lub skontaktuj się z pomocą techniczną, jeśli problem będzie się powtarzał.",
         "insightLoadError": "Mamy problem z załadowaniem twojego spostrzeżenia. To może być tymczasowy problem.",
-        "birthSignatureRequired": "Skonfiguruj swoją sygnaturę urodzenia",
-        "journalSaveError": "Nie można zapisać. Spróbuj ponownie."
+        "birthSignatureRequired": "Skonfiguruj swoją sygnaturę urodzenia"
       },
       "socialInsights": {
         "paused": "Spostrzeżenia społeczne wstrzymane",

@@ -274,7 +274,6 @@
       "personalNarrative": "व्यक्तिगत कथा",
       "coreThemes": "मुख्य विषय",
       "focusForPeriod": "इस अवधि के लिए फोकस",
-      "journalPrompt": "जर्नल प्रॉम्प्ट",
       "tarot": {
         "title": "टैरो कार्ड",
         "label": "टैरो ड्रॉ — दैनिक आर्कीटाइप",
@@ -298,17 +297,10 @@
         "midnight": "आधी रात",
         "morning": "सुबह"
       },
-      "dailyReflection": {
-        "title": "दैनिक प्रतिबिंब",
-        "subtitle": "अपने नोट्स को निजी और कोमल रखें।",
-        "placeholder": "आज अपने आकाश के लिए कुछ शब्द…",
-        "saveHint": "सेव करने के लिए ⌘+Enter या Ctrl+Enter दबाएं"
-      },
       "errors": {
         "profileLoadError": "आपकी प्रोफ़ाइल लोड करने में समस्या हुई। कृपया पुनः प्रयास करें, या यदि यह जारी रहे तो सहायता से संपर्क करें।",
         "insightLoadError": "आपकी अंतर्दृष्टि लोड करने में समस्या हो रही है। यह अस्थायी समस्या हो सकती है।",
-        "birthSignatureRequired": "अपना जन्म हस्ताक्षर सेट करें",
-        "journalSaveError": "सेव नहीं हो सका। कृपया पुनः प्रयास करें।"
+        "birthSignatureRequired": "अपना जन्म हस्ताक्षर सेट करें"
       },
       "socialInsights": {
         "paused": "सामाजिक अंतर्दृष्टि रुकी हुई है",

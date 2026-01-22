@@ -274,7 +274,6 @@
       "personalNarrative": "Persoonlijk Verhaal",
       "coreThemes": "Kernthema's",
       "focusForPeriod": "Focus voor deze periode",
-      "journalPrompt": "Dagboekprompt",
       "tarot": {
         "title": "Tarotkaart",
         "label": "TAROT TREKKING — DAGELIJKS ARCHETYPE",
@@ -298,17 +297,10 @@
         "midnight": "Middernacht",
         "morning": "Ochtend"
       },
-      "dailyReflection": {
-        "title": "Dagelijkse reflectie",
-        "subtitle": "Laat je notities privé en zacht blijven.",
-        "placeholder": "Een paar woorden voor je hemel vandaag…",
-        "saveHint": "Druk ⌘+Enter of Ctrl+Enter om op te slaan"
-      },
       "errors": {
         "profileLoadError": "We hadden problemen met het laden van je profiel. Probeer het opnieuw, of neem contact op met support als dit aanhoudt.",
         "insightLoadError": "We hebben problemen met het laden van je inzicht. Dit kan een tijdelijk probleem zijn.",
-        "birthSignatureRequired": "Stel je geboorte signatuur in",
-        "journalSaveError": "Kan niet opslaan. Probeer het opnieuw."
+        "birthSignatureRequired": "Stel je geboorte signatuur in"
       },
       "socialInsights": {
         "paused": "Sociale inzichten gepauzeerd",

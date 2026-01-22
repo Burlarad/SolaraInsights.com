@@ -274,7 +274,6 @@
       "personalNarrative": "Narrativa personale",
       "coreThemes": "Temi principali",
       "focusForPeriod": "Focus per questo periodo",
-      "journalPrompt": "Spunto per il diario",
       "tarot": {
         "title": "Carta dei Tarocchi",
         "label": "ESTRAZIONE TAROCCHI — ARCHETIPO GIORNALIERO",
@@ -298,17 +297,10 @@
         "midnight": "Mezzanotte",
         "morning": "Mattina"
       },
-      "dailyReflection": {
-        "title": "Riflessione quotidiana",
-        "subtitle": "Lascia che le tue note restino private e gentili.",
-        "placeholder": "Qualche parola per il tuo cielo oggi…",
-        "saveHint": "Premi ⌘+Enter o Ctrl+Enter per salvare"
-      },
       "errors": {
         "profileLoadError": "Abbiamo avuto problemi a caricare il tuo profilo. Per favore riprova, o contatta il supporto se questo continua.",
         "insightLoadError": "Stiamo avendo problemi a caricare il tuo approfondimento. Potrebbe essere un problema temporaneo.",
-        "birthSignatureRequired": "Configura la tua firma di nascita",
-        "journalSaveError": "Impossibile salvare. Per favore riprova."
+        "birthSignatureRequired": "Configura la tua firma di nascita"
       },
       "socialInsights": {
         "paused": "Approfondimenti sociali in pausa",

@@ -274,7 +274,6 @@
       "personalNarrative": "Personal na Kuwento",
       "coreThemes": "Mga Pangunahing Tema",
       "focusForPeriod": "Pokus para sa panahong ito",
-      "journalPrompt": "Journal Prompt",
       "tarot": {
         "title": "Tarot Card",
         "label": "TAROT DRAW — PANG-ARAW-ARAW NA ARCHETYPE",
@@ -298,17 +297,10 @@
         "midnight": "Hatinggabi",
         "morning": "Umaga"
       },
-      "dailyReflection": {
-        "title": "Pang-araw-araw na pagmumuni-muni",
-        "subtitle": "Hayaang manatiling pribado at malumanay ang iyong mga tala.",
-        "placeholder": "Ilang salita para sa iyong langit ngayon…",
-        "saveHint": "Pindutin ang ⌘+Enter o Ctrl+Enter upang i-save"
-      },
       "errors": {
         "profileLoadError": "Nahirapan kaming i-load ang iyong profile. Subukan ulit, o makipag-ugnayan sa support kung magpatuloy ito.",
         "insightLoadError": "Nahirapan kaming i-load ang iyong insight. Maaaring pansamantala itong isyu.",
-        "birthSignatureRequired": "I-set up ang iyong birth signature",
-        "journalSaveError": "Hindi ma-save. Subukan ulit."
+        "birthSignatureRequired": "I-set up ang iyong birth signature"
       },
       "socialInsights": {
         "paused": "Naka-pause ang mga social insight",

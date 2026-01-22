@@ -274,7 +274,6 @@
       "personalNarrative": "السرد الشخصي",
       "coreThemes": "المواضيع الأساسية",
       "focusForPeriod": "التركيز لهذه الفترة",
-      "journalPrompt": "سؤال للتأمل",
       "tarot": {
         "title": "بطاقة التاروت",
         "label": "التاروت — النموذج اليومي",
@@ -298,17 +297,10 @@
         "midnight": "منتصف الليل",
         "morning": "الصباح"
       },
-      "dailyReflection": {
-        "title": "تأمل يومي",
-        "subtitle": "دع ملاحظاتك خاصة ولطيفة.",
-        "placeholder": "بضع كلمات لسمائك اليوم…",
-        "saveHint": "اضغط ⌘+Enter أو Ctrl+Enter للحفظ"
-      },
       "errors": {
         "profileLoadError": "واجهنا مشكلة في تحميل ملفك الشخصي. يرجى المحاولة مرة أخرى، أو التواصل مع الدعم إذا استمرت المشكلة.",
         "insightLoadError": "نواجه مشكلة في تحميل رؤيتك. قد تكون هذه مشكلة مؤقتة.",
-        "birthSignatureRequired": "قم بإعداد توقيع ميلادك",
-        "journalSaveError": "تعذر الحفظ. يرجى المحاولة مرة أخرى."
+        "birthSignatureRequired": "قم بإعداد توقيع ميلادك"
       },
       "socialInsights": {
         "paused": "الرؤى الاجتماعية متوقفة مؤقتاً",

@@ -274,7 +274,6 @@
       "personalNarrative": "Narrativa personal",
       "coreThemes": "Temas centrales",
       "focusForPeriod": "Enfoque para este período",
-      "journalPrompt": "Reflexión del diario",
       "tarot": {
         "title": "Carta del Tarot",
         "label": "TIRADA DE TAROT — ARQUETIPO DIARIO",
@@ -298,17 +297,10 @@
         "midnight": "Medianoche",
         "morning": "Mañana"
       },
-      "dailyReflection": {
-        "title": "Reflexión diaria",
-        "subtitle": "Deja que tus notas permanezcan privadas y suaves.",
-        "placeholder": "Algunas palabras para tu cielo hoy…",
-        "saveHint": "Presiona ⌘+Enter o Ctrl+Enter para guardar"
-      },
       "errors": {
         "profileLoadError": "Tuvimos problemas al cargar tu perfil. Por favor intenta de nuevo, o contacta soporte si esto continúa.",
         "insightLoadError": "Estamos teniendo problemas para cargar tu perspectiva. Esto puede ser un problema temporal.",
-        "birthSignatureRequired": "Configura tu firma de nacimiento",
-        "journalSaveError": "No se pudo guardar. Por favor intenta de nuevo."
+        "birthSignatureRequired": "Configura tu firma de nacimiento"
       },
       "socialInsights": {
         "paused": "Perspectivas sociales pausadas",

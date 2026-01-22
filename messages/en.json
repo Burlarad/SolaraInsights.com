@@ -274,7 +274,6 @@
       "personalNarrative": "Personal Narrative",
       "coreThemes": "Core Themes",
       "focusForPeriod": "Focus for this period",
-      "journalPrompt": "Journal Prompt",
       "tarot": {
         "title": "Tarot Card",
         "label": "TAROT OVERVIEW — DAILY DRAW",
@@ -298,17 +297,10 @@
         "midnight": "Midnight",
         "morning": "Morning"
       },
-      "dailyReflection": {
-        "title": "Daily reflection",
-        "subtitle": "Let your notes stay private and gentle.",
-        "placeholder": "A few words for your sky today…",
-        "saveHint": "Press ⌘+Enter or Ctrl+Enter to save"
-      },
       "errors": {
         "profileLoadError": "We had trouble loading your profile. Please try again, or contact support if this continues.",
         "insightLoadError": "We're having trouble loading your insight. This might be a temporary issue.",
-        "birthSignatureRequired": "Tune your birth signature",
-        "journalSaveError": "Unable to save. Please try again."
+        "birthSignatureRequired": "Tune your birth signature"
       },
       "socialInsights": {
         "paused": "Social Insights Paused",
