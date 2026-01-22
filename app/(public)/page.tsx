@@ -48,16 +48,24 @@ function HomeContent() {
         onTimeframeChange={setTimeframe}
       />
 
-      {experience === "tarot" ? (
-        <section className="max-w-3xl mx-auto px-4 sm:px-6 pb-16">
-          <TarotArena />
-        </section>
-      ) : experience === "compatibility" ? (
+      {experience === "compatibility" ? (
         <section className="max-w-3xl mx-auto px-4 sm:px-6 pb-16">
           <CompatibilityArena />
         </section>
+      ) : experience === "learn" ? (
+        <section className="max-w-5xl mx-auto px-4 sm:px-6 pb-16">
+          {/* Learn preview - will be implemented in Phase 9 */}
+          <div className="text-center py-12">
+            <p className="text-accent-ink/60">Learn content coming soon...</p>
+          </div>
+        </section>
       ) : (
-        <ZodiacGrid timeframe={timeframe} experience={experience} />
+        <>
+          <ZodiacGrid timeframe={timeframe} experience={experience} />
+          <section className="max-w-3xl mx-auto px-4 sm:px-6 pb-16 mt-12">
+            <TarotArena />
+          </section>
+        </>
       )}
 
       <SolaraPath />

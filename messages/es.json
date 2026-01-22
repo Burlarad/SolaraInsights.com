@@ -915,12 +915,14 @@
     "askTheCards": "Pregunta a las cartas",
     "enterQuestion": "Ingresa tu pregunta y saca tu tirada.",
     "exploreCompatibility": "Explora la compatibilidad",
-    "selectTwoSigns": "Selecciona dos signos para descubrir su conexión cósmica."
+    "selectTwoSigns": "Selecciona dos signos para descubrir su conexión cósmica.",
+    "exploreGuides": "Explore Guides",
+    "learnSubtitle": "Bite-sized lessons to deepen your cosmic understanding."
   },
   "experiences": {
     "horoscope": "Horóscopo",
-    "tarot": "Tarot",
-    "compatibility": "Compatibilidad"
+    "compatibility": "Compatibilidad",
+    "learn": "Learn"
   },
   "footer": {
     "privacyPolicy": "Política de Privacidad",
