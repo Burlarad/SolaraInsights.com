@@ -54,12 +54,6 @@ function SanctuaryContent() {
   const [error, setError] = useState<string | null>(null);
   const [errorInfo, setErrorInfo] = useState<ErrorInfo | null>(null);
 
-  // Journal state
-  const [journalContent, setJournalContent] = useState("");
-  const [isSavingJournal, setIsSavingJournal] = useState(false);
-  const [journalSavedMessage, setJournalSavedMessage] = useState<string | null>(null);
-  const [journalError, setJournalError] = useState<string | null>(null);
-
   // Social connect modal state
   const [showSocialModal, setShowSocialModal] = useState(false);
   const [justConnectedProvider, setJustConnectedProvider] = useState<SocialProvider | null>(null);
@@ -178,27 +172,6 @@ function SanctuaryContent() {
     }
   };
 
-  const loadJournalEntry = useCallback(async () => {
-    try {
-      // Get today's date in YYYY-MM-DD format
-      const today = new Date().toISOString().split("T")[0];
-
-      const response = await fetch(
-        `/api/journal?date=${today}&timeframe=${timeframe}`
-      );
-
-      if (!response.ok) {
-        console.error("Failed to load journal entry");
-        return;
-      }
-
-      const data = await response.json();
-      setJournalContent(data.content || "");
-    } catch (err: any) {
-      console.error("Error loading journal entry:", err);
-    }
-  }, [timeframe]);
-
   const loadInsight = useCallback(async () => {
     // Dedupe: Build request key and check if we're already fetching this exact request
     const requestKey = `${timeframe}:${locale}`;
@@ -297,9 +270,6 @@ function SanctuaryContent() {
       const insightData: SanctuaryInsight = data;
       setInsight(insightData);
       attemptCountRef.current = 0; // Reset on success
-
-      // Load journal entry after insight is loaded
-      loadJournalEntry();
     } catch (err: any) {
       // Ignore AbortError (expected when request is cancelled)
       if (err.name === "AbortError") {
@@ -319,48 +289,7 @@ function SanctuaryContent() {
       isLoadingRef.current = false;
       setLoading(false);
     }
-  }, [timeframe, locale, router, loadJournalEntry]);
-
-  const saveJournalEntry = async () => {
-    setIsSavingJournal(true);
-    setJournalError(null);
-    setJournalSavedMessage(null);
-
-    try {
-      const today = new Date().toISOString().split("T")[0];
-
-      const response = await fetch("/api/journal", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          date: today,
-          timeframe,
-          content: journalContent,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to save journal entry");
-      }
-
-      // Show success message briefly
-      setJournalSavedMessage(tCommon("saved"));
-      setTimeout(() => setJournalSavedMessage(null), 2000);
-    } catch (err: any) {
-      console.error("Error saving journal entry:", err);
-      setJournalError(t("insights.errors.journalSaveError"));
-      setTimeout(() => setJournalError(null), 3000);
-    } finally {
-      setIsSavingJournal(false);
-    }
-  };
-
-  const handleJournalKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
-      e.preventDefault();
-      saveJournalEntry();
-    }
-  };
+  }, [timeframe, locale, router]);
 
   // Use stable primitive deps to prevent unnecessary re-fetches
   // Refetch when: timeframe changes, profile loads, locale changes
@@ -718,40 +647,6 @@ function SanctuaryContent() {
               </CardContent>
             </Card>
 
-            {/* Daily reflection */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">{t("insights.dailyReflection.title")}</CardTitle>
-                <p className="text-sm text-accent-ink/60">
-                  {t("insights.dailyReflection.subtitle")}
-                </p>
-              </CardHeader>
-              <CardContent>
-                <textarea
-                  className="w-full h-32 px-3 py-2 rounded-lg border border-border-subtle bg-white resize-none focus:outline-none focus:ring-2 focus:ring-accent-gold/50 text-sm"
-                  placeholder={insight.journalPrompt || t("insights.dailyReflection.placeholder")}
-                  value={journalContent}
-                  onChange={(e) => setJournalContent(e.target.value)}
-                  onKeyDown={handleJournalKeyDown}
-                  disabled={isSavingJournal}
-                />
-                <div className="flex items-center justify-between mt-2">
-                  <p className="text-xs text-accent-ink/60">
-                    {t("insights.dailyReflection.saveHint")}
-                  </p>
-                  {journalSavedMessage && (
-                    <p className="text-xs text-accent-gold font-medium">
-                      ✓ {journalSavedMessage}
-                    </p>
-                  )}
-                  {journalError && (
-                    <p className="text-xs text-danger-soft">
-                      {journalError}
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </div>
       )}
