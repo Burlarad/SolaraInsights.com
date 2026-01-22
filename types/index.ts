@@ -139,7 +139,6 @@ export interface SanctuaryInsight {
     powerWords: string[]; // For the chips
     handwrittenNote: string; // 1–2 sentence affirmation
   };
-  journalPrompt: string; // For the Daily Reflection textbox
 }
 
 export interface BirthChartInsight {

@@ -251,8 +251,7 @@ Return a JSON object with this structure:
     ],
     "powerWords": ["WORD1", "WORD2", "WORD3"],
     "handwrittenNote": "1-2 sentence affirmation"
-  },
-  "journalPrompt": "A gentle reflection question for their private journal"
+  }
 }
 
 LUCKY COMPASS RULES:
