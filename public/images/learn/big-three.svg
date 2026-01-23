@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+  <defs>
+    <linearGradient id="bg2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="50%" style="stop-color:#16213e"/>
+      <stop offset="100%" style="stop-color:#0f0f23"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#F4D03F"/>
+      <stop offset="40%" style="stop-color:#D4AF37"/>
+      <stop offset="100%" style="stop-color:#B8860B;stop-opacity:0.8"/>
+    </radialGradient>
+    <radialGradient id="moon" cx="30%" cy="30%" r="70%">
+      <stop offset="0%" style="stop-color:#E8E8E8"/>
+      <stop offset="50%" style="stop-color:#C0C0C0"/>
+      <stop offset="100%" style="stop-color:#A0A0A0"/>
+    </radialGradient>
+    <radialGradient id="rising" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#E6B8D4"/>
+      <stop offset="50%" style="stop-color:#D4A5C9"/>
+      <stop offset="100%" style="stop-color:#B794A8"/>
+    </radialGradient>
+    <radialGradient id="sunGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#D4AF37;stop-opacity:0.4"/>
+      <stop offset="100%" style="stop-color:#D4AF37;stop-opacity:0"/>
+    </radialGradient>
+    <radialGradient id="moonGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#C0C0C0;stop-opacity:0.3"/>
+      <stop offset="100%" style="stop-color:#C0C0C0;stop-opacity:0"/>
+    </radialGradient>
+    <radialGradient id="risingGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#D4A5C9;stop-opacity:0.3"/>
+      <stop offset="100%" style="stop-color:#D4A5C9;stop-opacity:0"/>
+    </radialGradient>
+    <filter id="blur2">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="400" fill="url(#bg2)"/>
+
+  <!-- Stars -->
+  <g fill="#fff" opacity="0.5">
+    <circle cx="80" cy="50" r="1"/>
+    <circle cx="180" cy="90" r="1.5"/>
+    <circle cx="280" cy="35" r="1"/>
+    <circle cx="520" cy="60" r="1.2"/>
+    <circle cx="620" cy="45" r="1"/>
+    <circle cx="720" cy="80" r="1.5"/>
+    <circle cx="120" cy="350" r="1"/>
+    <circle cx="680" cy="340" r="1.2"/>
+  </g>
+
+  <!-- Connection lines between celestial bodies -->
+  <g stroke="#D4AF37" stroke-width="1" opacity="0.2">
+    <line x1="200" y1="200" x2="400" y2="200"/>
+    <line x1="400" y1="200" x2="600" y2="200"/>
+    <path d="M200,200 Q400,100 600,200" fill="none"/>
+  </g>
+
+  <!-- Sun (left) - larger, golden -->
+  <ellipse cx="200" cy="200" rx="90" ry="90" fill="url(#sunGlow)"/>
+  <circle cx="200" cy="200" r="55" fill="url(#sun)"/>
+  <!-- Sun rays -->
+  <g stroke="#F4D03F" stroke-width="2" opacity="0.6">
+    <line x1="200" y1="130" x2="200" y2="115"/>
+    <line x1="200" y1="270" x2="200" y2="285"/>
+    <line x1="130" y1="200" x2="115" y2="200"/>
+    <line x1="270" y1="200" x2="285" y2="200"/>
+    <line x1="150" y1="150" x2="140" y2="140"/>
+    <line x1="250" y1="150" x2="260" y2="140"/>
+    <line x1="150" y1="250" x2="140" y2="260"/>
+    <line x1="250" y1="250" x2="260" y2="260"/>
+  </g>
+
+  <!-- Moon (center) - silvery with craters -->
+  <ellipse cx="400" cy="200" rx="75" ry="75" fill="url(#moonGlow)"/>
+  <circle cx="400" cy="200" r="45" fill="url(#moon)"/>
+  <!-- Moon craters -->
+  <g fill="#909090" opacity="0.4">
+    <circle cx="385" cy="185" r="8"/>
+    <circle cx="410" cy="210" r="5"/>
+    <circle cx="420" cy="185" r="4"/>
+    <circle cx="390" cy="220" r="6"/>
+  </g>
+  <!-- Moon shadow -->
+  <path d="M400,155 A45,45 0 0,1 400,245 A35,35 0 0,0 400,155" fill="#7a7a7a" opacity="0.3"/>
+
+  <!-- Rising (right) - soft pink/lavender, ascending -->
+  <ellipse cx="600" cy="200" rx="80" ry="80" fill="url(#risingGlow)"/>
+  <circle cx="600" cy="200" r="50" fill="url(#rising)"/>
+  <!-- Rising horizon line -->
+  <line x1="550" y1="200" x2="650" y2="200" stroke="#fff" stroke-width="2" opacity="0.5"/>
+  <!-- Rising arrow/ascension -->
+  <path d="M600,160 L590,180 L595,180 L595,220 L605,220 L605,180 L610,180 Z" fill="#fff" opacity="0.4"/>
+
+  <!-- Orbital paths (subtle) -->
+  <ellipse cx="400" cy="200" rx="280" ry="100" fill="none" stroke="#D4AF37" stroke-width="0.5" opacity="0.2" stroke-dasharray="5,5"/>
+
+  <!-- Labels as decorative elements -->
+  <g fill="#D4AF37" font-family="serif" font-size="12" opacity="0.6">
+    <text x="200" y="280" text-anchor="middle">SUN</text>
+    <text x="400" y="270" text-anchor="middle">MOON</text>
+    <text x="600" y="275" text-anchor="middle">RISING</text>
+  </g>
+</svg>

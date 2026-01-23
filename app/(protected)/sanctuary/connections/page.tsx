@@ -651,7 +651,8 @@ export default function ConnectionsPage() {
         <SolaraLogo />
       </div>
 
-      <div className="flex items-center justify-between">
+      {/* Tabs - centered */}
+      <div className="flex justify-center">
         <SanctuaryTabs />
       </div>
 

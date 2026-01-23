@@ -24,11 +24,10 @@ import {
 import { useTranslations } from "next-intl";
 import { useLocaleContext } from "@/providers/IntlProvider";
 
-type NavLinkKey = "home" | "about" | "learn" | "sanctuary" | "settings";
+type NavLinkKey = "home" | "about" | "sanctuary" | "settings";
 
 const publicNavLinks: { href: string; labelKey: NavLinkKey }[] = [
   { href: "/", labelKey: "home" },
-  { href: "/learn", labelKey: "learn" },
 ];
 
 const protectedNavLinks: { href: string; labelKey: NavLinkKey }[] = [

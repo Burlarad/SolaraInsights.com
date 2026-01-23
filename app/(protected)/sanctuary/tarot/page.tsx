@@ -15,8 +15,10 @@ export default function TarotPage() {
         <SolaraLogo />
       </div>
 
-      {/* Tabs */}
-      <SanctuaryTabs />
+      {/* Tabs - centered */}
+      <div className="flex justify-center">
+        <SanctuaryTabs />
+      </div>
 
       {/* Tarot Arena */}
       <div className="max-w-3xl mx-auto">

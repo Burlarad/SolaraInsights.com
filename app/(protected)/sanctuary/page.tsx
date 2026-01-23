@@ -364,12 +364,10 @@ function SanctuaryContent() {
         <SolaraLogo />
       </div>
 
-      {/* Tabs and timeframe - stacked on mobile, side-by-side on desktop */}
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+      {/* Tabs - centered */}
+      <div className="flex flex-col items-center gap-4">
         <SanctuaryTabs />
-        <div className="flex justify-center md:justify-end">
-          <TimeframeToggle value={timeframe} onChange={(v) => setTimeframe(v as Timeframe)} />
-        </div>
+        <TimeframeToggle value={timeframe} onChange={(v) => setTimeframe(v as Timeframe)} />
       </div>
 
       {/* Error state for incomplete profile */}

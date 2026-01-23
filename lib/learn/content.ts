@@ -12,6 +12,7 @@ export interface LearnItem {
   level: "Beginner" | "Intermediate" | "Advanced";
   minutes: number;
   tags: string[];
+  image: string;
 }
 
 export const LEARN_ITEMS: LearnItem[] = [
@@ -27,6 +28,7 @@ export const LEARN_ITEMS: LearnItem[] = [
     level: "Beginner",
     minutes: 6,
     tags: ["Signs", "Charts", "Foundations"],
+    image: "/images/learn/astrology-101.svg",
   },
   {
     slug: "big-three",
@@ -37,6 +39,7 @@ export const LEARN_ITEMS: LearnItem[] = [
     level: "Beginner",
     minutes: 7,
     tags: ["Sun", "Moon", "Rising"],
+    image: "/images/learn/big-three.svg",
   },
   {
     slug: "elements-modalities",
@@ -47,6 +50,7 @@ export const LEARN_ITEMS: LearnItem[] = [
     level: "Beginner",
     minutes: 8,
     tags: ["Elements", "Modalities", "Signs"],
+    image: "/images/learn/elements-modalities.svg",
   },
   {
     slug: "planets-101",
@@ -57,6 +61,7 @@ export const LEARN_ITEMS: LearnItem[] = [
     level: "Beginner",
     minutes: 9,
     tags: ["Planets", "Mercury", "Venus", "Mars"],
+    image: "/images/learn/planets-101.svg",
   },
   {
     slug: "houses-101",
@@ -67,6 +72,7 @@ export const LEARN_ITEMS: LearnItem[] = [
     level: "Beginner",
     minutes: 10,
     tags: ["Houses", "Angles", "Life Areas"],
+    image: "/images/learn/houses-101.svg",
   },
 
   // ========================================
@@ -81,6 +87,7 @@ export const LEARN_ITEMS: LearnItem[] = [
     level: "Intermediate",
     minutes: 10,
     tags: ["Transits", "Timing", "Cycles"],
+    image: "/images/learn/transits-101.svg",
   },
   {
     slug: "retrogrades",
@@ -91,6 +98,7 @@ export const LEARN_ITEMS: LearnItem[] = [
     level: "Intermediate",
     minutes: 7,
     tags: ["Retrogrades", "Mercury", "Cycles"],
+    image: "/images/learn/retrogrades.svg",
   },
   {
     slug: "nodes-chiron-lilith",
@@ -101,6 +109,7 @@ export const LEARN_ITEMS: LearnItem[] = [
     level: "Intermediate",
     minutes: 11,
     tags: ["Nodes", "Chiron", "Lilith"],
+    image: "/images/learn/nodes-chiron-lilith.svg",
   },
 
   // ========================================
@@ -115,6 +124,7 @@ export const LEARN_ITEMS: LearnItem[] = [
     level: "Beginner",
     minutes: 7,
     tags: ["Spreads", "Questions", "Reversals"],
+    image: "/images/learn/tarot-101.svg",
   },
 
   // ========================================
@@ -129,6 +139,7 @@ export const LEARN_ITEMS: LearnItem[] = [
     level: "Beginner",
     minutes: 5,
     tags: ["Signs", "Dynamics", "Practical"],
+    image: "/images/learn/compatibility-101.svg",
   },
 ];
 

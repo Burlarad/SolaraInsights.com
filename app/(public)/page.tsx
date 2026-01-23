@@ -8,16 +8,30 @@ import { TarotArena } from "@/components/home/TarotArena";
 import { CompatibilityArena } from "@/components/home/CompatibilityArena";
 import { SolaraPath } from "@/components/home/SolaraPath";
 import { LearnPreview } from "@/components/home/LearnPreview";
-import { type ExperienceKey, type TimeframeKey } from "@/lib/constants";
+import { EXPERIENCE_KEYS, type ExperienceKey, type TimeframeKey } from "@/lib/constants";
 
 function HomeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [experience, setExperience] = useState<ExperienceKey>("horoscope");
+  // Read initial experience from URL if present
+  const urlExperience = searchParams.get("experience") as ExperienceKey | null;
+  const initialExperience = urlExperience && EXPERIENCE_KEYS.includes(urlExperience)
+    ? urlExperience
+    : "horoscope";
+
+  const [experience, setExperience] = useState<ExperienceKey>(initialExperience);
   const [timeframe, setTimeframe] = useState<TimeframeKey>("today");
 
   const [showDeletedBanner, setShowDeletedBanner] = useState(false);
+
+  // Sync experience state with URL for bookmarkable/shareable links
+  const handleExperienceChange = (newExperience: ExperienceKey) => {
+    setExperience(newExperience);
+    // Update URL without full navigation (shallow update)
+    const url = newExperience === "horoscope" ? "/" : `/?experience=${newExperience}`;
+    router.replace(url, { scroll: false });
+  };
 
   useEffect(() => {
     if (searchParams.get("deleted") === "true") {
@@ -45,7 +59,7 @@ function HomeContent() {
       <HeroSection
         experience={experience}
         timeframe={timeframe}
-        onExperienceChange={setExperience}
+        onExperienceChange={handleExperienceChange}
         onTimeframeChange={setTimeframe}
       />
 

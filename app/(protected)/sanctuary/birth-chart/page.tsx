@@ -245,13 +245,16 @@ export default function BirthChartPage() {
         <SolaraLogo />
       </div>
 
+      {/* Tabs - centered */}
+      <div className="flex justify-center">
+        <SanctuaryTabs />
+      </div>
+
       {/* Page Header */}
       <div className="space-y-2">
         <h1 className="text-2xl font-semibold">{t("title")}</h1>
         <p className="text-sm text-accent-ink/70">{t("subtitle")}</p>
       </div>
-
-      <SanctuaryTabs />
 
       {loading && (
         <div>

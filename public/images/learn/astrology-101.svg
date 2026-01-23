@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+  <defs>
+    <linearGradient id="bg1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="50%" style="stop-color:#16213e"/>
+      <stop offset="100%" style="stop-color:#0f0f23"/>
+    </linearGradient>
+    <linearGradient id="gold1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#D4AF37"/>
+      <stop offset="100%" style="stop-color:#F4D03F"/>
+    </linearGradient>
+    <radialGradient id="glow1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#D4AF37;stop-opacity:0.3"/>
+      <stop offset="100%" style="stop-color:#D4AF37;stop-opacity:0"/>
+    </radialGradient>
+    <filter id="blur1">
+      <feGaussianBlur stdDeviation="2"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="400" fill="url(#bg1)"/>
+
+  <!-- Stars -->
+  <g fill="#fff" opacity="0.6">
+    <circle cx="50" cy="30" r="1"/>
+    <circle cx="150" cy="80" r="1.5"/>
+    <circle cx="250" cy="45" r="1"/>
+    <circle cx="350" cy="90" r="1.2"/>
+    <circle cx="450" cy="25" r="1"/>
+    <circle cx="550" cy="70" r="1.5"/>
+    <circle cx="650" cy="40" r="1"/>
+    <circle cx="750" cy="85" r="1.2"/>
+    <circle cx="100" cy="350" r="1"/>
+    <circle cx="200" cy="380" r="1.5"/>
+    <circle cx="600" cy="360" r="1"/>
+    <circle cx="700" cy="320" r="1.2"/>
+  </g>
+
+  <!-- Central glow -->
+  <ellipse cx="400" cy="200" rx="200" ry="180" fill="url(#glow1)"/>
+
+  <!-- Zodiac wheel outer ring -->
+  <circle cx="400" cy="200" r="140" fill="none" stroke="url(#gold1)" stroke-width="2" opacity="0.8"/>
+  <circle cx="400" cy="200" r="120" fill="none" stroke="url(#gold1)" stroke-width="1" opacity="0.5"/>
+
+  <!-- Zodiac divisions (12 segments) -->
+  <g stroke="url(#gold1)" stroke-width="1" opacity="0.4">
+    <line x1="400" y1="60" x2="400" y2="80"/>
+    <line x1="470" y1="70" x2="460" y2="88"/>
+    <line x1="530" y1="130" x2="512" y2="142"/>
+    <line x1="540" y1="200" x2="520" y2="200"/>
+    <line x1="530" y1="270" x2="512" y2="258"/>
+    <line x1="470" y1="330" x2="460" y2="312"/>
+    <line x1="400" y1="340" x2="400" y2="320"/>
+    <line x1="330" y1="330" x2="340" y2="312"/>
+    <line x1="270" y1="270" x2="288" y2="258"/>
+    <line x1="260" y1="200" x2="280" y2="200"/>
+    <line x1="270" y1="130" x2="288" y2="142"/>
+    <line x1="330" y1="70" x2="340" y2="88"/>
+  </g>
+
+  <!-- Zodiac symbols simplified as dots/marks -->
+  <g fill="url(#gold1)" opacity="0.7">
+    <circle cx="400" cy="68" r="4"/>
+    <circle cx="468" cy="82" r="4"/>
+    <circle cx="518" cy="132" r="4"/>
+    <circle cx="532" cy="200" r="4"/>
+    <circle cx="518" cy="268" r="4"/>
+    <circle cx="468" cy="318" r="4"/>
+    <circle cx="400" cy="332" r="4"/>
+    <circle cx="332" cy="318" r="4"/>
+    <circle cx="282" cy="268" r="4"/>
+    <circle cx="268" cy="200" r="4"/>
+    <circle cx="282" cy="132" r="4"/>
+    <circle cx="332" cy="82" r="4"/>
+  </g>
+
+  <!-- Inner celestial body -->
+  <circle cx="400" cy="200" r="50" fill="#1a1a2e" stroke="url(#gold1)" stroke-width="1.5"/>
+  <circle cx="400" cy="200" r="35" fill="none" stroke="url(#gold1)" stroke-width="0.5" opacity="0.5"/>
+
+  <!-- Central star -->
+  <polygon points="400,170 405,190 425,195 405,200 400,220 395,200 375,195 395,190" fill="url(#gold1)" opacity="0.9"/>
+
+  <!-- Floating particles -->
+  <g fill="url(#gold1)" opacity="0.5">
+    <circle cx="180" cy="150" r="2" filter="url(#blur1)"/>
+    <circle cx="620" cy="250" r="2" filter="url(#blur1)"/>
+    <circle cx="220" cy="280" r="1.5" filter="url(#blur1)"/>
+    <circle cx="580" cy="120" r="1.5" filter="url(#blur1)"/>
+  </g>
+</svg>

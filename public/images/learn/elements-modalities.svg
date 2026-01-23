@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+  <defs>
+    <linearGradient id="bg3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#0f0f23"/>
+    </linearGradient>
+    <linearGradient id="fire" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" style="stop-color:#FF6B35"/>
+      <stop offset="50%" style="stop-color:#F7931E"/>
+      <stop offset="100%" style="stop-color:#FFCD00"/>
+    </linearGradient>
+    <linearGradient id="earth" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B7355"/>
+      <stop offset="50%" style="stop-color:#6B5344"/>
+      <stop offset="100%" style="stop-color:#4A3728"/>
+    </linearGradient>
+    <linearGradient id="air" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#E8F4F8"/>
+      <stop offset="50%" style="stop-color:#B8D4E3"/>
+      <stop offset="100%" style="stop-color:#87CEEB"/>
+    </linearGradient>
+    <linearGradient id="water" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1E90FF"/>
+      <stop offset="50%" style="stop-color:#4169E1"/>
+      <stop offset="100%" style="stop-color:#191970"/>
+    </linearGradient>
+    <filter id="glow3">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="400" fill="url(#bg3)"/>
+
+  <!-- Subtle grid pattern for modalities -->
+  <g stroke="#D4AF37" stroke-width="0.3" opacity="0.15">
+    <line x1="200" y1="50" x2="200" y2="350"/>
+    <line x1="400" y1="50" x2="400" y2="350"/>
+    <line x1="600" y1="50" x2="600" y2="350"/>
+    <line x1="100" y1="200" x2="700" y2="200"/>
+  </g>
+
+  <!-- Fire Element (top-left quadrant) -->
+  <g transform="translate(150, 120)">
+    <!-- Fire triangle pointing up -->
+    <polygon points="50,0 0,80 100,80" fill="url(#fire)" filter="url(#glow3)" opacity="0.9"/>
+    <!-- Inner flame detail -->
+    <polygon points="50,20 30,70 70,70" fill="#FFCD00" opacity="0.5"/>
+    <!-- Sparks -->
+    <circle cx="30" cy="30" r="3" fill="#FFCD00" opacity="0.7"/>
+    <circle cx="70" cy="35" r="2" fill="#FF6B35" opacity="0.6"/>
+  </g>
+
+  <!-- Earth Element (top-right quadrant) -->
+  <g transform="translate(550, 120)">
+    <!-- Earth triangle pointing down -->
+    <polygon points="50,80 0,0 100,0" fill="url(#earth)" opacity="0.9"/>
+    <!-- Horizontal line through earth -->
+    <line x1="20" y1="30" x2="80" y2="30" stroke="#D4AF37" stroke-width="2" opacity="0.6"/>
+    <!-- Ground texture -->
+    <circle cx="40" cy="50" r="5" fill="#8B7355" opacity="0.5"/>
+    <circle cx="60" cy="60" r="4" fill="#6B5344" opacity="0.5"/>
+  </g>
+
+  <!-- Air Element (bottom-left quadrant) -->
+  <g transform="translate(150, 220)">
+    <!-- Air triangle pointing up -->
+    <polygon points="50,0 0,80 100,80" fill="url(#air)" opacity="0.8"/>
+    <!-- Horizontal line through air -->
+    <line x1="20" y1="50" x2="80" y2="50" stroke="#1a1a2e" stroke-width="2" opacity="0.6"/>
+    <!-- Wind swirls -->
+    <path d="M30,30 Q50,20 70,30" fill="none" stroke="#87CEEB" stroke-width="2" opacity="0.5"/>
+  </g>
+
+  <!-- Water Element (bottom-right quadrant) -->
+  <g transform="translate(550, 220)">
+    <!-- Water triangle pointing down -->
+    <polygon points="50,80 0,0 100,0" fill="url(#water)" filter="url(#glow3)" opacity="0.9"/>
+    <!-- Wave detail -->
+    <path d="M20,40 Q35,30 50,40 Q65,50 80,40" fill="none" stroke="#1E90FF" stroke-width="2" opacity="0.6"/>
+    <!-- Ripples -->
+    <circle cx="50" cy="55" r="8" fill="none" stroke="#87CEEB" stroke-width="1" opacity="0.4"/>
+  </g>
+
+  <!-- Central connecting symbol -->
+  <g transform="translate(400, 200)">
+    <circle r="40" fill="none" stroke="#D4AF37" stroke-width="1.5" opacity="0.6"/>
+    <circle r="25" fill="none" stroke="#D4AF37" stroke-width="1" opacity="0.4"/>
+    <!-- Four-pointed star -->
+    <polygon points="0,-15 5,0 0,15 -5,0" fill="#D4AF37" opacity="0.7"/>
+    <polygon points="-15,0 0,5 15,0 0,-5" fill="#D4AF37" opacity="0.7"/>
+  </g>
+
+  <!-- Connecting arcs (modalities) -->
+  <g fill="none" stroke="#D4AF37" stroke-width="1" opacity="0.3">
+    <!-- Cardinal -->
+    <path d="M200,160 Q400,100 600,160"/>
+    <!-- Fixed -->
+    <path d="M200,200 L600,200"/>
+    <!-- Mutable -->
+    <path d="M200,260 Q400,320 600,260"/>
+  </g>
+
+  <!-- Element labels -->
+  <g fill="#D4AF37" font-family="serif" font-size="10" opacity="0.5">
+    <text x="200" y="100" text-anchor="middle">FIRE</text>
+    <text x="600" y="100" text-anchor="middle">EARTH</text>
+    <text x="200" y="330" text-anchor="middle">AIR</text>
+    <text x="600" y="330" text-anchor="middle">WATER</text>
+  </g>
+</svg>
