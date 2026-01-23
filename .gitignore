@@ -64,3 +64,4 @@ docs/schema/
 # Local schema dumps (do not commit)
 docs/schema/
 audits/
+supabase_remote_backup.sql
