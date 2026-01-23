@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { SanctuaryTabs } from "@/components/sanctuary/SanctuaryTabs";
 import { SolaraLogo } from "@/components/layout/SolaraLogo";
 import type { FullBirthChartInsight, TabDeepDive } from "@/types/natalAI";
@@ -118,7 +118,7 @@ export default function BirthChartPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [errorInfo, setErrorInfo] = useState<ErrorInfo | null>(null);
-  const [attemptCount, setAttemptCount] = useState(0);
+  const attemptCountRef = useRef(0); // Use ref to avoid infinite loop
   const [incompleteProfile, setIncompleteProfile] = useState(false);
   const [insight, setInsight] = useState<FullBirthChartInsight | null>(null);
   const [placements, setPlacements] = useState<any | null>(null);
@@ -145,7 +145,8 @@ export default function BirthChartPage() {
     setError(null);
     setErrorInfo(null);
     setIncompleteProfile(false);
-    setAttemptCount((prev) => prev + 1);
+    attemptCountRef.current += 1;
+    const currentAttempt = attemptCountRef.current;
 
     try {
       const res = await fetch("/api/birth-chart", { method: "POST" });
@@ -161,7 +162,7 @@ export default function BirthChartPage() {
       if (!contentType.includes("application/json")) {
         const rotatingMessage = pickRotatingMessage({
           category: "non_json_response",
-          attempt: attemptCount + 1,
+          attempt: currentAttempt,
         });
         setError(rotatingMessage);
         setErrorInfo({
@@ -187,7 +188,7 @@ export default function BirthChartPage() {
         const category = getErrorCategory(res.status, apiError.errorCode);
         const rotatingMessage = pickRotatingMessage({
           category,
-          attempt: attemptCount + 1,
+          attempt: currentAttempt,
           retryAfterSeconds: apiError.retryAfterSeconds,
         });
 
@@ -209,13 +210,13 @@ export default function BirthChartPage() {
       console.log("[BirthChart UI] Houses array:", chartData.placements?.houses);
       setPlacements(chartData.placements || null);
       setInsight(chartData.insight ?? null);
-      setAttemptCount(0); // Reset on success
+      attemptCountRef.current = 0; // Reset on success
       setLoading(false);
     } catch (err) {
       console.error("[BirthChart] Client fetch error:", err);
       const rotatingMessage = pickRotatingMessage({
         category: "provider_500",
-        attempt: attemptCount + 1,
+        attempt: currentAttempt,
       });
       setError(rotatingMessage);
       setErrorInfo({
@@ -224,7 +225,7 @@ export default function BirthChartPage() {
       });
       setLoading(false);
     }
-  }, [attemptCount]);
+  }, []);
 
   useEffect(() => {
     fetchBirthChart();
