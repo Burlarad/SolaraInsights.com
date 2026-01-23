@@ -114,9 +114,6 @@ export default function SettingsPage() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  // Journal state
-  const [journalMessage, setJournalMessage] = useState<string | null>(null);
-
   // Social connections state (from /api/social/status)
   const [socialStatuses, setSocialStatuses] = useState<SocialConnectionStatus[]>([]);
   const [socialStatusLoading, setSocialStatusLoading] = useState(true);
@@ -581,59 +578,6 @@ export default function SettingsPage() {
       setPasswordUpdateError(err.message || "Failed to update password. Please try again.");
     } finally {
       setIsUpdatingPassword(false);
-    }
-  };
-
-  const handleExportJournal = async () => {
-    try {
-      const response = await fetch("/api/journal/export");
-
-      if (!response.ok) {
-        throw new Error("Failed to export journal");
-      }
-
-      // Convert response to blob and trigger download
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "solara-journal.md";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-
-      setJournalMessage("Journal exported successfully.");
-      setTimeout(() => setJournalMessage(null), 3000);
-    } catch (err: any) {
-      console.error("Error exporting journal:", err);
-      setJournalMessage("Failed to export journal.");
-      setTimeout(() => setJournalMessage(null), 3000);
-    }
-  };
-
-  const handleDeleteJournal = async () => {
-    const confirmed = confirm(
-      "Are you sure you want to delete all journal entries? This action cannot be undone."
-    );
-
-    if (!confirmed) return;
-
-    try {
-      const response = await fetch("/api/journal/delete", {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to delete journal");
-      }
-
-      setJournalMessage("Journal cleared.");
-      setTimeout(() => setJournalMessage(null), 3000);
-    } catch (err: any) {
-      console.error("Error deleting journal:", err);
-      setJournalMessage("Failed to delete journal.");
-      setTimeout(() => setJournalMessage(null), 3000);
     }
   };
 
@@ -1405,7 +1349,7 @@ export default function SettingsPage() {
               Privacy & data
             </h2>
             <p className="text-sm md:text-base text-accent-ink/60 leading-relaxed">
-              Your reflections are private and never shared. Manage your journal entries below.
+              Your data is private and never shared.
             </p>
           </section>
 
@@ -1489,50 +1433,6 @@ export default function SettingsPage() {
                   device registration.
                 </p>
               </div>
-            </div>
-          </section>
-        </CardContent>
-      </Card>
-
-      {/* Journal section */}
-      <Card>
-        <CardContent className="p-5 sm:p-6 md:p-8">
-          <section className="space-y-6">
-            <div>
-              <h2 className="text-lg md:text-xl font-semibold mb-1">Journal</h2>
-              <p className="text-sm md:text-base text-accent-ink/60">
-                Export or manage your private reflections
-              </p>
-            </div>
-
-            <div className="space-y-5">
-              <div className="space-y-3">
-                <p className="text-sm md:text-base font-medium">Export journal (.MD)</p>
-                <p className="text-xs md:text-sm text-accent-ink/60 leading-relaxed">
-                  Download all your journal entries as a markdown file.
-                </p>
-                <Button variant="outline" onClick={handleExportJournal} className="w-full sm:w-auto min-h-[44px]">
-                  Export journal
-                </Button>
-              </div>
-
-              <div className="space-y-3 pt-4 border-t border-border-subtle/60">
-                <p className="text-sm md:text-base font-medium">Delete journal</p>
-                <p className="text-xs md:text-sm text-accent-ink/60 leading-relaxed">
-                  Permanently delete all journal entries. This cannot be undone.
-                </p>
-                <Button
-                  variant="outline"
-                  onClick={handleDeleteJournal}
-                  className="w-full sm:w-auto min-h-[44px] text-danger-soft border-danger-soft hover:bg-danger-soft/10"
-                >
-                  Delete all entries
-                </Button>
-              </div>
-
-              {journalMessage && (
-                <p className="text-sm text-accent-gold">✓ {journalMessage}</p>
-              )}
             </div>
           </section>
         </CardContent>
@@ -1697,7 +1597,7 @@ export default function SettingsPage() {
             <DialogTitle className="text-danger-soft">Delete your account</DialogTitle>
             <DialogDescription>
               This action is permanent and cannot be undone. All your data including
-              your profile, journal entries, connections, and insights will be deleted.
+              your profile, connections, and insights will be deleted.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">

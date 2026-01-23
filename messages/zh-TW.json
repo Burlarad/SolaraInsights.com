@@ -255,7 +255,8 @@
       "insights": "洞察",
       "astrology": "占星術",
       "numerology": "數字命理",
-      "connections": "連結"
+      "connections": "連結",
+      "tarot": "Tarot"
     },
     "timeframes": {
       "today": "今天",
@@ -277,7 +278,6 @@
       "personalNarrative": "個人敘事",
       "coreThemes": "核心主題",
       "focusForPeriod": "本期重點",
-      "journalPrompt": "日記提示",
       "tarot": {
         "title": "塔羅牌",
         "label": "塔羅牌 — 每日原型",
@@ -301,17 +301,10 @@
         "midnight": "午夜",
         "morning": "早晨"
       },
-      "dailyReflection": {
-        "title": "每日反思",
-        "subtitle": "讓您的筆記保持私密和溫柔。",
-        "placeholder": "今天給您的天空寫幾句話…",
-        "saveHint": "按 ⌘+Enter 或 Ctrl+Enter 儲存"
-      },
       "errors": {
         "profileLoadError": "載入您的個人資料時遇到問題。請再試一次，或聯繫客服。",
         "insightLoadError": "載入您的洞察時遇到問題。這可能是暫時性問題。",
-        "birthSignatureRequired": "設定您的出生簽名",
-        "journalSaveError": "無法儲存。請再試一次。"
+        "birthSignatureRequired": "設定您的出生簽名"
       },
       "socialInsights": {
         "paused": "社交洞察已暫停",
@@ -893,7 +886,8 @@
     "backToLearn": "Back to Learn Center",
     "minRead": "min read",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "viewAllGuides": "View all guides"
   },
   "learnCategories": {
     "astrologyBasics": "Astrology Basics",
@@ -916,12 +910,14 @@
     "askTheCards": "Ask the Cards",
     "enterQuestion": "Enter your question and draw your spread.",
     "exploreCompatibility": "Explore Compatibility",
-    "selectTwoSigns": "Select two signs to discover their cosmic connection."
+    "selectTwoSigns": "Select two signs to discover their cosmic connection.",
+    "exploreGuides": "Explore Guides",
+    "learnSubtitle": "Bite-sized lessons to deepen your cosmic understanding."
   },
   "experiences": {
     "horoscope": "Horoscope",
-    "tarot": "Tarot",
-    "compatibility": "Compatibility"
+    "compatibility": "Compatibility",
+    "learn": "Learn"
   },
   "footer": {
     "privacyPolicy": "Privacy Policy",

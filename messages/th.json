@@ -252,7 +252,8 @@
       "insights": "ข้อมูลเชิงลึก",
       "astrology": "โหราศาสตร์",
       "numerology": "ตัวเลขศาสตร์",
-      "connections": "ความสัมพันธ์"
+      "connections": "ความสัมพันธ์",
+      "tarot": "Tarot"
     },
     "timeframes": {
       "today": "วันนี้",
@@ -274,7 +275,6 @@
       "personalNarrative": "เรื่องราวส่วนตัว",
       "coreThemes": "ธีมหลัก",
       "focusForPeriod": "จุดเน้นสำหรับช่วงเวลานี้",
-      "journalPrompt": "คำถามสำหรับบันทึก",
       "tarot": {
         "title": "ไพ่ทาโรต์",
         "label": "จับไพ่ทาโรต์ — ต้นแบบประจำวัน",
@@ -298,17 +298,10 @@
         "midnight": "เที่ยงคืน",
         "morning": "เช้า"
       },
-      "dailyReflection": {
-        "title": "การสะท้อนประจำวัน",
-        "subtitle": "ให้บันทึกของคุณเป็นส่วนตัวและอ่อนโยน",
-        "placeholder": "คำสองสามคำสำหรับท้องฟ้าของคุณวันนี้…",
-        "saveHint": "กด ⌘+Enter หรือ Ctrl+Enter เพื่อบันทึก"
-      },
       "errors": {
         "profileLoadError": "เรามีปัญหาในการโหลดโปรไฟล์ของคุณ กรุณาลองอีกครั้ง หรือติดต่อฝ่ายสนับสนุนหากปัญหายังคงอยู่",
         "insightLoadError": "เรามีปัญหาในการโหลดข้อมูลเชิงลึกของคุณ นี่อาจเป็นปัญหาชั่วคราว",
-        "birthSignatureRequired": "ตั้งค่าลายเซ็นเกิดของคุณ",
-        "journalSaveError": "ไม่สามารถบันทึกได้ กรุณาลองอีกครั้ง"
+        "birthSignatureRequired": "ตั้งค่าลายเซ็นเกิดของคุณ"
       },
       "socialInsights": {
         "paused": "ข้อมูลเชิงลึกทางสังคมหยุดชั่วคราว",
@@ -899,7 +892,8 @@
     "backToLearn": "Back to Learn Center",
     "minRead": "min read",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "viewAllGuides": "View all guides"
   },
   "learnCategories": {
     "astrologyBasics": "Astrology Basics",
@@ -922,12 +916,14 @@
     "askTheCards": "Ask the Cards",
     "enterQuestion": "Enter your question and draw your spread.",
     "exploreCompatibility": "Explore Compatibility",
-    "selectTwoSigns": "Select two signs to discover their cosmic connection."
+    "selectTwoSigns": "Select two signs to discover their cosmic connection.",
+    "exploreGuides": "Explore Guides",
+    "learnSubtitle": "Bite-sized lessons to deepen your cosmic understanding."
   },
   "experiences": {
     "horoscope": "Horoscope",
-    "tarot": "Tarot",
-    "compatibility": "Compatibility"
+    "compatibility": "Compatibility",
+    "learn": "Learn"
   },
   "footer": {
     "privacyPolicy": "Privacy Policy",

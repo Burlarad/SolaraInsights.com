@@ -107,13 +107,6 @@ export const profileUpdateSchema = z.object({
   is_onboarded: z.boolean().optional(),
 });
 
-// Journal entry request
-export const journalEntrySchema = z.object({
-  content: z.string().min(1).max(10000),
-  entry_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  timeframe: timeframe.optional(),
-});
-
 // Connection create/update request
 export const connectionSchema = z.object({
   name: z.string().min(1).max(100),

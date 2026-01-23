@@ -64,10 +64,10 @@ export function HeroSection({
       </div>
 
       <div className="mb-8">
-        {experience === "tarot" ? (
+        {experience === "learn" ? (
           <>
-            <h2 className="text-3xl font-semibold mb-2">{t("askTheCards")}</h2>
-            <p className="text-base text-accent-ink/70">{t("enterQuestion")}</p>
+            <h2 className="text-3xl font-semibold mb-2">{t("exploreGuides")}</h2>
+            <p className="text-base text-accent-ink/70">{t("learnSubtitle")}</p>
           </>
         ) : experience === "compatibility" ? (
           <>

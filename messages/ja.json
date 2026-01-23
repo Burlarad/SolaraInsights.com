@@ -252,7 +252,8 @@
       "insights": "インサイト",
       "astrology": "占星術",
       "numerology": "数秘術",
-      "connections": "つながり"
+      "connections": "つながり",
+      "tarot": "Tarot"
     },
     "timeframes": {
       "today": "今日",
@@ -274,7 +275,6 @@
       "personalNarrative": "パーソナルナラティブ",
       "coreThemes": "コアテーマ",
       "focusForPeriod": "この期間のフォーカス",
-      "journalPrompt": "ジャーナルプロンプト",
       "tarot": {
         "title": "タロットカード",
         "label": "タロット — 今日のアーキタイプ",
@@ -298,17 +298,10 @@
         "midnight": "真夜中",
         "morning": "朝"
       },
-      "dailyReflection": {
-        "title": "毎日の振り返り",
-        "subtitle": "あなたのメモをプライベートで優しく保ちましょう。",
-        "placeholder": "今日の空に向けて一言…",
-        "saveHint": "⌘+Enter または Ctrl+Enter で保存"
-      },
       "errors": {
         "profileLoadError": "プロフィールの読み込みに問題がありました。もう一度お試しください。問題が続く場合はサポートにお問い合わせください。",
         "insightLoadError": "インサイトの読み込みに問題があります。一時的な問題かもしれません。",
-        "birthSignatureRequired": "出生シグネチャーを設定してください",
-        "journalSaveError": "保存できませんでした。もう一度お試しください。"
+        "birthSignatureRequired": "出生シグネチャーを設定してください"
       },
       "socialInsights": {
         "paused": "ソーシャルインサイトが一時停止中",
@@ -899,7 +892,8 @@
     "backToLearn": "Back to Learn Center",
     "minRead": "min read",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "viewAllGuides": "View all guides"
   },
   "learnCategories": {
     "astrologyBasics": "Astrology Basics",
@@ -922,12 +916,14 @@
     "askTheCards": "Ask the Cards",
     "enterQuestion": "Enter your question and draw your spread.",
     "exploreCompatibility": "Explore Compatibility",
-    "selectTwoSigns": "Select two signs to discover their cosmic connection."
+    "selectTwoSigns": "Select two signs to discover their cosmic connection.",
+    "exploreGuides": "Explore Guides",
+    "learnSubtitle": "Bite-sized lessons to deepen your cosmic understanding."
   },
   "experiences": {
     "horoscope": "Horoscope",
-    "tarot": "Tarot",
-    "compatibility": "Compatibility"
+    "compatibility": "Compatibility",
+    "learn": "Learn"
   },
   "footer": {
     "privacyPolicy": "Privacy Policy",

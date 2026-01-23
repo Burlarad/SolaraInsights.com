@@ -230,9 +230,8 @@ export default function TermsOfServicePage() {
                 intellectual property laws.
               </p>
               <p>
-                You retain ownership of any content you provide (such as journal entries). By
-                providing content, you grant us a limited license to use it for operating and
-                improving the Service.
+                You retain ownership of any content you provide. By providing content, you grant
+                us a limited license to use it for operating and improving the Service.
               </p>
               <p>
                 Generated content provided to you through the Service is licensed to you for

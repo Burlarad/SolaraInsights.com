@@ -252,7 +252,8 @@
       "insights": "Insights",
       "astrology": "Astrology",
       "numerology": "Numerology",
-      "connections": "Connections"
+      "connections": "Connections",
+      "tarot": "Tarot"
     },
     "timeframes": {
       "today": "Today",
@@ -274,7 +275,6 @@
       "personalNarrative": "Personal Narrative",
       "coreThemes": "Core Themes",
       "focusForPeriod": "Focus for this period",
-      "journalPrompt": "Journal Prompt",
       "tarot": {
         "title": "Tarot Card",
         "label": "TAROT OVERVIEW — DAILY DRAW",
@@ -298,17 +298,10 @@
         "midnight": "Midnight",
         "morning": "Morning"
       },
-      "dailyReflection": {
-        "title": "Daily reflection",
-        "subtitle": "Let your notes stay private and gentle.",
-        "placeholder": "A few words for your sky today…",
-        "saveHint": "Press ⌘+Enter or Ctrl+Enter to save"
-      },
       "errors": {
         "profileLoadError": "We had trouble loading your profile. Please try again, or contact support if this continues.",
         "insightLoadError": "We're having trouble loading your insight. This might be a temporary issue.",
-        "birthSignatureRequired": "Tune your birth signature",
-        "journalSaveError": "Unable to save. Please try again."
+        "birthSignatureRequired": "Tune your birth signature"
       },
       "socialInsights": {
         "paused": "Social Insights Paused",
@@ -899,7 +892,8 @@
     "backToLearn": "Back to Learn Center",
     "minRead": "min read",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "viewAllGuides": "View all guides"
   },
   "learnCategories": {
     "astrologyBasics": "Astrology Basics",
@@ -922,12 +916,14 @@
     "askTheCards": "Ask the Cards",
     "enterQuestion": "Enter your question and draw your spread.",
     "exploreCompatibility": "Explore Compatibility",
-    "selectTwoSigns": "Select two signs to discover their cosmic connection."
+    "selectTwoSigns": "Select two signs to discover their cosmic connection.",
+    "exploreGuides": "Explore Guides",
+    "learnSubtitle": "Bite-sized lessons to deepen your cosmic understanding."
   },
   "experiences": {
     "horoscope": "Horoscope",
-    "tarot": "Tarot",
-    "compatibility": "Compatibility"
+    "compatibility": "Compatibility",
+    "learn": "Learn"
   },
   "footer": {
     "privacyPolicy": "Privacy Policy",

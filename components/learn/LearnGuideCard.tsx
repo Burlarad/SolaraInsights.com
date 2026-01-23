@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,7 +20,7 @@ export function LearnGuideCard({
   stepNumber,
 }: LearnGuideCardProps) {
   const t = useTranslations("learn");
-  const { slug, title, description, category, level, minutes, tags } = item;
+  const { slug, title, description, category, level, minutes, tags, image } = item;
 
   // Roadmap variant - horizontal scroll card with step number
   if (variant === "roadmap") {
@@ -95,8 +96,16 @@ export function LearnGuideCard({
   return (
     <Link href={`/learn/${slug}`} className="block group">
       <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col">
-        {/* Hero gradient */}
-        <div className="relative h-40 bg-gradient-to-br from-accent-muted to-accent-lavender flex items-center justify-center">
+        {/* Hero image */}
+        <div className="relative h-40 overflow-hidden">
+          <Image
+            src={image}
+            alt={title}
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
           <div className="absolute top-4 left-4 flex items-center gap-3">
             <div className="flex items-center gap-1 bg-white/90 pill text-xs">
               <Clock className="h-3 w-3" aria-hidden="true" />
@@ -104,13 +113,6 @@ export function LearnGuideCard({
             </div>
             <span className="micro-label bg-white/90 pill">{level}</span>
           </div>
-          {/* Category icon */}
-          <span className="text-4xl opacity-40" aria-hidden="true">
-            {category === "Astrology Basics" && "✦"}
-            {category === "Astrology Intermediate" && "✧"}
-            {category === "Tarot Basics" && "🃏"}
-            {category === "Compatibility" && "💫"}
-          </span>
         </div>
 
         <CardContent className="p-6 space-y-4 flex-1 flex flex-col">

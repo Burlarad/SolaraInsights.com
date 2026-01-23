@@ -252,7 +252,8 @@
       "insights": "நுண்ணறிவுகள்",
       "astrology": "ஜோதிடம்",
       "numerology": "எண்கணிதம்",
-      "connections": "இணைப்புகள்"
+      "connections": "இணைப்புகள்",
+      "tarot": "Tarot"
     },
     "timeframes": {
       "today": "இன்று",
@@ -274,7 +275,6 @@
       "personalNarrative": "தனிப்பட்ட கதை",
       "coreThemes": "முக்கிய கருப்பொருள்கள்",
       "focusForPeriod": "இந்த காலத்திற்கான கவனம்",
-      "journalPrompt": "நாட்குறிப்பு தூண்டுதல்",
       "tarot": {
         "title": "டாரட் அட்டை",
         "label": "டாரட் டிரா — தினசரி முன்மாதிரி",
@@ -298,17 +298,10 @@
         "midnight": "நள்ளிரவு",
         "morning": "காலை"
       },
-      "dailyReflection": {
-        "title": "தினசரி பிரதிபலிப்பு",
-        "subtitle": "உங்கள் குறிப்புகளை தனிப்பட்டதாகவும் மென்மையாகவும் வைத்திருங்கள்.",
-        "placeholder": "இன்று உங்கள் வானத்திற்கு சில வார்த்தைகள்…",
-        "saveHint": "சேமிக்க ⌘+Enter அல்லது Ctrl+Enter அழுத்தவும்"
-      },
       "errors": {
         "profileLoadError": "உங்கள் சுயவிவரத்தை ஏற்றுவதில் சிக்கல் ஏற்பட்டது. மீண்டும் முயற்சிக்கவும், அல்லது தொடர்ந்தால் ஆதரவைத் தொடர்பு கொள்ளவும்.",
         "insightLoadError": "உங்கள் நுண்ணறிவை ஏற்றுவதில் சிக்கல் உள்ளது. இது தற்காலிக பிரச்சனையாக இருக்கலாம்.",
-        "birthSignatureRequired": "உங்கள் பிறப்பு கையொப்பத்தை அமைக்கவும்",
-        "journalSaveError": "சேமிக்க இயலவில்லை. மீண்டும் முயற்சிக்கவும்."
+        "birthSignatureRequired": "உங்கள் பிறப்பு கையொப்பத்தை அமைக்கவும்"
       },
       "socialInsights": {
         "paused": "சமூக நுண்ணறிவுகள் இடைநிறுத்தப்பட்டுள்ளன",
@@ -907,7 +900,8 @@
     "backToLearn": "Back to Learn Center",
     "minRead": "min read",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "viewAllGuides": "View all guides"
   },
   "learnCategories": {
     "astrologyBasics": "Astrology Basics",
@@ -930,12 +924,14 @@
     "askTheCards": "Ask the Cards",
     "enterQuestion": "Enter your question and draw your spread.",
     "exploreCompatibility": "Explore Compatibility",
-    "selectTwoSigns": "Select two signs to discover their cosmic connection."
+    "selectTwoSigns": "Select two signs to discover their cosmic connection.",
+    "exploreGuides": "Explore Guides",
+    "learnSubtitle": "Bite-sized lessons to deepen your cosmic understanding."
   },
   "experiences": {
     "horoscope": "Horoscope",
-    "tarot": "Tarot",
-    "compatibility": "Compatibility"
+    "compatibility": "Compatibility",
+    "learn": "Learn"
   },
   "footer": {
     "privacyPolicy": "Privacy Policy",

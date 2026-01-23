@@ -75,7 +75,6 @@ export function normalizeInsight(insight: Partial<SanctuaryInsight> | null | und
         powerWords: [],
         handwrittenNote: "",
       },
-      journalPrompt: "",
     };
   }
 
@@ -83,7 +82,6 @@ export function normalizeInsight(insight: Partial<SanctuaryInsight> | null | und
     // String fields - default to empty string
     personalNarrative: insight.personalNarrative ?? "",
     focusForPeriod: insight.focusForPeriod ?? "",
-    journalPrompt: insight.journalPrompt ?? "",
 
     // Emotional cadence - ensure all six time slots exist (day + night)
     emotionalCadence: {

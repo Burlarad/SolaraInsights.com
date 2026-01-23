@@ -63,7 +63,9 @@ export default function NumerologyPage() {
           <h1 className="text-2xl font-semibold">{t("title")}</h1>
           <p className="text-sm text-accent-ink/70">{t("subtitle")}</p>
         </div>
-        <SanctuaryTabs />
+        <div className="flex justify-center">
+          <SanctuaryTabs />
+        </div>
         <div className="text-center py-12">
           <div className="inline-flex items-center gap-3">
             <div className="w-6 h-6 rounded-full border-2 border-accent-gold/30 border-t-accent-gold animate-spin" />
@@ -84,7 +86,9 @@ export default function NumerologyPage() {
           <h1 className="text-2xl font-semibold">{t("title")}</h1>
           <p className="text-sm text-accent-ink/70">{t("subtitle")}</p>
         </div>
-        <SanctuaryTabs />
+        <div className="flex justify-center">
+          <SanctuaryTabs />
+        </div>
         <Card className="border-amber-200 bg-amber-50/50">
           <CardContent className="py-12 text-center space-y-4">
             <h2 className="text-xl font-semibold text-accent-ink">{t("errors.nameRequired")}</h2>
@@ -110,7 +114,9 @@ export default function NumerologyPage() {
           <h1 className="text-2xl font-semibold">{t("title")}</h1>
           <p className="text-sm text-accent-ink/70">{t("subtitle")}</p>
         </div>
-        <SanctuaryTabs />
+        <div className="flex justify-center">
+          <SanctuaryTabs />
+        </div>
         <Card className="border-amber-200 bg-amber-50/50">
           <CardContent className="py-12 text-center space-y-4">
             <h2 className="text-xl font-semibold text-accent-ink">{t("errors.birthDateRequired")}</h2>
@@ -136,7 +142,9 @@ export default function NumerologyPage() {
           <h1 className="text-2xl font-semibold">{t("title")}</h1>
           <p className="text-sm text-accent-ink/70">{t("subtitle")}</p>
         </div>
-        <SanctuaryTabs />
+        <div className="flex justify-center">
+          <SanctuaryTabs />
+        </div>
         <Card className="border-danger-soft/20">
           <CardContent className="py-12 text-center space-y-4">
             <p className="text-accent-ink/70">{error || t("errors.loadFailed")}</p>
@@ -179,10 +187,10 @@ export default function NumerologyPage() {
         <p className="text-sm text-accent-ink/70">{t("subtitle")}</p>
       </div>
 
-      {/* Navigation + System Toggle */}
-      <div className="flex items-center justify-between gap-4">
+      {/* Navigation + System Toggle - stacked and centered */}
+      <div className="flex flex-col items-center gap-4">
         <SanctuaryTabs />
-        <div className="flex gap-2 p-1 bg-white/50 rounded-full flex-shrink-0">
+        <div className="flex gap-2 p-1 bg-white/50 rounded-full">
           <button
             onClick={() => setSystem("pythagorean")}
             className={`px-4 py-2 rounded-full font-cursive text-xl font-normal transition-all ${

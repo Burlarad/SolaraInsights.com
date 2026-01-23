@@ -57,7 +57,9 @@ CREATE INDEX IF NOT EXISTS idx_ai_usage_events_provider_created_at
 CREATE INDEX IF NOT EXISTS idx_ai_usage_events_request_id
   ON public.ai_usage_events (request_id);
 
--- RLS: service_role only
+-- RLS:
+-- - service_role: full access (server-side tracking + maintenance)
+-- - authenticated: read-only access to their own usage rows (for dashboards)
 DROP POLICY IF EXISTS "ai_usage_events_service_role_all" ON public.ai_usage_events;
 CREATE POLICY "ai_usage_events_service_role_all"
   ON public.ai_usage_events
@@ -65,7 +67,17 @@ CREATE POLICY "ai_usage_events_service_role_all"
   USING (auth.role() = 'service_role')
   WITH CHECK (auth.role() = 'service_role');
 
+DROP POLICY IF EXISTS "ai_usage_events_authenticated_select_own" ON public.ai_usage_events;
+CREATE POLICY "ai_usage_events_authenticated_select_own"
+  ON public.ai_usage_events
+  FOR SELECT
+  TO authenticated
+  USING (auth.uid() = user_id);
+
+-- Privileges:
+-- authenticated users can only SELECT (RLS still restricts to their own rows)
 REVOKE ALL ON TABLE public.ai_usage_events FROM anon, authenticated;
+GRANT SELECT ON TABLE public.ai_usage_events TO authenticated;
 GRANT ALL ON TABLE public.ai_usage_events TO service_role;
 
 

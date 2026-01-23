@@ -6,13 +6,14 @@ import { useRef, useEffect, useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
-const TAB_KEYS = ["insights", "connections", "astrology", "numerology"] as const;
+const TAB_KEYS = ["insights", "connections", "tarot", "astrology", "numerology"] as const;
 
 const TAB_HREFS: Record<typeof TAB_KEYS[number], string> = {
   insights: "/sanctuary",
   astrology: "/sanctuary/birth-chart",
   numerology: "/sanctuary/numerology",
   connections: "/sanctuary/connections",
+  tarot: "/sanctuary/tarot",
 };
 
 export function SanctuaryTabs() {
@@ -82,7 +83,7 @@ export function SanctuaryTabs() {
   return (
     <>
       {/* Desktop */}
-      <div className="hidden md:inline-flex gap-2 p-1 bg-white/50 rounded-full">
+      <div className="hidden md:inline-flex gap-2 p-1 bg-white/50 rounded-full relative z-10">
         {TAB_KEYS.map((key) => {
           const href = TAB_HREFS[key];
           const isActive = pathname === href;
@@ -105,7 +106,7 @@ export function SanctuaryTabs() {
       </div>
 
       {/* Mobile */}
-      <div className="md:hidden relative w-full min-w-0">
+      <div className="md:hidden relative w-full min-w-0 z-10">
         <div
           className={cn(
             "absolute left-0 top-0 bottom-0 w-6 z-10 pointer-events-none transition-opacity duration-200",
@@ -127,7 +128,7 @@ export function SanctuaryTabs() {
           className={cn(
             "w-full flex gap-2 p-1 bg-white/50 rounded-full",
             "overflow-x-auto overscroll-x-contain",
-            "snap-x snap-mandatory",
+            "snap-x",
             "scrollbar-none",
             "[-webkit-overflow-scrolling:touch]"
           )}
@@ -151,18 +152,6 @@ export function SanctuaryTabs() {
                     ? "bg-accent-ink text-white shadow-sm"
                     : "bg-transparent text-accent-ink hover:bg-white/80"
                 )}
-                onClick={() => {
-                  const target = tabRefs.current.get(href);
-                  if (target) {
-                    setTimeout(() => {
-                      target.scrollIntoView({
-                        behavior: "smooth",
-                        inline: "center",
-                        block: "nearest",
-                      });
-                    }, 10);
-                  }
-                }}
               >
                 {t(key)}
               </Link>

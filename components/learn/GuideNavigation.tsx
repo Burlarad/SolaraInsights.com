@@ -15,7 +15,7 @@ export function BackToLearn() {
 
   return (
     <Link
-      href="/learn"
+      href="/?experience=learn"
       className="inline-flex items-center gap-2 text-sm text-accent-ink/60 hover:text-accent-gold transition-colors mb-8"
     >
       <ArrowLeft className="h-4 w-4" />

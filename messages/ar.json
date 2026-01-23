@@ -252,7 +252,8 @@
       "insights": "الرؤى",
       "astrology": "الأبراج",
       "numerology": "علم الأرقام",
-      "connections": "الروابط"
+      "connections": "الروابط",
+      "tarot": "Tarot"
     },
     "timeframes": {
       "today": "اليوم",
@@ -274,7 +275,6 @@
       "personalNarrative": "السرد الشخصي",
       "coreThemes": "المواضيع الأساسية",
       "focusForPeriod": "التركيز لهذه الفترة",
-      "journalPrompt": "سؤال للتأمل",
       "tarot": {
         "title": "بطاقة التاروت",
         "label": "التاروت — النموذج اليومي",
@@ -298,17 +298,10 @@
         "midnight": "منتصف الليل",
         "morning": "الصباح"
       },
-      "dailyReflection": {
-        "title": "تأمل يومي",
-        "subtitle": "دع ملاحظاتك خاصة ولطيفة.",
-        "placeholder": "بضع كلمات لسمائك اليوم…",
-        "saveHint": "اضغط ⌘+Enter أو Ctrl+Enter للحفظ"
-      },
       "errors": {
         "profileLoadError": "واجهنا مشكلة في تحميل ملفك الشخصي. يرجى المحاولة مرة أخرى، أو التواصل مع الدعم إذا استمرت المشكلة.",
         "insightLoadError": "نواجه مشكلة في تحميل رؤيتك. قد تكون هذه مشكلة مؤقتة.",
-        "birthSignatureRequired": "قم بإعداد توقيع ميلادك",
-        "journalSaveError": "تعذر الحفظ. يرجى المحاولة مرة أخرى."
+        "birthSignatureRequired": "قم بإعداد توقيع ميلادك"
       },
       "socialInsights": {
         "paused": "الرؤى الاجتماعية متوقفة مؤقتاً",
@@ -907,7 +900,8 @@
     "backToLearn": "Back to Learn Center",
     "minRead": "min read",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "viewAllGuides": "View all guides"
   },
   "learnCategories": {
     "astrologyBasics": "Astrology Basics",
@@ -930,12 +924,14 @@
     "askTheCards": "Ask the Cards",
     "enterQuestion": "Enter your question and draw your spread.",
     "exploreCompatibility": "Explore Compatibility",
-    "selectTwoSigns": "Select two signs to discover their cosmic connection."
+    "selectTwoSigns": "Select two signs to discover their cosmic connection.",
+    "exploreGuides": "Explore Guides",
+    "learnSubtitle": "Bite-sized lessons to deepen your cosmic understanding."
   },
   "experiences": {
     "horoscope": "Horoscope",
-    "tarot": "Tarot",
-    "compatibility": "Compatibility"
+    "compatibility": "Compatibility",
+    "learn": "Learn"
   },
   "footer": {
     "privacyPolicy": "Privacy Policy",

@@ -252,7 +252,8 @@
       "insights": "Insights",
       "astrology": "Astrologia",
       "numerology": "Numerologia",
-      "connections": "Conexões"
+      "connections": "Conexões",
+      "tarot": "Tarot"
     },
     "timeframes": {
       "today": "Hoje",
@@ -274,7 +275,6 @@
       "personalNarrative": "Narrativa pessoal",
       "coreThemes": "Temas principais",
       "focusForPeriod": "Foco para este período",
-      "journalPrompt": "Reflexão do diário",
       "tarot": {
         "title": "Carta de Tarot",
         "label": "TIRAGEM DE TAROT — ARQUÉTIPO DIÁRIO",
@@ -298,17 +298,10 @@
         "midnight": "Meia-noite",
         "morning": "Manhã"
       },
-      "dailyReflection": {
-        "title": "Reflexão diária",
-        "subtitle": "Deixe suas notas privadas e gentis.",
-        "placeholder": "Algumas palavras para seu céu hoje…",
-        "saveHint": "Pressione ⌘+Enter ou Ctrl+Enter para salvar"
-      },
       "errors": {
         "profileLoadError": "Tivemos problemas ao carregar seu perfil. Por favor, tente novamente ou entre em contato com o suporte se isso continuar.",
         "insightLoadError": "Estamos tendo problemas para carregar seu insight. Isso pode ser um problema temporário.",
-        "birthSignatureRequired": "Configure sua assinatura de nascimento",
-        "journalSaveError": "Não foi possível salvar. Por favor, tente novamente."
+        "birthSignatureRequired": "Configure sua assinatura de nascimento"
       },
       "socialInsights": {
         "paused": "Insights sociais pausados",
@@ -907,7 +900,8 @@
     "backToLearn": "Back to Learn Center",
     "minRead": "min read",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "viewAllGuides": "View all guides"
   },
   "learnCategories": {
     "astrologyBasics": "Astrology Basics",
@@ -930,12 +924,14 @@
     "askTheCards": "Ask the Cards",
     "enterQuestion": "Enter your question and draw your spread.",
     "exploreCompatibility": "Explore Compatibility",
-    "selectTwoSigns": "Select two signs to discover their cosmic connection."
+    "selectTwoSigns": "Select two signs to discover their cosmic connection.",
+    "exploreGuides": "Explore Guides",
+    "learnSubtitle": "Bite-sized lessons to deepen your cosmic understanding."
   },
   "experiences": {
     "horoscope": "Horoscope",
-    "tarot": "Tarot",
-    "compatibility": "Compatibility"
+    "compatibility": "Compatibility",
+    "learn": "Learn"
   },
   "footer": {
     "privacyPolicy": "Privacy Policy",

@@ -231,16 +231,6 @@ export function ZodiacGrid({ timeframe, experience }: ZodiacGridProps) {
           </Card>
         )}
 
-        {selectedSign && experience === "tarot" && (
-          <Card className="bg-shell border-accent-gold/20 animate-in fade-in-50 duration-300">
-            <CardContent className="py-12 text-center">
-              <p className="text-lg text-accent-ink/70">
-                Tarot readings coming soon for {tSigns(selectedSign.key)}
-              </p>
-            </CardContent>
-          </Card>
-        )}
-
         {selectedSign && experience === "compatibility" && (
           <Card className="bg-shell border-accent-gold/20 animate-in fade-in-50 duration-300">
             <CardContent className="py-12 text-center">

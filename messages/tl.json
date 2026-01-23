@@ -252,7 +252,8 @@
       "insights": "Insights",
       "astrology": "Astrolohiya",
       "numerology": "Numerolohiya",
-      "connections": "Koneksyon"
+      "connections": "Koneksyon",
+      "tarot": "Tarot"
     },
     "timeframes": {
       "today": "Ngayon",
@@ -274,7 +275,6 @@
       "personalNarrative": "Personal na Kuwento",
       "coreThemes": "Mga Pangunahing Tema",
       "focusForPeriod": "Pokus para sa panahong ito",
-      "journalPrompt": "Journal Prompt",
       "tarot": {
         "title": "Tarot Card",
         "label": "TAROT DRAW — PANG-ARAW-ARAW NA ARCHETYPE",
@@ -298,17 +298,10 @@
         "midnight": "Hatinggabi",
         "morning": "Umaga"
       },
-      "dailyReflection": {
-        "title": "Pang-araw-araw na pagmumuni-muni",
-        "subtitle": "Hayaang manatiling pribado at malumanay ang iyong mga tala.",
-        "placeholder": "Ilang salita para sa iyong langit ngayon…",
-        "saveHint": "Pindutin ang ⌘+Enter o Ctrl+Enter upang i-save"
-      },
       "errors": {
         "profileLoadError": "Nahirapan kaming i-load ang iyong profile. Subukan ulit, o makipag-ugnayan sa support kung magpatuloy ito.",
         "insightLoadError": "Nahirapan kaming i-load ang iyong insight. Maaaring pansamantala itong isyu.",
-        "birthSignatureRequired": "I-set up ang iyong birth signature",
-        "journalSaveError": "Hindi ma-save. Subukan ulit."
+        "birthSignatureRequired": "I-set up ang iyong birth signature"
       },
       "socialInsights": {
         "paused": "Naka-pause ang mga social insight",
@@ -907,7 +900,8 @@
     "backToLearn": "Back to Learn Center",
     "minRead": "min read",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "viewAllGuides": "View all guides"
   },
   "learnCategories": {
     "astrologyBasics": "Astrology Basics",
@@ -930,12 +924,14 @@
     "askTheCards": "Ask the Cards",
     "enterQuestion": "Enter your question and draw your spread.",
     "exploreCompatibility": "Explore Compatibility",
-    "selectTwoSigns": "Select two signs to discover their cosmic connection."
+    "selectTwoSigns": "Select two signs to discover their cosmic connection.",
+    "exploreGuides": "Explore Guides",
+    "learnSubtitle": "Bite-sized lessons to deepen your cosmic understanding."
   },
   "experiences": {
     "horoscope": "Horoscope",
-    "tarot": "Tarot",
-    "compatibility": "Compatibility"
+    "compatibility": "Compatibility",
+    "learn": "Learn"
   },
   "footer": {
     "privacyPolicy": "Privacy Policy",
