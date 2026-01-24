@@ -277,26 +277,15 @@
       "focusForPeriod": "이 기간의 초점",
       "tarot": {
         "title": "타로 카드",
-        "label": "타로 — 오늘의 원형",
+        "label": "당신의 카드",
         "yourCard": "당신의 카드",
         "matchError": "이 타로 카드를 덱에 매칭하는 데 문제가 있었습니다."
       },
       "luckyCompass": {
         "title": "행운의 나침반",
-        "label": "행운의 나침반 — 행운과 빛의 표지",
+        "label": "당신의 숫자",
         "numbers": "{timeframe}의 숫자",
-        "powerWords": "파워 워드",
-        "handwrittenNote": "손글씨 메모"
-      },
-      "emotionalCadence": {
-        "title": "감정의 리듬",
-        "label": "감정의 리듬 — 일일 리듬",
-        "dawn": "새벽",
-        "midday": "정오",
-        "dusk": "황혼",
-        "evening": "저녁",
-        "midnight": "자정",
-        "morning": "아침"
+        "powerWords": "파워 워드"
       },
       "errors": {
         "profileLoadError": "프로필을 로드하는 데 문제가 있었습니다. 다시 시도하시거나, 문제가 계속되면 지원팀에 문의하세요.",
@@ -307,7 +296,9 @@
         "paused": "소셜 인사이트 일시 중지됨",
         "pausedDescription": "연결된 계정의 패턴으로 리딩을 향상시키려면 소셜 인사이트를 켜세요."
       },
-      "reactivated": "재활성화됨 — 다시 오신 것을 환영합니다."
+      "reactivated": "재활성화됨 — 다시 오신 것을 환영합니다.",
+      "yourReading": "당신의 리딩",
+      "themes": "테마"
     }
   },
   "numerology": {

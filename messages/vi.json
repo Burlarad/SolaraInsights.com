@@ -277,26 +277,15 @@
       "focusForPeriod": "Trọng tâm cho giai đoạn này",
       "tarot": {
         "title": "Lá bài Tarot",
-        "label": "RÚT BÀI TAROT — NGUYÊN MẪU HÀNG NGÀY",
+        "label": "Lá Bài Của Bạn",
         "yourCard": "Lá bài của bạn",
         "matchError": "Chúng tôi gặp khó khăn khi khớp lá bài tarot này với bộ bài của chúng tôi."
       },
       "luckyCompass": {
         "title": "La bàn may mắn",
-        "label": "LA BÀN MAY MẮN — VẬN MAY HÀNG NGÀY + DẤU HIỆU ÁNH SÁNG",
+        "label": "Số Của Bạn",
         "numbers": "Số của {timeframe}",
-        "powerWords": "TỪ KHÓA SỨC MẠNH",
-        "handwrittenNote": "GHI CHÚ VIẾT TAY"
-      },
-      "emotionalCadence": {
-        "title": "Nhịp cảm xúc",
-        "label": "NHỊP CẢM XÚC — NHỊP ĐIỆU HÀNG NGÀY",
-        "dawn": "Bình minh",
-        "midday": "Giữa trưa",
-        "dusk": "Hoàng hôn",
-        "evening": "Tối",
-        "midnight": "Nửa đêm",
-        "morning": "Sáng"
+        "powerWords": "Từ Sức Mạnh"
       },
       "errors": {
         "profileLoadError": "Chúng tôi gặp sự cố khi tải hồ sơ của bạn. Vui lòng thử lại, hoặc liên hệ hỗ trợ nếu vấn đề tiếp tục.",
@@ -307,7 +296,9 @@
         "paused": "Thông tin xã hội đã tạm dừng",
         "pausedDescription": "Bật Thông tin Xã hội để nâng cao bài đọc của bạn với các mẫu từ tài khoản được kết nối."
       },
-      "reactivated": "Đã kích hoạt lại — chào mừng trở lại."
+      "reactivated": "Đã kích hoạt lại — chào mừng trở lại.",
+      "yourReading": "Bài Đọc Của Bạn",
+      "themes": "Chủ Đề"
     }
   },
   "numerology": {

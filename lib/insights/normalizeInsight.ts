@@ -12,15 +12,6 @@ import { SanctuaryInsight } from "@/types";
 /**
  * Default values for a normalized insight
  */
-const DEFAULT_EMOTIONAL_CADENCE = {
-  dawn: "hopeful",
-  midday: "focused",
-  dusk: "reflective",
-  evening: "peaceful",
-  midnight: "restful",
-  morning: "stirring",
-};
-
 const DEFAULT_TAROT = {
   cardName: "",
   arcanaType: "",
@@ -39,7 +30,12 @@ const DEFAULT_RUNE = {
 const DEFAULT_LUCKY_COMPASS = {
   numbers: [] as { value: number; label: string; meaning: string }[],
   powerWords: [] as string[],
-  handwrittenNote: "",
+};
+
+const DEFAULT_DAILY_WISDOM = {
+  quote: "",
+  author: "",
+  context: "",
 };
 
 /**
@@ -58,14 +54,6 @@ export function normalizeInsight(insight: Partial<SanctuaryInsight> | null | und
     // Return a completely empty but valid structure
     return {
       personalNarrative: "",
-      emotionalCadence: {
-        dawn: DEFAULT_EMOTIONAL_CADENCE.dawn,
-        midday: DEFAULT_EMOTIONAL_CADENCE.midday,
-        dusk: DEFAULT_EMOTIONAL_CADENCE.dusk,
-        evening: DEFAULT_EMOTIONAL_CADENCE.evening,
-        midnight: DEFAULT_EMOTIONAL_CADENCE.midnight,
-        morning: DEFAULT_EMOTIONAL_CADENCE.morning,
-      },
       coreThemes: [],
       focusForPeriod: "",
       tarot: { ...DEFAULT_TAROT },
@@ -73,8 +61,8 @@ export function normalizeInsight(insight: Partial<SanctuaryInsight> | null | und
       luckyCompass: {
         numbers: [],
         powerWords: [],
-        handwrittenNote: "",
       },
+      dailyWisdom: { ...DEFAULT_DAILY_WISDOM },
     };
   }
 
@@ -82,16 +70,6 @@ export function normalizeInsight(insight: Partial<SanctuaryInsight> | null | und
     // String fields - default to empty string
     personalNarrative: insight.personalNarrative ?? "",
     focusForPeriod: insight.focusForPeriod ?? "",
-
-    // Emotional cadence - ensure all six time slots exist (day + night)
-    emotionalCadence: {
-      dawn: insight.emotionalCadence?.dawn ?? DEFAULT_EMOTIONAL_CADENCE.dawn,
-      midday: insight.emotionalCadence?.midday ?? DEFAULT_EMOTIONAL_CADENCE.midday,
-      dusk: insight.emotionalCadence?.dusk ?? DEFAULT_EMOTIONAL_CADENCE.dusk,
-      evening: insight.emotionalCadence?.evening ?? DEFAULT_EMOTIONAL_CADENCE.evening,
-      midnight: insight.emotionalCadence?.midnight ?? DEFAULT_EMOTIONAL_CADENCE.midnight,
-      morning: insight.emotionalCadence?.morning ?? DEFAULT_EMOTIONAL_CADENCE.morning,
-    },
 
     // Arrays - ensure they're always arrays
     coreThemes: Array.isArray(insight.coreThemes) ? insight.coreThemes : [],
@@ -125,7 +103,13 @@ export function normalizeInsight(insight: Partial<SanctuaryInsight> | null | und
       powerWords: Array.isArray(insight.luckyCompass?.powerWords)
         ? insight.luckyCompass.powerWords
         : [],
-      handwrittenNote: insight.luckyCompass?.handwrittenNote ?? DEFAULT_LUCKY_COMPASS.handwrittenNote,
+    },
+
+    // Daily wisdom - personalized quote from historical figure
+    dailyWisdom: {
+      quote: insight.dailyWisdom?.quote ?? DEFAULT_DAILY_WISDOM.quote,
+      author: insight.dailyWisdom?.author ?? DEFAULT_DAILY_WISDOM.author,
+      context: insight.dailyWisdom?.context ?? DEFAULT_DAILY_WISDOM.context,
     },
   };
 }
@@ -142,11 +126,11 @@ export function isInsightValid(insight: unknown): insight is SanctuaryInsight {
   // Check required top-level fields exist
   return (
     typeof obj.personalNarrative === "string" &&
-    obj.emotionalCadence !== undefined &&
     Array.isArray(obj.coreThemes) &&
     typeof obj.focusForPeriod === "string" &&
     obj.tarot !== undefined &&
     obj.rune !== undefined &&
-    obj.luckyCompass !== undefined
+    obj.luckyCompass !== undefined &&
+    obj.dailyWisdom !== undefined
   );
 }

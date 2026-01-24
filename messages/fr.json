@@ -277,26 +277,15 @@
       "focusForPeriod": "Focus pour cette période",
       "tarot": {
         "title": "Carte de Tarot",
-        "label": "TIRAGE DE TAROT — ARCHÉTYPE DU JOUR",
+        "label": "Votre Carte",
         "yourCard": "Votre carte",
         "matchError": "Nous avons eu du mal à associer cette carte de tarot à notre jeu."
       },
       "luckyCompass": {
         "title": "Boussole de chance",
-        "label": "BOUSSOLE DE CHANCE — MARQUEURS DE CHANCE ET DE LUMIÈRE",
+        "label": "Vos Nombres",
         "numbers": "Numéros de {timeframe}",
-        "powerWords": "MOTS DE POUVOIR",
-        "handwrittenNote": "UNE NOTE ÉCRITE À LA MAIN"
-      },
-      "emotionalCadence": {
-        "title": "Cadence émotionnelle",
-        "label": "CADENCE ÉMOTIONNELLE — RYTHME QUOTIDIEN",
-        "dawn": "Aube",
-        "midday": "Midi",
-        "dusk": "Crépuscule",
-        "evening": "Soirée",
-        "midnight": "Minuit",
-        "morning": "Matin"
+        "powerWords": "Mots de Pouvoir"
       },
       "errors": {
         "profileLoadError": "Nous avons eu des difficultés à charger votre profil. Veuillez réessayer ou contacter le support si cela continue.",
@@ -307,7 +296,9 @@
         "paused": "Aperçus sociaux en pause",
         "pausedDescription": "Activez les Aperçus sociaux pour améliorer vos lectures avec des schémas de vos comptes connectés."
       },
-      "reactivated": "Réactivé — bienvenue à nouveau."
+      "reactivated": "Réactivé — bienvenue à nouveau.",
+      "yourReading": "Votre Lecture",
+      "themes": "Thèmes"
     }
   },
   "numerology": {

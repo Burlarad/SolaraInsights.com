@@ -277,26 +277,15 @@
       "focusForPeriod": "Focus per questo periodo",
       "tarot": {
         "title": "Carta dei Tarocchi",
-        "label": "ESTRAZIONE TAROCCHI — ARCHETIPO GIORNALIERO",
+        "label": "La Tua Carta",
         "yourCard": "La tua carta",
         "matchError": "Abbiamo avuto problemi ad associare questa carta dei tarocchi al nostro mazzo."
       },
       "luckyCompass": {
         "title": "Bussola della fortuna",
-        "label": "BUSSOLA DELLA FORTUNA — MARCATORI DI FORTUNA E LUCE",
+        "label": "I Tuoi Numeri",
         "numbers": "Numeri di {timeframe}",
-        "powerWords": "PAROLE DI POTERE",
-        "handwrittenNote": "UNA NOTA SCRITTA A MANO"
-      },
-      "emotionalCadence": {
-        "title": "Cadenza emotiva",
-        "label": "CADENZA EMOTIVA — RITMO GIORNALIERO",
-        "dawn": "Alba",
-        "midday": "Mezzogiorno",
-        "dusk": "Crepuscolo",
-        "evening": "Sera",
-        "midnight": "Mezzanotte",
-        "morning": "Mattina"
+        "powerWords": "Parole di Potere"
       },
       "errors": {
         "profileLoadError": "Abbiamo avuto problemi a caricare il tuo profilo. Per favore riprova, o contatta il supporto se questo continua.",
@@ -307,7 +296,9 @@
         "paused": "Approfondimenti sociali in pausa",
         "pausedDescription": "Attiva gli Approfondimenti sociali per migliorare le tue letture con pattern dai tuoi account connessi."
       },
-      "reactivated": "Riattivato — bentornato."
+      "reactivated": "Riattivato — bentornato.",
+      "yourReading": "La Tua Lettura",
+      "themes": "Temi"
     }
   },
   "numerology": {

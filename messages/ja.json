@@ -277,26 +277,15 @@
       "focusForPeriod": "この期間のフォーカス",
       "tarot": {
         "title": "タロットカード",
-        "label": "タロット — 今日のアーキタイプ",
+        "label": "あなたのカード",
         "yourCard": "あなたのカード",
         "matchError": "このタロットカードをデッキに照合できませんでした。"
       },
       "luckyCompass": {
         "title": "ラッキーコンパス",
-        "label": "ラッキーコンパス — 幸運と光のマーカー",
+        "label": "あなたの数字",
         "numbers": "{timeframe}の数字",
-        "powerWords": "パワーワード",
-        "handwrittenNote": "手書きのメモ"
-      },
-      "emotionalCadence": {
-        "title": "感情のリズム",
-        "label": "感情のリズム — 毎日のリズム",
-        "dawn": "夜明け",
-        "midday": "正午",
-        "dusk": "夕暮れ",
-        "evening": "夜",
-        "midnight": "真夜中",
-        "morning": "朝"
+        "powerWords": "パワーワード"
       },
       "errors": {
         "profileLoadError": "プロフィールの読み込みに問題がありました。もう一度お試しください。問題が続く場合はサポートにお問い合わせください。",
@@ -307,7 +296,9 @@
         "paused": "ソーシャルインサイトが一時停止中",
         "pausedDescription": "ソーシャルインサイトを有効にして、接続されたアカウントのパターンでリーディングを強化しましょう。"
       },
-      "reactivated": "再アクティブ化されました — おかえりなさい。"
+      "reactivated": "再アクティブ化されました — おかえりなさい。",
+      "yourReading": "あなたのリーディング",
+      "themes": "テーマ"
     }
   },
   "numerology": {

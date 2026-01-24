@@ -277,26 +277,15 @@
       "focusForPeriod": "Focus voor deze periode",
       "tarot": {
         "title": "Tarotkaart",
-        "label": "TAROT TREKKING — DAGELIJKS ARCHETYPE",
+        "label": "Jouw Kaart",
         "yourCard": "Jouw Kaart",
         "matchError": "We konden deze tarotkaart niet koppelen aan ons deck."
       },
       "luckyCompass": {
         "title": "Gelukskompas",
-        "label": "GELUKSKOMPAS — DAGELIJKS GELUK + LICHTMARKERS",
+        "label": "Jouw Getallen",
         "numbers": "Getallen van {timeframe}",
-        "powerWords": "KRACHTWOORDEN",
-        "handwrittenNote": "EEN HANDGESCHREVEN NOTITIE"
-      },
-      "emotionalCadence": {
-        "title": "Emotionele Cadans",
-        "label": "EMOTIONELE CADANS — DAGELIJKS RITME",
-        "dawn": "Dageraad",
-        "midday": "Middag",
-        "dusk": "Schemering",
-        "evening": "Avond",
-        "midnight": "Middernacht",
-        "morning": "Ochtend"
+        "powerWords": "Krachtwoorden"
       },
       "errors": {
         "profileLoadError": "We hadden problemen met het laden van je profiel. Probeer het opnieuw, of neem contact op met support als dit aanhoudt.",
@@ -307,7 +296,9 @@
         "paused": "Sociale inzichten gepauzeerd",
         "pausedDescription": "Schakel Sociale Inzichten in om je lezingen te verbeteren met patronen van je verbonden accounts."
       },
-      "reactivated": "Gereactiveerd — welkom terug."
+      "reactivated": "Gereactiveerd — welkom terug.",
+      "yourReading": "Jouw Lezing",
+      "themes": "Thema's"
     }
   },
   "numerology": {

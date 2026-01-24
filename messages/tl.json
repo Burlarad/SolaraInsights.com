@@ -277,26 +277,15 @@
       "focusForPeriod": "Pokus para sa panahong ito",
       "tarot": {
         "title": "Tarot Card",
-        "label": "TAROT DRAW — PANG-ARAW-ARAW NA ARCHETYPE",
+        "label": "Ang Iyong Kard",
         "yourCard": "Ang Iyong Card",
         "matchError": "Nahirapan kaming itugma ang tarot card na ito sa aming deck."
       },
       "luckyCompass": {
         "title": "Lucky Compass",
-        "label": "LUCKY COMPASS — PANG-ARAW-ARAW NA SUWERTE + LIGHT MARKERS",
+        "label": "Ang Iyong mga Numero",
         "numbers": "Mga numero ng {timeframe}",
-        "powerWords": "MGA POWER WORDS",
-        "handwrittenNote": "SULAT-KAMAY NA TALA"
-      },
-      "emotionalCadence": {
-        "title": "Emotional Cadence",
-        "label": "EMOTIONAL CADENCE — PANG-ARAW-ARAW NA RITMO",
-        "dawn": "Bukang-liwayway",
-        "midday": "Tanghali",
-        "dusk": "Takipsilim",
-        "evening": "Gabi",
-        "midnight": "Hatinggabi",
-        "morning": "Umaga"
+        "powerWords": "Mga Salitang Kapangyarihan"
       },
       "errors": {
         "profileLoadError": "Nahirapan kaming i-load ang iyong profile. Subukan ulit, o makipag-ugnayan sa support kung magpatuloy ito.",
@@ -307,7 +296,9 @@
         "paused": "Naka-pause ang mga social insight",
         "pausedDescription": "I-on ang Social Insights upang mapahusay ang iyong mga reading gamit ang mga pattern mula sa mga konektadong account."
       },
-      "reactivated": "Na-reactivate — maligayang pagbabalik."
+      "reactivated": "Na-reactivate — maligayang pagbabalik.",
+      "yourReading": "Ang Iyong Pagbasa",
+      "themes": "Mga Tema"
     }
   },
   "numerology": {

@@ -277,26 +277,15 @@
       "focusForPeriod": "Foco para este período",
       "tarot": {
         "title": "Carta de Tarot",
-        "label": "TIRAGEM DE TAROT — ARQUÉTIPO DIÁRIO",
+        "label": "Sua Carta",
         "yourCard": "Sua carta",
         "matchError": "Tivemos problemas ao associar esta carta de tarot ao nosso baralho."
       },
       "luckyCompass": {
         "title": "Bússola da sorte",
-        "label": "BÚSSOLA DA SORTE — MARCADORES DE SORTE E LUZ",
+        "label": "Seus Números",
         "numbers": "Números de {timeframe}",
-        "powerWords": "PALAVRAS DE PODER",
-        "handwrittenNote": "UMA NOTA MANUSCRITA"
-      },
-      "emotionalCadence": {
-        "title": "Cadência emocional",
-        "label": "CADÊNCIA EMOCIONAL — RITMO DIÁRIO",
-        "dawn": "Amanhecer",
-        "midday": "Meio-dia",
-        "dusk": "Entardecer",
-        "evening": "Noite",
-        "midnight": "Meia-noite",
-        "morning": "Manhã"
+        "powerWords": "Palavras de Poder"
       },
       "errors": {
         "profileLoadError": "Tivemos problemas ao carregar seu perfil. Por favor, tente novamente ou entre em contato com o suporte se isso continuar.",
@@ -307,7 +296,9 @@
         "paused": "Insights sociais pausados",
         "pausedDescription": "Ative os Insights sociais para aprimorar suas leituras com padrões de suas contas conectadas."
       },
-      "reactivated": "Reativado — bem-vindo de volta."
+      "reactivated": "Reativado — bem-vindo de volta.",
+      "yourReading": "Sua Leitura",
+      "themes": "Temas"
     }
   },
   "numerology": {

@@ -21,6 +21,7 @@ export interface Profile {
   birth_lon: number | null; // Resolved from Google Geocoding API
   timezone: string;
   zodiac_sign: string | null;
+  gender: "male" | "female" | "non-binary" | null; // Used for personalized quote selection
   language: string;
   created_at: string;
   updated_at: string;
@@ -79,6 +80,7 @@ export interface ProfileUpdate {
   birth_lon?: number | null;
   timezone?: string;
   zodiac_sign?: string | null;
+  gender?: "male" | "female" | "non-binary" | null;
   language?: string;
 }
 
@@ -107,14 +109,6 @@ export interface PublicHoroscopeRequest {
 
 export interface SanctuaryInsight {
   personalNarrative: string;
-  emotionalCadence: {
-    dawn: string;
-    midday: string;
-    dusk: string;
-    evening: string;
-    midnight: string;
-    morning: string;
-  };
   coreThemes: string[]; // Short phrases
   focusForPeriod: string; // "Focus for today / this week / etc."
   tarot: {
@@ -137,7 +131,11 @@ export interface SanctuaryInsight {
       meaning: string;
     }[];
     powerWords: string[]; // For the chips
-    handwrittenNote: string; // 1–2 sentence affirmation
+  };
+  dailyWisdom: {
+    quote: string; // The quote from a historical figure
+    author: string; // Name of the historical figure
+    context: string; // Why this quote resonates with them today
   };
 }
 
