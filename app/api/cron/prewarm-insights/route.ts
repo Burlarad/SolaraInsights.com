@@ -28,7 +28,7 @@ import { AYREN_MODE_SHORT, PRO_SOCIAL_NUDGE_INSTRUCTION, HUMOR_INSTRUCTION, LOW_
 import { logTokenAudit } from "@/lib/ai/tokenAudit";
 import { isValidBirthTimezone } from "@/lib/location/detection";
 
-const PROMPT_VERSION = 2;
+const PROMPT_VERSION = 3; // bumped after removing emotionalCadence from output schema
 const BRIEF_PROMPT_VERSION = 1; // Must match /api/connection-brief
 const PREWARM_WINDOW_HOURS = 3; // Pre-warm if within 3 hours of midnight
 const MAX_USERS_PER_RUN = 500; // Safety cap to avoid timeouts
@@ -229,11 +229,6 @@ For the tarot card:
 Return a JSON object with this structure:
 {
   "personalNarrative": "Exactly 2 paragraphs, 8-12 sentences total. Include 1 micro-action (<=10 min). Follow Ayren voice rules.",
-  "emotionalCadence": {
-    "dawn": "one-word emotional state",
-    "midday": "one-word emotional state",
-    "dusk": "one-word emotional state"
-  },
   "coreThemes": ["theme1", "theme2", "theme3"],
   "focusForPeriod": "one paragraph of practical focus",
   "tarot": {
@@ -317,7 +312,11 @@ LUCKY COMPASS RULES:
 
           // Parse response
           const insight: SanctuaryInsight = JSON.parse(responseContent);
-
+          // Feature removed: emotionalCadence
+          // (If the model returns it anyway, strip it before caching.)
+          if ((insight as any)?.emotionalCadence) {
+            delete (insight as any).emotionalCadence;
+          }
           // Cache with 48h TTL (same as daily insights)
           await setCache(cacheKey, insight, 172800);
 
