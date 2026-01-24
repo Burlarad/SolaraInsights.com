@@ -444,9 +444,8 @@ function SanctuaryContent() {
 
       {/* Content - only show when we have data and no errors */}
       {insight && !loading && !error && (
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Left column (2/3 width) */}
-          <div className="lg:col-span-2 space-y-6">
+        <div className="bg-white/50 rounded-3xl p-8 md:p-12 max-w-4xl mx-auto">
+          <div className="space-y-8">
             {/* Personal narrative */}
             <Card>
               <CardHeader>
@@ -487,6 +486,44 @@ function SanctuaryContent() {
               </CardContent>
             </Card>
 
+            {/* Tarot Card of the Day */}
+            <Card>
+              <CardHeader>
+                <p className="micro-label mb-2">{t("insights.tarot.label")}</p>
+                <CardTitle>{insight.tarot?.cardName ?? t("insights.tarot.yourCard")}</CardTitle>
+                <p className="text-sm text-accent-ink/60">{insight.tarot?.arcanaType ?? ""}</p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {(() => {
+                  const tarotCard = insight.tarot?.cardName ? findTarotCard(insight.tarot.cardName) : null;
+                  return tarotCard ? (
+                    <div className="mb-4 flex justify-center">
+                      <Image
+                        src={tarotCard.imageUrl}
+                        alt={tarotCard.name}
+                        width={160}
+                        height={240}
+                        className="h-60 w-auto rounded-xl object-contain shadow-md"
+                      />
+                    </div>
+                  ) : (
+                    <p className="text-xs text-accent-ink/50 text-center mb-4">
+                      {t("insights.tarot.matchError")}
+                    </p>
+                  );
+                })()}
+                <p className="text-accent-ink/80 leading-relaxed">
+                  {insight.tarot?.summary ?? ""}
+                </p>
+                <p className="text-accent-ink/70 leading-relaxed">
+                  {insight.tarot?.symbolism ?? ""}
+                </p>
+                <p className="text-accent-ink/70 leading-relaxed italic">
+                  {insight.tarot?.guidance ?? ""}
+                </p>
+              </CardContent>
+            </Card>
+
             {/* Core themes and focus */}
             <div className="grid md:grid-cols-2 gap-6">
               <Card>
@@ -517,92 +554,16 @@ function SanctuaryContent() {
               </Card>
             </div>
 
-            {/* Tarot overview */}
-            <Card>
-              <CardHeader>
-                <p className="micro-label mb-2">{t("insights.tarot.label")}</p>
-                <CardTitle>{insight.tarot?.cardName ?? t("insights.tarot.yourCard")}</CardTitle>
-                <p className="text-sm text-accent-ink/60">{insight.tarot?.arcanaType ?? ""}</p>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {(() => {
-                  const tarotCard = insight.tarot?.cardName ? findTarotCard(insight.tarot.cardName) : null;
-                  return tarotCard ? (
-                    <div className="mb-4 flex justify-center">
-                      <Image
-                        src={tarotCard.imageUrl}
-                        alt={tarotCard.name}
-                        width={128}
-                        height={192}
-                        className="h-48 w-auto rounded-xl object-contain shadow-md"
-                      />
-                    </div>
-                  ) : (
-                    <p className="text-xs text-accent-ink/50 text-center mb-4">
-                      {t("insights.tarot.matchError")}
-                    </p>
-                  );
-                })()}
-                <p className="text-sm text-accent-ink/70 leading-relaxed">
-                  {insight.tarot?.summary ?? ""}
-                </p>
-                <p className="text-sm text-accent-ink/70 leading-relaxed">
-                  {insight.tarot?.symbolism ?? ""}
-                </p>
-                <p className="text-sm text-accent-ink/70 leading-relaxed">
-                  {insight.tarot?.guidance ?? ""}
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* FEATURE DISABLED: Rune Whisper / Daily Sigil
-            <Card>
-              <CardHeader>
-                <p className="micro-label mb-2">RUNE WHISPER — DAILY SIGIL</p>
-                <CardTitle>{insight.rune?.name ?? "Your Rune"}{insight.rune?.keyword ? ` • ${insight.rune.keyword}` : ""}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {(() => {
-                  const rune = insight.rune?.name ? findRune(insight.rune.name) : null;
-                  return rune ? (
-                    <div className="mb-4 flex justify-center">
-                      <img
-                        src={rune.imageUrl}
-                        alt={rune.name}
-                        className="h-32 w-auto object-contain"
-                      />
-                    </div>
-                  ) : (
-                    <p className="text-xs text-accent-ink/50 text-center mb-4">
-                      We had trouble matching this rune to our collection.
-                    </p>
-                  );
-                })()}
-                <p className="text-sm text-accent-ink/70 leading-relaxed">
-                  {insight.rune?.meaning ?? ""}
-                </p>
-                {insight.rune?.affirmation && (
-                  <p className="text-sm text-accent-ink/70 italic">
-                    &quot;{insight.rune.affirmation}&quot;
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-            */}
-          </div>
-
-          {/* Right column (1/3 width) */}
-          <div className="space-y-6">
             {/* Lucky Compass */}
             <Card>
               <CardHeader>
                 <p className="micro-label mb-2">{t("insights.luckyCompass.label")}</p>
                 <CardTitle className="text-lg">{t("insights.luckyCompass.numbers", { timeframe: timeframeLabel })}</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex gap-3">
+              <CardContent className="space-y-6">
+                <div className="flex gap-3 justify-center">
                   {(insight.luckyCompass?.numbers ?? []).map((num, i) => (
-                    <div key={i} className="flex-1 pill bg-accent-muted text-center min-h-[72px] py-3 flex flex-col justify-center">
+                    <div key={i} className="flex-1 max-w-[120px] pill bg-accent-muted text-center min-h-[72px] py-3 flex flex-col justify-center">
                       <p className="text-2xl font-bold text-accent-ink">{num.value}</p>
                       <p className="text-xs text-accent-ink/60 mt-1">{num.label}</p>
                     </div>
@@ -612,7 +573,7 @@ function SanctuaryContent() {
                 {(insight.luckyCompass?.numbers?.length ?? 0) > 0 && (
                   <div className="text-sm text-accent-ink/60 space-y-2">
                     {(insight.luckyCompass?.numbers ?? []).map((num, i) => (
-                      <p key={i} className="min-h-[44px] flex items-start py-1">
+                      <p key={i} className="flex items-start py-1">
                         <span className="font-medium text-accent-ink/80 mr-2">{num.value}:</span>
                         <span>{num.meaning}</span>
                       </p>
@@ -622,7 +583,7 @@ function SanctuaryContent() {
 
                 <div>
                   <p className="micro-label mb-3">{t("insights.luckyCompass.powerWords")}</p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 justify-center">
                     {(insight.luckyCompass?.powerWords ?? []).map((word, i) => (
                       <span
                         key={i}
@@ -637,7 +598,7 @@ function SanctuaryContent() {
                 {insight.luckyCompass?.handwrittenNote && (
                   <div className="pt-4 border-t border-border-subtle">
                     <p className="micro-label mb-2">{t("insights.luckyCompass.handwrittenNote")}</p>
-                    <p className="text-sm text-accent-ink/70 italic leading-relaxed">
+                    <p className="text-sm text-accent-ink/70 italic leading-relaxed text-center">
                       &quot;{insight.luckyCompass.handwrittenNote}&quot;
                     </p>
                   </div>
@@ -645,6 +606,7 @@ function SanctuaryContent() {
               </CardContent>
             </Card>
 
+            {/* FEATURE DISABLED: Rune Whisper / Daily Sigil */}
           </div>
         </div>
       )}
