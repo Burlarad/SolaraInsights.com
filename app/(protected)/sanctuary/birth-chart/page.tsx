@@ -251,12 +251,6 @@ export default function BirthChartPage() {
         <SanctuaryTabs />
       </div>
 
-      {/* Page Header */}
-      <div className="space-y-2">
-        <h1 className="text-2xl font-semibold">{t("title")}</h1>
-        <p className="text-sm text-accent-ink/70">{t("subtitle")}</p>
-      </div>
-
       {loading && (
         <div>
           <p className="text-sm text-accent-ink/70">{t("calculating")}</p>
@@ -302,11 +296,11 @@ export default function BirthChartPage() {
       {!loading && !error && !incompleteProfile && (
         <>
           {/* Mobile: Dropdown */}
-          <div className="md:hidden">
+          <div className="md:hidden flex justify-center">
             <select
               value={activeSection}
               onChange={(e) => setActiveSection(e.target.value as SoulPathSection)}
-              className="w-full px-4 py-3 rounded-lg border border-accent-soft bg-white text-accent-ink font-cursive text-xl font-normal focus:outline-none focus:ring-2 focus:ring-accent"
+              className="px-4 py-3 rounded-full border-0 bg-white/50 text-accent-ink font-cursive text-xl font-normal focus:outline-none focus:ring-2 focus:ring-accent"
             >
               {SECTIONS.map((section) => (
                 <option key={section.id} value={section.id}>
@@ -316,17 +310,17 @@ export default function BirthChartPage() {
             </select>
           </div>
 
-          {/* Desktop: Horizontal pills (single row with horizontal scroll) */}
-          <div className="hidden md:block max-w-5xl mx-auto overflow-x-auto">
-            <div className="flex justify-center gap-2 whitespace-nowrap pb-2">
+          {/* Desktop: Horizontal pills matching SanctuaryTabs */}
+          <div className="hidden md:flex justify-center">
+            <div className="inline-flex gap-2 p-1 bg-white/50 rounded-full">
               {SECTIONS.map((section) => (
                 <button
                   key={section.id}
                   onClick={() => setActiveSection(section.id)}
-                  className={`px-4 py-2 rounded-full font-cursive text-xl font-normal transition-all ${
+                  className={`pill font-cursive text-xl md:text-2xl font-normal transition-all ${
                     activeSection === section.id
-                      ? "bg-white/70 border border-border-subtle shadow-sm text-accent-ink"
-                      : "bg-transparent border border-transparent hover:bg-white/40 text-accent-ink/70"
+                      ? "bg-accent-ink text-white shadow-sm"
+                      : "bg-transparent text-accent-ink hover:bg-white/80"
                   }`}
                 >
                   {section.label}
