@@ -225,24 +225,6 @@ export function GuideHouses101() {
         </ul>
       </section>
 
-      <section className="bg-accent-lavender/20 rounded-lg p-6">
-        <h3 className="font-semibold mb-3">Try This</h3>
-        <p className="text-sm mb-3">
-          Find your Sun, Moon, and one other planet in your chart. Note which
-          houses they&apos;re in:
-        </p>
-        <ul className="list-disc pl-6 space-y-2 text-sm">
-          <li>
-            &quot;My Sun is in the ____ house, so my core identity expresses in the
-            area of ____.&quot;
-          </li>
-          <li>
-            &quot;My Moon is in the ____ house, so I find emotional comfort
-            through ____.&quot;
-          </li>
-        </ul>
-      </section>
-
       <section className="border-l-4 border-accent-gold/50 pl-4">
         <h3 className="font-semibold mb-3">Common Misconceptions</h3>
         <ul className="space-y-3 text-sm">

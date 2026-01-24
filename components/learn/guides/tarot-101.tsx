@@ -156,21 +156,6 @@ export function GuideTarot101() {
         </ul>
       </section>
 
-      <section className="bg-accent-lavender/20 rounded-lg p-6">
-        <h3 className="font-semibold mb-3">Try This</h3>
-        <p className="text-sm mb-3">
-          Pull a single card with this question:
-        </p>
-        <p className="text-sm italic mb-4">
-          &quot;What do I need to pay attention to today?&quot;
-        </p>
-        <p className="text-sm text-accent-ink/70">
-          Don&apos;t look up the meaning immediately. First, notice: What catches
-          your eye in the image? What feeling does the card give you? Then
-          check the meaning and see how your intuition compares.
-        </p>
-      </section>
-
       <section className="border-l-4 border-accent-gold/50 pl-4">
         <h3 className="font-semibold mb-3">Common Misconceptions</h3>
         <ul className="space-y-3 text-sm">

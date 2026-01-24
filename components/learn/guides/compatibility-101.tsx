@@ -161,24 +161,6 @@ export function GuideCompatibility101() {
         </ul>
       </section>
 
-      <section className="bg-accent-lavender/20 rounded-lg p-6">
-        <h3 className="font-semibold mb-3">Try This</h3>
-        <p className="text-sm mb-3">
-          Think of a relationship (romantic, friendship, family, or work) that
-          sometimes puzzles you:
-        </p>
-        <ul className="list-disc pl-6 space-y-2 text-sm">
-          <li>Look up the sun sign compatibility for you and that person</li>
-          <li>Read the &quot;friction points&quot; section first</li>
-          <li>
-            Ask: Does this describe a real pattern I&apos;ve experienced?
-          </li>
-          <li>
-            Then read the &quot;tips&quot; — is there one you could actually try?
-          </li>
-        </ul>
-      </section>
-
       <section className="border-l-4 border-accent-gold/50 pl-4">
         <h3 className="font-semibold mb-3">Common Misconceptions</h3>
         <ul className="space-y-3 text-sm">

@@ -1200,7 +1200,7 @@ export default function ConnectionsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="birthDate">Birth date (optional)</Label>
+                  <Label htmlFor="birthDate">Birth date</Label>
                   <Input
                     id="birthDate"
                     type="date"
@@ -1211,7 +1211,7 @@ export default function ConnectionsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="birthTime">Birth time (optional)</Label>
+                  <Label htmlFor="birthTime">Birth time</Label>
                   <Input
                     id="birthTime"
                     type="time"
@@ -1238,7 +1238,7 @@ export default function ConnectionsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Birth location (optional)</Label>
+                  <Label>Birth location</Label>
                   <PlacePicker
                     initialValue={birthPlaceDisplay}
                     placeholder="Search for their birth city..."

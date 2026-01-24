@@ -3,11 +3,8 @@
 import { SanctuaryTabs } from "@/components/sanctuary/SanctuaryTabs";
 import { SolaraLogo } from "@/components/layout/SolaraLogo";
 import { TarotArena } from "@/components/home/TarotArena";
-import { useTranslations } from "next-intl";
 
 export default function TarotPage() {
-  const t = useTranslations("tarot");
-
   return (
     <div className="max-w-7xl mx-auto px-6 py-12 space-y-8">
       {/* Solara Logo */}
@@ -22,7 +19,7 @@ export default function TarotPage() {
 
       {/* Tarot Arena */}
       <div className="max-w-3xl mx-auto">
-        <TarotArena />
+        <TarotArena hideSignupCta />
       </div>
     </div>
   );

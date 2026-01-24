@@ -259,26 +259,6 @@ export function GuideNodesChironLilith() {
         </ul>
       </section>
 
-      <section className="bg-accent-lavender/20 rounded-lg p-6">
-        <h3 className="font-semibold mb-3">Try This</h3>
-        <p className="text-sm mb-3">
-          Look up your North Node sign and house placement:
-        </p>
-        <ul className="list-disc pl-6 space-y-2 text-sm">
-          <li>
-            What qualities does this sign represent? Do they feel unfamiliar or
-            aspirational?
-          </li>
-          <li>
-            Think of a time you stretched toward those qualities. How did it
-            feel?
-          </li>
-          <li>
-            What&apos;s one small North Node action you could take this week?
-          </li>
-        </ul>
-      </section>
-
       <section className="border-l-4 border-accent-gold/50 pl-4">
         <h3 className="font-semibold mb-3">Common Misconceptions</h3>
         <ul className="space-y-3 text-sm">

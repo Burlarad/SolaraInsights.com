@@ -263,25 +263,6 @@ export function GuideRetrogrades() {
         </ul>
       </section>
 
-      <section className="bg-accent-lavender/20 rounded-lg p-6">
-        <h3 className="font-semibold mb-3">Try This</h3>
-        <p className="text-sm mb-3">
-          During the next Mercury retrograde:
-        </p>
-        <ul className="list-disc pl-6 space-y-2 text-sm">
-          <li>
-            Keep a simple log of communication issues vs. smooth interactions
-          </li>
-          <li>
-            Note if any &quot;blasts from the past&quot; (old friends, old issues) show up
-          </li>
-          <li>
-            At the end, review your log. Was it actually worse than usual, or
-            just more noticed?
-          </li>
-        </ul>
-      </section>
-
       <section className="border-l-4 border-accent-gold/50 pl-4">
         <h3 className="font-semibold mb-3">Common Misconceptions</h3>
         <ul className="space-y-3 text-sm">

@@ -23,7 +23,11 @@ function scrollToCenter(el: HTMLElement) {
   window.scrollTo({ top: targetY, behavior: "smooth" });
 }
 
-export function TarotArena() {
+interface TarotArenaProps {
+  hideSignupCta?: boolean;
+}
+
+export function TarotArena({ hideSignupCta = false }: TarotArenaProps) {
   const t = useTranslations("tarot");
   const locale = useLocale();
 
@@ -344,43 +348,17 @@ export function TarotArena() {
                 </div>
               </div>
 
-              {/* Action Steps */}
-              {reading.interpretation.actionSteps.length > 0 && (
-                <div>
-                  <p className="micro-label mb-3">{t("reading.actions")}</p>
-                  <ul className="space-y-2">
-                    {reading.interpretation.actionSteps.map((step, i) => (
-                      <li
-                        key={i}
-                        className="flex items-start gap-3 text-accent-ink/80"
-                      >
-                        <span className="text-accent-gold font-bold">*</span>
-                        <span>{step}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Reflection Question */}
-              {reading.interpretation.reflectionQuestion && (
-                <div className="bg-accent-gold/5 border border-accent-gold/20 rounded-lg p-4">
-                  <p className="micro-label mb-2">{t("reading.reflection")}</p>
-                  <p className="text-accent-ink italic">
-                    "{reading.interpretation.reflectionQuestion}"
+              {/* CTA for sign up - only show on public pages */}
+              {!hideSignupCta && (
+                <div className="pt-6 border-t border-border-subtle text-center space-y-3">
+                  <p className="text-sm text-accent-ink/60">
+                    {t("cta.message")}
                   </p>
+                  <Button variant="gold" asChild className="min-h-[48px]">
+                    <a href="/join">{t("cta.button")}</a>
+                  </Button>
                 </div>
               )}
-
-              {/* CTA for sign up - quiet, no birth chart mention */}
-              <div className="pt-6 border-t border-border-subtle text-center space-y-3">
-                <p className="text-sm text-accent-ink/60">
-                  {t("cta.message")}
-                </p>
-                <Button variant="gold" asChild className="min-h-[48px]">
-                  <a href="/join">{t("cta.button")}</a>
-                </Button>
-              </div>
             </CardContent>
           </Card>
         )}
