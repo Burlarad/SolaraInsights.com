@@ -9,10 +9,8 @@ import { Button } from "@/components/ui/button";
 import { SanctuaryTabs } from "@/components/sanctuary/SanctuaryTabs";
 import { TimeframeToggle } from "@/components/sanctuary/TimeframeToggle";
 import { SolaraLogo } from "@/components/layout/SolaraLogo";
-import { EmotionalCadenceTimeline } from "@/components/sanctuary/EmotionalCadenceTimeline";
 import { SocialConnectModal } from "@/components/sanctuary/SocialConnectModal";
 import { useSettings } from "@/providers/SettingsProvider";
-import { useGeolocation } from "@/hooks/useGeolocation";
 import { SanctuaryInsight, Timeframe, SocialProvider } from "@/types";
 import { findTarotCard } from "@/lib/tarot";
 // FEATURE DISABLED: Rune Whisper / Daily Sigil
@@ -32,7 +30,6 @@ function SanctuaryContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { profile, loading: profileLoading, error: profileError, refreshProfile } = useSettings();
-  const { coords } = useGeolocation();
   const locale = useLocale();
   const t = useTranslations("sanctuary");
   const tCommon = useTranslations("common");
@@ -407,23 +404,31 @@ function SanctuaryContent() {
 
       {/* Loading state */}
       {loading && !error && (
-        <div className="grid lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            {[1, 2, 3].map((i) => (
-              <Card key={i} className="animate-pulse">
-                <CardContent className="p-12 bg-accent-muted/10">
-                  <div className="h-4 bg-accent-muted rounded w-3/4 mb-4"></div>
-                  <div className="h-4 bg-accent-muted rounded w-1/2"></div>
-                </CardContent>
-              </Card>
-            ))}
+        <div className="bg-white/60 backdrop-blur-sm rounded-3xl shadow-xl border border-white/80 max-w-3xl mx-auto overflow-hidden animate-pulse">
+          {/* Quote skeleton */}
+          <div className="bg-gradient-to-br from-accent-gold/10 via-accent-gold/5 to-transparent px-8 py-10 md:px-12 md:py-14 border-b border-accent-gold/10">
+            <div className="text-center space-y-4">
+              <div className="h-6 bg-accent-muted rounded w-3/4 mx-auto" />
+              <div className="h-6 bg-accent-muted rounded w-1/2 mx-auto" />
+              <div className="h-4 bg-accent-muted rounded w-1/4 mx-auto" />
+            </div>
           </div>
-          <div className="space-y-6">
-            <Card className="animate-pulse">
-              <CardContent className="p-12 bg-accent-muted/10">
-                <div className="h-4 bg-accent-muted rounded w-full"></div>
-              </CardContent>
-            </Card>
+          {/* Content skeleton */}
+          <div className="px-8 py-10 md:px-12 md:py-12 space-y-10">
+            <div className="space-y-4">
+              <div className="h-4 bg-accent-muted rounded w-1/3 mx-auto" />
+              <div className="h-4 bg-accent-muted rounded w-full" />
+              <div className="h-4 bg-accent-muted rounded w-full" />
+              <div className="h-4 bg-accent-muted rounded w-2/3" />
+            </div>
+            <div className="flex justify-center gap-8">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="text-center">
+                  <div className="h-12 w-12 bg-accent-muted rounded-full mx-auto" />
+                  <div className="h-3 bg-accent-muted rounded w-12 mt-2" />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
@@ -443,170 +448,188 @@ function SanctuaryContent() {
       )}
 
       {/* Content - only show when we have data and no errors */}
+      {/* Main Insight Tablet */}
       {insight && !loading && !error && (
-        <div className="bg-white/50 rounded-3xl p-8 md:p-12 max-w-4xl mx-auto">
-          <div className="space-y-8">
-            {/* Personal narrative */}
-            <Card>
-              <CardHeader>
-                <div className="space-y-1">
-                  <CardTitle>{t("insights.sunriseGuidance")}</CardTitle>
-                  {profile?.zodiac_sign && (
-                    <p className="text-sm text-accent-ink/60 uppercase tracking-wide">
-                      {profile.zodiac_sign}
-                    </p>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-accent-ink/80 leading-relaxed whitespace-pre-line">
-                  {insight.personalNarrative}
-                </p>
-              </CardContent>
-            </Card>
+        <div className="bg-white/60 backdrop-blur-sm rounded-3xl shadow-xl border border-white/80 max-w-3xl mx-auto overflow-hidden">
 
-            {/* Emotional Cadence - Day Arc Timeline */}
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("insights.emotionalCadence.title")}</CardTitle>
-                <p className="text-sm text-accent-ink/60">
-                  {t("insights.energeticRhythm", { timeframe })}
+          {/* Daily Wisdom Quote - Hero Section */}
+          {insight.dailyWisdom?.quote && (
+            <div className="bg-gradient-to-br from-accent-gold/10 via-accent-gold/5 to-transparent px-8 py-10 md:px-12 md:py-14 border-b border-accent-gold/10">
+              <div className="text-center space-y-4">
+                <p className="text-xl md:text-2xl font-serif text-accent-ink leading-relaxed italic">
+                  &ldquo;{insight.dailyWisdom.quote}&rdquo;
                 </p>
-              </CardHeader>
-              <CardContent>
-                <EmotionalCadenceTimeline
-                  dawn={insight.emotionalCadence?.dawn ?? "—"}
-                  midday={insight.emotionalCadence?.midday ?? "—"}
-                  dusk={insight.emotionalCadence?.dusk ?? "—"}
-                  evening={insight.emotionalCadence?.evening ?? "—"}
-                  midnight={insight.emotionalCadence?.midnight ?? "—"}
-                  morning={insight.emotionalCadence?.morning ?? "—"}
-                  coords={coords}
-                />
-              </CardContent>
-            </Card>
+                <p className="text-sm font-medium text-accent-gold tracking-wide uppercase">
+                  — {insight.dailyWisdom.author}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Content Body */}
+          <div className="px-8 py-10 md:px-12 md:py-12 space-y-10">
+
+            {/* Your Daily Reading */}
+            <section>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-accent-gold/30 to-transparent" />
+                <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-gold">
+                  {t("insights.yourReading")}
+                </h2>
+                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-accent-gold/30 to-transparent" />
+              </div>
+              {profile?.zodiac_sign && (
+                <p className="text-center text-sm text-accent-ink/50 uppercase tracking-wide mb-4">
+                  {profile.zodiac_sign} • {timeframeLabel}
+                </p>
+              )}
+              <p className="text-accent-ink/85 leading-relaxed whitespace-pre-line text-center md:text-left">
+                {insight.personalNarrative}
+              </p>
+            </section>
 
             {/* Tarot Card of the Day */}
-            <Card>
-              <CardHeader>
-                <p className="micro-label mb-2">{t("insights.tarot.label")}</p>
-                <CardTitle>{insight.tarot?.cardName ?? t("insights.tarot.yourCard")}</CardTitle>
-                <p className="text-sm text-accent-ink/60">{insight.tarot?.arcanaType ?? ""}</p>
-              </CardHeader>
-              <CardContent className="space-y-4">
+            <section>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-accent-gold/30 to-transparent" />
+                <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-gold">
+                  {t("insights.tarot.label")}
+                </h2>
+                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-accent-gold/30 to-transparent" />
+              </div>
+
+              <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
+                {/* Card Image */}
                 {(() => {
                   const tarotCard = insight.tarot?.cardName ? findTarotCard(insight.tarot.cardName) : null;
                   return tarotCard ? (
-                    <div className="mb-4 flex justify-center">
-                      <Image
-                        src={tarotCard.imageUrl}
-                        alt={tarotCard.name}
-                        width={160}
-                        height={240}
-                        className="h-60 w-auto rounded-xl object-contain shadow-md"
-                      />
+                    <div className="flex-shrink-0">
+                      <div className="relative">
+                        <Image
+                          src={tarotCard.imageUrl}
+                          alt={tarotCard.name}
+                          width={140}
+                          height={210}
+                          className="h-52 w-auto rounded-xl object-contain shadow-lg"
+                        />
+                        <div className="absolute inset-0 rounded-xl ring-1 ring-accent-gold/20" />
+                      </div>
                     </div>
-                  ) : (
-                    <p className="text-xs text-accent-ink/50 text-center mb-4">
-                      {t("insights.tarot.matchError")}
-                    </p>
-                  );
+                  ) : null;
                 })()}
-                <p className="text-accent-ink/80 leading-relaxed">
-                  {insight.tarot?.summary ?? ""}
-                </p>
-                <p className="text-accent-ink/70 leading-relaxed">
-                  {insight.tarot?.symbolism ?? ""}
-                </p>
-                <p className="text-accent-ink/70 leading-relaxed italic">
-                  {insight.tarot?.guidance ?? ""}
-                </p>
-              </CardContent>
-            </Card>
 
-            {/* Core themes and focus */}
-            <div className="grid md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">{t("insights.coreThemesFor", { timeframe: timeframeLabel })}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {(insight.coreThemes ?? []).map((theme, i) => (
-                      <li key={i} className="text-sm text-accent-ink/70 flex items-start gap-2">
-                        <span className="text-accent-gold mt-1">✦</span>
-                        <span>{theme}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">{t("insights.focusFor", { timeframe })}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-accent-ink/70 leading-relaxed">
-                    {insight.focusForPeriod}
+                {/* Card Details */}
+                <div className="flex-1 text-center md:text-left space-y-3">
+                  <div>
+                    <h3 className="text-xl font-semibold text-accent-ink">
+                      {insight.tarot?.cardName ?? t("insights.tarot.yourCard")}
+                    </h3>
+                    <p className="text-sm text-accent-ink/50">{insight.tarot?.arcanaType ?? ""}</p>
+                  </div>
+                  <p className="text-accent-ink/80 leading-relaxed">
+                    {insight.tarot?.summary ?? ""}
                   </p>
-                </CardContent>
-              </Card>
-            </div>
+                  <p className="text-accent-ink/70 leading-relaxed text-sm">
+                    {insight.tarot?.symbolism ?? ""}
+                  </p>
+                  <p className="text-accent-ink/70 leading-relaxed text-sm italic border-l-2 border-accent-gold/30 pl-4">
+                    {insight.tarot?.guidance ?? ""}
+                  </p>
+                </div>
+              </div>
+            </section>
 
-            {/* Lucky Compass */}
-            <Card>
-              <CardHeader>
-                <p className="micro-label mb-2">{t("insights.luckyCompass.label")}</p>
-                <CardTitle className="text-lg">{t("insights.luckyCompass.numbers", { timeframe: timeframeLabel })}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex gap-3 justify-center">
+            {/* Lucky Numbers */}
+            <section>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-accent-gold/30 to-transparent" />
+                <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-gold">
+                  {t("insights.luckyCompass.label")}
+                </h2>
+                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-accent-gold/30 to-transparent" />
+              </div>
+
+              {/* Numbers Display - Elegant Typography */}
+              <div className="flex justify-center gap-8 md:gap-12 mb-6">
+                {(insight.luckyCompass?.numbers ?? []).map((num, i) => (
+                  <div key={i} className="text-center">
+                    <p className="text-4xl md:text-5xl font-light text-accent-gold tracking-tight">
+                      {num.value}
+                    </p>
+                    <p className="text-[10px] uppercase tracking-[0.15em] text-accent-ink/40 mt-1">
+                      {num.label}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Number Meanings */}
+              {(insight.luckyCompass?.numbers?.length ?? 0) > 0 && (
+                <div className="space-y-2 text-center">
                   {(insight.luckyCompass?.numbers ?? []).map((num, i) => (
-                    <div key={i} className="flex-1 max-w-[120px] pill bg-accent-muted text-center min-h-[72px] py-3 flex flex-col justify-center">
-                      <p className="text-2xl font-bold text-accent-ink">{num.value}</p>
-                      <p className="text-xs text-accent-ink/60 mt-1">{num.label}</p>
-                    </div>
+                    <p key={i} className="text-sm text-accent-ink/60">
+                      <span className="font-medium text-accent-ink/70">{num.value}</span>
+                      <span className="mx-2 text-accent-gold/50">·</span>
+                      <span>{num.meaning}</span>
+                    </p>
                   ))}
                 </div>
+              )}
+            </section>
 
-                {(insight.luckyCompass?.numbers?.length ?? 0) > 0 && (
-                  <div className="text-sm text-accent-ink/60 space-y-2">
-                    {(insight.luckyCompass?.numbers ?? []).map((num, i) => (
-                      <p key={i} className="flex items-start py-1">
-                        <span className="font-medium text-accent-ink/80 mr-2">{num.value}:</span>
-                        <span>{num.meaning}</span>
-                      </p>
-                    ))}
-                  </div>
-                )}
+            {/* Core Themes */}
+            <section>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-accent-gold/30 to-transparent" />
+                <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-gold">
+                  {t("insights.themes")}
+                </h2>
+                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-accent-gold/30 to-transparent" />
+              </div>
 
-                <div>
-                  <p className="micro-label mb-3">{t("insights.luckyCompass.powerWords")}</p>
-                  <div className="flex flex-wrap gap-2 justify-center">
-                    {(insight.luckyCompass?.powerWords ?? []).map((word, i) => (
-                      <span
-                        key={i}
-                        className="pill bg-white text-accent-ink text-sm border border-border-subtle min-h-[44px] px-4 flex items-center"
-                      >
-                        {word}
-                      </span>
-                    ))}
-                  </div>
+              <div className="flex flex-wrap justify-center gap-3">
+                {(insight.coreThemes ?? []).map((theme, i) => (
+                  <span
+                    key={i}
+                    className="px-4 py-2 text-sm text-accent-ink/80 bg-accent-gold/5 rounded-full border border-accent-gold/15"
+                  >
+                    {theme}
+                  </span>
+                ))}
+              </div>
+            </section>
+
+            {/* Focus for the Period */}
+            {insight.focusForPeriod && (
+              <section className="bg-accent-muted/30 rounded-2xl p-6 text-center">
+                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-accent-gold mb-3">
+                  {t("insights.focusFor", { timeframe })}
+                </p>
+                <p className="text-accent-ink/75 leading-relaxed">
+                  {insight.focusForPeriod}
+                </p>
+              </section>
+            )}
+
+            {/* Power Words */}
+            {(insight.luckyCompass?.powerWords?.length ?? 0) > 0 && (
+              <section className="text-center pt-4">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-accent-ink/40 mb-3">
+                  {t("insights.luckyCompass.powerWords")}
+                </p>
+                <div className="flex justify-center gap-6">
+                  {(insight.luckyCompass?.powerWords ?? []).map((word, i) => (
+                    <span
+                      key={i}
+                      className="text-lg font-light text-accent-gold tracking-wide"
+                    >
+                      {word}
+                    </span>
+                  ))}
                 </div>
+              </section>
+            )}
 
-                {insight.luckyCompass?.handwrittenNote && (
-                  <div className="pt-4 border-t border-border-subtle">
-                    <p className="micro-label mb-2">{t("insights.luckyCompass.handwrittenNote")}</p>
-                    <p className="text-sm text-accent-ink/70 italic leading-relaxed text-center">
-                      &quot;{insight.luckyCompass.handwrittenNote}&quot;
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* FEATURE DISABLED: Rune Whisper / Daily Sigil */}
           </div>
         </div>
       )}
