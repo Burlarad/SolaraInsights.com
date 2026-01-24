@@ -280,26 +280,15 @@
       "focusForPeriod": "本期重點",
       "tarot": {
         "title": "塔羅牌",
-        "label": "塔羅牌 — 每日原型",
+        "label": "您的牌",
         "yourCard": "您的牌",
         "matchError": "我們在匹配這張塔羅牌時遇到問題。"
       },
       "luckyCompass": {
         "title": "幸運指南針",
-        "label": "幸運指南針 — 幸運與光明標記",
+        "label": "您的數字",
         "numbers": "{timeframe}的數字",
-        "powerWords": "力量詞彙",
-        "handwrittenNote": "手寫便條"
-      },
-      "emotionalCadence": {
-        "title": "情緒節奏",
-        "label": "情緒節奏 — 每日節律",
-        "dawn": "黎明",
-        "midday": "正午",
-        "dusk": "黃昏",
-        "evening": "傍晚",
-        "midnight": "午夜",
-        "morning": "早晨"
+        "powerWords": "力量詞"
       },
       "errors": {
         "profileLoadError": "載入您的個人資料時遇到問題。請再試一次，或聯繫客服。",
@@ -310,7 +299,9 @@
         "paused": "社交洞察已暫停",
         "pausedDescription": "開啟社交洞察，以連結帳戶的模式增強您的解讀。"
       },
-      "reactivated": "已重新啟用 — 歡迎回來。"
+      "reactivated": "已重新啟用 — 歡迎回來。",
+      "yourReading": "您的解讀",
+      "themes": "主題"
     }
   },
   "numerology": {

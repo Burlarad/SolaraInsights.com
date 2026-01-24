@@ -277,26 +277,15 @@
       "focusForPeriod": "Koncentracja na ten okres",
       "tarot": {
         "title": "Karta Tarota",
-        "label": "LOSOWANIE TAROTA — CODZIENNY ARCHETYP",
+        "label": "Twoja Karta",
         "yourCard": "Twoja Karta",
         "matchError": "Mieliśmy problem z dopasowaniem tej karty tarota do naszej talii."
       },
       "luckyCompass": {
         "title": "Kompas Szczęścia",
-        "label": "KOMPAS SZCZĘŚCIA — CODZIENNA FORTUNA + ZNAKI ŚWIATŁA",
+        "label": "Twoje Liczby",
         "numbers": "Liczby na {timeframe}",
-        "powerWords": "SŁOWA MOCY",
-        "handwrittenNote": "RĘCZNIE NAPISANA NOTATKA"
-      },
-      "emotionalCadence": {
-        "title": "Emocjonalna Kadencja",
-        "label": "EMOCJONALNA KADENCJA — CODZIENNY RYTM",
-        "dawn": "Świt",
-        "midday": "Południe",
-        "dusk": "Zmierzch",
-        "evening": "Wieczór",
-        "midnight": "Północ",
-        "morning": "Poranek"
+        "powerWords": "Słowa Mocy"
       },
       "errors": {
         "profileLoadError": "Mieliśmy problem z załadowaniem twojego profilu. Spróbuj ponownie lub skontaktuj się z pomocą techniczną, jeśli problem będzie się powtarzał.",
@@ -307,7 +296,9 @@
         "paused": "Spostrzeżenia społeczne wstrzymane",
         "pausedDescription": "Włącz Spostrzeżenia Społeczne, aby wzbogacić swoje odczyty o wzorce z połączonych kont."
       },
-      "reactivated": "Reaktywowane — witaj z powrotem."
+      "reactivated": "Reaktywowane — witaj z powrotem.",
+      "yourReading": "Twoja Lektura",
+      "themes": "Tematy"
     }
   },
   "numerology": {

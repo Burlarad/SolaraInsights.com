@@ -277,26 +277,15 @@
       "focusForPeriod": "Fokus für diesen Zeitraum",
       "tarot": {
         "title": "Tarotkarte",
-        "label": "TAROT-ZIEHUNG — TÄGLICHER ARCHETYP",
+        "label": "Deine Karte",
         "yourCard": "Ihre Karte",
         "matchError": "Wir konnten diese Tarotkarte nicht unserem Deck zuordnen."
       },
       "luckyCompass": {
         "title": "Glückskompass",
-        "label": "GLÜCKSKOMPASS — TÄGLICHE GLÜCKS- UND LICHTMARKER",
+        "label": "Deine Zahlen",
         "numbers": "Zahlen für {timeframe}",
-        "powerWords": "KRAFTWÖRTER",
-        "handwrittenNote": "EINE HANDSCHRIFTLICHE NOTIZ"
-      },
-      "emotionalCadence": {
-        "title": "Emotionale Kadenz",
-        "label": "EMOTIONALE KADENZ — TÄGLICHER RHYTHMUS",
-        "dawn": "Morgendämmerung",
-        "midday": "Mittag",
-        "dusk": "Abenddämmerung",
-        "evening": "Abend",
-        "midnight": "Mitternacht",
-        "morning": "Morgen"
+        "powerWords": "Kraftwörter"
       },
       "errors": {
         "profileLoadError": "Wir hatten Probleme beim Laden Ihres Profils. Bitte versuchen Sie es erneut oder kontaktieren Sie den Support, wenn dies weiterhin auftritt.",
@@ -307,7 +296,9 @@
         "paused": "Soziale Einblicke pausiert",
         "pausedDescription": "Aktivieren Sie Soziale Einblicke, um Ihre Lesungen mit Mustern aus Ihren verbundenen Konten zu verbessern."
       },
-      "reactivated": "Reaktiviert — willkommen zurück."
+      "reactivated": "Reaktiviert — willkommen zurück.",
+      "yourReading": "Deine Lesung",
+      "themes": "Themen"
     }
   },
   "numerology": {

@@ -24,8 +24,8 @@ import { AYREN_MODE_SOULPRINT_LONG } from "@/lib/ai/voice";
 import { resolveLocaleAuth, getCriticalLanguageBlock } from "@/lib/i18n/resolveLocale";
 import { localeNames, isValidLocale } from "@/i18n";
 
-// Bump to v4 to invalidate legacy cached insights (year tab now uses global events)
-const PROMPT_VERSION = 4;
+// Bump to v6 to invalidate cache (gender inference from name for personalized quotes)
+const PROMPT_VERSION = 6;
 
 // Human-friendly rate limits (only applies on cache miss / generation)
 // Users can navigate Today→Week→Month→Year freely since cache hits bypass these
@@ -513,6 +513,19 @@ Respond with ONLY valid JSON. No markdown, no explanations—just the JSON objec
     // FEATURE DISABLED: Rune Whisper / Daily Sigil
     // const runeNames = getRuneNames();
 
+    // Determine gender-appropriate quote guidance
+    // If gender is explicitly set, use it. Otherwise, infer from name.
+    const userName = profile.preferred_name || profile.full_name || "";
+    const genderContext = profile.gender
+      ? profile.gender === "male"
+        ? "masculine energy (select quotes from strong male historical figures: philosophers, leaders, warriors, inventors)"
+        : profile.gender === "female"
+        ? "feminine energy (select quotes from powerful female historical figures: queens, poets, activists, pioneers)"
+        : "balanced energy (select quotes from any inspiring historical figure)"
+      : userName
+        ? `inferred energy based on the name "${userName}" — if the name suggests masculine energy, select quotes from strong male historical figures (philosophers, leaders, warriors, inventors); if feminine, select quotes from powerful female historical figures (queens, poets, activists, pioneers); if ambiguous or gender-neutral, select from any inspiring historical figure`
+        : "universal energy (select quotes from any inspiring historical figure)";
+
     const userPrompt = `Generate ${timeframe} insights for ${profile.preferred_name || profile.full_name || "this person"}.
 
 Birth details:
@@ -521,6 +534,7 @@ Birth details:
 - Location: ${profile.birth_city || "unknown"}, ${profile.birth_region || ""}, ${profile.birth_country || ""}
 - Timezone: ${profile.timezone}
 - Sign: ${profile.zodiac_sign || "unknown"}
+- Gender: ${profile.gender || "infer from name"}
 
 Current date: ${new Date().toISOString()}
 Period: ${periodKey} (${timeframe})
@@ -549,17 +563,16 @@ For the tarot card:
 - Do NOT claim you are literally drawing from a physical deck.
 - Treat the card as a symbolic archetype that fits this person's current energy.
 
+For the daily wisdom quote:
+- Select a REAL quote from a REAL historical figure (not fictional characters)
+- The quote should resonate with ${genderContext}
+- Match the quote to their current themes, zodiac energy, or tarot card meaning
+- Famous historical figures include: Marcus Aurelius, Maya Angelou, Rumi, Eleanor Roosevelt, Sun Tzu, Marie Curie, Seneca, Frida Kahlo, Theodore Roosevelt, Coco Chanel, Winston Churchill, Virginia Woolf, Bruce Lee, Audrey Hepburn, etc.
+- The quote must be AUTHENTIC - do not invent quotes
+
 Return a JSON object with this structure:
 {
   "personalNarrative": "Exactly 2 paragraphs, 8-12 sentences total. Include 1 micro-action (<=10 min). Follow Ayren voice rules.",
-  "emotionalCadence": {
-    "dawn": "one-word emotional state for sunrise",
-    "midday": "one-word emotional state for noon",
-    "dusk": "one-word emotional state for sunset",
-    "evening": "one-word emotional state for after sunset",
-    "midnight": "one-word emotional state for midnight",
-    "morning": "one-word emotional state for pre-dawn"
-  },
   "coreThemes": ["theme1", "theme2", "theme3"],
   "focusForPeriod": "one paragraph of practical focus",
   "tarot": {
@@ -575,8 +588,12 @@ Return a JSON object with this structure:
       {"value": NUMBER_1_99, "label": "ROOT|PATH|BLOOM", "meaning": "one sentence"},
       {"value": NUMBER_1_99, "label": "ROOT|PATH|BLOOM", "meaning": "one sentence"}
     ],
-    "powerWords": ["WORD1", "WORD2", "WORD3"],
-    "handwrittenNote": "1-2 sentence affirmation"
+    "powerWords": ["WORD1", "WORD2", "WORD3"]
+  },
+  "dailyWisdom": {
+    "quote": "The actual quote from the historical figure",
+    "author": "Name of the historical figure",
+    "context": "One sentence explaining why this quote resonates with them today"
   }
 }
 

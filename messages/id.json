@@ -277,26 +277,15 @@
       "focusForPeriod": "Fokus untuk periode ini",
       "tarot": {
         "title": "Kartu Tarot",
-        "label": "UNDIAN TAROT — ARKETIPE HARIAN",
+        "label": "Kartu Anda",
         "yourCard": "Kartu Anda",
         "matchError": "Kami mengalami kesulitan mencocokkan kartu tarot ini dengan dek kami."
       },
       "luckyCompass": {
         "title": "Kompas Keberuntungan",
-        "label": "KOMPAS KEBERUNTUNGAN — KEBERUNTUNGAN HARIAN + PENANDA CAHAYA",
+        "label": "Angka Anda",
         "numbers": "Angka {timeframe}",
-        "powerWords": "KATA KEKUATAN",
-        "handwrittenNote": "CATATAN TULISAN TANGAN"
-      },
-      "emotionalCadence": {
-        "title": "Irama Emosional",
-        "label": "IRAMA EMOSIONAL — RITME HARIAN",
-        "dawn": "Fajar",
-        "midday": "Siang",
-        "dusk": "Senja",
-        "evening": "Malam",
-        "midnight": "Tengah malam",
-        "morning": "Pagi"
+        "powerWords": "Kata Kekuatan"
       },
       "errors": {
         "profileLoadError": "Kami mengalami kesulitan memuat profil Anda. Silakan coba lagi, atau hubungi dukungan jika ini berlanjut.",
@@ -307,7 +296,9 @@
         "paused": "Wawasan sosial dijeda",
         "pausedDescription": "Aktifkan Wawasan Sosial untuk meningkatkan bacaan Anda dengan pola dari akun yang terhubung."
       },
-      "reactivated": "Diaktifkan kembali — selamat datang kembali."
+      "reactivated": "Diaktifkan kembali — selamat datang kembali.",
+      "yourReading": "Bacaan Anda",
+      "themes": "Tema"
     }
   },
   "numerology": {

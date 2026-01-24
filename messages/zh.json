@@ -277,26 +277,15 @@
       "focusForPeriod": "本阶段重点",
       "tarot": {
         "title": "塔罗牌",
-        "label": "塔罗概览 — 每日抽牌",
+        "label": "您的牌",
         "yourCard": "您的牌",
         "matchError": "我们在匹配这张塔罗牌到牌组时遇到了问题。"
       },
       "luckyCompass": {
         "title": "幸运罗盘",
-        "label": "幸运罗盘 — 每日幸运与光明标记",
+        "label": "您的数字",
         "numbers": "{timeframe}的数字",
-        "powerWords": "能量词汇",
-        "handwrittenNote": "手写笔记"
-      },
-      "emotionalCadence": {
-        "title": "情绪节律",
-        "label": "情绪节律 — 每日韵律",
-        "dawn": "黎明",
-        "midday": "正午",
-        "dusk": "黄昏",
-        "evening": "傍晚",
-        "midnight": "午夜",
-        "morning": "早晨"
+        "powerWords": "力量词"
       },
       "errors": {
         "profileLoadError": "加载您的档案时遇到问题，请重试，如问题持续请联系支持。",
@@ -307,7 +296,9 @@
         "paused": "社交洞见已暂停",
         "pausedDescription": "开启社交洞见，用您关联账户的模式来增强您的解读。"
       },
-      "reactivated": "已重新激活 — 欢迎回来。"
+      "reactivated": "已重新激活 — 欢迎回来。",
+      "yourReading": "您的解读",
+      "themes": "主题"
     }
   },
   "numerology": {

@@ -268,6 +268,8 @@
       "ready": "Your insights are ready.",
       "localTimezone": "Local timezone",
       "greeting": "Welcome back",
+      "yourReading": "Your Reading",
+      "themes": "Themes",
       "sunriseGuidance": "Sunrise guidance",
       "energeticRhythm": "Your energetic rhythm for {timeframe}",
       "coreThemesFor": "{timeframe}'s core themes",
@@ -277,26 +279,15 @@
       "focusForPeriod": "Focus for this period",
       "tarot": {
         "title": "Tarot Card",
-        "label": "TAROT OVERVIEW — DAILY DRAW",
+        "label": "Your Card",
         "yourCard": "Your Card",
         "matchError": "We had trouble matching this tarot card to our deck."
       },
       "luckyCompass": {
         "title": "Lucky Compass",
-        "label": "LUCKY COMPASS — DAILY LUCK + LIGHT MARKERS",
+        "label": "Your Numbers",
         "numbers": "{timeframe}'s numbers",
-        "powerWords": "POWER WORDS",
-        "handwrittenNote": "A HANDWRITTEN NOTE"
-      },
-      "emotionalCadence": {
-        "title": "Emotional Cadence",
-        "label": "EMOTIONAL CADENCE — DAILY RHYTHM",
-        "dawn": "Dawn",
-        "midday": "Midday",
-        "dusk": "Dusk",
-        "evening": "Evening",
-        "midnight": "Midnight",
-        "morning": "Morning"
+        "powerWords": "Power Words"
       },
       "errors": {
         "profileLoadError": "We had trouble loading your profile. Please try again, or contact support if this continues.",
