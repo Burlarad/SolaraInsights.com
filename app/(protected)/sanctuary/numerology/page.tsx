@@ -27,13 +27,21 @@ export default function NumerologyPage() {
       setError(null);
 
       try {
-        const response = await fetch(`/api/numerology?system=${system}`);
+        // TEMPORARY FIX: Reverted to working /api/numerology endpoint
+        // New /api/numerology-library endpoint incomplete (missing cycles, table name mismatch)
+        // See: docs/audit/LIBRARY_BOOK_FORENSIC_AUDIT.md
+        const response = await fetch(`/api/numerology?system=${system}`, {
+          method: "GET",
+        });
         const result = await response.json();
 
         if (!response.ok) {
-          if (result.code === "MISSING_BIRTH_NAME") {
+          // Support both new structured error codes and legacy codes
+          const code = result?.errorCode || result?.code;
+
+          if (code === "MISSING_NAME" || code === "MISSING_BIRTH_NAME") {
             setError("birth_name_required");
-          } else if (result.code === "MISSING_BIRTH_DATE") {
+          } else if (code === "MISSING_BIRTH_DATE") {
             setError("birth_date_required");
           } else {
             setError(result.message || "Failed to load numerology profile");

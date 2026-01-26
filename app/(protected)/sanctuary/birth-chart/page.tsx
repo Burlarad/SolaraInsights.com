@@ -176,7 +176,12 @@ export default function BirthChartPage() {
       const data = await res.json();
 
       if (res.status === 400) {
-        if (data?.error === "Incomplete profile") {
+        // Check for incomplete profile error (both old and new endpoint formats)
+        if (
+          data?.error === "Incomplete profile" ||
+          data?.errorCode === "INCOMPLETE_BIRTH_DATA" ||
+          data?.errorCode === "INCOMPLETE_PREVIEW_DATA"
+        ) {
           setIncompleteProfile(true);
           setLoading(false);
           return;
