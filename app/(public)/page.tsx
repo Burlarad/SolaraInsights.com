@@ -4,7 +4,6 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { HeroSection } from "@/components/home/HeroSection";
 import { ZodiacGrid } from "@/components/home/ZodiacGrid";
-import { TarotArena } from "@/components/home/TarotArena";
 import { CompatibilityArena } from "@/components/home/CompatibilityArena";
 import { SolaraPath } from "@/components/home/SolaraPath";
 import { LearnPreview } from "@/components/home/LearnPreview";
@@ -72,12 +71,7 @@ function HomeContent() {
           <LearnPreview />
         </section>
       ) : (
-        <>
-          <ZodiacGrid timeframe={timeframe} experience={experience} />
-          <section className="max-w-3xl mx-auto px-4 sm:px-6 pb-16 mt-12">
-            <TarotArena />
-          </section>
-        </>
+        <ZodiacGrid timeframe={timeframe} experience={experience} />
       )}
 
       <SolaraPath />
