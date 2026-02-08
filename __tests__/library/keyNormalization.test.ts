@@ -197,10 +197,10 @@ describe("Chart Key Normalization", () => {
       expect(result).toBe(true);
     });
 
-    it("returns false when birth_time is null (NO NOON DEFAULTING)", () => {
+    it("returns false when birth_time is missing (NO NOON DEFAULTING)", () => {
       const result = isChartInputComplete({
         birth_date: "1990-05-15",
-        birth_time: null,
+        birth_time: undefined,
         birth_lat: 40.7128,
         birth_lon: -74.006,
         timezone: "America/New_York",
@@ -209,11 +209,11 @@ describe("Chart Key Normalization", () => {
       expect(result).toBe(false);
     });
 
-    it("returns false when birth_lat is null", () => {
+    it("returns false when birth_lat is missing", () => {
       const result = isChartInputComplete({
         birth_date: "1990-05-15",
         birth_time: "14:30",
-        birth_lat: null,
+        birth_lat: undefined,
         birth_lon: -74.006,
         timezone: "America/New_York",
       });
@@ -227,7 +227,7 @@ describe("Chart Key Normalization", () => {
         birth_time: "14:30",
         birth_lat: 40.7128,
         birth_lon: -74.006,
-        timezone: null,
+        timezone: undefined,
       });
 
       expect(result).toBe(false);
@@ -367,7 +367,7 @@ describe("Numerology Key Normalization", () => {
 
     it("returns false when first_name is missing", () => {
       const result = isNumerologyInputComplete({
-        first_name: null,
+        first_name: undefined,
         last_name: "Doe",
         birth_date: "1990-05-15",
       });
@@ -379,7 +379,7 @@ describe("Numerology Key Normalization", () => {
       const result = isNumerologyInputComplete({
         first_name: "John",
         last_name: "Doe",
-        birth_date: null,
+        birth_date: undefined,
       });
 
       expect(result).toBe(false);
