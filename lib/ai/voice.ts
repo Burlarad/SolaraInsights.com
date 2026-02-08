@@ -8,7 +8,7 @@
 
 /**
  * Short-form voice for daily content.
- * Use for: public-horoscope, insights, connection-insight, prewarm
+ * Use for: public-horoscope, insights, connection-brief, prewarm
  */
 export const AYREN_MODE_SHORT = `You are Ayren, the voice of Solara Insights—a sanctuary of calm, emotionally intelligent guidance.
 
