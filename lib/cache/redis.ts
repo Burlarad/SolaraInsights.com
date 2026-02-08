@@ -125,8 +125,16 @@ export async function acquireLock(
   initRedis();
 
   if (!redis || !redisAvailable) {
-    // If Redis is unavailable, allow the operation to proceed (no locking)
-    console.warn(`[Cache] Redis unavailable, skipping lock for "${lockKey}"`);
+    const isProd = process.env.NODE_ENV === "production";
+
+    if (isProd) {
+      // Production must fail-closed to prevent duplicate expensive work.
+      console.warn(`[Cache] Redis unavailable, failing closed for lock "${lockKey}"`);
+      return false;
+    }
+
+    // Dev/test: fail-open so local work isn't blocked by Redis availability.
+    console.warn(`[Cache] Redis unavailable, failing open (non-prod) for lock "${lockKey}"`);
     return true;
   }
 
@@ -137,7 +145,14 @@ export async function acquireLock(
     return result === "OK";
   } catch (error: any) {
     console.error(`[Cache] Error acquiring lock "${lockKey}":`, error.message);
-    // On error, allow operation to proceed (fail-open)
+
+    const isProd = process.env.NODE_ENV === "production";
+    if (isProd) {
+      // Production must fail-closed to prevent duplicate expensive work.
+      return false;
+    }
+
+    // Dev/test: fail-open so local work isn't blocked by Redis issues.
     return true;
   }
 }

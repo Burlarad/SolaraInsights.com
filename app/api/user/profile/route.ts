@@ -4,6 +4,7 @@ import { getZodiacSign } from "@/lib/zodiac";
 import { computeAndStoreBirthChart } from "@/lib/birthChart/storage";
 import { touchLastSeen } from "@/lib/activity/touchLastSeen";
 import { isValidBirthTimezone } from "@/lib/location/detection";
+import { syncOfficialKeys } from "@/lib/library/profileSync";
 import tzLookup from "tz-lookup";
 
 export async function PATCH(req: NextRequest) {
@@ -238,6 +239,23 @@ export async function PATCH(req: NextRequest) {
         console.error("[Profile] ✗ Failed to recompute birth chart:", chartError.message);
         console.warn("[Profile] Chart will be computed on next birth chart page load");
       }
+    }
+
+    // Sync official library keys (chart + numerology) after any profile update
+    // Handles both complete → set key and incomplete → clear key
+    try {
+      await syncOfficialKeys(user.id, {
+        birth_date: updatedProfile.birth_date,
+        birth_time: updatedProfile.birth_time,
+        birth_lat: updatedProfile.birth_lat,
+        birth_lon: updatedProfile.birth_lon,
+        timezone: updatedProfile.timezone,
+        full_name: updatedProfile.full_name,
+      });
+      console.log("[Profile] ✓ Official library keys synced");
+    } catch (syncError: any) {
+      console.error("[Profile] ✗ Failed to sync official keys:", syncError.message);
+      // Non-blocking — keys will be computed on next chart/numerology load
     }
 
     return NextResponse.json({

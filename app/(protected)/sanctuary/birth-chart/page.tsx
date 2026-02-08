@@ -8,8 +8,10 @@ import { SolaraCard } from "@/components/ui/solara-card";
 import { Button } from "@/components/ui/button";
 import { pickRotatingMessage, getErrorCategory, type ApiErrorResponse } from "@/lib/ui/pickRotatingMessage";
 import { AspectGrid, AspectList } from "@/components/charts/AspectGrid";
+import { PlacePicker, type PlaceSelection } from "@/components/shared/PlacePicker";
 import { BalanceCharts } from "@/components/charts/BalanceCharts";
 import { useTranslations } from "next-intl";
+import { useSettings } from "@/providers/SettingsProvider";
 
 interface ErrorInfo {
   message: string;
@@ -107,9 +109,20 @@ function formatHouseLabel(house: number): string {
   return `${meta.ordinal} House – ${meta.title}`;
 }
 
+type CheckoutInputs = {
+  birth_date: string;
+  birth_time: string;
+  birth_lat: number;
+  birth_lon: number;
+  timezone: string;
+};
+
 type BirthChartResponse = {
-  placements: any; // SwissPlacements type - can refine later
+  placements: any;
   insight: FullBirthChartInsight | null;
+  chart_key?: string;
+  is_official?: boolean;
+  mode?: "official" | "checkout";
   error?: string;
   message?: string;
 };
@@ -124,6 +137,14 @@ export default function BirthChartPage() {
   const [placements, setPlacements] = useState<any | null>(null);
   const [activeSection, setActiveSection] = useState<SoulPathSection>("narrative");
   const [showAllAspects, setShowAllAspects] = useState(false);
+  const [checkoutMode, setCheckoutMode] = useState(false);
+  const [checkoutPanelOpen, setCheckoutPanelOpen] = useState(false);
+  const [checkoutDate, setCheckoutDate] = useState("");
+  const [checkoutTime, setCheckoutTime] = useState("");
+  const [checkoutPlace, setCheckoutPlace] = useState<PlaceSelection | null>(null);
+  const activeCheckoutInputsRef = useRef<CheckoutInputs | null>(null);
+  const checkoutPrefillDoneRef = useRef(false);
+  const { profile } = useSettings();
   const t = useTranslations("astrology");
   const tCommon = useTranslations("common");
 
@@ -140,16 +161,25 @@ export default function BirthChartPage() {
     typeof insight.sections?.purposeAndGrowth === "string" &&
     typeof insight.sections?.innerWorld === "string";
 
-  const fetchBirthChart = useCallback(async () => {
+  const fetchBirthChart = useCallback(async (checkoutInputs?: CheckoutInputs) => {
     setLoading(true);
     setError(null);
     setErrorInfo(null);
     setIncompleteProfile(false);
     attemptCountRef.current += 1;
     const currentAttempt = attemptCountRef.current;
+    activeCheckoutInputsRef.current = checkoutInputs ?? null;
 
     try {
-      const res = await fetch("/api/birth-chart", { method: "POST" });
+      const body = checkoutInputs
+        ? { mode: "checkout" as const, inputs: checkoutInputs }
+        : { mode: "official" as const };
+
+      const res = await fetch("/api/birth-chart-library", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
 
       if (res.status === 401) {
         setError("Please sign in to view your Soul Path.");
@@ -236,6 +266,60 @@ export default function BirthChartPage() {
     fetchBirthChart();
   }, [fetchBirthChart]);
 
+  const handleCheckoutGenerate = useCallback(() => {
+    if (!checkoutDate || !checkoutTime || !checkoutPlace) return;
+    setCheckoutMode(true);
+    setCheckoutPanelOpen(false);
+    fetchBirthChart({
+      birth_date: checkoutDate,
+      birth_time: checkoutTime,
+      birth_lat: checkoutPlace.birth_lat,
+      birth_lon: checkoutPlace.birth_lon,
+      timezone: checkoutPlace.timezone,
+    });
+  }, [checkoutDate, checkoutTime, checkoutPlace, fetchBirthChart]);
+
+  const handleReturnToOfficial = useCallback(() => {
+    setCheckoutMode(false);
+    setCheckoutPanelOpen(false);
+    setCheckoutDate("");
+    setCheckoutTime("");
+    setCheckoutPlace(null);
+    checkoutPrefillDoneRef.current = false;
+    fetchBirthChart();
+  }, [fetchBirthChart]);
+
+  // Prefill checkout fields from Settings on first panel open
+  useEffect(() => {
+    if (!checkoutPanelOpen || checkoutPrefillDoneRef.current || !profile) return;
+    checkoutPrefillDoneRef.current = true;
+    if (!checkoutDate && profile.birth_date) setCheckoutDate(profile.birth_date);
+    if (!checkoutTime && profile.birth_time) setCheckoutTime(profile.birth_time);
+    if (
+      !checkoutPlace &&
+      profile.birth_lat != null &&
+      profile.birth_lon != null &&
+      profile.timezone
+    ) {
+      setCheckoutPlace({
+        birth_lat: profile.birth_lat,
+        birth_lon: profile.birth_lon,
+        timezone: profile.timezone,
+        birth_city: profile.birth_city ?? "",
+        birth_region: profile.birth_region ?? "",
+        birth_country: profile.birth_country ?? "",
+      });
+    }
+  }, [checkoutPanelOpen, profile, checkoutDate, checkoutTime, checkoutPlace]);
+
+  // Reset checkout state on unmount (defensive)
+  useEffect(() => {
+    return () => {
+      activeCheckoutInputsRef.current = null;
+      checkoutPrefillDoneRef.current = false;
+    };
+  }, []);
+
   // Build sections array with translations
   const SECTIONS: { id: SoulPathSection; label: string }[] = [
     { id: "narrative", label: t("sections.narrative") },
@@ -255,6 +339,79 @@ export default function BirthChartPage() {
       <div className="flex justify-center">
         <SanctuaryTabs />
       </div>
+
+      {/* Checkout Another Book */}
+      {!loading && !error && !incompleteProfile && (
+        <div className="max-w-3xl mx-auto">
+          {checkoutMode ? (
+            <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-4 flex items-center justify-between gap-4">
+              <p className="text-sm text-accent-ink/70">
+                Viewing a checkout chart — temporary, not saved.
+              </p>
+              <Button variant="outline" size="sm" onClick={handleReturnToOfficial}>
+                Return to My Book
+              </Button>
+            </div>
+          ) : (
+            <div>
+              <button
+                onClick={() => setCheckoutPanelOpen(!checkoutPanelOpen)}
+                className="text-sm text-accent underline hover:no-underline"
+              >
+                {checkoutPanelOpen ? "Close" : "Checkout Another Book"}
+              </button>
+              {checkoutPanelOpen && (
+                <div className="mt-4 rounded-xl border border-accent-soft bg-white/50 p-6 space-y-4">
+                  <p className="text-sm text-accent-ink/70">
+                    Generate a chart for different birth data. This is temporary and won't affect your saved chart.
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm text-accent-ink/70 mb-1 block">Birth Date</label>
+                      <input
+                        type="date"
+                        value={checkoutDate}
+                        onChange={(e) => setCheckoutDate(e.target.value)}
+                        className="w-full rounded-lg border border-accent-soft px-3 py-2 text-sm bg-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-accent-ink/70 mb-1 block">Birth Time</label>
+                      <input
+                        type="time"
+                        value={checkoutTime}
+                        onChange={(e) => setCheckoutTime(e.target.value)}
+                        className="w-full rounded-lg border border-accent-soft px-3 py-2 text-sm bg-white"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm text-accent-ink/70 mb-1 block">Birth Location</label>
+                    <PlacePicker
+                      initialValue={
+                        checkoutPlace
+                          ? [checkoutPlace.birth_city, checkoutPlace.birth_region, checkoutPlace.birth_country]
+                              .filter(Boolean)
+                              .join(", ")
+                          : ""
+                      }
+                      onSelect={(place) => setCheckoutPlace(place)}
+                      onClear={() => setCheckoutPlace(null)}
+                      placeholder="Search for birth city..."
+                    />
+                  </div>
+                  <Button
+                    onClick={handleCheckoutGenerate}
+                    disabled={!checkoutDate || !checkoutTime || !checkoutPlace}
+                  >
+                    Generate Chart
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       {loading && (
         <div>
@@ -291,7 +448,7 @@ export default function BirthChartPage() {
             </p>
           )}
 
-          <Button variant="outline" onClick={() => fetchBirthChart()}>
+          <Button variant="outline" onClick={() => fetchBirthChart(activeCheckoutInputsRef.current ?? undefined)}>
             {tCommon("tryAgain")}
           </Button>
         </div>

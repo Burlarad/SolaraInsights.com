@@ -27,11 +27,17 @@ import { checkBudget, incrementBudget } from "@/lib/ai/costControl";
 import { AYREN_MODE_SHORT, PRO_SOCIAL_NUDGE_INSTRUCTION, HUMOR_INSTRUCTION, LOW_SIGNAL_GUARDRAIL } from "@/lib/ai/voice";
 import { logTokenAudit } from "@/lib/ai/tokenAudit";
 import { isValidBirthTimezone } from "@/lib/location/detection";
+import { parseMetadataFromSummary, getSummaryTextOnly } from "@/lib/social/summarize";
+import { normalizeInsight } from "@/lib/insights/normalizeInsight";
+import { getCriticalLanguageBlock } from "@/lib/i18n/resolveLocale";
+import { localeNames } from "@/i18n";
 
-const PROMPT_VERSION = 3; // bumped after removing emotionalCadence from output schema
+const PROMPT_VERSION = 6; // Must match /api/insights (v6: gender inference, dailyWisdom, language block)
 const BRIEF_PROMPT_VERSION = 1; // Must match /api/connection-brief
 const PREWARM_WINDOW_HOURS = 3; // Pre-warm if within 3 hours of midnight
 const MAX_USERS_PER_RUN = 500; // Safety cap to avoid timeouts
+const MAX_CONNECTIONS_PER_USER = 20; // Cap connections prewarmed per user
+const MAX_AI_CALLS_PER_RUN = 100; // Hard ceiling on total AI calls per cron run
 const BRIEF_ACTIVITY_WINDOW_DAYS = 3; // Only prewarm briefs for users active in last 3 days
 
 export async function GET(req: NextRequest) {
@@ -59,6 +65,9 @@ export async function GET(req: NextRequest) {
     briefsSkippedCached: 0,
     briefsSkippedLocked: 0,
     briefErrors: 0,
+    aiCallsTotal: 0,
+    cappedConnections: 0, // Users whose connections were capped
+    cappedAiCalls: false, // Whether global AI call cap triggered
   };
 
   try {
@@ -147,6 +156,17 @@ export async function GET(req: NextRequest) {
 
         // Generate insight (same logic as /api/insights)
         try {
+          // Hard cap: abort entire job if global AI call limit reached
+          if (stats.aiCallsTotal >= MAX_AI_CALLS_PER_RUN) {
+            stats.cappedAiCalls = true;
+            console.warn(`[Prewarm] HARD CAP: ${MAX_AI_CALLS_PER_RUN} AI calls reached, aborting job`, { stats });
+            await releaseLock(lockKey);
+            return NextResponse.json({
+              message: "Pre-warm stopped - AI call cap reached",
+              stats,
+            });
+          }
+
           // P0: Budget check before OpenAI call
           const budgetCheck = await checkBudget();
           if (!budgetCheck.allowed) {
@@ -172,32 +192,70 @@ export async function GET(req: NextRequest) {
             continue;
           }
 
-          // Optionally load social summary
-          const { data: socialSummary } = await admin
-            .from("social_summaries")
-            .select("*")
-            .eq("user_id", userId)
-            .eq("provider", "facebook")
-            .order("last_fetched_at", { ascending: false })
-            .limit(1)
-            .maybeSingle();
+          // Load social summaries (all providers, gated on user preference)
+          let socialSummaries: { provider: string; summary: string }[] | null = null;
+          if (fullProfile.social_insights_enabled) {
+            const { data } = await admin
+              .from("social_summaries")
+              .select("provider, summary")
+              .eq("user_id", userId)
+              .order("last_fetched_at", { ascending: false });
+            socialSummaries = data;
+          }
 
-          // Build OpenAI prompt using Ayren voice (same as /api/insights)
+          // Parse metadata from first summary (if any)
+          const socialMetadata = socialSummaries && socialSummaries.length > 0
+            ? parseMetadataFromSummary(socialSummaries[0].summary)
+            : null;
+
+          // Combine all social summaries into text-only context
+          const socialContext = socialSummaries && socialSummaries.length > 0
+            ? socialSummaries.map(s => getSummaryTextOnly(s.summary)).join("\n\n---\n\n")
+            : null;
+
+          // Build social metadata context for prompt (matches /api/insights v6)
+          const socialMetadataContext = socialMetadata
+            ? `
+SOCIAL SIGNAL METADATA (internal use only, never mention to user):
+- signalStrength: ${socialMetadata.signalStrength}
+- accountType: ${socialMetadata.accountType}
+- humorEligible: ${socialMetadata.humorEligible}
+- humorDial: ${socialMetadata.humorDial}
+- humorStyle: ${socialMetadata.humorStyle}`
+            : "";
+
+          // Language block (matches /api/insights v6)
+          const languageName = localeNames[language as keyof typeof localeNames] || "English";
+          const languageBlock = getCriticalLanguageBlock(languageName, language);
+
+          // Build OpenAI prompt using Ayren voice (must match /api/insights v6 exactly)
           const systemPrompt = `${AYREN_MODE_SHORT}
+${PRO_SOCIAL_NUDGE_INSTRUCTION}
+${HUMOR_INSTRUCTION}
+${LOW_SIGNAL_GUARDRAIL}
 
 CONTEXT:
 This is a PERSONALIZED insight for a specific person based on their birth chart and current transits.
+${socialMetadataContext}
 
-LANGUAGE:
-- Write ALL narrative text in language code: ${language}
-- Field names in JSON remain in English, but all content values must be in the user's language
+${languageBlock}
 
 OUTPUT FORMAT:
 Respond with ONLY valid JSON. No markdown, no explanations—just the JSON object.`;
 
           const tarotCardNames = getTarotCardNames();
-          // FEATURE DISABLED: Rune Whisper / Daily Sigil
-          // const runeNames = getRuneNames();
+
+          // Gender context for daily wisdom quotes (v6 feature)
+          const userName = fullProfile.preferred_name || fullProfile.full_name || "";
+          const genderContext = fullProfile.gender
+            ? fullProfile.gender === "male"
+              ? "masculine energy (select quotes from strong male historical figures: philosophers, leaders, warriors, inventors)"
+              : fullProfile.gender === "female"
+              ? "feminine energy (select quotes from powerful female historical figures: queens, poets, activists, pioneers)"
+              : "balanced energy (select quotes from any inspiring historical figure)"
+            : userName
+              ? `inferred energy based on the name "${userName}" — if the name suggests masculine energy, select quotes from strong male historical figures (philosophers, leaders, warriors, inventors); if feminine, select quotes from powerful female historical figures (queens, poets, activists, pioneers); if ambiguous or gender-neutral, select from any inspiring historical figure`
+              : "universal energy (select quotes from any inspiring historical figure)";
 
           const userPrompt = `Generate today insights for ${fullProfile.preferred_name || fullProfile.full_name || "this person"}.
 
@@ -207,14 +265,15 @@ Birth details:
 - Location: ${fullProfile.birth_city || "unknown"}, ${fullProfile.birth_region || ""}, ${fullProfile.birth_country || ""}
 - Timezone: ${fullProfile.timezone}
 - Sign: ${fullProfile.zodiac_sign || "unknown"}
+- Gender: ${fullProfile.gender || "infer from name"}
 
 Current date: ${new Date().toISOString()}
 Period: ${tomorrowPeriodKey} (today)
 Timeframe: today
 
-${socialSummary?.summary ? `Social context (optional, do not mention platforms directly):
+${socialContext ? `Social context (optional, do not mention platforms directly):
 
-${socialSummary.summary}
+${socialContext}
 
 If this block is empty or missing, ignore it. Use it subtly to enhance your understanding of their emotional tone and expression patterns.` : ""}
 
@@ -225,6 +284,13 @@ For the tarot card:
 - Do NOT invent card names outside this list.
 - Do NOT claim you are literally drawing from a physical deck.
 - Treat the card as a symbolic archetype that fits this person's current energy.
+
+For the daily wisdom quote:
+- Select a REAL quote from a REAL historical figure (not fictional characters)
+- The quote should resonate with ${genderContext}
+- Match the quote to their current themes, zodiac energy, or tarot card meaning
+- Famous historical figures include: Marcus Aurelius, Maya Angelou, Rumi, Eleanor Roosevelt, Sun Tzu, Marie Curie, Seneca, Frida Kahlo, Theodore Roosevelt, Coco Chanel, Winston Churchill, Virginia Woolf, Bruce Lee, Audrey Hepburn, etc.
+- The quote must be AUTHENTIC - do not invent quotes
 
 Return a JSON object with this structure:
 {
@@ -244,8 +310,12 @@ Return a JSON object with this structure:
       {"value": NUMBER_1_99, "label": "ROOT|PATH|BLOOM", "meaning": "one sentence"},
       {"value": NUMBER_1_99, "label": "ROOT|PATH|BLOOM", "meaning": "one sentence"}
     ],
-    "powerWords": ["WORD1", "WORD2", "WORD3"],
-    "handwrittenNote": "1-2 sentence affirmation"
+    "powerWords": ["WORD1", "WORD2", "WORD3"]
+  },
+  "dailyWisdom": {
+    "quote": "The actual quote from the historical figure",
+    "author": "Name of the historical figure",
+    "context": "One sentence explaining why this quote resonates with them today"
   }
 }
 
@@ -310,13 +380,15 @@ LUCKY COMPASS RULES:
             timeframe: "today",
           });
 
-          // Parse response
-          const insight: SanctuaryInsight = JSON.parse(responseContent);
-          // Feature removed: emotionalCadence
-          // (If the model returns it anyway, strip it before caching.)
-          if ((insight as any)?.emotionalCadence) {
-            delete (insight as any).emotionalCadence;
+          stats.aiCallsTotal++;
+
+          // Parse and normalize response (matches /api/insights v6 caching)
+          const rawInsight: SanctuaryInsight = JSON.parse(responseContent);
+          // Strip legacy fields if model returns them
+          if ((rawInsight as any)?.emotionalCadence) {
+            delete (rawInsight as any).emotionalCadence;
           }
+          const insight = normalizeInsight(rawInsight);
           // Cache with 48h TTL (same as daily insights)
           await setCache(cacheKey, insight, 172800);
 
@@ -340,12 +412,19 @@ LUCKY COMPASS RULES:
               .eq("owner_user_id", userId);
 
             if (connections && connections.length > 0) {
-              console.log(`[Prewarm] Processing ${connections.length} connection briefs for user ${userId}`);
+              // Cap connections per user
+              const cappedConnections = connections.slice(0, MAX_CONNECTIONS_PER_USER);
+              if (connections.length > MAX_CONNECTIONS_PER_USER) {
+                stats.cappedConnections++;
+                console.warn(`[Prewarm] User ${userId}: capped connections from ${connections.length} to ${MAX_CONNECTIONS_PER_USER}`);
+              }
+
+              console.log(`[Prewarm] Processing ${cappedConnections.length} connection briefs for user ${userId}`);
 
               // Calculate tomorrow's local date for briefs
               const tomorrowLocalDate = format(tomorrow, "yyyy-MM-dd", { timeZone: timezone });
 
-              for (const connection of connections) {
+              for (const connection of cappedConnections) {
                 try {
                   // Check if brief already exists for tomorrow
                   const { data: existingBrief } = await admin
@@ -372,6 +451,14 @@ LUCKY COMPASS RULES:
                   }
 
                   try {
+                    // Hard cap: stop brief generation if global AI call limit reached
+                    if (stats.aiCallsTotal >= MAX_AI_CALLS_PER_RUN) {
+                      stats.cappedAiCalls = true;
+                      console.warn(`[Prewarm] HARD CAP: ${MAX_AI_CALLS_PER_RUN} AI calls reached during briefs`, { userId });
+                      await releaseLock(briefLockKey);
+                      break;
+                    }
+
                     // Budget check before each brief
                     const briefBudgetCheck = await checkBudget();
                     if (!briefBudgetCheck.allowed) {
@@ -498,6 +585,8 @@ Return the JSON object now.`;
                       timeframe: "today",
                     });
 
+                    stats.aiCallsTotal++;
+
                     // Parse response
                     const briefContent = JSON.parse(briefResponseContent);
 
@@ -544,6 +633,15 @@ Return the JSON object now.`;
 
               console.log(`[Prewarm] Generated ${stats.briefsWarmed} briefs for user ${userId}`);
             }
+          }
+
+          // If global AI cap was hit during briefs, abort the entire job
+          if (stats.cappedAiCalls) {
+            await releaseLock(lockKey);
+            return NextResponse.json({
+              message: "Pre-warm stopped - AI call cap reached",
+              stats,
+            });
           }
         } catch (genError: any) {
           console.error(`[Prewarm] Generation failed for user ${userId}:`, genError.message);

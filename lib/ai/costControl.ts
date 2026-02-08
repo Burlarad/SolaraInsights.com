@@ -36,10 +36,19 @@ function getDailyBudgetLimit(): number {
 
 /**
  * Get fail mode from env (default: closed)
+ *
+ * SAFETY: "open" is forbidden in production — it would allow unlimited
+ * spending when Redis is down. Throws at call time to surface immediately.
  */
 function getFailMode(): "closed" | "open" {
   const mode = process.env.OPENAI_BUDGET_FAIL_MODE;
   if (mode === "open") {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        "[CostControl] FATAL: OPENAI_BUDGET_FAIL_MODE=open is forbidden in production. " +
+        "Remove or set to 'closed'."
+      );
+    }
     return "open";
   }
   return "closed";

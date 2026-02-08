@@ -117,7 +117,7 @@ async function storeCachedNarrative(
   promptVersion: number,
   language: string,
   model: string
-): Promise<void> {
+): Promise<boolean> {
   try {
     const supabase = createAdminSupabaseClient();
 
@@ -135,11 +135,14 @@ async function storeCachedNarrative(
 
     if (error) {
       console.error(`[BirthChart] Failed to store narrative for user ${userId}:`, error);
-    } else {
-      console.log(`[BirthChart] ✓ Narrative cached for user ${userId} (prompt v${promptVersion}, lang: ${language})`);
+      return false;
     }
+
+    console.log(`[BirthChart] ✓ Narrative cached for user ${userId} (prompt v${promptVersion}, lang: ${language})`);
+    return true;
   } catch (error: any) {
-    console.error(`[BirthChart] Error storing narrative:`, error.message);
+    console.error(`[BirthChart] Error storing narrative for user ${userId}:`, error.message);
+    return false;
   }
 }
 
@@ -512,6 +515,15 @@ Return a SINGLE JSON object with this EXACT structure:
 `;
 
 export async function POST(req: NextRequest) {
+  // DEPRECATION GUARD: This endpoint is superseded by /api/birth-chart-library.
+  // Logging to track remaining usage before removal.
+  console.warn("[BirthChart] DEPRECATED endpoint called. Migrate callers to /api/birth-chart-library.");
+  const response = await _handlePost(req);
+  response.headers.set("X-Deprecated", "Use /api/birth-chart-library instead");
+  return response;
+}
+
+async function _handlePost(req: NextRequest) {
   try {
     // Get authenticated user
     const supabase = await createServerSupabaseClient();
@@ -914,13 +926,13 @@ export async function POST(req: NextRequest) {
     });
 
     if (!responseContent) {
-      console.error("[BirthChart] OpenAI returned empty response");
+      console.error("[BirthChart] OpenAI returned empty response", { userId: user.id });
       return NextResponse.json(
         {
-          placements: swissPlacements,
-          insight: null,
+          error: "Narrative generation failed",
+          message: "We couldn't generate your Soul Path. Please try again in a moment.",
         },
-        { status: 200 }
+        { status: 502 }
       );
     }
 
@@ -1003,14 +1015,28 @@ export async function POST(req: NextRequest) {
       }
 
       // Store narrative (with tab deep dives if generated) in soul_paths for future requests (stone tablet caching)
-      // Only store after validation passes
-      void storeCachedNarrative(
+      // Only store after validation passes — do NOT return 200 unless persistence succeeds
+      const stored = await storeCachedNarrative(
         user.id,
         insight,
         PROMPT_VERSION,
         targetLanguage,
         OPENAI_MODELS.birthChart
       );
+
+      if (!stored) {
+        console.error(`[BirthChart] Narrative persistence failed`, {
+          userId: user.id,
+          chartKey: `${user.id}:v${PROMPT_VERSION}:${targetLanguage}`,
+        });
+        return NextResponse.json(
+          {
+            error: "Storage failed",
+            message: "Your Soul Path was generated but could not be saved. Please try again.",
+          },
+          { status: 500 }
+        );
+      }
     } catch (parseError) {
       console.error("[BirthChart] Failed to parse OpenAI response:", parseError);
       // Return placements without insight if parsing fails
