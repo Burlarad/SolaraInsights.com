@@ -86,51 +86,65 @@ END $$;
 -- ============================================================================
 -- PART 3: ADD AI NARRATIVE COLUMNS TO NUMEROLOGY_LIBRARY
 -- ============================================================================
+-- PRODUCTION-SAFE: Only runs if numerology_library exists
+-- If table doesn't exist, this part is skipped with a NOTICE
 
--- Add narrative columns to numerology_library (matching astrology_library)
-ALTER TABLE public.numerology_library
-  ADD COLUMN IF NOT EXISTS narrative_json JSONB,
-  ADD COLUMN IF NOT EXISTS narrative_prompt_version INTEGER,
-  ADD COLUMN IF NOT EXISTS narrative_language TEXT,
-  ADD COLUMN IF NOT EXISTS narrative_generated_at TIMESTAMPTZ;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'numerology_library'
+  ) THEN
+    -- Add narrative columns to numerology_library (matching astrology_library)
+    ALTER TABLE public.numerology_library
+      ADD COLUMN IF NOT EXISTS narrative_json JSONB,
+      ADD COLUMN IF NOT EXISTS narrative_prompt_version INTEGER,
+      ADD COLUMN IF NOT EXISTS narrative_language TEXT,
+      ADD COLUMN IF NOT EXISTS narrative_generated_at TIMESTAMPTZ;
 
--- Add system column to track Pythagorean vs Chaldean
-ALTER TABLE public.numerology_library
-  ADD COLUMN IF NOT EXISTS system TEXT NOT NULL DEFAULT 'pythagorean';
+    -- Add system column to track Pythagorean vs Chaldean
+    ALTER TABLE public.numerology_library
+      ADD COLUMN IF NOT EXISTS system TEXT NOT NULL DEFAULT 'pythagorean';
 
--- Create composite unique constraint: key must include system
--- (same birth data with different systems = different books)
-CREATE UNIQUE INDEX IF NOT EXISTS idx_numerology_library_key_system
-  ON public.numerology_library(numerology_key, system);
+    -- Create composite unique constraint: key must include system
+    -- (same birth data with different systems = different books)
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_numerology_library_key_system
+      ON public.numerology_library(numerology_key, system);
 
--- Partial index for missing narratives
-CREATE INDEX IF NOT EXISTS idx_numerology_library_missing_narrative
-  ON public.numerology_library(numerology_key)
-  WHERE narrative_json IS NULL;
+    -- Partial index for missing narratives
+    CREATE INDEX IF NOT EXISTS idx_numerology_library_missing_narrative
+      ON public.numerology_library(numerology_key)
+      WHERE narrative_json IS NULL;
 
--- Index for prompt version cache invalidation
-CREATE INDEX IF NOT EXISTS idx_numerology_library_narrative_version
-  ON public.numerology_library(narrative_prompt_version)
-  WHERE narrative_json IS NOT NULL;
+    -- Index for prompt version cache invalidation
+    CREATE INDEX IF NOT EXISTS idx_numerology_library_narrative_version
+      ON public.numerology_library(narrative_prompt_version)
+      WHERE narrative_json IS NOT NULL;
 
--- Update table comment
-COMMENT ON TABLE public.numerology_library IS
-  'Global library of computed numerology profiles with AI narratives. Deduplicated by deterministic numerology_key + system. Book = Math (numerology_json) + Narrative (narrative_json) stored together. Part of the unified Library of Solara.';
+    -- Update table comment
+    COMMENT ON TABLE public.numerology_library IS
+      'Global library of computed numerology profiles with AI narratives. Deduplicated by deterministic numerology_key + system. Book = Math (numerology_json) + Narrative (narrative_json) stored together. Part of the unified Library of Solara.';
 
-COMMENT ON COLUMN public.numerology_library.narrative_json IS
-  'AI-generated numerology soul story. NULL if not yet generated. Cached once generated.';
+    COMMENT ON COLUMN public.numerology_library.narrative_json IS
+      'AI-generated numerology soul story. NULL if not yet generated. Cached once generated.';
 
-COMMENT ON COLUMN public.numerology_library.narrative_prompt_version IS
-  'Version of the prompt used to generate narrative. Used for cache invalidation when prompts change.';
+    COMMENT ON COLUMN public.numerology_library.narrative_prompt_version IS
+      'Version of the prompt used to generate narrative. Used for cache invalidation when prompts change.';
 
-COMMENT ON COLUMN public.numerology_library.narrative_language IS
-  'Language code for narrative (e.g., "en", "es"). Allows multi-language support.';
+    COMMENT ON COLUMN public.numerology_library.narrative_language IS
+      'Language code for narrative (e.g., "en", "es"). Allows multi-language support.';
 
-COMMENT ON COLUMN public.numerology_library.narrative_generated_at IS
-  'Timestamp when narrative was generated. NULL if not yet generated.';
+    COMMENT ON COLUMN public.numerology_library.narrative_generated_at IS
+      'Timestamp when narrative was generated. NULL if not yet generated.';
 
-COMMENT ON COLUMN public.numerology_library.system IS
-  'Numerology system used: "pythagorean" or "chaldean". Part of the deterministic key.';
+    COMMENT ON COLUMN public.numerology_library.system IS
+      'Numerology system used: "pythagorean" or "chaldean". Part of the deterministic key.';
+
+    RAISE NOTICE 'Added AI narrative columns to numerology_library';
+  ELSE
+    RAISE NOTICE 'Table numerology_library does not exist, skipping PART 3 (numerology enhancements)';
+  END IF;
+END $$;
 
 -- ============================================================================
 -- PART 4: ADD NAME_CHANGED_SINCE_BIRTH FLAG TO PROFILES
@@ -283,14 +297,14 @@ END $$;
 -- MIGRATION COMPLETE
 -- ============================================================================
 -- Summary of changes:
--- ✅ Renamed charts → astrology_library
--- ✅ Renamed official_chart_key → official_astrology_key
--- ✅ Added AI narrative columns to numerology_library
--- ✅ Added system column to numerology_library
--- ✅ Added name_changed_since_birth flag to profiles
--- ✅ Dropped soul_paths table (deprecated)
--- ✅ Cleaned up deprecated profiles columns
--- ✅ Updated RLS policies
+-- ✅ Renamed charts → astrology_library (idempotent, guarded)
+-- ✅ Renamed official_chart_key → official_astrology_key (idempotent, guarded)
+-- ✅ Added AI narrative columns to numerology_library (PRODUCTION-SAFE: skipped if table doesn't exist)
+-- ✅ Added system column to numerology_library (PRODUCTION-SAFE: skipped if table doesn't exist)
+-- ✅ Added name_changed_since_birth flag to profiles (idempotent)
+-- ✅ Dropped soul_paths table (idempotent, guarded)
+-- ✅ Cleaned up deprecated profiles columns (idempotent)
+-- ✅ Updated RLS policies (idempotent, guarded)
 --
 -- Next steps (code changes):
 -- 1. Update all code references from "charts" → "astrology_library"
