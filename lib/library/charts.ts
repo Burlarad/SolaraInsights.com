@@ -52,7 +52,7 @@ export async function getChartFromLibrary(chartKey: string): Promise<ChartLibrar
   const supabase = createAdminSupabaseClient();
 
   const { data, error } = await supabase
-    .from("charts")
+    .from("astrology_library")
     .select("*")
     .eq("chart_key", chartKey)
     .maybeSingle();
@@ -117,7 +117,7 @@ export async function getOrComputeChart(input: Partial<ChartInput>): Promise<Cha
   const supabase = createAdminSupabaseClient();
 
   const { error: upsertError } = await supabase
-    .from("charts")
+    .from("astrology_library")
     .upsert(
       {
         chart_key: chartKey,
@@ -137,7 +137,7 @@ export async function getOrComputeChart(input: Partial<ChartInput>): Promise<Cha
     // Duplicate key = chart already exists → treat as cache hit
     if ((upsertError as any).code === "23505") {
       const { data: existing, error: existingError } = await supabase
-        .from("charts")
+        .from("astrology_library")
         .select("*")
         .eq("chart_key", chartKey)
         .single();
@@ -157,7 +157,7 @@ export async function getOrComputeChart(input: Partial<ChartInput>): Promise<Cha
   console.log(`[ChartsLibrary] ✓ Chart computed and stored: ${chartKey}`);
 
   const { data: stored, error: fetchError } = await supabase
-    .from("charts")
+    .from("astrology_library")
     .select("*")
     .eq("chart_key", chartKey)
     .single();
@@ -176,7 +176,7 @@ async function trackChartAccess(chartKey: string): Promise<void> {
   try {
     const supabase = createAdminSupabaseClient();
     await supabase
-      .from("charts")
+      .from("astrology_library")
       .update({
         last_accessed_at: new Date().toISOString(),
       })
@@ -233,7 +233,7 @@ export function computeOfficialChartKey(profile: {
  * Get user's official chart
  *
  * Workflow:
- * 1. Check if profile has official_chart_key set
+ * 1. Check if profile has official_astrology_key set
  * 2. If yes, fetch from library
  * 3. If no, check if Settings data is complete
  * 4. If complete, compute key and fetch/compute chart
@@ -250,12 +250,12 @@ export async function getOfficialChart(
     birth_lat: number | null;
     birth_lon: number | null;
     timezone: string | null;
-    official_chart_key: string | null;
+    official_astrology_key: string | null;
   }
 ): Promise<ChartLibraryEntry | null> {
-  // If user already has official_chart_key, use it
-  if (profile.official_chart_key) {
-    const chart = await getChartFromLibrary(profile.official_chart_key);
+  // If user already has official_astrology_key, use it
+  if (profile.official_astrology_key) {
+    const chart = await getChartFromLibrary(profile.official_astrology_key);
     if (chart) {
       return chart;
     }
@@ -278,12 +278,12 @@ export async function getOfficialChart(
     timezone: profile.timezone!,
   });
 
-  // Update profile's official_chart_key if needed
-  if (profile.official_chart_key !== chartKey) {
+  // Update profile's official_astrology_key if needed
+  if (profile.official_astrology_key !== chartKey) {
     const supabase = createAdminSupabaseClient();
     await supabase
       .from("profiles")
-      .update({ official_chart_key: chartKey })
+      .update({ official_astrology_key: chartKey })
       .eq("id", userId);
   }
 
@@ -331,7 +331,7 @@ export async function storeChartNarrative(
   const supabase = createAdminSupabaseClient();
 
   const { error } = await supabase
-    .from("charts")
+    .from("astrology_library")
     .update({
       narrative_json: narrative,
       narrative_prompt_version: promptVersion,
@@ -474,7 +474,7 @@ export async function getOfficialChartWithNarrative(
     birth_region?: string | null;
     birth_country?: string | null;
     zodiac_sign?: string | null;
-    official_chart_key: string | null;
+    official_astrology_key: string | null;
     preferred_name?: string | null;
     full_name?: string | null;
   },

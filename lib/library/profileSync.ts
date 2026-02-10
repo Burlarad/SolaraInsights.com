@@ -25,13 +25,13 @@ export type ProfileNameData = {
 };
 
 /**
- * Update user's official_chart_key after profile birth data changes
+ * Update user's official_astrology_key after profile birth data changes
  *
  * Called from Profile Update API after birth fields are updated.
  *
  * Behavior:
- * - If all birth fields present: compute and set official_chart_key
- * - If any birth field missing: clear official_chart_key
+ * - If all birth fields present: compute and set official_astrology_key
+ * - If any birth field missing: clear official_astrology_key
  *
  * @param userId - User ID
  * @param birthData - Updated birth data from profile
@@ -46,17 +46,17 @@ export async function syncOfficialChartKey(
 
   if (chartKey) {
     // Settings data complete - set official chart key
-    console.log(`[ProfileSync] Setting official_chart_key for user ${userId}: ${chartKey}`);
+    console.log(`[ProfileSync] Setting official_astrology_key for user ${userId}: ${chartKey}`);
     await supabase
       .from("profiles")
-      .update({ official_chart_key: chartKey })
+      .update({ official_astrology_key: chartKey })
       .eq("id", userId);
   } else {
     // Settings data incomplete - clear official chart key
-    console.log(`[ProfileSync] Clearing official_chart_key for user ${userId} (incomplete data)`);
+    console.log(`[ProfileSync] Clearing official_astrology_key for user ${userId} (incomplete data)`);
     await supabase
       .from("profiles")
-      .update({ official_chart_key: null })
+      .update({ official_astrology_key: null })
       .eq("id", userId);
   }
 }

@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
           birth_date, birth_time, birth_lat, birth_lon, timezone,
           birth_city, birth_region, birth_country, zodiac_sign,
           preferred_name, full_name, language,
-          official_chart_key
+          official_astrology_key
         `)
         .eq("id", user.id)
         .single();
