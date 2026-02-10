@@ -860,9 +860,14 @@ export default function SettingsPage() {
 
       <Card>
         <CardContent className="p-5 sm:p-6 md:p-8 space-y-8 md:space-y-10">
-          {/* Identity */}
+          {/* Natal Coordinates */}
           <section className="space-y-5">
-            <h2 className="text-lg md:text-xl font-semibold text-accent-gold">{t("identity.title")}</h2>
+            <div>
+              <h2 className="text-lg md:text-xl font-semibold text-accent-gold">Natal Coordinates</h2>
+              <p className="text-sm md:text-base text-accent-ink/60 mt-1">
+                Your exact birth information allows for the most precise insights
+              </p>
+            </div>
 
             {/* Gentle banner for existing users missing first/last name */}
             {profile && (!profile.first_name || !profile.last_name) && (
@@ -921,11 +926,104 @@ export default function SettingsPage() {
               </p>
             </div>
 
+            <div className="grid md:grid-cols-2 gap-5">
+              <div className="space-y-2">
+                <Label htmlFor="birthDate">
+                  {t("birthDetails.date")} <span className="text-danger-soft">*</span>
+                </Label>
+                <Input
+                  id="birthDate"
+                  type="date"
+                  value={birthDate}
+                  onChange={(e) => setBirthDate(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="birthTime">Birth time (24-hour format)</Label>
+                <Input
+                  id="birthTime"
+                  type="time"
+                  value={birthTime}
+                  onChange={(e) => setBirthTime(e.target.value)}
+                  disabled={unknownBirthTime}
+                />
+                <div className="flex items-center gap-3 min-h-[44px]">
+                  <input
+                    type="checkbox"
+                    id="unknownBirthTime"
+                    checked={unknownBirthTime}
+                    onChange={(e) => setUnknownBirthTime(e.target.checked)}
+                    className="rounded w-5 h-5"
+                  />
+                  <label
+                    htmlFor="unknownBirthTime"
+                    className="text-sm text-accent-ink/70"
+                  >
+                    {t("birthDetails.timeUnknown")}
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>
+                Birth location <span className="text-danger-soft">*</span>
+              </Label>
+              <PlacePicker
+                initialValue={birthPlaceDisplay}
+                placeholder="Search for your birth city..."
+                onSelect={(place) => {
+                  setBirthPlace(place);
+                  const displayParts = [
+                    place.birth_city,
+                    place.birth_region,
+                    place.birth_country,
+                  ].filter(Boolean);
+                  setBirthPlaceDisplay(displayParts.join(", "));
+                  setDisplayTimezone(place.timezone);
+                }}
+                onClear={() => {
+                  setBirthPlace(null);
+                  setBirthPlaceDisplay("");
+                  setDisplayTimezone("");
+                }}
+              />
+              <p className="text-xs md:text-sm text-accent-ink/60 leading-relaxed">
+                Start typing to search, then select from the results
+              </p>
+              {!birthPlace && birthPlaceDisplay && (
+                <p className="text-xs text-amber-600">
+                  Please re-select your birth location from the search results to update coordinates
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label>Time zone</Label>
+              <Input
+                value={displayTimezone || "Not set"}
+                disabled
+                className="bg-gray-50"
+              />
+              <p className="text-xs md:text-sm text-accent-ink/60 leading-relaxed">
+                Timezone is automatically determined from your birthplace and cannot be changed manually.
+              </p>
+            </div>
+          </section>
+
+          {/* Sign-in Information */}
+          <section className="space-y-5 pt-6 border-t border-border-subtle/60">
+            <h2 className="text-lg md:text-xl font-semibold text-accent-gold">
+              Sign-in Information
+            </h2>
+
+            {/* Email */}
             <div className="space-y-3">
               <Label htmlFor="email">Email</Label>
               {userHasPlaceholderEmail ? (
                 <>
-                  {/* Placeholder email users - show "Add email" prompt */}
                   <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-800">
                     Add a real email address to receive updates and enable password reset.
                   </div>
@@ -949,7 +1047,6 @@ export default function SettingsPage() {
                 </>
               ) : (
                 <>
-                  {/* Normal users - show current email and update option */}
                   <Input
                     id="email"
                     type="email"
@@ -987,39 +1084,10 @@ export default function SettingsPage() {
               </p>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="zodiacSign">Zodiac sign</Label>
-              <select
-                id="zodiacSign"
-                value={zodiacSign}
-                onChange={(e) => setZodiacSign(e.target.value)}
-                className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-base"
-              >
-                <option value="">Select a sign</option>
-                <option value="Aries">Aries</option>
-                <option value="Taurus">Taurus</option>
-                <option value="Gemini">Gemini</option>
-                <option value="Cancer">Cancer</option>
-                <option value="Leo">Leo</option>
-                <option value="Virgo">Virgo</option>
-                <option value="Libra">Libra</option>
-                <option value="Scorpio">Scorpio</option>
-                <option value="Sagittarius">Sagittarius</option>
-                <option value="Capricorn">Capricorn</option>
-                <option value="Aquarius">Aquarius</option>
-                <option value="Pisces">Pisces</option>
-              </select>
-              <p className="text-xs text-accent-ink/60">
-                Auto-calculated from birth date when saved
-              </p>
-            </div>
-          </section>
-
-          {/* Password Section - differs based on auth type */}
-          <section className="space-y-5 pt-6 border-t border-border-subtle/60">
-            <h2 className="text-lg md:text-xl font-semibold text-accent-gold">
+            {/* Password */}
+            <h3 className="text-base md:text-lg font-medium pt-2">
               {userHasPassword ? "Change password" : "Create password"}
-            </h2>
+            </h3>
 
             {authTypeLoading ? (
               <p className="text-sm text-accent-ink/60">Loading...</p>
@@ -1124,104 +1192,6 @@ export default function SettingsPage() {
                 </Button>
               </div>
             )}
-          </section>
-
-          {/* Birth Details */}
-          <section className="space-y-5 pt-6 border-t border-border-subtle/60">
-            <div>
-              <h2 className="text-lg md:text-xl font-semibold text-accent-gold">
-                {t("birthDetails.title")}
-              </h2>
-              <p className="text-sm md:text-base text-accent-ink/60 mt-1">
-                Your exact birth information allows for the most precise insights
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-5">
-              <div className="space-y-2">
-                <Label htmlFor="birthDate">
-                  {t("birthDetails.date")} <span className="text-danger-soft">*</span>
-                </Label>
-                <Input
-                  id="birthDate"
-                  type="date"
-                  value={birthDate}
-                  onChange={(e) => setBirthDate(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="birthTime">Birth time (24-hour format)</Label>
-                <Input
-                  id="birthTime"
-                  type="time"
-                  value={birthTime}
-                  onChange={(e) => setBirthTime(e.target.value)}
-                  disabled={unknownBirthTime}
-                />
-                <div className="flex items-center gap-3 min-h-[44px]">
-                  <input
-                    type="checkbox"
-                    id="unknownBirthTime"
-                    checked={unknownBirthTime}
-                    onChange={(e) => setUnknownBirthTime(e.target.checked)}
-                    className="rounded w-5 h-5"
-                  />
-                  <label
-                    htmlFor="unknownBirthTime"
-                    className="text-sm text-accent-ink/70"
-                  >
-                    {t("birthDetails.timeUnknown")}
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>
-                Birth location <span className="text-danger-soft">*</span>
-              </Label>
-              <PlacePicker
-                initialValue={birthPlaceDisplay}
-                placeholder="Search for your birth city..."
-                onSelect={(place) => {
-                  setBirthPlace(place);
-                  const displayParts = [
-                    place.birth_city,
-                    place.birth_region,
-                    place.birth_country,
-                  ].filter(Boolean);
-                  setBirthPlaceDisplay(displayParts.join(", "));
-                  setDisplayTimezone(place.timezone);
-                }}
-                onClear={() => {
-                  setBirthPlace(null);
-                  setBirthPlaceDisplay("");
-                  setDisplayTimezone("");
-                }}
-              />
-              <p className="text-xs md:text-sm text-accent-ink/60 leading-relaxed">
-                Start typing to search, then select from the results
-              </p>
-              {!birthPlace && birthPlaceDisplay && (
-                <p className="text-xs text-amber-600">
-                  Please re-select your birth location from the search results to update coordinates
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label>Time zone</Label>
-              <Input
-                value={displayTimezone || "Not set"}
-                disabled
-                className="bg-gray-50"
-              />
-              <p className="text-xs md:text-sm text-accent-ink/60 leading-relaxed">
-                Timezone is automatically determined from your birthplace and cannot be changed manually.
-              </p>
-            </div>
           </section>
 
           {/* Social Insights / Social Personalization */}
@@ -1343,6 +1313,92 @@ export default function SettingsPage() {
             </div>
           </section>
 
+          {/* Membership */}
+          <section className="space-y-5 pt-6 border-t border-border-subtle/60">
+            <h2 className="text-lg md:text-xl font-semibold text-accent-gold">
+              Membership
+            </h2>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-4 rounded-lg bg-shell border border-border-subtle">
+                <div>
+                  <p className="text-sm font-medium">
+                    {profile.membership_plan === "individual"
+                      ? "Individual Plan"
+                      : profile.membership_plan === "family"
+                        ? "Family Plan"
+                        : "No active plan"}
+                  </p>
+                  <p className="text-xs text-accent-ink/60 mt-1">
+                    {profile.subscription_status === "active"
+                      ? "Active"
+                      : profile.subscription_status === "trialing"
+                        ? "Trial"
+                        : profile.subscription_status === "past_due"
+                          ? "Past due"
+                          : profile.subscription_status === "canceled"
+                            ? "Canceled"
+                            : "—"}
+                  </p>
+                </div>
+                {profile.membership_plan === "none" && (
+                  <Button
+                    variant="gold"
+                    onClick={() => router.push("/join")}
+                    className="min-h-[44px]"
+                  >
+                    Upgrade
+                  </Button>
+                )}
+              </div>
+            </div>
+          </section>
+
+          {/* Notifications & preferences */}
+          <section className="space-y-5 pt-6 border-t border-border-subtle/60">
+            <h2 className="text-lg md:text-xl font-semibold text-accent-gold">
+              Notifications & preferences
+            </h2>
+
+            <div className="space-y-5">
+              <div className="min-h-[44px] flex flex-col justify-center">
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="emailNotifications"
+                    checked={emailNotifications}
+                    onChange={(e) => setEmailNotifications(e.target.checked)}
+                    className="rounded w-5 h-5"
+                  />
+                  <label htmlFor="emailNotifications" className="text-sm md:text-base font-medium">
+                    Email notifications
+                  </label>
+                </div>
+                <p className="text-xs md:text-sm text-accent-ink/60 ml-8 mt-1">
+                  Account and billing notices only. No horoscope content.
+                </p>
+              </div>
+
+              <div className="min-h-[44px] flex flex-col justify-center">
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="pushNotifications"
+                    checked={pushNotifications}
+                    onChange={(e) => setPushNotifications(e.target.checked)}
+                    className="rounded w-5 h-5"
+                  />
+                  <label htmlFor="pushNotifications" className="text-sm md:text-base font-medium">
+                    Push notifications
+                  </label>
+                </div>
+                <p className="text-xs md:text-sm text-accent-ink/60 ml-8 mt-1 leading-relaxed">
+                  Gentle morning reminder between 7:55–8:15 AM local time. Requires
+                  device registration.
+                </p>
+              </div>
+            </div>
+          </section>
+
           {/* Privacy & Data */}
           <section className="space-y-3 pt-6 border-t border-border-subtle/60">
             <h2 className="text-lg md:text-xl font-semibold text-accent-gold">
@@ -1387,52 +1443,6 @@ export default function SettingsPage() {
               >
                 Delete account
               </Button>
-            </div>
-          </section>
-
-          {/* Notifications */}
-          <section className="space-y-5 pt-6 border-t border-border-subtle/60">
-            <h2 className="text-lg md:text-xl font-semibold text-accent-gold">
-              Notifications & preferences
-            </h2>
-
-            <div className="space-y-5">
-              <div className="min-h-[44px] flex flex-col justify-center">
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="emailNotifications"
-                    checked={emailNotifications}
-                    onChange={(e) => setEmailNotifications(e.target.checked)}
-                    className="rounded w-5 h-5"
-                  />
-                  <label htmlFor="emailNotifications" className="text-sm md:text-base font-medium">
-                    Email notifications
-                  </label>
-                </div>
-                <p className="text-xs md:text-sm text-accent-ink/60 ml-8 mt-1">
-                  Account and billing notices only. No horoscope content.
-                </p>
-              </div>
-
-              <div className="min-h-[44px] flex flex-col justify-center">
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="pushNotifications"
-                    checked={pushNotifications}
-                    onChange={(e) => setPushNotifications(e.target.checked)}
-                    className="rounded w-5 h-5"
-                  />
-                  <label htmlFor="pushNotifications" className="text-sm md:text-base font-medium">
-                    Push notifications
-                  </label>
-                </div>
-                <p className="text-xs md:text-sm text-accent-ink/60 ml-8 mt-1 leading-relaxed">
-                  Gentle morning reminder between 7:55–8:15 AM local time. Requires
-                  device registration.
-                </p>
-              </div>
             </div>
           </section>
         </CardContent>

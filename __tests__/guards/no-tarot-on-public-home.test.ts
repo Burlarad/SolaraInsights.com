@@ -10,7 +10,7 @@ import { readFileSync } from "fs";
 import { join } from "path";
 
 describe("Public Home Page - Tarot Guard", () => {
-  const homePath = join(process.cwd(), "app/(public)/page.tsx");
+  const homePath = join(process.cwd(), "app/(public)/archive/home/page.tsx");
   const content = readFileSync(homePath, "utf-8");
 
   it("should NOT import TarotArena", () => {

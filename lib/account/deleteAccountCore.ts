@@ -23,12 +23,11 @@ export interface DeleteAccountResult {
  *
  * Deletion order (respects foreign key constraints):
  * 1. Cancel Stripe subscription (if exists)
- * 2. soul_paths
- * 3. social_accounts (tokens - but NOT social_identities)
- * 4. social_summaries
- * 5. connections (cascades daily_briefs, space_between_reports)
- * 6. profiles
- * 7. auth.users (last)
+ * 2. social_accounts (tokens - but NOT social_identities)
+ * 3. social_summaries
+ * 4. connections (cascades daily_briefs, space_between_reports)
+ * 5. profiles
+ * 6. auth.users (last)
  *
  * Note: social_identities is NOT deleted - it preserves the external_user_id → user_id
  * mapping for Meta Data Deletion compliance (we need to look up users by Facebook ID).
@@ -81,21 +80,7 @@ export async function deleteAccountCore({
       }
     }
 
-    // Step 3: Delete soul_paths
-    const { error: soulPathsError } = await admin
-      .from("soul_paths")
-      .delete()
-      .eq("user_id", userId);
-
-    if (soulPathsError) {
-      console.error(`${logPrefix} Failed to delete soul_paths:`, soulPathsError);
-      result.errors.push(`soul_paths: ${soulPathsError.message}`);
-    } else {
-      console.log(`${logPrefix} Deleted soul_paths`);
-      result.deletedTables.push("soul_paths");
-    }
-
-    // Step 4: Delete social_accounts (tokens only - NOT social_identities)
+    // Step 3: Delete social_accounts (tokens only - NOT social_identities)
     const { error: socialAccountsError } = await admin
       .from("social_accounts")
       .delete()
@@ -112,7 +97,7 @@ export async function deleteAccountCore({
       result.deletedTables.push("social_accounts");
     }
 
-    // Step 5: Delete social_summaries
+    // Step 4: Delete social_summaries
     const { error: socialSummariesError } = await admin
       .from("social_summaries")
       .delete()
@@ -129,7 +114,7 @@ export async function deleteAccountCore({
       result.deletedTables.push("social_summaries");
     }
 
-    // Step 6: Delete connections (cascades daily_briefs, space_between_reports)
+    // Step 5: Delete connections (cascades daily_briefs, space_between_reports)
     const { error: connectionsError } = await admin
       .from("connections")
       .delete()
@@ -145,7 +130,7 @@ export async function deleteAccountCore({
       result.deletedTables.push("connections");
     }
 
-    // Step 7: Delete profile
+    // Step 6: Delete profile
     const { error: profileError } = await admin
       .from("profiles")
       .delete()
@@ -160,7 +145,7 @@ export async function deleteAccountCore({
     console.log(`${logPrefix} Deleted profile`);
     result.deletedTables.push("profiles");
 
-    // Step 8: Delete auth user (must be last)
+    // Step 7: Delete auth user (must be last)
     const { error: authError } = await admin.auth.admin.deleteUser(userId);
 
     if (authError) {
