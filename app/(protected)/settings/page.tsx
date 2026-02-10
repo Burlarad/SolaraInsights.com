@@ -137,6 +137,10 @@ export default function SettingsPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
+  // Section navigation state
+  type SettingsSection = "natal" | "signin" | "social" | "membership" | "notifications" | "privacy" | "account";
+  const [activeSection, setActiveSection] = useState<SettingsSection>("natal");
+
   // Detect auth type on mount
   useEffect(() => {
     const detectAuthType = async () => {
@@ -256,6 +260,26 @@ export default function SettingsPage() {
       router.replace("/settings");
     }
   }, [searchParams, refreshProfile, router]);
+
+  // Handle deep-linking via URL hash or query param (e.g., /settings#social or /settings?section=social)
+  useEffect(() => {
+    // Check query param first
+    const sectionParam = searchParams.get("section");
+    if (sectionParam) {
+      const validSections: SettingsSection[] = ["natal", "signin", "social", "membership", "notifications", "privacy", "account"];
+      if (validSections.includes(sectionParam as SettingsSection)) {
+        setActiveSection(sectionParam as SettingsSection);
+      }
+    }
+    // Check URL hash second (overrides query param)
+    const hash = window.location.hash.slice(1); // Remove #
+    if (hash) {
+      const validSections: SettingsSection[] = ["natal", "signin", "social", "membership", "notifications", "privacy", "account"];
+      if (validSections.includes(hash as SettingsSection)) {
+        setActiveSection(hash as SettingsSection);
+      }
+    }
+  }, [searchParams]);
 
   // Load profile data into form fields
   useEffect(() => {
@@ -388,6 +412,24 @@ export default function SettingsPage() {
   const getProviderName = (providerId: SocialProvider): string => {
     return SOCIAL_PROVIDERS.find((p) => p.id === providerId)?.name || providerId;
   };
+
+  // Section navigation helper
+  const handleSectionChange = (section: SettingsSection) => {
+    setActiveSection(section);
+    // Update URL hash without page reload
+    window.history.replaceState(null, "", `/settings#${section}`);
+  };
+
+  // Section metadata for navigation
+  const sections: Array<{ id: SettingsSection; label: string; icon?: string }> = [
+    { id: "natal", label: "Natal Coordinates" },
+    { id: "signin", label: "Sign-in Information" },
+    { id: "social", label: "Social Insights" },
+    { id: "membership", label: "Membership" },
+    { id: "notifications", label: "Notifications" },
+    { id: "privacy", label: "Privacy & Data" },
+    { id: "account", label: "Account State" },
+  ];
 
   // Disconnect handler - called after confirmation
   const handleDisconnect = async () => {
@@ -850,17 +892,53 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 md:py-12 space-y-8 md:space-y-10">
-      <div className="text-center mb-6 md:mb-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 md:py-12 space-y-6 md:space-y-8">
+      <div className="text-center mb-4 md:mb-6">
         <h1 className="text-3xl md:text-4xl font-bold mb-2">{t("title")}</h1>
         <p className="text-sm md:text-base text-accent-ink/60">
           {t("subtitle")}
         </p>
       </div>
 
+      {/* Section Navigation */}
+      <div className="space-y-4">
+        {/* Desktop: Horizontal tabs */}
+        <div className="hidden md:flex gap-2 overflow-x-auto pb-2">
+          {sections.map((section) => (
+            <button
+              key={section.id}
+              onClick={() => handleSectionChange(section.id)}
+              className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                activeSection === section.id
+                  ? "bg-accent-gold text-white"
+                  : "bg-shell text-accent-ink/70 hover:bg-shell-hover"
+              }`}
+            >
+              {section.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Mobile: Dropdown */}
+        <div className="md:hidden">
+          <select
+            value={activeSection}
+            onChange={(e) => handleSectionChange(e.target.value as SettingsSection)}
+            className="w-full px-4 py-3 rounded-lg border border-border-subtle bg-white text-accent-ink font-medium"
+          >
+            {sections.map((section) => (
+              <option key={section.id} value={section.id}>
+                {section.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       <Card>
         <CardContent className="p-5 sm:p-6 md:p-8 space-y-8 md:space-y-10">
           {/* Natal Coordinates */}
+          {activeSection === "natal" && (
           <section className="space-y-5">
             <div>
               <h2 className="text-lg md:text-xl font-semibold text-accent-gold">Natal Coordinates</h2>
@@ -1012,9 +1090,11 @@ export default function SettingsPage() {
               </p>
             </div>
           </section>
+          )}
 
           {/* Sign-in Information */}
-          <section className="space-y-5 pt-6 border-t border-border-subtle/60">
+          {activeSection === "signin" && (
+          <section className="space-y-5">
             <h2 className="text-lg md:text-xl font-semibold text-accent-gold">
               Sign-in Information
             </h2>
@@ -1193,9 +1273,12 @@ export default function SettingsPage() {
               </div>
             )}
           </section>
+          )}
 
           {/* Social Insights / Social Personalization */}
-          <section className="space-y-5 pt-6 border-t border-border-subtle/60">
+          {/* ⚠️ CRITICAL: DO NOT MODIFY SOCIAL INSIGHTS LOGIC - Preserves consent flow, OAuth redirects, and token handling */}
+          {activeSection === "social" && (
+          <section className="space-y-5">
             <div>
               <div className="flex items-center justify-between">
                 <h2 className="text-lg md:text-xl font-semibold text-accent-gold">
@@ -1312,9 +1395,11 @@ export default function SettingsPage() {
               </p>
             </div>
           </section>
+          )}
 
           {/* Membership */}
-          <section className="space-y-5 pt-6 border-t border-border-subtle/60">
+          {activeSection === "membership" && (
+          <section className="space-y-5">
             <h2 className="text-lg md:text-xl font-semibold text-accent-gold">
               Membership
             </h2>
@@ -1352,9 +1437,11 @@ export default function SettingsPage() {
               </div>
             </div>
           </section>
+          )}
 
           {/* Notifications & preferences */}
-          <section className="space-y-5 pt-6 border-t border-border-subtle/60">
+          {activeSection === "notifications" && (
+          <section className="space-y-5">
             <h2 className="text-lg md:text-xl font-semibold text-accent-gold">
               Notifications & preferences
             </h2>
@@ -1398,9 +1485,11 @@ export default function SettingsPage() {
               </div>
             </div>
           </section>
+          )}
 
           {/* Privacy & Data */}
-          <section className="space-y-3 pt-6 border-t border-border-subtle/60">
+          {activeSection === "privacy" && (
+          <section className="space-y-3">
             <h2 className="text-lg md:text-xl font-semibold text-accent-gold">
               Privacy & data
             </h2>
@@ -1408,9 +1497,11 @@ export default function SettingsPage() {
               Your data is private and never shared.
             </p>
           </section>
+          )}
 
           {/* Account State */}
-          <section className="space-y-6 pt-6 border-t border-border-subtle/60">
+          {activeSection === "account" && (
+          <section className="space-y-6">
             <h2 className="text-lg md:text-xl font-semibold text-accent-gold">
               Account state
             </h2>
@@ -1445,13 +1536,15 @@ export default function SettingsPage() {
               </Button>
             </div>
           </section>
+          )}
         </CardContent>
       </Card>
 
-      {/* Action buttons */}
+      {/* Action buttons - shown only for sections with editable forms */}
+      {(activeSection === "natal" || activeSection === "signin") && (
       <div className="space-y-5">
-        {/* Warning if place not selected */}
-        {!birthPlace && (
+        {/* Warning if place not selected (Natal Coordinates only) */}
+        {activeSection === "natal" && !birthPlace && (
           <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-800">
             Select a birth location from the dropdown to save your changes.
           </div>
@@ -1461,7 +1554,7 @@ export default function SettingsPage() {
           <Button
             variant="gold"
             onClick={handleSaveChanges}
-            disabled={isSaving || !birthPlace}
+            disabled={isSaving || (activeSection === "natal" && !birthPlace)}
             className="w-full sm:w-auto min-h-[48px] text-base"
           >
             {isSaving ? tCommon("saving") : t("saveChanges")}
@@ -1489,6 +1582,7 @@ export default function SettingsPage() {
           Changes settle softly—return anytime to tune your details at your own rhythm.
         </p>
       </div>
+      )}
 
       {/* Disconnect Confirmation Dialog */}
       <Dialog
