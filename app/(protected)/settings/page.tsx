@@ -138,7 +138,7 @@ export default function SettingsPage() {
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   // Section navigation state
-  type SettingsSection = "natal" | "signin" | "social" | "membership" | "notifications" | "privacy" | "account";
+  type SettingsSection = "natal" | "signin" | "social" | "account";
   const [activeSection, setActiveSection] = useState<SettingsSection>("natal");
 
   // Detect auth type on mount
@@ -266,7 +266,7 @@ export default function SettingsPage() {
     // Check query param first
     const sectionParam = searchParams.get("section");
     if (sectionParam) {
-      const validSections: SettingsSection[] = ["natal", "signin", "social", "membership", "notifications", "privacy", "account"];
+      const validSections: SettingsSection[] = ["natal", "signin", "social", "account"];
       if (validSections.includes(sectionParam as SettingsSection)) {
         setActiveSection(sectionParam as SettingsSection);
       }
@@ -274,7 +274,7 @@ export default function SettingsPage() {
     // Check URL hash second (overrides query param)
     const hash = window.location.hash.slice(1); // Remove #
     if (hash) {
-      const validSections: SettingsSection[] = ["natal", "signin", "social", "membership", "notifications", "privacy", "account"];
+      const validSections: SettingsSection[] = ["natal", "signin", "social", "account"];
       if (validSections.includes(hash as SettingsSection)) {
         setActiveSection(hash as SettingsSection);
       }
@@ -425,10 +425,7 @@ export default function SettingsPage() {
     { id: "natal", label: "Natal Coordinates" },
     { id: "signin", label: "Sign-in Information" },
     { id: "social", label: "Social Insights" },
-    { id: "membership", label: "Membership" },
-    { id: "notifications", label: "Notifications" },
-    { id: "privacy", label: "Privacy & Data" },
-    { id: "account", label: "Account State" },
+    { id: "account", label: "Account" },
   ];
 
   // Disconnect handler - called after confirmation
@@ -1397,13 +1394,16 @@ export default function SettingsPage() {
           </section>
           )}
 
-          {/* Membership */}
-          {activeSection === "membership" && (
-          <section className="space-y-5">
+          {/* Account (Membership, Notifications, Privacy, Account State) */}
+          {activeSection === "account" && (
+          <section className="space-y-8">
             <h2 className="text-lg md:text-xl font-semibold text-accent-gold">
-              Membership
+              Account
             </h2>
+
+            {/* Membership */}
             <div className="space-y-3">
+              <h3 className="text-base md:text-lg font-medium">Membership</h3>
               <div className="flex items-center justify-between p-4 rounded-lg bg-shell border border-border-subtle">
                 <div>
                   <p className="text-sm font-medium">
@@ -1436,77 +1436,60 @@ export default function SettingsPage() {
                 )}
               </div>
             </div>
-          </section>
-          )}
 
-          {/* Notifications & preferences */}
-          {activeSection === "notifications" && (
-          <section className="space-y-5">
-            <h2 className="text-lg md:text-xl font-semibold text-accent-gold">
-              Notifications & preferences
-            </h2>
-
-            <div className="space-y-5">
-              <div className="min-h-[44px] flex flex-col justify-center">
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="emailNotifications"
-                    checked={emailNotifications}
-                    onChange={(e) => setEmailNotifications(e.target.checked)}
-                    className="rounded w-5 h-5"
-                  />
-                  <label htmlFor="emailNotifications" className="text-sm md:text-base font-medium">
-                    Email notifications
-                  </label>
+            {/* Notifications & preferences */}
+            <div className="space-y-3">
+              <h3 className="text-base md:text-lg font-medium">Notifications & preferences</h3>
+              <div className="space-y-5">
+                <div className="min-h-[44px] flex flex-col justify-center">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="emailNotifications"
+                      checked={emailNotifications}
+                      onChange={(e) => setEmailNotifications(e.target.checked)}
+                      className="rounded w-5 h-5"
+                    />
+                    <label htmlFor="emailNotifications" className="text-sm md:text-base font-medium">
+                      Email notifications
+                    </label>
+                  </div>
+                  <p className="text-xs md:text-sm text-accent-ink/60 ml-8 mt-1">
+                    Account and billing notices only. No horoscope content.
+                  </p>
                 </div>
-                <p className="text-xs md:text-sm text-accent-ink/60 ml-8 mt-1">
-                  Account and billing notices only. No horoscope content.
-                </p>
-              </div>
 
-              <div className="min-h-[44px] flex flex-col justify-center">
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="pushNotifications"
-                    checked={pushNotifications}
-                    onChange={(e) => setPushNotifications(e.target.checked)}
-                    className="rounded w-5 h-5"
-                  />
-                  <label htmlFor="pushNotifications" className="text-sm md:text-base font-medium">
-                    Push notifications
-                  </label>
+                <div className="min-h-[44px] flex flex-col justify-center">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="pushNotifications"
+                      checked={pushNotifications}
+                      onChange={(e) => setPushNotifications(e.target.checked)}
+                      className="rounded w-5 h-5"
+                    />
+                    <label htmlFor="pushNotifications" className="text-sm md:text-base font-medium">
+                      Push notifications
+                    </label>
+                  </div>
+                  <p className="text-xs md:text-sm text-accent-ink/60 ml-8 mt-1 leading-relaxed">
+                    Gentle morning reminder between 7:55–8:15 AM local time. Requires
+                    device registration.
+                  </p>
                 </div>
-                <p className="text-xs md:text-sm text-accent-ink/60 ml-8 mt-1 leading-relaxed">
-                  Gentle morning reminder between 7:55–8:15 AM local time. Requires
-                  device registration.
-                </p>
               </div>
             </div>
-          </section>
-          )}
 
-          {/* Privacy & Data */}
-          {activeSection === "privacy" && (
-          <section className="space-y-3">
-            <h2 className="text-lg md:text-xl font-semibold text-accent-gold">
-              Privacy & data
-            </h2>
-            <p className="text-sm md:text-base text-accent-ink/60 leading-relaxed">
-              Your data is private and never shared.
-            </p>
-          </section>
-          )}
+            {/* Privacy & Data */}
+            <div className="space-y-3">
+              <h3 className="text-base md:text-lg font-medium">Privacy & data</h3>
+              <p className="text-sm md:text-base text-accent-ink/60 leading-relaxed">
+                Your data is private and never shared.
+              </p>
+            </div>
 
-          {/* Account State */}
-          {activeSection === "account" && (
-          <section className="space-y-6">
-            <h2 className="text-lg md:text-xl font-semibold text-accent-gold">
-              Account state
-            </h2>
-
-            <div className="space-y-4">
+            {/* Hibernate account */}
+            <div className="space-y-3">
               <h3 className="text-base md:text-lg font-medium">Hibernate account</h3>
               <p className="text-sm md:text-base text-accent-ink/60 leading-relaxed">
                 Pause your subscription while keeping your data safe. You can reactivate
@@ -1521,7 +1504,8 @@ export default function SettingsPage() {
               </Button>
             </div>
 
-            <div className="space-y-4">
+            {/* Delete account */}
+            <div className="space-y-3">
               <h3 className="text-base md:text-lg font-medium">Delete account</h3>
               <p className="text-sm md:text-base text-accent-ink/60 leading-relaxed">
                 Permanently delete your account and all associated data. This action
