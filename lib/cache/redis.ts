@@ -47,11 +47,12 @@ function initRedis(): void {
     });
 
     redis.on("connect", () => {
-      console.log("[Cache] Redis connected successfully.");
+      console.log("[Cache] ✅ Redis connected successfully.");
       redisAvailable = true;
     });
 
     redis.on("ready", () => {
+      console.log("[Cache] ✅ Redis ready for operations.");
       redisAvailable = true;
     });
   } catch (error: any) {
@@ -213,11 +214,23 @@ export async function withLock<T>(
 /**
  * Check if Redis is currently available.
  *
- * @returns true if Redis is connected and ready, false otherwise
+ * In production: returns true only if Redis is connected and ready.
+ * In development: returns true even if Redis is unavailable (fail-open for DX).
+ *
+ * @returns true if Redis is available (or in dev mode), false otherwise
  */
 export function isRedisAvailable(): boolean {
   initRedis();
-  return redis !== null && redisAvailable;
+
+  const available = redis !== null && redisAvailable;
+
+  // Dev mode: fail-open to prevent startup race 503s
+  if (!available && process.env.NODE_ENV !== "production") {
+    console.warn("[Cache] Redis unavailable, failing open (dev mode)");
+    return true;
+  }
+
+  return available;
 }
 
 /**
@@ -229,9 +242,12 @@ export function isRedisAvailable(): boolean {
  * Use this for expensive operations (like OpenAI calls) where duplicate
  * execution is costly.
  *
+ * Production: Fails closed (returns acquired: false, redisDown: true) when Redis unavailable.
+ * Development: Fails open (returns acquired: true, redisDown: false) to prevent startup race 503s.
+ *
  * @param lockKey - Unique key for the lock
  * @param ttlSeconds - How long to hold the lock (default: 30 seconds)
- * @returns { acquired: boolean, redisAvailable: boolean }
+ * @returns { acquired: boolean, redisDown: boolean }
  */
 export async function acquireLockFailClosed(
   lockKey: string,
@@ -240,8 +256,17 @@ export async function acquireLockFailClosed(
   initRedis();
 
   if (!redis || !redisAvailable) {
-    console.warn(`[Cache] Redis unavailable, failing closed for lock "${lockKey}"`);
-    return { acquired: false, redisDown: true };
+    const isProd = process.env.NODE_ENV === "production";
+
+    if (isProd) {
+      // Production: fail closed to prevent duplicate expensive operations
+      console.warn(`[Cache] Redis unavailable, failing closed for lock "${lockKey}"`);
+      return { acquired: false, redisDown: true };
+    }
+
+    // Development: fail open to prevent startup race 503s (local DX)
+    console.warn(`[Cache] Redis unavailable, failing open (dev mode) for lock "${lockKey}"`);
+    return { acquired: true, redisDown: false };
   }
 
   try {
@@ -249,8 +274,15 @@ export async function acquireLockFailClosed(
     return { acquired: result === "OK", redisDown: false };
   } catch (error: any) {
     console.error(`[Cache] Error acquiring lock "${lockKey}":`, error.message);
-    // On error, fail closed (don't allow the operation)
-    return { acquired: false, redisDown: true };
+
+    const isProd = process.env.NODE_ENV === "production";
+    if (isProd) {
+      // Production: fail closed on error
+      return { acquired: false, redisDown: true };
+    }
+
+    // Development: fail open on error (local DX)
+    return { acquired: true, redisDown: false };
   }
 }
 
