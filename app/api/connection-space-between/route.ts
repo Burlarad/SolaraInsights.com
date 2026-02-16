@@ -284,8 +284,10 @@ export async function POST(req: NextRequest) {
       : null;
 
     // If linked to a real profile, use their data
+    // NOTE: Uses admin client because profiles RLS restricts SELECT to own row.
+    // Safe: auth verified, connection ownership confirmed, unlock gate passed.
     if (connection.linked_profile_id) {
-      const { data: linkedProfile } = await supabase
+      const { data: linkedProfile } = await admin
         .from("profiles")
         .select("birth_date, birth_time, birth_city, birth_region, birth_country")
         .eq("id", connection.linked_profile_id)
@@ -304,7 +306,8 @@ export async function POST(req: NextRequest) {
       }
 
       // Try to get social insights summary (if available)
-      const { data: socialSummaries } = await supabase
+      // NOTE: Uses admin client because social_summaries RLS restricts to own rows.
+      const { data: socialSummaries } = await admin
         .from("social_summaries")
         .select("summary")
         .eq("user_id", connection.linked_profile_id);
@@ -566,25 +569,34 @@ Return the JSON object now.`;
     }
 
     // ========================================
-    // SAVE TO DATABASE (STONE TABLET)
+    // SAVE TO DATABASE (UPSERT — quarterly refresh overwrites)
     // ========================================
-    const { data: savedReport, error: saveError } = await supabase
+    // Uses admin client to bypass service_role-only write policy.
+    // Safe: auth verified, ownership confirmed, unlock gate passed above.
+    // UPSERT on (connection_id, language, prompt_version) so quarterly
+    // refresh overwrites the previous report instead of failing on
+    // the unique constraint.
+    const { data: savedReport, error: saveError } = await admin
       .from("space_between_reports")
-      .insert({
-        connection_id: connectionId,
-        owner_user_id: user.id,
-        language,
-        prompt_version: PROMPT_VERSION,
-        model_version: OPENAI_MODELS.deep,
-        includes_linked_birth_data: includesLinkedBirthData,
-        includes_linked_social_data: includesLinkedSocialData,
-        linked_profile_id: connection.linked_profile_id || null,
-        relationship_essence: reportContent.relationship_essence,
-        emotional_blueprint: reportContent.emotional_blueprint,
-        communication_patterns: reportContent.communication_patterns,
-        growth_edges: reportContent.growth_edges,
-        care_guide: reportContent.care_guide,
-      })
+      .upsert(
+        {
+          connection_id: connectionId,
+          owner_user_id: user.id,
+          language,
+          prompt_version: PROMPT_VERSION,
+          model_version: OPENAI_MODELS.deep,
+          includes_linked_birth_data: includesLinkedBirthData,
+          includes_linked_social_data: includesLinkedSocialData,
+          linked_profile_id: connection.linked_profile_id || null,
+          relationship_essence: reportContent.relationship_essence,
+          emotional_blueprint: reportContent.emotional_blueprint,
+          communication_patterns: reportContent.communication_patterns,
+          growth_edges: reportContent.growth_edges,
+          care_guide: reportContent.care_guide,
+          refreshed_at: new Date().toISOString(),
+        },
+        { onConflict: "connection_id,language,prompt_version" }
+      )
       .select()
       .single();
 
