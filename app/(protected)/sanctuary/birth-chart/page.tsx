@@ -122,9 +122,16 @@ type BirthChartResponse = {
   insight: FullBirthChartInsight | null;
   chart_key?: string;
   is_official?: boolean;
-  mode?: "official" | "checkout";
+  mode?: "official" | "checkout" | "load";
   error?: string;
   message?: string;
+};
+
+type ShelfEntry = {
+  book_key: string;
+  label: string | null;
+  last_opened_at: string;
+  created_at: string;
 };
 
 export default function BirthChartPage() {
@@ -144,6 +151,10 @@ export default function BirthChartPage() {
   const [checkoutPlace, setCheckoutPlace] = useState<PlaceSelection | null>(null);
   const activeCheckoutInputsRef = useRef<CheckoutInputs | null>(null);
   const checkoutPrefillDoneRef = useRef(false);
+  // Shelf state
+  const [shelf, setShelf] = useState<ShelfEntry[]>([]);
+  const [officialKey, setOfficialKey] = useState<string | null>(null);
+  const [currentBookKey, setCurrentBookKey] = useState<string | null>(null);
   const { profile } = useSettings();
   const t = useTranslations("astrology");
   const tCommon = useTranslations("common");
@@ -240,13 +251,13 @@ export default function BirthChartPage() {
       }
 
       const chartData: BirthChartResponse = data;
-      console.log("[BirthChart UI] Received placements:", chartData.placements);
-      console.log("[BirthChart UI] Houses count:", chartData.placements?.houses?.length);
-      console.log("[BirthChart UI] Houses array:", chartData.placements?.houses);
       setPlacements(chartData.placements || null);
       setInsight(chartData.insight ?? null);
+      if (chartData.chart_key) setCurrentBookKey(chartData.chart_key);
       attemptCountRef.current = 0; // Reset on success
       setLoading(false);
+      // Refresh shelf after any successful generation (non-blocking)
+      void refreshShelf();
     } catch (err) {
       console.error("[BirthChart] Client fetch error:", err);
       const rotatingMessage = pickRotatingMessage({
@@ -262,22 +273,111 @@ export default function BirthChartPage() {
     }
   }, []);
 
+  // Fetch shelf on mount and after any generation
+  const refreshShelf = useCallback(async () => {
+    try {
+      const res = await fetch("/api/birth-chart-library");
+      if (res.ok) {
+        const data = await res.json();
+        setShelf(data.shelf || []);
+        setOfficialKey(data.official_key || null);
+      }
+    } catch {
+      // Non-critical — shelf is nice-to-have
+    }
+  }, []);
+
   useEffect(() => {
     fetchBirthChart();
-  }, [fetchBirthChart]);
+    void refreshShelf();
+  }, [fetchBirthChart, refreshShelf]);
+
+  // Load a previously checked-out book by key
+  const loadBookByKey = useCallback(async (bookKey: string) => {
+    setLoading(true);
+    setError(null);
+    setErrorInfo(null);
+
+    try {
+      const res = await fetch("/api/birth-chart-library", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mode: "load", chart_key: bookKey }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.message || "Failed to load book.");
+        setLoading(false);
+        return;
+      }
+
+      const chartData: BirthChartResponse = await res.json();
+      setPlacements(chartData.placements || null);
+      setInsight(chartData.insight ?? null);
+      if (chartData.chart_key) setCurrentBookKey(chartData.chart_key);
+      setCheckoutMode(!chartData.is_official);
+      setLoading(false);
+      void refreshShelf();
+    } catch {
+      setError("Failed to load book.");
+      setLoading(false);
+    }
+  }, [refreshShelf]);
 
   const handleCheckoutGenerate = useCallback(() => {
     if (!checkoutDate || !checkoutTime || !checkoutPlace) return;
     setCheckoutMode(true);
     setCheckoutPanelOpen(false);
-    fetchBirthChart({
-      birth_date: checkoutDate,
-      birth_time: checkoutTime,
-      birth_lat: checkoutPlace.birth_lat,
-      birth_lon: checkoutPlace.birth_lon,
-      timezone: checkoutPlace.timezone,
-    });
-  }, [checkoutDate, checkoutTime, checkoutPlace, fetchBirthChart]);
+
+    // Pass birth_city so the API can build a meaningful label
+    const body = {
+      mode: "checkout" as const,
+      inputs: {
+        birth_date: checkoutDate,
+        birth_time: checkoutTime,
+        birth_lat: checkoutPlace.birth_lat,
+        birth_lon: checkoutPlace.birth_lon,
+        timezone: checkoutPlace.timezone,
+      },
+      birth_city: checkoutPlace.birth_city || undefined,
+    };
+
+    // Use fetchBirthChart but with birth_city included via direct fetch
+    setLoading(true);
+    setError(null);
+    setErrorInfo(null);
+    attemptCountRef.current += 1;
+    activeCheckoutInputsRef.current = body.inputs;
+
+    fetch("/api/birth-chart-library", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const data = await res.json();
+          const category = getErrorCategory(res.status, data.errorCode);
+          const msg = pickRotatingMessage({ category, attempt: attemptCountRef.current, retryAfterSeconds: data.retryAfterSeconds });
+          setError(msg);
+          setErrorInfo({ message: msg, errorCode: data.errorCode, retryAfterSeconds: data.retryAfterSeconds, status: res.status });
+          setLoading(false);
+          return;
+        }
+        const chartData: BirthChartResponse = await res.json();
+        setPlacements(chartData.placements || null);
+        setInsight(chartData.insight ?? null);
+        if (chartData.chart_key) setCurrentBookKey(chartData.chart_key);
+        attemptCountRef.current = 0;
+        setLoading(false);
+        void refreshShelf();
+      })
+      .catch(() => {
+        setError("Failed to generate chart.");
+        setLoading(false);
+      });
+  }, [checkoutDate, checkoutTime, checkoutPlace, refreshShelf]);
 
   const handleReturnToOfficial = useCallback(() => {
     setCheckoutMode(false);
@@ -340,76 +440,100 @@ export default function BirthChartPage() {
         <SanctuaryTabs />
       </div>
 
-      {/* Checkout Another Book */}
+      {/* Book Shelf Counter + Checkout */}
       {!loading && !error && !incompleteProfile && (
-        <div className="max-w-3xl mx-auto">
-          {checkoutMode ? (
-            <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-4 flex items-center justify-between gap-4">
-              <p className="text-sm text-accent-ink/70">
-                Viewing a checkout chart — temporary, not saved.
-              </p>
-              <Button variant="outline" size="sm" onClick={handleReturnToOfficial}>
-                Return to My Book
-              </Button>
-            </div>
-          ) : (
-            <div>
-              <button
-                onClick={() => setCheckoutPanelOpen(!checkoutPanelOpen)}
-                className="text-sm text-accent underline hover:no-underline"
+        <div className="max-w-3xl mx-auto space-y-3">
+          {/* Book counter + switcher */}
+          {shelf.length > 0 && (
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="text-xs font-medium text-accent-ink/50 uppercase tracking-wide">
+                Book {currentBookKey ? shelf.findIndex(s => s.book_key === currentBookKey) + 1 || 1 : 1} of {shelf.length}
+              </span>
+              <select
+                value={currentBookKey || ""}
+                onChange={(e) => {
+                  const key = e.target.value;
+                  if (!key) return;
+                  if (key === officialKey) {
+                    handleReturnToOfficial();
+                  } else {
+                    setCheckoutMode(true);
+                    loadBookByKey(key);
+                  }
+                }}
+                className="rounded-lg border border-accent-soft px-3 py-1.5 text-sm bg-white text-accent-ink/80 min-w-[180px]"
               >
-                {checkoutPanelOpen ? "Close" : "Checkout Another Book"}
-              </button>
-              {checkoutPanelOpen && (
-                <div className="mt-4 rounded-xl border border-accent-soft bg-white/50 p-6 space-y-4">
-                  <p className="text-sm text-accent-ink/70">
-                    Generate a chart for different birth data. This is temporary and won't affect your saved chart.
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm text-accent-ink/70 mb-1 block">Birth Date</label>
-                      <input
-                        type="date"
-                        value={checkoutDate}
-                        onChange={(e) => setCheckoutDate(e.target.value)}
-                        className="w-full rounded-lg border border-accent-soft px-3 py-2 text-sm bg-white"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm text-accent-ink/70 mb-1 block">Birth Time</label>
-                      <input
-                        type="time"
-                        value={checkoutTime}
-                        onChange={(e) => setCheckoutTime(e.target.value)}
-                        className="w-full rounded-lg border border-accent-soft px-3 py-2 text-sm bg-white"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-sm text-accent-ink/70 mb-1 block">Birth Location</label>
-                    <PlacePicker
-                      initialValue={
-                        checkoutPlace
-                          ? [checkoutPlace.birth_city, checkoutPlace.birth_region, checkoutPlace.birth_country]
-                              .filter(Boolean)
-                              .join(", ")
-                          : ""
-                      }
-                      onSelect={(place) => setCheckoutPlace(place)}
-                      onClear={() => setCheckoutPlace(null)}
-                      placeholder="Search for birth city..."
-                    />
-                  </div>
-                  <Button
-                    onClick={handleCheckoutGenerate}
-                    disabled={!checkoutDate || !checkoutTime || !checkoutPlace}
-                  >
-                    Generate Chart
-                  </Button>
-                </div>
+                {shelf.map((entry) => (
+                  <option key={entry.book_key} value={entry.book_key}>
+                    {entry.book_key === officialKey ? "Official" : entry.label || "Checkout"}
+                  </option>
+                ))}
+              </select>
+              {checkoutMode && (
+                <Button variant="outline" size="sm" onClick={handleReturnToOfficial}>
+                  Return to Official
+                </Button>
               )}
             </div>
           )}
+
+          {/* Checkout form toggle */}
+          <div>
+            <button
+              onClick={() => setCheckoutPanelOpen(!checkoutPanelOpen)}
+              className="text-sm text-accent underline hover:no-underline"
+            >
+              {checkoutPanelOpen ? "Close" : "Checkout Another Book"}
+            </button>
+            {checkoutPanelOpen && (
+              <div className="mt-4 rounded-xl border border-accent-soft bg-white/50 p-6 space-y-4">
+                <p className="text-sm text-accent-ink/70">
+                  Generate a chart for different birth data. It will be saved to your shelf.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm text-accent-ink/70 mb-1 block">Birth Date</label>
+                    <input
+                      type="date"
+                      value={checkoutDate}
+                      onChange={(e) => setCheckoutDate(e.target.value)}
+                      className="w-full rounded-lg border border-accent-soft px-3 py-2 text-sm bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-accent-ink/70 mb-1 block">Birth Time</label>
+                    <input
+                      type="time"
+                      value={checkoutTime}
+                      onChange={(e) => setCheckoutTime(e.target.value)}
+                      className="w-full rounded-lg border border-accent-soft px-3 py-2 text-sm bg-white"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm text-accent-ink/70 mb-1 block">Birth Location</label>
+                  <PlacePicker
+                    initialValue={
+                      checkoutPlace
+                        ? [checkoutPlace.birth_city, checkoutPlace.birth_region, checkoutPlace.birth_country]
+                            .filter(Boolean)
+                            .join(", ")
+                        : ""
+                    }
+                    onSelect={(place) => setCheckoutPlace(place)}
+                    onClear={() => setCheckoutPlace(null)}
+                    placeholder="Search for birth city..."
+                  />
+                </div>
+                <Button
+                  onClick={handleCheckoutGenerate}
+                  disabled={!checkoutDate || !checkoutTime || !checkoutPlace}
+                >
+                  Generate Chart
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       )}
 

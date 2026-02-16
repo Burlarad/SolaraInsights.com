@@ -1,12 +1,13 @@
 /**
- * Birth Chart Library API (POST)
+ * Birth Chart Library API (GET + POST)
  *
- * NEW endpoint implementing Library Book model.
- * Book = Math (placements) + Narrative (insight) stored together.
+ * GET: Returns user's astrology shelf (list of checked-out books)
+ * POST: Generates/loads a birth chart book
  *
- * Modes:
+ * POST Modes:
  * 1. Official mode (no payload or mode: "official"): Returns user's official chart from Settings
- * 2. Checkout mode (mode: "checkout"): Generates chart for arbitrary inputs (ephemeral, no pointer update)
+ * 2. Checkout mode (mode: "checkout"): Generates chart for arbitrary inputs
+ * 3. Load mode (mode: "load"): Loads a previously checked-out chart by key
  *
  * CRITICAL: NO noon defaulting. If inputs incomplete, return error.
  *
@@ -16,7 +17,7 @@
  *   insight: FullBirthChartInsight | null,  // The narrative
  *   chart_key: string,
  *   is_official: boolean,
- *   mode: "official" | "checkout"
+ *   mode: "official" | "checkout" | "load"
  * }
  */
 
@@ -43,6 +44,87 @@ const COOLDOWN_SECONDS = 10;
 const USER_RATE_LIMIT = 20;
 const USER_RATE_WINDOW = 3600;
 
+/**
+ * Build a human-readable label for a checkout book
+ */
+function buildCheckoutLabel(inputs: { birth_date?: string; birth_city?: string }): string {
+  const parts: string[] = [];
+  if (inputs.birth_date) {
+    const d = new Date(inputs.birth_date + "T00:00:00");
+    parts.push(d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }));
+  }
+  if (inputs.birth_city) {
+    parts.push(inputs.birth_city);
+  }
+  return parts.join(" \u00b7 ") || "Checkout";
+}
+
+/**
+ * Upsert a shelf entry for a checked-out book
+ */
+async function trackCheckout(
+  supabase: any,
+  userId: string,
+  bookKey: string,
+  label: string
+) {
+  await supabase
+    .from("library_checkouts")
+    .upsert(
+      {
+        user_id: userId,
+        book_type: "astrology",
+        book_key: bookKey,
+        label,
+        last_opened_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id,book_type,book_key" }
+    );
+}
+
+/**
+ * GET /api/birth-chart-library
+ * Returns user's astrology shelf (list of checked-out books)
+ */
+export async function GET(req: NextRequest) {
+  try {
+    const supabase = await createServerSupabaseClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Fetch user's astrology shelf
+    const { data: shelf } = await supabase
+      .from("library_checkouts")
+      .select("book_key, label, last_opened_at, created_at")
+      .eq("user_id", user.id)
+      .eq("book_type", "astrology")
+      .order("last_opened_at", { ascending: false });
+
+    // Fetch official key from profile
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("official_astrology_key")
+      .eq("id", user.id)
+      .single();
+
+    return NextResponse.json({
+      shelf: shelf || [],
+      official_key: profile?.official_astrology_key || null,
+    });
+  } catch (error: any) {
+    console.error("[BirthChartLibrary] GET error:", error);
+    return NextResponse.json(
+      { error: "Failed to load shelf" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     // Authenticate user
@@ -60,10 +142,12 @@ export async function POST(req: NextRequest) {
 
     // Parse request body (optional - if empty, use official mode)
     const body = await req.json().catch(() => ({}));
-    const { mode, inputs, language: bodyLanguage } = body as {
-      mode?: "official" | "checkout";
+    const { mode, inputs, chart_key: requestedChartKey, language: bodyLanguage, birth_city } = body as {
+      mode?: "official" | "checkout" | "load";
       inputs?: Partial<ChartInput>;
+      chart_key?: string;
       language?: string;
+      birth_city?: string;
     };
 
     // ========================================
@@ -207,6 +291,9 @@ export async function POST(req: NextRequest) {
             { status: 400 }
           );
         }
+
+        // Track on shelf (non-blocking)
+        void trackCheckout(supabase, user.id, chart.chart_key, "Official");
 
         // Return official chart with correct field names
         return NextResponse.json({
@@ -356,6 +443,13 @@ export async function POST(req: NextRequest) {
           }
         );
 
+        // Track on shelf (non-blocking)
+        const checkoutLabel = buildCheckoutLabel({
+          birth_date: inputs.birth_date,
+          birth_city: birth_city || undefined,
+        });
+        void trackCheckout(supabase, user.id, chart.chart_key, checkoutLabel);
+
         // Return checkout chart with correct field names
         return NextResponse.json({
           placements: chart.geometry_json,  // Frontend expects "placements"
@@ -371,8 +465,71 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // ========================================
+    // MODE 3: LOAD (previously checked-out book)
+    // ========================================
+    // Read-only — no Swiss Ephemeris, no AI, no rate limiting
+    if (mode === "load") {
+      if (!requestedChartKey) {
+        return NextResponse.json(
+          { error: "Bad request", message: "Load mode requires 'chart_key' field." },
+          { status: 400 }
+        );
+      }
+
+      // Verify the book is on the user's shelf (ownership check)
+      const { data: shelfEntry } = await supabase
+        .from("library_checkouts")
+        .select("book_key")
+        .eq("user_id", user.id)
+        .eq("book_type", "astrology")
+        .eq("book_key", requestedChartKey)
+        .maybeSingle();
+
+      if (!shelfEntry) {
+        return NextResponse.json(
+          { error: "Not found", message: "This book is not on your shelf." },
+          { status: 404 }
+        );
+      }
+
+      // Load from global library
+      const chart = await getChartFromLibrary(requestedChartKey);
+      if (!chart) {
+        return NextResponse.json(
+          { error: "Not found", message: "Chart data not found in library." },
+          { status: 404 }
+        );
+      }
+
+      // Update last_opened_at (non-blocking)
+      void supabase
+        .from("library_checkouts")
+        .update({ last_opened_at: new Date().toISOString() })
+        .eq("user_id", user.id)
+        .eq("book_type", "astrology")
+        .eq("book_key", requestedChartKey);
+
+      // Determine if this is the official chart
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("official_astrology_key")
+        .eq("id", user.id)
+        .single();
+
+      const isOfficial = profile?.official_astrology_key === requestedChartKey;
+
+      return NextResponse.json({
+        placements: chart.geometry_json,
+        insight: chart.narrative_json,
+        chart_key: chart.chart_key,
+        is_official: isOfficial,
+        mode: "load",
+      });
+    }
+
     return NextResponse.json(
-      { error: "Bad request", message: "Invalid mode. Use 'official' or 'checkout'." },
+      { error: "Bad request", message: "Invalid mode. Use 'official', 'checkout', or 'load'." },
       { status: 400 }
     );
   } catch (error: any) {
