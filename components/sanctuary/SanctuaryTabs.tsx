@@ -6,12 +6,10 @@ import { useRef, useEffect, useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
-const TAB_KEYS = ["insights", "connections", "tarot", "astrology", "numerology", "library"] as const;
+const TAB_KEYS = ["insights", "connections", "tarot", "library"] as const;
 
 const TAB_HREFS: Record<typeof TAB_KEYS[number], string> = {
   insights: "/sanctuary",
-  astrology: "/sanctuary/birth-chart",
-  numerology: "/sanctuary/numerology",
   connections: "/sanctuary/connections",
   tarot: "/sanctuary/tarot",
   library: "/sanctuary/library",
