@@ -306,6 +306,17 @@
     "title": "당신의 숫자",
     "subtitle": "인생 뒤에 숨은 수학",
     "calculating": "숫자 계산 중...",
+    "sections": {
+      "narrative": "개인 내러티브",
+      "cycles": "주기 및 기간",
+      "numbers": "숫자 및 의미"
+    },
+    "narrative": {
+      "title": "당신의 개인 내러티브",
+      "subtitle": "당신의 수비학 이야기와 인생 주제",
+      "notAvailable": "해석을 사용할 수 없습니다",
+      "notAvailableDesc": "숫자를 계산했지만 현재 전체 해석을 생성할 수 없었습니다. 프로필이 저장되었습니다 — 잠시 후 다시 시도해 주세요."
+    },
     "systems": {
       "pythagorean": "피타고라스식",
       "chaldean": "칼데아식"
@@ -545,7 +556,7 @@
   "astrology": {
     "title": "점성술",
     "subtitle": "인생 뒤에 숨은 빛",
-    "calculating": "소울 패스를 계산 중…",
+    "calculating": "점성술 프로필 작성 중…",
     "sections": {
       "narrative": "개인 내러티브",
       "foundations": "기초",

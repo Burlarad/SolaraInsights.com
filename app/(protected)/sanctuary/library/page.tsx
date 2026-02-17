@@ -1156,7 +1156,7 @@ function NumerologyTab() {
             </Button>
           </CardContent>
         </Card>
-        <CheckoutButton show={showCheckout} onToggle={() => setShowCheckout(!showCheckout)} label="Checkout a Numerology Book" />
+        <CheckoutButton show={showCheckout} onToggle={() => setShowCheckout(!showCheckout)} label="View Numerology Profile" />
         {showCheckout && (
           <NumerologyCheckoutForm
             name={checkoutName}
@@ -1183,7 +1183,7 @@ function NumerologyTab() {
             </Button>
           </CardContent>
         </Card>
-        <CheckoutButton show={showCheckout} onToggle={() => setShowCheckout(!showCheckout)} label="Checkout a Numerology Book" />
+        <CheckoutButton show={showCheckout} onToggle={() => setShowCheckout(!showCheckout)} label="View Numerology Profile" />
         {showCheckout && (
           <NumerologyCheckoutForm
             name={checkoutName}
@@ -1270,7 +1270,7 @@ function NumerologyTab() {
       )}
 
       {/* Checkout form toggle */}
-      <CheckoutButton show={showCheckout} onToggle={() => setShowCheckout(!showCheckout)} label="Checkout a Numerology Book" />
+      <CheckoutButton show={showCheckout} onToggle={() => setShowCheckout(!showCheckout)} label="View Numerology Profile" />
       {showCheckout && (
         <NumerologyCheckoutForm
           name={checkoutName}
@@ -1977,7 +1977,7 @@ function LoadingSpinner({ message }: { message: string }) {
 function CheckoutButton({
   show,
   onToggle,
-  label = "Checkout Another Book",
+  label = "View Astrological Profile",
 }: {
   show: boolean;
   onToggle: () => void;
@@ -2051,7 +2051,7 @@ function AstrologyCheckoutForm({
           onClick={onSubmit}
           disabled={loading || !date || !time || !place}
         >
-          {loading ? "Checking out..." : "Checkout"}
+          {loading ? "Generating..." : "View Profile"}
         </Button>
       </CardContent>
     </Card>
@@ -2106,7 +2106,7 @@ function NumerologyCheckoutForm({
           onClick={onSubmit}
           disabled={loading || !name.trim() || !date}
         >
-          {loading ? "Checking out..." : "Checkout"}
+          {loading ? "Generating..." : "View Profile"}
         </Button>
       </CardContent>
     </Card>

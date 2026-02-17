@@ -306,6 +306,17 @@
     "title": "Con số của bạn",
     "subtitle": "Toán học đằng sau cuộc sống của bạn",
     "calculating": "Đang tính toán con số của bạn...",
+    "sections": {
+      "narrative": "Câu chuyện cá nhân",
+      "cycles": "Chu kỳ & Giai đoạn",
+      "numbers": "Con số & Ý nghĩa"
+    },
+    "narrative": {
+      "title": "Câu chuyện cá nhân của bạn",
+      "subtitle": "Câu chuyện thần số học và chủ đề cuộc sống của bạn",
+      "notAvailable": "Không có diễn giải",
+      "notAvailableDesc": "Chúng tôi đã tính toán các con số của bạn, nhưng hiện không thể tạo diễn giải đầy đủ. Hồ sơ của bạn đã được lưu — vui lòng thử lại sau giây lát."
+    },
     "systems": {
       "pythagorean": "Pythagoras",
       "chaldean": "Chaldean"
@@ -545,7 +556,7 @@
   "astrology": {
     "title": "Chiêm tinh học",
     "subtitle": "Ánh sáng đằng sau cuộc sống của bạn",
-    "calculating": "Đang tính toán con đường linh hồn của bạn…",
+    "calculating": "Đang lập hồ sơ chiêm tinh của bạn…",
     "sections": {
       "narrative": "Câu Chuyện Cá Nhân",
       "foundations": "Nền Tảng",

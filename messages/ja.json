@@ -306,6 +306,17 @@
     "title": "あなたの数字",
     "subtitle": "人生の数学",
     "calculating": "数字を計算中...",
+    "sections": {
+      "narrative": "パーソナルナラティブ",
+      "cycles": "サイクルと期間",
+      "numbers": "数字と意味"
+    },
+    "narrative": {
+      "title": "あなたのパーソナルナラティブ",
+      "subtitle": "あなたの数秘術の物語と人生のテーマ",
+      "notAvailable": "解釈を利用できません",
+      "notAvailableDesc": "数字を計算しましたが、現在完全な解釈を生成できませんでした。プロフィールは保存されています — しばらくしてからもう一度お試しください。"
+    },
     "systems": {
       "pythagorean": "ピタゴラス式",
       "chaldean": "カルデア式"
@@ -545,7 +556,7 @@
   "astrology": {
     "title": "占星術",
     "subtitle": "人生の光",
-    "calculating": "ソウルパスを計算中…",
+    "calculating": "占星術プロフィールを作成中…",
     "sections": {
       "narrative": "パーソナルナラティブ",
       "foundations": "基盤",

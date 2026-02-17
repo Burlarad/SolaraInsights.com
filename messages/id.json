@@ -306,6 +306,17 @@
     "title": "Angka Anda",
     "subtitle": "Matematika di Balik Kehidupan Anda",
     "calculating": "Menghitung angka Anda...",
+    "sections": {
+      "narrative": "Narasi Pribadi",
+      "cycles": "Siklus & Periode",
+      "numbers": "Angka & Makna"
+    },
+    "narrative": {
+      "title": "Narasi Pribadi Anda",
+      "subtitle": "Kisah numerologi dan tema kehidupan Anda",
+      "notAvailable": "Interpretasi tidak tersedia",
+      "notAvailableDesc": "Kami telah menghitung angka Anda, tetapi tidak dapat menghasilkan interpretasi lengkap saat ini. Profil Anda tersimpan — silakan coba lagi dalam beberapa saat."
+    },
     "systems": {
       "pythagorean": "Pythagoras",
       "chaldean": "Kaldea"

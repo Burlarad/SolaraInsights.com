@@ -306,6 +306,17 @@
     "title": "Ihre Zahlen",
     "subtitle": "Die Mathematik hinter Ihrem Leben",
     "calculating": "Ihre Zahlen werden berechnet...",
+    "sections": {
+      "narrative": "Persönliche Erzählung",
+      "cycles": "Zyklen & Perioden",
+      "numbers": "Zahlen & Bedeutungen"
+    },
+    "narrative": {
+      "title": "Ihre persönliche Erzählung",
+      "subtitle": "Ihre numerologische Geschichte und Lebensthemen",
+      "notAvailable": "Interpretation nicht verfügbar",
+      "notAvailableDesc": "Wir haben Ihre Zahlen berechnet, konnten aber momentan keine vollständige Interpretation erstellen. Ihr Profil ist gespeichert — bitte versuchen Sie es in einem Moment erneut."
+    },
     "systems": {
       "pythagorean": "Pythagoreisch",
       "chaldean": "Chaldäisch"
@@ -545,7 +556,7 @@
   "astrology": {
     "title": "Astrologie",
     "subtitle": "Das Licht hinter Ihrem Leben",
-    "calculating": "Berechnung Ihres Seelenpfades…",
+    "calculating": "Ihr astrologisches Profil wird erstellt…",
     "sections": {
       "narrative": "Persönliche Erzählung",
       "foundations": "Grundlagen",

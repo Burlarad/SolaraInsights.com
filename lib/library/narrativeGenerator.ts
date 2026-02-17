@@ -112,6 +112,37 @@ export async function generateNarrative(
         type: a.type,
         orb: a.orb,
       })),
+      // Derived summary from Swiss Ephemeris (chart ruler, dominants, balances)
+      derived: placements.derived ? {
+        chartRuler: placements.derived.chartRuler,
+        dominantSigns: placements.derived.dominantSigns?.slice(0, 5) ?? [],
+        dominantPlanets: placements.derived.dominantPlanets?.slice(0, 5) ?? [],
+        elementBalance: placements.derived.elementBalance,
+        modalityBalance: placements.derived.modalityBalance,
+        topAspects: (placements.derived.topAspects ?? []).slice(0, 8).map((a) => ({
+          between: `${a.between[0]}-${a.between[1]}`,
+          type: a.type,
+          orb: a.orb,
+        })),
+      } : undefined,
+      // Calculated features from Swiss Ephemeris (chart type, nodes, emphasis, patterns)
+      calculated: placements.calculated ? {
+        chartType: placements.calculated.chartType,
+        southNode: placements.calculated.southNode ? {
+          sign: placements.calculated.southNode.sign,
+          house: placements.calculated.southNode.house ?? null,
+        } : null,
+        partOfFortune: placements.calculated.partOfFortune ? {
+          sign: placements.calculated.partOfFortune.sign,
+          house: placements.calculated.partOfFortune.house ?? null,
+        } : null,
+        emphasis: placements.calculated.emphasis ? {
+          houseEmphasis: placements.calculated.emphasis.houseEmphasis?.slice(0, 5) ?? [],
+          signEmphasis: placements.calculated.emphasis.signEmphasis?.slice(0, 5) ?? [],
+          stelliums: placements.calculated.emphasis.stelliums ?? [],
+        } : null,
+        patterns: placements.calculated.patterns ?? [],
+      } : undefined,
     },
   };
 

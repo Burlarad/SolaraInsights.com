@@ -306,6 +306,17 @@
     "title": "Vos nombres",
     "subtitle": "Les mathématiques derrière votre vie",
     "calculating": "Calcul de vos nombres...",
+    "sections": {
+      "narrative": "Récit personnel",
+      "cycles": "Cycles et périodes",
+      "numbers": "Nombres et significations"
+    },
+    "narrative": {
+      "title": "Votre récit personnel",
+      "subtitle": "Votre histoire numérologique et vos thèmes de vie",
+      "notAvailable": "Interprétation non disponible",
+      "notAvailableDesc": "Nous avons calculé vos nombres, mais n'avons pas pu générer une interprétation complète pour le moment. Votre profil est sauvegardé — veuillez réessayer dans un instant."
+    },
     "systems": {
       "pythagorean": "Pythagoricien",
       "chaldean": "Chaldéen"

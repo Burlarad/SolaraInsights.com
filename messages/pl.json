@@ -306,6 +306,17 @@
     "title": "Twoje Liczby",
     "subtitle": "Matematyka Za Twoim Życiem",
     "calculating": "Obliczanie twoich liczb...",
+    "sections": {
+      "narrative": "Osobista narracja",
+      "cycles": "Cykle i okresy",
+      "numbers": "Liczby i znaczenia"
+    },
+    "narrative": {
+      "title": "Twoja osobista narracja",
+      "subtitle": "Twoja numerologiczna historia i motywy życiowe",
+      "notAvailable": "Interpretacja niedostępna",
+      "notAvailableDesc": "Obliczyliśmy twoje liczby, ale nie udało się wygenerować pełnej interpretacji w tej chwili. Twój profil jest zapisany — spróbuj ponownie za chwilę."
+    },
     "systems": {
       "pythagorean": "Pitagorejski",
       "chaldean": "Chaldejski"

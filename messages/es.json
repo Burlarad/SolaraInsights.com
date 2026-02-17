@@ -306,6 +306,17 @@
     "title": "Tus números",
     "subtitle": "La matemática detrás de tu vida",
     "calculating": "Calculando tus números...",
+    "sections": {
+      "narrative": "Narrativa personal",
+      "cycles": "Ciclos y períodos",
+      "numbers": "Números y significados"
+    },
+    "narrative": {
+      "title": "Tu narrativa personal",
+      "subtitle": "Tu historia numerológica y temas de vida",
+      "notAvailable": "Interpretación no disponible",
+      "notAvailableDesc": "Calculamos tus números, pero no pudimos generar una interpretación completa en este momento. Tu perfil está guardado — por favor inténtalo de nuevo en un momento."
+    },
     "systems": {
       "pythagorean": "Pitagórico",
       "chaldean": "Caldeo"
@@ -545,7 +556,7 @@
   "astrology": {
     "title": "Astrología",
     "subtitle": "La luz detrás de tu vida",
-    "calculating": "Calculando el camino de tu alma…",
+    "calculating": "Trazando tu perfil astrológico…",
     "sections": {
       "narrative": "Narrativa personal",
       "foundations": "Fundamentos",

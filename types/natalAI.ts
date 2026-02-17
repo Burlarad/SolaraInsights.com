@@ -66,6 +66,25 @@ export type NatalAIRequest = {
       type: "conjunction" | "sextile" | "square" | "trine" | "opposition";
       orb: number; // degrees off exact
     }>;
+    derived?: {
+      chartRuler: string; // e.g. "Venus"
+      dominantSigns: Array<{ sign: string; score: number }>;
+      dominantPlanets: Array<{ name: string; score: number }>;
+      elementBalance: { fire: number; earth: number; air: number; water: number };
+      modalityBalance: { cardinal: number; fixed: number; mutable: number };
+      topAspects: Array<{ between: string; type: string; orb: number }>;
+    };
+    calculated?: {
+      chartType: "day" | "night";
+      southNode: { sign: string; house: number | null } | null;
+      partOfFortune: { sign: string; house: number | null } | null;
+      emphasis: {
+        houseEmphasis: Array<{ house: number; count: number }>;
+        signEmphasis: Array<{ sign: string; count: number }>;
+        stelliums: Array<{ type: string; name: string | number; planets: string[] }>;
+      } | null;
+      patterns: Array<{ type: string; planets: string[] }>;
+    };
   };
 };
 

@@ -306,6 +306,17 @@
     "title": "您的数字",
     "subtitle": "生命背后的数学",
     "calculating": "计算您的数字中...",
+    "sections": {
+      "narrative": "个人叙事",
+      "cycles": "周期与阶段",
+      "numbers": "数字与含义"
+    },
+    "narrative": {
+      "title": "您的个人叙事",
+      "subtitle": "您的数字命理故事与人生主题",
+      "notAvailable": "解读暂时无法提供",
+      "notAvailableDesc": "我们已计算出您的数字，但目前无法生成完整的解读。您的资料已保存——请稍后再试。"
+    },
     "systems": {
       "pythagorean": "毕达哥拉斯",
       "chaldean": "迦勒底"

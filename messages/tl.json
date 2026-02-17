@@ -306,6 +306,17 @@
     "title": "Ang Iyong mga Numero",
     "subtitle": "Ang Matematika sa Likod ng Iyong Buhay",
     "calculating": "Kinakalkula ang iyong mga numero...",
+    "sections": {
+      "narrative": "Personal na Salaysay",
+      "cycles": "Mga Siklo at Panahon",
+      "numbers": "Mga Numero at Kahulugan"
+    },
+    "narrative": {
+      "title": "Ang Iyong Personal na Salaysay",
+      "subtitle": "Ang iyong kuwento sa numerolohiya at mga tema ng buhay",
+      "notAvailable": "Hindi available ang interpretasyon",
+      "notAvailableDesc": "Nakalkula namin ang iyong mga numero, ngunit hindi nagawa ang buong interpretasyon sa ngayon. Naka-save ang iyong profile — subukan muli sa ilang sandali."
+    },
     "systems": {
       "pythagorean": "Pythagorean",
       "chaldean": "Chaldean"

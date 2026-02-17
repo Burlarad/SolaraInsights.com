@@ -306,6 +306,17 @@
     "title": "Jouw Getallen",
     "subtitle": "De Wiskunde Achter Je Leven",
     "calculating": "Je getallen berekenen...",
+    "sections": {
+      "narrative": "Persoonlijk verhaal",
+      "cycles": "Cycli & perioden",
+      "numbers": "Getallen & betekenissen"
+    },
+    "narrative": {
+      "title": "Jouw persoonlijke verhaal",
+      "subtitle": "Je numerologische verhaal en levensthema's",
+      "notAvailable": "Interpretatie niet beschikbaar",
+      "notAvailableDesc": "We hebben je getallen berekend, maar konden op dit moment geen volledige interpretatie genereren. Je profiel is opgeslagen — probeer het over een moment opnieuw."
+    },
     "systems": {
       "pythagorean": "Pythagoreïsch",
       "chaldean": "Chaldeeuws"
