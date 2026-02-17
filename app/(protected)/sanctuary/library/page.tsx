@@ -75,6 +75,7 @@ type NumerologyBookResponse = {
 type RecentEntry = ShelfEntry & { book_type: string };
 
 type SoulPathSection = "narrative" | "foundations" | "connections" | "patterns-path";
+type NumerologySection = "narrative" | "cycles" | "numbers";
 
 // ============================================================================
 // CONSTANTS
@@ -120,15 +121,15 @@ export default function LibraryPage() {
 
       {/* Library sub-tabs */}
       <div className="flex justify-center">
-        <div className="inline-flex gap-1 p-1 bg-white/50 rounded-full">
+        <div className="inline-flex gap-2 p-1 bg-white/50 rounded-full">
           {(["astrology", "numerology", "recent"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
+              className={`pill font-cursive text-xl md:text-2xl font-normal transition-all ${
                 activeTab === tab
-                  ? "bg-accent-ink text-white"
-                  : "text-accent-ink hover:bg-white/80"
+                  ? "bg-accent-ink text-white shadow-sm"
+                  : "bg-transparent text-accent-ink hover:bg-white/80"
               }`}
             >
               {tab === "recent" ? "Recent Books" : tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -1003,7 +1004,7 @@ function NumerologyTab() {
   const [error, setError] = useState<string | null>(null);
   const [book, setBook] = useState<NumerologyBookResponse | null>(null);
   const [system, setSystem] = useState<NumerologySystem>("pythagorean");
-  const [appendixOpen, setAppendixOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState<NumerologySection>("narrative");
 
   // Shelf state
   const [shelf, setShelf] = useState<ShelfEntry[]>([]);
@@ -1227,63 +1228,46 @@ function NumerologyTab() {
   };
   const currentPinnacle = getCurrentPinnacle();
 
+  const NUMEROLOGY_SECTIONS: { id: NumerologySection; label: string }[] = [
+    { id: "narrative", label: t("sections.narrative") },
+    { id: "cycles", label: t("sections.cycles") },
+    { id: "numbers", label: t("sections.numbers") },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Shelf counter + switcher */}
       {shelf.length > 0 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white/60 rounded-xl p-4 border border-border-subtle">
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-medium text-accent-ink/70">
-              Book {shelfIndex >= 0 ? shelfIndex + 1 : 1} of {shelf.length}
-            </span>
-            {shelf.length > 1 && (
-              <select
-                className="text-sm border border-border-subtle rounded-lg px-3 py-1.5 bg-white text-accent-ink"
-                value={currentBookKey || ""}
-                onChange={(e) => {
-                  if (e.target.value && e.target.value !== currentBookKey) {
-                    if (e.target.value === officialKey) {
-                      handleReturnToOfficial();
-                    } else {
-                      loadBookByKey(e.target.value);
-                    }
-                  }
-                }}
-              >
-                {shelf.map((entry) => (
-                  <option key={entry.book_key} value={entry.book_key}>
-                    {entry.label || "Book"}{entry.book_key === officialKey ? " (Official)" : ""}
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            {!isViewingOfficial && officialKey && (
-              <Button variant="outline" size="sm" onClick={handleReturnToOfficial}>
-                Return to Official
-              </Button>
-            )}
-          </div>
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="text-xs font-medium text-accent-ink/50 uppercase tracking-wide">
+            Book {shelfIndex >= 0 ? shelfIndex + 1 : 1} of {shelf.length}
+          </span>
+          <select
+            value={currentBookKey || ""}
+            onChange={(e) => {
+              const key = e.target.value;
+              if (!key) return;
+              if (key === officialKey) {
+                handleReturnToOfficial();
+              } else {
+                loadBookByKey(key);
+              }
+            }}
+            className="rounded-lg border border-accent-soft px-3 py-1.5 text-sm bg-white text-accent-ink/80 min-w-[180px]"
+          >
+            {shelf.map((entry) => (
+              <option key={entry.book_key} value={entry.book_key}>
+                {entry.book_key === officialKey ? "Official" : entry.label || "Checkout"}
+              </option>
+            ))}
+          </select>
+          {!isViewingOfficial && (
+            <Button variant="outline" size="sm" onClick={handleReturnToOfficial}>
+              Return to Official
+            </Button>
+          )}
         </div>
       )}
-
-      {/* System toggle */}
-      <div className="flex justify-center">
-        <div className="flex gap-2 p-1 bg-white/50 rounded-full">
-          {(["pythagorean", "chaldean"] as const).map((s) => (
-            <button
-              key={s}
-              onClick={() => setSystem(s)}
-              className={`px-4 py-2 rounded-full font-cursive text-xl font-normal transition-all ${
-                system === s ? "bg-accent-ink text-white" : "text-accent-ink hover:bg-white/80"
-              }`}
-            >
-              {t(`systems.${s}`)}
-            </button>
-          ))}
-        </div>
-      </div>
 
       {/* Checkout form toggle */}
       <CheckoutButton show={showCheckout} onToggle={() => setShowCheckout(!showCheckout)} label="Checkout a Numerology Book" />
@@ -1298,167 +1282,190 @@ function NumerologyTab() {
         />
       )}
 
-      {/* Narrative (MAIN content at top) */}
-      {narrative && narrative.sections && narrative.sections.length > 0 && (
-        <section className="space-y-6">
-          {narrative.sections.map((section, i) => (
-            <div key={i} className="space-y-3">
-              <h2 className="text-lg font-semibold text-accent-gold">{section.heading}</h2>
-              <div className="prose prose-sm max-w-none text-accent-ink/85 leading-relaxed">
-                {section.body.split("\n\n").map((paragraph, j) => (
-                  <p key={j} className="mb-4 last:mb-0">{paragraph}</p>
-                ))}
-              </div>
-            </div>
-          ))}
-        </section>
-      )}
+      {/* Section toggle pills — matching astrology layout */}
+      <>
+        {/* Mobile: Dropdown */}
+        <div className="md:hidden flex justify-center">
+          <select
+            value={activeSection}
+            onChange={(e) => setActiveSection(e.target.value as NumerologySection)}
+            className="px-4 py-3 rounded-full border-0 bg-white/50 text-accent-ink font-cursive text-xl font-normal focus:outline-none focus:ring-2 focus:ring-accent"
+          >
+            {NUMEROLOGY_SECTIONS.map((section) => (
+              <option key={section.id} value={section.id}>
+                {section.label}
+              </option>
+            ))}
+          </select>
+        </div>
 
-      {!narrative && (
-        <Card className="bg-white/50">
-          <CardContent className="py-8 text-center">
-            <p className="text-accent-ink/60">
-              Narrative is being generated. This may take a moment on first load.
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Personal Cycles */}
-      {cycles && (
-        <section>
-          <h2 className="text-lg font-semibold text-accent-gold mb-4">{t("cycles.title")}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="bg-white border-border-subtle">
-              <CardContent className="p-5">
-                <p className="text-xs text-accent-ink/60 uppercase tracking-wide mb-1">
-                  {t("cycles.personalYear")}
-                </p>
-                <div className="flex items-baseline gap-2 mb-2">
-                  <p className="text-3xl font-bold text-accent-gold">{cycles.personalYear}</p>
-                  <span className="text-sm font-medium text-accent-ink/70">
-                    {t(`numbers.${cycles.personalYear}.keyword`)}
-                  </span>
-                </div>
-                <p className="text-sm text-accent-ink/80 leading-relaxed">
-                  {t(`numbers.${cycles.personalYear}.yearGuidance`)}
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="bg-white border-border-subtle">
-              <CardContent className="p-5">
-                <p className="text-xs text-accent-ink/60 uppercase tracking-wide mb-1">
-                  {t("cycles.personalMonth")}
-                </p>
-                <div className="flex items-baseline gap-2 mb-2">
-                  <p className="text-3xl font-bold text-accent-gold">{cycles.personalMonth}</p>
-                  <span className="text-sm font-medium text-accent-ink/70">
-                    {t(`numbers.${cycles.personalMonth}.keyword`)}
-                  </span>
-                </div>
-                <p className="text-sm text-accent-ink/80 leading-relaxed">
-                  {t(`numbers.${cycles.personalMonth}.monthGuidance`)}
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="bg-white border-border-subtle">
-              <CardContent className="p-5">
-                <p className="text-xs text-accent-ink/60 uppercase tracking-wide mb-1">
-                  {t("cycles.personalDay")}
-                </p>
-                <div className="flex items-baseline gap-2 mb-2">
-                  <p className="text-3xl font-bold text-accent-gold">{cycles.personalDay}</p>
-                  <span className="text-sm font-medium text-accent-ink/70">
-                    {t(`numbers.${cycles.personalDay}.keyword`)}
-                  </span>
-                </div>
-                <p className="text-sm text-accent-ink/80 leading-relaxed">
-                  {t(`numbers.${cycles.personalDay}.dayGuidance`)}
-                </p>
-              </CardContent>
-            </Card>
+        {/* Desktop: Horizontal pills */}
+        <div className="hidden md:flex justify-center">
+          <div className="inline-flex gap-2 p-1 bg-white/50 rounded-full">
+            {NUMEROLOGY_SECTIONS.map((section) => (
+              <button
+                key={section.id}
+                onClick={() => setActiveSection(section.id)}
+                className={`pill font-cursive text-xl md:text-2xl font-normal transition-all ${
+                  activeSection === section.id
+                    ? "bg-accent-ink text-white shadow-sm"
+                    : "bg-transparent text-accent-ink hover:bg-white/80"
+                }`}
+              >
+                {section.label}
+              </button>
+            ))}
           </div>
-        </section>
-      )}
+        </div>
+      </>
 
-      {/* Appendix (Numbers — collapsible) */}
-      <section>
-        <button
-          onClick={() => setAppendixOpen(!appendixOpen)}
-          className="flex items-center gap-2 text-lg font-semibold text-accent-gold mb-4 hover:opacity-80 transition-opacity"
-        >
-          <span className={`transition-transform ${appendixOpen ? "rotate-90" : ""}`}>&#9654;</span>
-          Numbers &amp; Meanings
-        </button>
+      {/* System toggle */}
+      <div className="flex justify-center">
+        <div className="flex gap-2 p-1 bg-white/50 rounded-full">
+          {(["pythagorean", "chaldean"] as const).map((s) => (
+            <button
+              key={s}
+              onClick={() => setSystem(s)}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                system === s ? "bg-accent-gold/20 text-accent-gold border border-accent-gold/30" : "text-accent-ink/50 hover:bg-white/80"
+              }`}
+            >
+              {t(`systems.${s}`)}
+            </button>
+          ))}
+        </div>
+      </div>
 
-        {appendixOpen && (
-          <div className="space-y-8">
-            {/* Core Numbers */}
-            <div>
-              <h3 className="text-base font-semibold text-accent-ink/80 mb-3">{t("coreNumbers.title")}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {([
-                  ["lifePath", t("coreNumbers.lifePath"), t("coreNumbers.lifePathDesc")],
-                  ["expression", t("coreNumbers.expression"), t("coreNumbers.expressionDesc")],
-                  ["soulUrge", t("coreNumbers.soulUrge"), t("coreNumbers.soulUrgeDesc")],
-                  ["personality", t("coreNumbers.personality"), t("coreNumbers.personalityDesc")],
-                  ["birthday", t("coreNumbers.birthday"), t("coreNumbers.birthdayDesc")],
-                  ["maturity", t("coreNumbers.maturity"), t("coreNumbers.maturityDesc")],
-                ] as [keyof CoreNumbers, string, string][]).map(([key, label, desc]) => {
-                  const num = coreNumbers[key];
-                  const displayNumber = num.master || num.value;
-                  return (
-                    <Card key={key} className="bg-white border-border-subtle hover:shadow-md transition-shadow">
-                      <CardContent className="p-5">
-                        <p className="text-xs text-accent-ink/60 uppercase tracking-wide mb-1">{label}</p>
-                        <div className="flex items-baseline gap-2 mb-1">
-                          <p className="text-3xl font-bold text-accent-gold">{num.value}</p>
-                          {num.master && (
-                            <span className="text-sm text-accent-gold/60">({num.master})</span>
-                          )}
-                          <span className="text-sm font-medium text-accent-ink/70">
-                            {t(`numbers.${displayNumber}.keyword`)}
-                          </span>
-                        </div>
-                        <p className="text-xs text-accent-ink/50 mb-3">{desc}</p>
-                        <p className="text-sm text-accent-ink/80 leading-relaxed">
-                          {t(`numbers.${displayNumber}.description`)}
-                        </p>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            </div>
+      {/* Section content */}
+      <div className="max-w-3xl mx-auto">
 
-            {/* Current Pinnacle */}
-            <div>
-              <h3 className="text-base font-semibold text-accent-ink/80 mb-3">{t("lifePeriods.title")}</h3>
-              <Card className="bg-gradient-to-br from-accent-gold/5 to-transparent border-accent-gold/20">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <p className="text-sm text-accent-ink/60">{t("lifePeriods.currentPinnacle")}</p>
-                      <div className="flex items-baseline gap-2">
-                        <p className="text-4xl font-bold text-accent-gold">{currentPinnacle.number}</p>
-                        <span className="text-sm font-medium text-accent-ink/70">
-                          {t(`numbers.${currentPinnacle.number}.keyword`)}
-                        </span>
+        {/* ── Narrative Section ── */}
+        {activeSection === "narrative" && narrative && narrative.sections && narrative.sections.length > 0 && (() => {
+          const [overview, ...rest] = narrative.sections;
+          return (
+            <div className="space-y-6">
+              <SolaraCard className="space-y-6">
+                <div>
+                  <h2 className="text-xl font-semibold mb-2">{t("narrative.title")}</h2>
+                  <p className="text-sm text-accent-ink/60">{t("narrative.subtitle")}</p>
+                </div>
+
+                <h3 className="text-xl md:text-2xl font-semibold leading-snug text-accent-ink">
+                  {overview.heading}
+                </h3>
+
+                <div className="text-base text-accent-ink/80 leading-relaxed space-y-4">
+                  {overview.body.split("\n\n").map((para, idx) => (
+                    <p key={idx}>{para}</p>
+                  ))}
+                </div>
+
+                <div className="space-y-6 pt-4 border-t border-accent-soft/30">
+                  {rest.map((section, i) => (
+                    <div key={i} className="space-y-3">
+                      <h4 className="text-sm font-medium text-accent-ink/70">{section.heading}</h4>
+                      <div className="text-base text-accent-ink/80 leading-relaxed space-y-4">
+                        {section.body.split("\n\n").map((paragraph, j) => (
+                          <p key={j}>{paragraph}</p>
+                        ))}
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm text-accent-ink/60">{currentPinnacle.period} {t("lifePeriods.period")}</p>
-                      <p className="text-sm text-accent-ink/70">
-                        {t("lifePeriods.ages")} {currentPinnacle.startAge || 0} - {currentPinnacle.endAge || t("lifePeriods.onwards")}
-                      </p>
+                  ))}
+                </div>
+              </SolaraCard>
+            </div>
+          );
+        })()}
+
+        {activeSection === "narrative" && (!narrative || !narrative.sections || narrative.sections.length === 0) && (
+          <SolaraCard className="space-y-3">
+            <h2 className="text-lg font-semibold">{t("narrative.notAvailable")}</h2>
+            <p className="text-sm text-accent-ink/80 leading-relaxed">
+              {t("narrative.notAvailableDesc")}
+            </p>
+          </SolaraCard>
+        )}
+
+        {/* ── Cycles Section ── */}
+        {activeSection === "cycles" && (
+          <div className="space-y-8">
+            {/* Personal Cycles */}
+            {cycles && (
+              <SolaraCard className="space-y-6">
+                <h2 className="text-xl font-semibold">{t("cycles.title")}</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-5 bg-white rounded-xl border border-border-subtle">
+                    <p className="text-xs text-accent-ink/60 uppercase tracking-wide mb-1">
+                      {t("cycles.personalYear")}
+                    </p>
+                    <div className="flex items-baseline gap-2 mb-2">
+                      <p className="text-3xl font-bold text-accent-gold">{cycles.personalYear}</p>
+                      <span className="text-sm font-medium text-accent-ink/70">
+                        {t(`numbers.${cycles.personalYear}.keyword`)}
+                      </span>
+                    </div>
+                    <p className="text-sm text-accent-ink/80 leading-relaxed">
+                      {t(`numbers.${cycles.personalYear}.yearGuidance`)}
+                    </p>
+                  </div>
+                  <div className="p-5 bg-white rounded-xl border border-border-subtle">
+                    <p className="text-xs text-accent-ink/60 uppercase tracking-wide mb-1">
+                      {t("cycles.personalMonth")}
+                    </p>
+                    <div className="flex items-baseline gap-2 mb-2">
+                      <p className="text-3xl font-bold text-accent-gold">{cycles.personalMonth}</p>
+                      <span className="text-sm font-medium text-accent-ink/70">
+                        {t(`numbers.${cycles.personalMonth}.keyword`)}
+                      </span>
+                    </div>
+                    <p className="text-sm text-accent-ink/80 leading-relaxed">
+                      {t(`numbers.${cycles.personalMonth}.monthGuidance`)}
+                    </p>
+                  </div>
+                  <div className="p-5 bg-white rounded-xl border border-border-subtle">
+                    <p className="text-xs text-accent-ink/60 uppercase tracking-wide mb-1">
+                      {t("cycles.personalDay")}
+                    </p>
+                    <div className="flex items-baseline gap-2 mb-2">
+                      <p className="text-3xl font-bold text-accent-gold">{cycles.personalDay}</p>
+                      <span className="text-sm font-medium text-accent-ink/70">
+                        {t(`numbers.${cycles.personalDay}.keyword`)}
+                      </span>
+                    </div>
+                    <p className="text-sm text-accent-ink/80 leading-relaxed">
+                      {t(`numbers.${cycles.personalDay}.dayGuidance`)}
+                    </p>
+                  </div>
+                </div>
+              </SolaraCard>
+            )}
+
+            {/* Current Pinnacle */}
+            <SolaraCard className="space-y-6">
+              <h2 className="text-xl font-semibold">{t("lifePeriods.title")}</h2>
+              <div className="p-6 bg-gradient-to-br from-accent-gold/5 to-transparent rounded-xl border border-accent-gold/20">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <p className="text-sm text-accent-ink/60">{t("lifePeriods.currentPinnacle")}</p>
+                    <div className="flex items-baseline gap-2">
+                      <p className="text-4xl font-bold text-accent-gold">{currentPinnacle.number}</p>
+                      <span className="text-sm font-medium text-accent-ink/70">
+                        {t(`numbers.${currentPinnacle.number}.keyword`)}
+                      </span>
                     </div>
                   </div>
-                  <p className="text-accent-ink/80">{t(`numbers.${currentPinnacle.number}.description`)}</p>
-                </CardContent>
-              </Card>
+                  <div className="text-right">
+                    <p className="text-sm text-accent-ink/60">{currentPinnacle.period} {t("lifePeriods.period")}</p>
+                    <p className="text-sm text-accent-ink/70">
+                      {t("lifePeriods.ages")} {currentPinnacle.startAge || 0} - {currentPinnacle.endAge || t("lifePeriods.onwards")}
+                    </p>
+                  </div>
+                </div>
+                <p className="text-accent-ink/80">{t(`numbers.${currentPinnacle.number}.description`)}</p>
+              </div>
 
               {/* All Pinnacles Timeline */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {[pinnacles.first, pinnacles.second, pinnacles.third, pinnacles.fourth].map(
                   (p, i) => {
                     const isActive =
@@ -1498,102 +1505,136 @@ function NumerologyTab() {
                   }
                 )}
               </div>
-            </div>
+            </SolaraCard>
 
             {/* Challenges */}
-            <div>
-              <h3 className="text-base font-semibold text-accent-ink/80 mb-3">{t("challenges.title")}</h3>
+            <SolaraCard className="space-y-4">
+              <h2 className="text-xl font-semibold">{t("challenges.title")}</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[challenges.first, challenges.second, challenges.third, challenges.fourth].map(
                   (c, i) => (
-                    <Card key={i} className="bg-white border-border-subtle">
-                      <CardContent className="p-4">
-                        <p className="text-xs text-accent-ink/60 mb-1">
-                          {t(`challenges.${["first", "second", "third", "main"][i]}`)}
-                        </p>
-                        <div className="flex items-baseline gap-2 mb-2">
-                          <p className="text-2xl font-bold text-accent-ink">{c}</p>
-                          <span className="text-xs font-medium text-accent-ink/60">
-                            {t(`numbers.${c}.keyword`)}
-                          </span>
-                        </div>
-                        <p className="text-xs text-accent-ink/70 line-clamp-2">
-                          {t(`challengeMeanings.${c}`)}
-                        </p>
-                      </CardContent>
-                    </Card>
+                    <div key={i} className="p-4 bg-white rounded-lg border border-border-subtle">
+                      <p className="text-xs text-accent-ink/60 mb-1">
+                        {t(`challenges.${["first", "second", "third", "main"][i]}`)}
+                      </p>
+                      <div className="flex items-baseline gap-2 mb-2">
+                        <p className="text-2xl font-bold text-accent-ink">{c}</p>
+                        <span className="text-xs font-medium text-accent-ink/60">
+                          {t(`numbers.${c}.keyword`)}
+                        </span>
+                      </div>
+                      <p className="text-xs text-accent-ink/70 line-clamp-2">
+                        {t(`challengeMeanings.${c}`)}
+                      </p>
+                    </div>
                   )
                 )}
               </div>
-            </div>
+            </SolaraCard>
+          </div>
+        )}
+
+        {/* ── Numbers Section ── */}
+        {activeSection === "numbers" && (
+          <div className="space-y-8">
+            {/* Core Numbers */}
+            <SolaraCard className="space-y-4">
+              <h2 className="text-xl font-semibold">{t("coreNumbers.title")}</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {([
+                  ["lifePath", t("coreNumbers.lifePath"), t("coreNumbers.lifePathDesc")],
+                  ["expression", t("coreNumbers.expression"), t("coreNumbers.expressionDesc")],
+                  ["soulUrge", t("coreNumbers.soulUrge"), t("coreNumbers.soulUrgeDesc")],
+                  ["personality", t("coreNumbers.personality"), t("coreNumbers.personalityDesc")],
+                  ["birthday", t("coreNumbers.birthday"), t("coreNumbers.birthdayDesc")],
+                  ["maturity", t("coreNumbers.maturity"), t("coreNumbers.maturityDesc")],
+                ] as [keyof CoreNumbers, string, string][]).map(([key, label, desc]) => {
+                  const num = coreNumbers[key];
+                  const displayNumber = num.master || num.value;
+                  return (
+                    <div key={key} className="p-5 bg-white rounded-xl border border-border-subtle">
+                      <p className="text-xs text-accent-ink/60 uppercase tracking-wide mb-1">{label}</p>
+                      <div className="flex items-baseline gap-2 mb-1">
+                        <p className="text-3xl font-bold text-accent-gold">{num.value}</p>
+                        {num.master && (
+                          <span className="text-sm text-accent-gold/60">({num.master})</span>
+                        )}
+                        <span className="text-sm font-medium text-accent-ink/70">
+                          {t(`numbers.${displayNumber}.keyword`)}
+                        </span>
+                      </div>
+                      <p className="text-xs text-accent-ink/50 mb-3">{desc}</p>
+                      <p className="text-sm text-accent-ink/80 leading-relaxed">
+                        {t(`numbers.${displayNumber}.description`)}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </SolaraCard>
 
             {/* Lucky Numbers */}
-            <div>
-              <h3 className="text-base font-semibold text-accent-ink/80 mb-3">{t("luckyNumbers.title")}</h3>
+            <SolaraCard className="space-y-4">
+              <h2 className="text-xl font-semibold">{t("luckyNumbers.title")}</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {luckyNumbers.all.map((num, i) => {
                   const isMaster = num === 11 || num === 22 || num === 33;
                   return (
-                    <Card
+                    <div
                       key={i}
-                      className={`border-border-subtle ${
-                        i === 0 ? "bg-accent-gold/10 border-accent-gold/30" : "bg-white"
+                      className={`p-4 rounded-xl text-center border ${
+                        i === 0 ? "bg-accent-gold/10 border-accent-gold/30" : "bg-white border-border-subtle"
                       }`}
                     >
-                      <CardContent className="p-4 text-center">
-                        <div
-                          className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-3 ${
-                            i === 0
-                              ? "bg-accent-gold text-white"
-                              : "bg-accent-gold/10 text-accent-gold border border-accent-gold/30"
-                          }`}
-                        >
-                          {num}
-                        </div>
-                        <p className="text-sm font-medium text-accent-ink mb-1">
-                          {t(`numbers.${num}.keyword`)}
-                        </p>
-                        {isMaster && (
-                          <p className="text-xs text-accent-gold font-medium mb-1">{tCommon("masterNumber")}</p>
-                        )}
-                        <p className="text-xs text-accent-ink/60">{t(`numbers.${num}.energy`)}</p>
-                      </CardContent>
-                    </Card>
+                      <div
+                        className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-3 ${
+                          i === 0
+                            ? "bg-accent-gold text-white"
+                            : "bg-accent-gold/10 text-accent-gold border border-accent-gold/30"
+                        }`}
+                      >
+                        {num}
+                      </div>
+                      <p className="text-sm font-medium text-accent-ink mb-1">
+                        {t(`numbers.${num}.keyword`)}
+                      </p>
+                      {isMaster && (
+                        <p className="text-xs text-accent-gold font-medium mb-1">{tCommon("masterNumber")}</p>
+                      )}
+                      <p className="text-xs text-accent-ink/60">{t(`numbers.${num}.energy`)}</p>
+                    </div>
                   );
                 })}
               </div>
-            </div>
+            </SolaraCard>
 
             {/* Karmic Debt */}
             {karmicDebt.hasKarmicDebt && (
-              <div>
-                <h3 className="text-base font-semibold text-accent-ink/80 mb-3">{t("karmicDebt.title")}</h3>
+              <SolaraCard className="space-y-4">
+                <h2 className="text-xl font-semibold">{t("karmicDebt.title")}</h2>
                 <div className="space-y-4">
                   {karmicDebt.numbers.map((num) => (
-                    <Card key={num} className="bg-white border-border-subtle">
-                      <CardContent className="p-6">
-                        <div className="flex items-start gap-4">
-                          <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 font-bold text-xl flex-shrink-0">
-                            {num}
-                          </div>
-                          <div>
-                            <p className="font-medium text-accent-ink">
-                              {t("karmicDebt.title")} {num}: {t(`karmicDebt.${num}.label`)}
-                            </p>
-                            <p className="text-sm text-accent-ink/70 mt-1">
-                              {t(`karmicDebt.${num}.meaning`)}
-                            </p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <div key={num} className="flex items-start gap-4 p-4 bg-white rounded-xl border border-border-subtle">
+                      <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 font-bold text-xl flex-shrink-0">
+                        {num}
+                      </div>
+                      <div>
+                        <p className="font-medium text-accent-ink">
+                          {t("karmicDebt.title")} {num}: {t(`karmicDebt.${num}.label`)}
+                        </p>
+                        <p className="text-sm text-accent-ink/70 mt-1">
+                          {t(`karmicDebt.${num}.meaning`)}
+                        </p>
+                      </div>
+                    </div>
                   ))}
                 </div>
-              </div>
+              </SolaraCard>
             )}
           </div>
         )}
-      </section>
+
+      </div>
     </div>
   );
 }
@@ -1973,9 +2014,9 @@ function AstrologyCheckoutForm({
   return (
     <Card className="border-accent-gold/30 bg-accent-gold/5">
       <CardContent className="p-6 space-y-4">
-        <h3 className="text-lg font-semibold text-accent-ink">Checkout an Astrology Book</h3>
+        <h3 className="text-lg font-semibold text-accent-ink">View Astrological Profile</h3>
         <p className="text-sm text-accent-ink/60">
-          Enter birth details to generate an astrology chart for anyone.
+          Enter birth details to view an astrological profile for anyone.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
@@ -2010,7 +2051,7 @@ function AstrologyCheckoutForm({
           onClick={onSubmit}
           disabled={loading || !date || !time || !place}
         >
-          {loading ? "Generating..." : "Generate Astrology Book"}
+          {loading ? "Checking out..." : "Checkout"}
         </Button>
       </CardContent>
     </Card>
@@ -2035,9 +2076,9 @@ function NumerologyCheckoutForm({
   return (
     <Card className="border-accent-gold/30 bg-accent-gold/5">
       <CardContent className="p-6 space-y-4">
-        <h3 className="text-lg font-semibold text-accent-ink">Checkout a Numerology Book</h3>
+        <h3 className="text-lg font-semibold text-accent-ink">View Numerology Profile</h3>
         <p className="text-sm text-accent-ink/60">
-          Enter a name and birth date to generate a numerology profile for anyone.
+          Enter a name and birth date to view a numerology profile for anyone.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -2065,7 +2106,7 @@ function NumerologyCheckoutForm({
           onClick={onSubmit}
           disabled={loading || !name.trim() || !date}
         >
-          {loading ? "Generating..." : "Generate Numerology Book"}
+          {loading ? "Checking out..." : "Checkout"}
         </Button>
       </CardContent>
     </Card>
