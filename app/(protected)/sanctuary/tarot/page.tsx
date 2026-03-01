@@ -19,7 +19,7 @@ export default function TarotPage() {
 
       {/* Tarot Arena */}
       <div className="max-w-3xl mx-auto">
-        <TarotArena hideSignupCta />
+        <TarotArena />
       </div>
     </div>
   );

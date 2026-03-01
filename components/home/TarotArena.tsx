@@ -23,11 +23,7 @@ function scrollToCenter(el: HTMLElement) {
   window.scrollTo({ top: targetY, behavior: "smooth" });
 }
 
-interface TarotArenaProps {
-  hideSignupCta?: boolean;
-}
-
-export function TarotArena({ hideSignupCta = false }: TarotArenaProps) {
+export function TarotArena() {
   const t = useTranslations("tarot");
   const locale = useLocale();
 
@@ -38,6 +34,7 @@ export function TarotArena({ hideSignupCta = false }: TarotArenaProps) {
   const [error, setError] = useState<string | null>(null);
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
   const [showGlow, setShowGlow] = useState(false);
+  const [sessionExpired, setSessionExpired] = useState(false);
 
   const outputRef = useRef<HTMLDivElement>(null);
   const cooldownInterval = useRef<NodeJS.Timeout | null>(null);
@@ -96,12 +93,13 @@ export function TarotArena({ hideSignupCta = false }: TarotArenaProps) {
     setError(null);
     setReading(null);
     setShowGlow(false);
+    setSessionExpired(false);
 
     try {
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const requestId = generateUUID();
 
-      const response = await fetch("/api/public-tarot", {
+      const response = await fetch("/api/tarot", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -116,6 +114,12 @@ export function TarotArena({ hideSignupCta = false }: TarotArenaProps) {
       const data = await response.json();
 
       if (!response.ok) {
+        // Session expired — prompt to sign in
+        if (response.status === 401) {
+          setSessionExpired(true);
+          return;
+        }
+
         // Handle rate limit / cooldown
         if (response.status === 429) {
           const retryAfter = data.retryAfterSeconds || data.retryAfter || 10;
@@ -221,6 +225,17 @@ export function TarotArena({ hideSignupCta = false }: TarotArenaProps) {
                 : t("buttons.draw")}
             </Button>
           </div>
+
+          {/* Session expired — sign-in prompt */}
+          {sessionExpired && (
+            <p className="text-center text-sm text-accent-ink/70">
+              Your session has expired.{" "}
+              <a href="/sign-in" className="text-accent-gold hover:underline">
+                Sign in
+              </a>{" "}
+              to draw cards.
+            </p>
+          )}
 
           {/* Error Message */}
           {error && !loading && (
@@ -347,18 +362,6 @@ export function TarotArena({ hideSignupCta = false }: TarotArenaProps) {
                   ))}
                 </div>
               </div>
-
-              {/* CTA for sign up - only show on public pages */}
-              {!hideSignupCta && (
-                <div className="pt-6 border-t border-border-subtle text-center space-y-3">
-                  <p className="text-sm text-accent-ink/60">
-                    {t("cta.message")}
-                  </p>
-                  <Button variant="gold" asChild className="min-h-[48px]">
-                    <a href="/join">{t("cta.button")}</a>
-                  </Button>
-                </div>
-              )}
             </CardContent>
           </Card>
         )}

@@ -1,498 +1,365 @@
-# SOLARA INSIGHTS - COMPREHENSIVE REPOSITORY AUDIT
-
-**Date:** 2026-01-21
-**Auditor:** Claude Opus 4.5
-**Scope:** Complete end-to-end repository audit for launch readiness
-
----
-
-## EXECUTIVE SUMMARY
-
-### Overall Health Score: 7.5/10
-
-The Solara codebase is in **good shape** for a SaaS launch. Core functionality is complete, security is solid, and the architecture is well-documented. However, there are **2 critical RLS blockers** that must be fixed before launch, and significant test coverage gaps.
-
-### Top 5 Critical Issues
-
-| # | Issue | Severity | Impact |
-|---|-------|----------|--------|
-| 1 | `soul_paths` table has RLS enabled but NO policies | **BLOCKER** | Soul path data inaccessible to users |
-| 2 | `ai_usage_events` has RLS enabled but NO policies | **BLOCKER** | AI usage tracking broken |
-| 3 | 231 tests are `test.todo()` - not implemented | HIGH | Core paths untested |
-| 4 | Swiss Ephemeris native addon blocks Cloudflare Workers | HIGH | Deployment constraint |
-| 5 | STRIPE_SECRET_KEY only warns when missing | HIGH | Silent payment failures |
-
-### Top 5 Quick Wins
-
-| # | Action | Effort | Impact |
-|---|--------|--------|--------|
-| 1 | Add RLS policies to `soul_paths` and `ai_usage_events` | 30 min | Unblocks launch |
-| 2 | Make STRIPE_SECRET_KEY throw instead of warn | 5 min | Prevents silent failures |
-| 3 | Remove Reddit stub from sign-in UI | 10 min | Better UX |
-| 4 | Fix 5 React hook dependency warnings | 1 hour | Prevents stale closure bugs |
-| 5 | Archive duplicate audit docs | 15 min | Cleaner repo |
-
-### Launch Readiness Assessment
-
-| Area | Status | Notes |
-|------|--------|-------|
-| Core Features | READY | Birth charts, insights, numerology functional |
-| Authentication | READY | Supabase Auth + PKCE working |
-| Payments | READY | Stripe integration complete |
-| Database | **BLOCKED** | 2 tables missing RLS policies |
-| Security | GOOD | Solid threat model, no critical vulns |
-| Tests | PARTIAL | 27% coverage, 73% todo |
-| i18n | READY | 19 languages, all ~960 lines |
-| Performance | GOOD | No major issues identified |
-
-**Verdict:** Fix 2 RLS blockers and you're launch-ready.
-
----
-
-## SECTION 1: ARCHITECTURE MAP
-
-### Directory Structure
-
-```
-solara/
-├── app/                    # Next.js App Router
-│   ├── (auth)/             # Auth routes (sign-in, sign-up, etc.)
-│   ├── (protected)/        # Authenticated routes
-│   │   ├── sanctuary/      # Main user area (4 tabs)
-│   │   └── settings/       # User settings
-│   ├── api/                # API routes
-│   │   ├── auth/           # OAuth callbacks
-│   │   ├── birth-chart/    # Birth chart generation
-│   │   ├── cron/           # Scheduled jobs
-│   │   ├── insights/       # AI insights
-│   │   ├── social/         # Social connections
-│   │   ├── stripe/         # Payment webhooks
-│   │   └── public-*/       # Public endpoints
-│   └── auth/               # Auth callback handlers
-├── components/             # React components
-│   ├── home/               # Public homepage
-│   ├── sanctuary/          # Protected area UI
-│   ├── shared/             # Reusable components
-│   └── ui/                 # Base UI primitives
-├── lib/                    # Core business logic
-│   ├── ai/                 # AI cost control
-│   ├── cache/              # Redis caching
-│   ├── ephemeris/          # Swiss Ephemeris engine
-│   ├── oauth/              # OAuth providers
-│   ├── social/             # Social data fetching
-│   ├── stripe/             # Payment processing
-│   ├── supabase/           # Database clients
-│   └── validation/         # Zod schemas
-├── messages/               # i18n translations (19 languages)
-├── types/                  # TypeScript types
-├── contexts/               # React contexts
-├── providers/              # App providers
-├── docs/                   # Documentation
-├── audits/                 # Audit reports
-├── supabase/               # DB migrations
-└── __tests__/              # Test suite
-```
-
-### Route Map (App Router)
-
-| Route | Type | Auth | Purpose |
-|-------|------|------|---------|
-| `/` | Page | No | Homepage |
-| `/sign-in` | Page | No | Login |
-| `/sign-up` | Page | No | Registration |
-| `/join` | Page | No | Pricing/signup |
-| `/onboarding` | Page | Yes | Profile setup |
-| `/sanctuary` | Page | Yes | Main dashboard |
-| `/sanctuary/birth-chart` | Page | Yes | Birth chart view |
-| `/sanctuary/numerology` | Page | Yes | Numerology view |
-| `/sanctuary/connections` | Page | Yes | Relationships |
-| `/settings` | Page | Yes | User settings |
-
-### API Endpoint Map
-
-| Endpoint | Method | Auth | Purpose |
-|----------|--------|------|---------|
-| `/api/birth-chart` | GET/POST | Yes | Generate birth chart |
-| `/api/insights` | POST | Yes | Generate AI insights |
-| `/api/social/status` | GET | Yes | Social connection status |
-| `/api/social/oauth/*/callback` | GET | No | OAuth callbacks |
-| `/api/stripe/webhook` | POST | Sig | Payment webhooks |
-| `/api/cron/prewarm-insights` | GET | CRON_SECRET | Pregenerate insights |
-| `/api/public-horoscope` | GET | No | Public horoscopes |
-| `/api/public-tarot` | POST | No | Public tarot |
-| `/api/public-compatibility` | GET | No | Public compatibility |
-
----
-
-## SECTION 2: FEATURE COMPLETENESS MATRIX
-
-| Feature | Status | Location | Launch Critical | Notes |
-|---------|--------|----------|-----------------|-------|
-| Birth chart calculations | COMPLETE | `lib/ephemeris/swissEngine.ts` | Yes | Swiss Ephemeris |
-| Natal wheel visualization | COMPLETE | `components/sanctuary/NatalWheel.tsx` | Yes | SVG-based |
-| Aspect grid | COMPLETE | `lib/ephemeris/aspects.ts` | Yes | Major aspects |
-| Numerology (Pythagorean) | COMPLETE | `lib/numerology/` | Yes | Full calculation |
-| Numerology (Chaldean) | COMPLETE | `lib/numerology/` | No | Secondary method |
-| Daily insights | COMPLETE | `app/api/insights/route.ts` | Yes | AI-generated |
-| Yearly insights | COMPLETE | `app/api/insights/route.ts` | No | AI-generated |
-| Solar theme system | COMPLETE | Multiple files | Yes | 8 daily phases |
-| Emotional Cadence timeline | COMPLETE | `components/sanctuary/EmotionalCadenceTimeline.tsx` | No | SVG visualization |
-| Weather integration | COMPLETE | `lib/weather.ts` | No | Open-Meteo API |
-| Geolocation timing | COMPLETE | `contexts/GeolocationContext.tsx` | Yes | suncalc library |
-| i18n (19 languages) | COMPLETE | `messages/*.json` | Yes | next-intl |
-| RTL Arabic support | COMPLETE | `i18n.ts` | No | Single RTL locale |
-| User authentication | COMPLETE | Supabase Auth | Yes | Email + OAuth |
-| Stripe payments | COMPLETE | `lib/stripe/` | Yes | Subscriptions |
-| Profile management | COMPLETE | `app/(protected)/settings/` | Yes | Full CRUD |
-| Social OAuth (Meta/TikTok) | COMPLETE | `lib/oauth/providers/` | No | Feature-flagged |
-| X/Twitter OAuth | DISABLED | `lib/oauth/providers/x.ts` | No | $100/mo barrier |
-| Reddit OAuth | STUB | `lib/oauth/providers/reddit.ts` | No | UI shows "coming soon" |
-| Numerology AI interpretations | TODO | - | No | Not implemented |
-| Tarot for zodiac signs | TODO | - | No | "Coming soon" in UI |
-| Compatibility for zodiac | TODO | - | No | "Coming soon" in UI |
-
----
-
-## SECTION 3: SWISS EPHEMERIS DEEP DIVE
-
-### Licensing Analysis
-
-| Aspect | Details |
-|--------|---------|
-| **Package** | `swisseph` v0.5.17 (npm) |
-| **Binding Author** | mivion (Node.js binding) |
-| **Underlying Library** | Swiss Ephemeris by Astrodienst |
-| **Package License** | GPL-2.0 |
-| **Upstream License** | Dual: GPL or Commercial |
-
-### License Implications for SaaS
-
-**Critical Question:** Does GPL require open-sourcing Solara?
-
-**Answer: NO** - GPL's "distribution" clause does not apply to SaaS:
-- Users access Solara via web browser
-- No software is "distributed" to users
-- This is the "SaaS loophole" in GPL (closed by AGPL, but Swiss Ephemeris uses GPL, not AGPL)
-
-**Recommendation:** You can use the GPL-licensed Swiss Ephemeris for commercial SaaS without open-sourcing. However, if you ever distribute the application (desktop app, self-hosted version), you'd need to either:
-1. Open-source the entire application, OR
-2. Purchase a commercial license from Astrodienst
-
-### Implementation Analysis
-
-**Current Implementation:**
-```typescript
-// lib/ephemeris/swissEngine.ts
-import swisseph from "swisseph";  // Native Node.js addon
-
-// Uses native C library compiled for current platform
-const ephePath = path.join(process.cwd(), "node_modules", "swisseph", "ephe");
-swisseph.swe_set_ephe_path(ephePath);
-```
-
-**Key Findings:**
-
-1. **No Time Bombs:** The `swisseph` npm package contains no license detection, payment verification, or expiration code. It's a straightforward Node.js binding.
-
-2. **No Embedded Detection:** Searched all files - no phone-home, no license checking, no usage tracking.
-
-3. **Cloudflare Workers Incompatibility:** Current implementation uses native addon (`node-gyp`), which is incompatible with Cloudflare Workers' WASM-only environment.
-
-4. **WASM Migration Status:** NOT DONE. The code still uses the native addon. For Cloudflare Workers deployment, you'd need to migrate to a WASM-based ephemeris library.
-
-### WASM Migration Options
-
-| Option | Effort | Notes |
-|--------|--------|-------|
-| `@nicholasa/swiss-ephemeris-wasm` | Medium | Community WASM build |
-| `astronomia` | High | Pure JS, less accurate |
-| Keep on Node.js runtime | None | Works on Vercel, Render |
-
-**Recommendation:** If targeting Cloudflare Workers is important, allocate 2-3 days for WASM migration. Otherwise, deploy to Vercel/Render where Node.js native addons work.
-
----
-
-## SECTION 4: INTEGRATION STATUS REPORT
-
-### Third-Party Services
-
-| Service | Purpose | Status | Cost | Launch Critical |
-|---------|---------|--------|------|-----------------|
-| **Supabase** | Database + Auth | ACTIVE | Free tier | YES |
-| **OpenAI** | AI insights | ACTIVE | Usage-based | YES |
-| **Stripe** | Payments | ACTIVE | 2.9% + 30c | YES |
-| **Redis/Valkey** | Caching + rate limiting | OPTIONAL | Free tier | NO |
-| **Resend** | Email | ACTIVE | Free tier | NO |
-| **Open-Meteo** | Weather | ACTIVE | Free | NO |
-| **suncalc** | Sun/moon times | ACTIVE | Free (npm) | YES |
-| **Swiss Ephemeris** | Astro calculations | ACTIVE | Free (GPL) | YES |
-
-### API Key Status
-
-| Variable | Validated | Behavior if Missing |
-|----------|-----------|---------------------|
-| `OPENAI_API_KEY` | YES (throws) | App won't start |
-| `STRIPE_SECRET_KEY` | PARTIAL (warns) | **Silent failures** |
-| `STRIPE_WEBHOOK_SECRET` | YES (500 error) | Webhooks rejected |
-| `SUPABASE_SERVICE_ROLE_KEY` | PARTIAL (warns) | Admin features fail |
-| `SOCIAL_TOKEN_ENCRYPTION_KEY` | YES (throws) | App won't start |
-| `CRON_SECRET` | YES (401) | Cron jobs unauthorized |
-| `REDIS_URL` | OPTIONAL | Caching disabled |
-| `RESEND_API_KEY` | PARTIAL (warns) | Emails fail silently |
-
-### Integration Health
-
-| Integration | Health | Notes |
-|-------------|--------|-------|
-| Supabase Auth | GOOD | PKCE flow, secure cookies |
-| Supabase DB | GOOD | RLS enforced (except 2 tables) |
-| Stripe Payments | GOOD | Webhook signature verified |
-| Stripe Pricing Table | GOOD | Embedded component |
-| OpenAI | GOOD | Cost control circuit breaker |
-| Meta OAuth | GOOD | PKCE + state validation |
-| TikTok OAuth | GOOD | Waiting portal approval |
-| X OAuth | DISABLED | $100/mo API tier required |
-| Reddit OAuth | STUB | Not implemented |
-
----
-
-## SECTION 5: PAIN POINTS & WACKY CODE
-
-### Identified Issues
-
-#### 1. RLS Policy Gaps (CRITICAL)
-
-```sql
--- These tables have RLS enabled but NO policies
--- Users cannot access their own data!
-soul_paths
-ai_usage_events
-```
-
-**Impact:** Core features silently broken for non-service-role queries.
-
-#### 2. Large Page Files
-
-| File | Lines | Assessment |
-|------|-------|------------|
-| `settings/page.tsx` | 1,771 | Large but functional |
-| `connections/page.tsx` | 1,292 | Could be split |
-| `birth-chart/page.tsx` | 901 | Acceptable |
-| `sanctuary/page.tsx` | 786 | Acceptable |
-
-**Assessment:** These are at the upper limit but not "wacky". The settings page handles 12+ sections which justifies the size.
-
-#### 3. Circular Dependencies (Ephemeris)
-
-```
-aspects.ts ←→ swissEngine.ts ←→ derived.ts ←→ calculated.ts
-```
-
-**Impact:** Not causing runtime issues currently, but could cause problems with bundlers. Low priority fix.
-
-#### 4. Console Log Spam
-
-```bash
-# Found 945 console.* statements
-grep -r "console\." | wc -l  # → 945
-```
-
-**Impact:** Production log noise. Add structured logging post-launch.
-
-#### 5. Translation File Inconsistency
-
-```bash
-# zh.json is 179 lines shorter than others
-zh.json:  781 lines
-en.json:  960 lines
-```
-
-**Impact:** Simplified Chinese (`zh.json`) exists but isn't in the locale list. Only `zh-TW` (Traditional) is used. Consider removing `zh.json` if unused.
-
-#### 6. React Hook Dependency Warnings (6)
-
-| File | Issue |
-|------|-------|
-| `onboarding/page.tsx` | Missing `saveProfile` dep |
-| `birth-chart/page.tsx` | Missing `fetchBirthChart` dep |
-| `connections/page.tsx` | Missing `generateBriefForConnection` dep |
-| `sanctuary/page.tsx` | Missing `loadJournalEntry` dep |
-| `PlacePicker.tsx` | Missing `query` dep |
-
-**Impact:** Potential stale closure bugs in critical user flows.
-
----
-
-## SECTION 6: QUICK WINS LIST
-
-### Immediate Fixes (Pre-Launch)
-
-| # | Action | File | Effort |
-|---|--------|------|--------|
-| 1 | Add RLS policies to `soul_paths` | `supabase/migrations/` | 15 min |
-| 2 | Add RLS policies to `ai_usage_events` | `supabase/migrations/` | 15 min |
-| 3 | Make `STRIPE_SECRET_KEY` throw | `lib/stripe/client.ts` | 5 min |
-| 4 | Make `SUPABASE_SERVICE_ROLE_KEY` throw | `lib/supabase/server.ts` | 5 min |
-| 5 | Remove Reddit stub from sign-in | `app/(auth)/sign-in/page.tsx` | 10 min |
-
-### Post-Launch Cleanup
-
-| # | Action | File | Effort |
-|---|--------|------|--------|
-| 6 | Delete `zh.json` (unused) | `messages/zh.json` | 1 min |
-| 7 | Archive duplicate audit docs | `docs/archive/` | 15 min |
-| 8 | Fix React hook warnings | Multiple | 1 hour |
-| 9 | Add `VALKEY_URL` to `.env.example` | `.env.example` | 2 min |
-| 10 | Remove `AUTH_SECRET` from `.env.example` | `.env.example` | 2 min |
-
-### Files Confirmed Safe to Delete
-
-| File | Reason |
-|------|--------|
-| `messages/zh.json` | Not in locale list, unused |
-| `docs/ARCHITECTURE_MAP.md` | Duplicate of `docs/audit/` version |
-| `docs/DATA_FLOW_FLOWS.md` | Duplicate of `docs/audit/` version |
-| `docs/CLEANUP_CHECKLIST.md` | Duplicate of `docs/audit/` version |
-| `docs/TESTING_STRATEGY.md` | Duplicate of `docs/audit/` version |
-
----
-
-## SECTION 7: LAUNCH BLOCKERS
-
-### BLOCKER 1: `soul_paths` Missing RLS Policies
-
-**Severity:** CRITICAL
-**Impact:** Users cannot read/write their soul path data via client
-**Fix:**
-```sql
--- Add to new migration
-ALTER TABLE soul_paths ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can view own soul paths"
-  ON soul_paths FOR SELECT
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can insert own soul paths"
-  ON soul_paths FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can update own soul paths"
-  ON soul_paths FOR UPDATE
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
-```
-
-### BLOCKER 2: `ai_usage_events` Missing RLS Policies
-
-**Severity:** CRITICAL
-**Impact:** AI usage tracking broken
-**Fix:** Either add user-owns-own policy OR disable RLS if internal-only table.
-
-### Near-Blockers (Should Fix)
-
-| Issue | Severity | Recommendation |
-|-------|----------|----------------|
-| `STRIPE_SECRET_KEY` silent failure | HIGH | Make it throw |
-| 8 skipped test files | HIGH | Un-skip critical paths |
-| `birth_data_versions` RLS disabled | HIGH | Enable if contains user data |
-
----
-
-## SECTION 8: TECHNICAL DEBT INVENTORY
-
-### High Priority (Fix Soon)
-
-| Category | Item | Location | Effort |
-|----------|------|----------|--------|
-| Tests | 231 todo tests | `__tests__/` | 2-3 weeks |
-| Tests | 8 skipped test files | `__tests__/` | 1 week |
-| Security | React hook stale closures | Multiple pages | 1 day |
-| Code | Circular deps in ephemeris | `lib/ephemeris/` | 1 day |
-
-### Medium Priority (Next Quarter)
-
-| Category | Item | Location | Effort |
-|----------|------|----------|--------|
-| Logging | Replace 945 console.* with structured logging | Global | 1 week |
-| i18n | Review auto-generated translations | `messages/` | 1 week |
-| Performance | Replace `<img>` with `<Image>` | `sanctuary/page.tsx` | 1 hour |
-| Types | Migrate 5 deprecated types | `lib/validation/` | 1 day |
-
-### Low Priority (Tech Debt Backlog)
-
-| Category | Item | Notes |
-|----------|------|-------|
-| Docs | 17 unused exported types | Prune with knip |
-| Docs | Duplicate RLS policies on profiles | Consolidate |
-| DB | Placeholder migration files | Clean up history |
-
----
-
-## SECTION 9: RECOMMENDATIONS
-
-### Week 1 (Pre-Launch)
-
-| Day | Task | Owner |
-|-----|------|-------|
-| 1 | Fix 2 RLS blockers | Backend |
-| 1 | Make STRIPE_SECRET_KEY throw | Backend |
-| 2 | Fix 5 React hook warnings | Frontend |
-| 2 | Remove Reddit stub from UI | Frontend |
-| 3 | Manual QA on core flows | QA |
-| 4 | Un-skip stripe-webhook tests | Backend |
-| 5 | Buffer / bug fixes | All |
-
-### Week 2 (Launch Week)
-
-| Day | Task | Owner |
-|-----|------|-------|
-| 1-2 | Final QA pass | QA |
-| 3 | Production deploy | DevOps |
-| 4 | Monitor errors/logs | All |
-| 5 | Launch! | All |
-
-### Post-Launch Priorities
-
-1. **Testing Sprint:** Implement 231 todo tests over 2-3 weeks
-2. **Logging:** Add structured logging (Axiom, Logtail, etc.)
-3. **WASM Migration:** If Cloudflare Workers needed
-4. **X/Twitter:** Enable when budget allows ($100/mo)
-5. **Reddit:** Implement OAuth flow
-
----
-
-## APPENDIX A: File Statistics
-
-| Metric | Value |
-|--------|-------|
-| Total TypeScript/TSX files | ~250 |
-| Total lines of code | ~45,000 |
-| Translation files | 20 (19 used) |
-| Test files | 13 |
-| Tests passing | 84 |
-| Tests todo | 231 |
-| API routes | 25+ |
-| React components | 50+ |
-| Supabase tables | 15+ |
-
----
-
-## APPENDIX B: Existing Documentation Index
-
-| Document | Location | Purpose |
-|----------|----------|---------|
-| Architecture Map | `docs/SOLARA_ARCHITECTURE_MAP.md` | System overview |
-| Route Inventory | `docs/ROUTE_INVENTORY.md` | All routes |
-| DB Schema | `docs/DB_SCHEMA_AUDIT.md` | Table structure |
-| Env Variables | `docs/ENV_VAR_MATRIX.md` | Config inventory |
-| Security | `docs/SECURITY_THREAT_MODEL.md` | Threat model |
-| RLS Audit | `docs/RLS_GRANTS_AUDIT_REPORT.md` | RLS policies |
-| Social Systems | `docs/AUDIT_SOCIAL_SYSTEMS_CANONICAL.md` | OAuth flows |
-| Unfinished Items | `audits/UNFINISHED_INVENTORY.md` | TODO tracking |
-| Warnings | `audits/WARNING_INVENTORY.md` | Lint warnings |
-
----
-
-**End of Audit Report**
-
-*Generated by Claude Opus 4.5 on 2026-01-21*
+# Solara Insights Full Repo Audit (Read-Only)
+
+Audit timestamp: 2026-02-28 22:36:42 EST (2026-03-01 03:36:42 UTC)
+Workspace: `/Users/aaronburlar/Desktop/Solara`
+Mode: Exhaustive read-only audit (no source edits, no commits, no destructive repo commands)
+
+## Scope + Constraints
+- Source code was not modified.
+- Existing repo changes were preserved as-is.
+- Commands that could mutate repo state were either run in safe dry-run mode or in `/tmp` isolation.
+- Network access is restricted in this environment, which blocked several external security tools.
+
+## 0) Setup Snapshot
+
+### Environment
+- OS: `Darwin 25.3.0 (arm64)`
+- Node: `v20.19.6`
+- Package manager: `npm 10.8.2`
+- `.nvmrc`: present (`20`)
+- `.node-version`: not present
+- `packageManager` field in `package.json`: not set
+- Repo model: single app (single root `package.json`, no pnpm/turbo/nx/lerna workspace files)
+
+### Git snapshot
+- Branch: `main`
+- Commit: `f98ad4617104932045edcac8ac77d1f3670f0b65`
+- Worktree: dirty before audit (pre-existing modified/untracked files detected)
+
+### Setup commands run
+- `git status --short --branch`
+- `git rev-parse --abbrev-ref HEAD`
+- `git rev-parse HEAD`
+- `node -v`
+- `npm -v`
+- `ls`, `ls -a`
+
+## 1) Repo X-Ray Map
+
+### Folder-by-folder map (top-level)
+- `app/`: Next.js App Router pages/layouts + API routes
+- `components/`: UI and domain components (`auth`, `home`, `sanctuary`, `learn`, `layout`)
+- `lib/`: core business/infrastructure modules (`auth`, `library`, `numerology`, `social`, `stripe`, `supabase`, `ai`, etc.)
+- `providers/`, `contexts/`, `hooks/`: client app state/composition
+- `messages/`: i18n message catalogs
+- `supabase/`: migrations, verification SQL, rollback snippets, local CLI config
+- `sql/`: additional SQL artifacts/manual scripts
+- `__tests__/`: Vitest suites
+- `docs/`, `audits/`: architecture, deployment, historical audit artifacts
+- `scripts/`: minimal script surface (`run-prewarm-cron.sh`)
+
+### App entry points
+- Root layout: `app/layout.tsx`
+- Segment layouts:
+  - `app/(public)/layout.tsx`
+  - `app/(auth)/layout.tsx`
+  - `app/(protected)/layout.tsx`
+- Middleware: `middleware.ts`
+- Pages (App Router): 25 page entries detected (auth/public/protected/sanctuary/settings)
+- API routes: 45 route handlers (`app/api/**/route.ts` + `app/auth/callback/route.ts`)
+- Worker/cron style routes:
+  - `app/api/cron/generate-global-events/route.ts`
+  - `app/api/cron/prewarm-insights/route.ts`
+  - `app/api/cron/social-sync/route.ts`
+- Script entry points:
+  - `scripts/run-prewarm-cron.sh`
+
+### Core domains detected
+- Auth: `app/(auth)/*`, `app/api/auth/*`, `app/auth/callback/*`, `lib/auth/*`
+- Profiles: `app/api/user/profile/route.ts`, `providers/SettingsProvider.tsx`, `lib/library/profileSync.ts`
+- Sanctuary: `app/(protected)/sanctuary/*`
+- Library: `app/(protected)/sanctuary/library/page.tsx`, `app/api/*-library/*`, `lib/library/*`
+- Astrology: `app/api/public-horoscope/route.ts`, `lib/ephemeris/*`, `lib/library/charts.ts`
+- Numerology: `app/api/numerology/route.ts`, `app/api/numerology-library/route.ts`, `lib/numerology/*`
+- Connections: `app/api/connections/route.ts`, `app/api/connection-brief/route.ts`, `app/api/connection-space-between/route.ts`
+- Social insights: `app/api/social/*`, `app/api/user/social-insights/route.ts`, `lib/social/*`
+- Billing/paywall: `app/api/stripe/*`, `lib/stripe/*`, `lib/entitlements/*`, `app/(auth)/join/page.tsx`
+
+## 2) Exhaustive Build/Test/Type/Lint Audit
+
+### Install step (safe mode)
+- Lockfile present: `package-lock.json`
+- Install validation run in safe mode: `npm ci --ignore-scripts --dry-run`
+- Result: dry-run succeeded (no repo writes), would add/change platform packages if executed for real.
+
+### Command results
+| Command | Result | Notes |
+|---|---|---|
+| `./node_modules/.bin/tsc -p . --noEmit --incremental false` | **FAIL** | Type mismatch cluster in entitlement checks (`MembershipProfile` nullability/literal narrowing) |
+| `npm run lint` | **PASS** | `eslint . --ext .ts,.tsx` clean |
+| `npm test` | **PASS (partial scope)** | 104 passed; 242 todo/skipped tests |
+| `npm run build` | **NOT RUN in repo** | Unsafe script chain: `prebuild` uses `rm -rf` |
+| `next build` in `/tmp` isolated mirror | **FAIL** | Network dependency on Google Fonts (`ENOTFOUND fonts.googleapis.com`) |
+| `npm run start` | **SKIPPED** | Build did not complete |
+
+### Biggest error clusters
+1. Type entitlement mismatch
+   - Files: `app/api/connections/route.ts:180`, `app/api/public-tarot/route.ts:153`, `app/api/public-tarot/route.ts:390`
+   - Proof: `TS2345` where nullable/string profile shape is passed to strict `MembershipProfile`.
+2. Build hermeticity issue
+   - File: `app/layout.tsx:2` (`next/font/google` imports `Inter`, `Crimson_Pro`, `Tangerine`)
+   - Proof: `next build` failed fetching `fonts.googleapis.com`.
+
+### Ship blockers
+- Typecheck currently failing.
+- No CI gates to enforce type/lint/test/build before deploy.
+- Build depends on external font network fetch (non-hermetic build surface).
+
+## 3) Dependency + Security Audit
+
+### Commands run
+- `npm audit --json` -> failed: `ENOTFOUND registry.npmjs.org`
+- `npm audit --offline --json` -> succeeded: `0` vulns reported (offline DB limitations apply)
+- `npx license-checker --summary` -> blocked by network / not installed locally
+- `npx gitleaks detect ...` -> blocked by network / not installed locally
+- `npx semgrep --config=auto` -> blocked by network / not installed locally
+- Local fallback checks:
+  - package-lock license summary extraction
+  - regex secret scan of tracked files
+
+### Vulnerabilities (ranked)
+- High: `unknown` (online advisory DB unreachable)
+- Medium: `unknown` (online advisory DB unreachable)
+- Low: `unknown` (online advisory DB unreachable)
+- Offline npm audit result: no advisories found in local cache snapshot.
+
+### License summary (from `package-lock.json` metadata)
+- `MIT`: 642
+- `ISC`: 81
+- `Apache-2.0`: 39
+- `BSD-2-Clause`: 15
+- `BSD-3-Clause`: 10
+- `LGPL-3.0-or-later`: 10
+- Missing license entries: 2
+
+### Secret-like strings found
+- Tracked files:
+  - `.env.example` contains placeholders for secret-bearing vars (expected)
+  - `docs/archive/2026-01-14_SOCIAL_AUDIT.md` contains service-role-like token patterns (appears redacted with ellipsis in many places, still risky in archives)
+- Untracked local files:
+  - `.env`, `.env.local` contain live-looking credential values (OpenAI/Stripe/Supabase/etc.). These files are gitignored but present in workspace.
+
+### High-risk package/dependency notes
+- `npm ls --depth=0` reports extraneous `@emnapi/runtime@1.8.1` in local install state.
+- No online freshness/abandonment check possible due network restrictions.
+
+## 4) Ghost Code / Artifact Hunt
+
+### Preferred tool availability
+| Tool | Status |
+|---|---|
+| `knip` | unavailable locally; `npx` blocked by network |
+| `depcheck` | unavailable locally; `npx` blocked by network |
+| `ts-prune` | unavailable locally; `npx` blocked by network |
+| `madge` | unavailable locally; `npx` blocked by network |
+
+### TODO/FIXME/HACK/XXX (production code)
+- `app/(auth)/sign-in/page.tsx:202` (Reddit stub TODO)
+- `lib/social/fetchers.ts:97` (TikTok profile/stats TODO)
+- `lib/oauth/providers/tiktok.ts:18` (same TODO duplicated)
+
+### Ghost files/artifacts
+| Artifact | Evidence |
+|---|---|
+| `package-lock 2.json` | duplicate lockfile-like artifact at repo root |
+| `coverage/app 2`, `coverage/lib 3` | duplicate coverage directories with suffixes |
+| `app/api/birth-chart/` (empty dir) | directory exists, no route file |
+
+### Unused deps (heuristic static import scan, low confidence)
+- Candidate runtime deps: `@types/suncalc`, `autoprefixer`, `postcss`, `react-dom`
+- Candidate dev deps: `@types/node`, `@types/react`, `@types/react-dom`, `@types/tz-lookup`, `@vitest/coverage-v8`, `@vitest/ui`, `eslint`, `eslint-config-next`, `jsdom`, `typescript`
+- Note: this heuristic under-reports config-driven/tooling usage; treat as triage list, not final truth.
+
+### Orphan routes (0 internal references in app/lib/components/providers/hooks/contexts/scripts)
+| Route | Internal refs | Likely status |
+|---|---:|---|
+| `/api/auth/reauth/tiktok/callback` | 0 | External OAuth callback |
+| `/api/auth/reauth/x/callback` | 0 | External OAuth callback |
+| `/api/cron/generate-global-events` | 0 | External cron/scheduler route |
+| `/api/cron/social-sync` | 0 | External cron/scheduler route |
+| `/api/health` | 0 | External health probe |
+| `/api/meta/facebook/data-deletion` | 0 | External Meta webhook |
+| `/api/meta/facebook/deauthorize` | 0 | External Meta webhook |
+| `/api/stripe/checkout` | 0 | Stripe flow may route via server redirect path |
+| `/api/stripe/webhook` | 0 | External Stripe webhook |
+
+### Unused env vars (from `.env.example` vs `process.env.*` refs)
+- Declared but not referenced in code (10):
+  - `AUTH_SECRET`, `META_APP_ID`, `NEXTAUTH_URL`, `NEXT_SUPABASE_DB_URL`, `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`, `TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET`, `X_CLIENT_ID`, `X_CLIENT_SECRET`
+- Referenced in code but missing from `.env.example` (20):
+  - `DEBUG_MIDDLEWARE`, `DEV_PAYWALL_BYPASS`, `NEXT_PHASE`, `NEXT_PUBLIC_SOLARA_DEBUG`, `NEXT_PUBLIC_SOLARA_DEBUG_BUILD`, `NODE_ENV`, `OAUTH_DEBUG_LOGS`, `OPENAI_BIRTHCHART_MODEL`, `OPENAI_BUDGET_FAIL_MODE`, `OPENAI_CONNECTION_BRIEF_MODEL`, `OPENAI_DAILY_BUDGET_USD`, `OPENAI_DAILY_INSIGHTS_MODEL`, `OPENAI_DEEP_MODEL`, `OPENAI_FAST_MODEL`, `OPENAI_HOROSCOPE_MODEL`, `OPENAI_PLACEMENTS_MODEL`, `OPENAI_YEARLY_INSIGHTS_MODEL`, `RESEND_FROM_NAME`, `TOKEN_AUDIT_ENABLED`, `VALKEY_URL`
+
+### Duplicated implementations
+- SQL function duplication count (migration history):
+  - `public.update_numerology_access` appears 3 times
+  - `public.set_updated_at` appears 2 times
+  - `public.update_social_accounts_updated_at` appears 2 times
+  - `public.update_social_identities_updated_at` appears 2 times
+  - `public.maintain_mutual_flag` appears 2 times
+- TikTok scope TODO duplicated in two code paths:
+  - `lib/social/fetchers.ts:97`
+  - `lib/oauth/providers/tiktok.ts:18`
+
+## 5) Pipeline Sanity Audit (CI/CD + deploy)
+
+### Findings
+- `.github/workflows` directory not present.
+- No checked-in pipeline config (`render.yaml`, `Dockerfile`, `vercel.json`, `netlify.toml` absent at root scan).
+- Deployment process appears manual via Render dashboard docs (`docs/RENDER_DEPLOYMENT.md`).
+
+### Pipeline diagram (in words)
+1. Developer runs local scripts (`lint`, `test`, `build`) manually.
+2. Deployment configuration/secrets managed in Render dashboard.
+3. Webhooks and OAuth callback endpoints configured manually in external providers.
+4. No repository-enforced CI gate currently validates branch merges.
+
+### Broken/pointless workflows
+- None found (no workflows exist).
+
+### Missing gates
+- Required PR checks (typecheck/lint/test/build).
+- Security scanning gate (audit/gitleaks/semgrep equivalents).
+- Migration verification gate (schema drift checks).
+
+## 6) Supabase Audit (Schema, migrations, RLS, triggers)
+
+### Inventory
+- `supabase/migrations/*.sql`: 48 files
+- `_placeholders` remote placeholders: 20 files
+- `supabase/verification/*.sql`: 2 files
+- `supabase/functions/*`: none present
+
+### Migration order + drift signals
+- Local migration snapshot (`local_migrations.txt`) only lists:
+  - `20241215_public_compatibility.sql`
+  - `20241221_social_insights_toggle.sql`
+  - `20250101_numerology_schema.sql`
+- Repo migration set extends to `20260228000000_free_tier_entitlements.sql`.
+- Presence of both `remote_schema` and `remote_commit` style migrations plus placeholders indicates heavy reconciliation history and potential drift risk.
+
+### RLS / SECURITY DEFINER / search_path checks
+- Multiple `SECURITY DEFINER` functions exist.
+- Some include explicit `SET search_path` (good pattern; e.g., in `20260106140000_reconcile_public_schema_from_prod.sql`, `20260114160000_enhance_ai_usage_tracking.sql`).
+- Some recent functions do **not** set `search_path` (risk):
+  - `20260216142511_recreate_numerology_library.sql:126-136`
+  - `20260125000000_library_book_model.sql:202-224`
+  - `20260217000000_fix_numerology_library_schema.sql:207-216`
+  - `20260114170000_ai_usage_cost_micros.sql:488-551`
+
+### Table usage alignment (create table vs app `.from(...)`)
+- Created but not referenced by app queries (selected): `ai_invocations`, `analytics_events`, `birth_charts`, `birth_data_versions`, `gratitude_stats`, `journal_entries`, `soul_paths`, `subscriptions`, `user_year_*`, etc.
+- Referenced by app but not directly created in current create-table scan: `astrology_library` (renamed from `charts` by migration).
+
+### DB/RLS risk list (ranked)
+1. Migration drift + placeholder reliance (`High`)
+2. SECURITY DEFINER without explicit search_path in recent functions (`High`)
+3. Repeated function/policy churn across migrations (`Med`)
+4. Table naming transition complexity (`charts` -> `astrology_library`) (`Med`)
+5. Large legacy surface appears unused from app query paths (`Med`)
+
+### Migration health score
+- **4.5 / 10**
+- Rationale: broad migration coverage and some explicit RLS hardening exist, but drift indicators, placeholder history, duplicated definitions, and security-definer inconsistencies materially reduce confidence.
+
+### Immediate remediation suggestions (no changes applied)
+- Create a canonical schema baseline migration after reconciliation.
+- Add automated migration verification in CI (`db diff` + policy checks).
+- Normalize all SECURITY DEFINER functions to explicit locked `search_path`.
+- Prune/archive obsolete tables/policies only after proven no runtime references.
+
+## 7) Cohesion + Alignment Audit
+
+### Cohesion scorecard (0-10)
+| Dimension | Score | Evidence |
+|---|---:|---|
+| Naming consistency | 6 | Ongoing rename churn (`official_chart_key` -> `official_astrology_key`, `charts` -> `astrology_library`) |
+| Folder structure coherence | 8 | Clear domain folders under `app/` + `lib/` |
+| Business logic placement | 5 | Very large API/page files hold mixed concerns (`app/api/insights/route.ts`, sanctuary pages) |
+| DB access consistency | 7 | Standardized Supabase client factories used broadly |
+| Validation consistency | 4 | Central `validateRequest` used in only a few routes |
+| Error handling consistency | 4 | Central error helper mostly used only by insights route |
+| i18n consistency | 5 | `zh.json` key deficit, `zh-TW` extras |
+| **Overall cohesion** | **5.6** | Functional but fragmented at boundaries and contracts |
+
+### Circular deps + cross-domain tangles
+- Circular import check: `eslint --rule 'import/no-cycle:error' app lib` returned clean (no cycle errors).
+- Cross-domain tangles observed in large composite files coupling UI, API contracts, and domain logic.
+
+### Top 10 alignment breaks (ranked)
+1. Type contract mismatch in entitlement checks (`app/api/connections/route.ts`, `app/api/public-tarot/route.ts`)
+2. Non-hermetic build dependency on Google Fonts (`app/layout.tsx`)
+3. No CI workflow/gates (`.github/workflows` absent)
+4. Env contract drift (`.env.example` vs runtime refs)
+5. Validation strategy split across routes
+6. Error payload shape inconsistency across APIs
+7. Migration drift and placeholder-heavy DB history
+8. SECURITY DEFINER/search_path inconsistency
+9. i18n catalog drift (`zh`/`zh-TW`)
+10. Artifact noise in repo (`package-lock 2.json`, duplicate coverage dirs)
+
+## 8) Progress Toward Completion (Reality Check)
+
+### Feature completion matrix
+| Feature Area | Status | Evidence |
+|---|---|---|
+| Auth (email + OAuth flows) | ✅ shipped | auth routes/pages + callback flows present |
+| Profile/settings management | ✅ shipped | `app/api/user/profile/route.ts`, `settings/page.tsx` |
+| Sanctuary insights core | 🟡 partial | Insights route exists, but type/build/pipeline quality gaps remain |
+| Astrology library books | ✅ shipped | `birth-chart-library` route + `lib/library/charts.ts` |
+| Numerology library books | ✅ shipped | `numerology-library` route + `lib/library/numerology.ts` |
+| Connections + briefs + space-between | 🟡 partial | endpoints present; entitlement/type issues and large-file coupling |
+| Social insights | 🟡 partial | provider framework exists, Instagram/Reddit marked coming soon |
+| Billing/paywall | 🟡 partial | Stripe routes present; gating recently modified, CI absent |
+| i18n coverage parity | 🔴 missing/broken | `zh.json` missing 135 keys |
+| CI/CD automation | 🔴 missing/broken | no workflow definitions |
+| Legacy/unused surfaces | 🧟 exists but unused | multiple external-only/zero-ref routes + old DB surfaces |
+
+### Top blockers
+- Typecheck failures in membership entitlement calls.
+- Missing CI quality gate.
+- Build fragility due network font fetch.
+- DB migration drift confidence gap.
+
+### Top time-wasters
+- Recurrent migration reconciliation churn (`remote_schema`, placeholders, duplicated function definitions).
+- Large monolithic files slowing focused changes/reviews.
+- Env variable contract mismatch causing setup/debug friction.
+
+### Recommended next 7 commits roadmap (recommendations only)
+1. Fix `MembershipProfile` type contract and restore clean `tsc`.
+2. Make build hermetic (self-host or local fallback fonts) and remove external font hard dependency.
+3. Add CI workflow with required checks: typecheck, lint, test, build.
+4. Standardize API request validation (shared helper across private routes).
+5. Standardize API error envelope via central helper.
+6. Add migration integrity job (drift check + security definer/search_path lint).
+7. Clean artifact noise + env contract docs (`.env.example` parity, duplicate lock/coverage cleanup).
+
+## 9) Finding Register (Strict Format)
+
+| ID | Location | Evidence | Impact | Recommendation | Confidence |
+|---|---|---|---|---|---|
+| FR-01 | `app/api/connections/route.ts:180`; `app/api/public-tarot/route.ts:43`; `app/api/public-tarot/route.ts:153`; `app/api/public-tarot/route.ts:390`; `lib/entitlements/canAccessFeature.ts:43` | `tsc` emits `TS2345` when nullable/string profile object is passed into strict `MembershipProfile` | High | Align profile selection/typing with `Profile` literals and nullable guards before calling `isPremium` | High |
+| FR-02 | `app/layout.tsx:2-26` | Isolated `next build` failed with `ENOTFOUND fonts.googleapis.com` for `Inter`, `Crimson Pro`, `Tangerine` | High | Replace remote Google font fetch dependency with self-hosted/local strategy to keep builds deterministic | High |
+| FR-03 | `.github/workflows` (missing); `docs/RENDER_DEPLOYMENT.md` | No repo CI workflows found; deploy appears manual via dashboard process | High | Add branch-gated CI workflow and required checks before deploy | High |
+| FR-04 | `package.json` (`prebuild`) | `prebuild` runs `rm -rf .next/cache node_modules/.cache` | Med | Replace destructive prebuild cleanup with safer controlled cache strategy and isolate cleanup in CI-only context | High |
+| FR-05 | Security tool commands (`npm audit`, `npx license-checker/gitleaks/semgrep/knip/depcheck/ts-prune/madge`) | Multiple `ENOTFOUND registry.npmjs.org`; tools unavailable locally | Med | Add pinned security/analysis tooling in CI environment with network access and fail thresholds | High |
+| FR-06 | `.env`, `.env.local` | Live-looking secrets present locally (OpenAI/Stripe/Supabase/etc.) | High | Rotate any exposed secrets, use external secret manager, keep local secrets ephemeral and access-controlled | High |
+| FR-07 | `docs/archive/2026-01-14_SOCIAL_AUDIT.md` and related archived docs | Regex scan found service-role-style key fragments/patterns in docs | Med | Redact historical docs and purge sensitive history if any full secrets were ever committed | Med |
+| FR-08 | `.env.example` + runtime refs across `app/`, `lib/`, `middleware.ts` | 10 declared vars unused; 20 referenced vars missing from `.env.example` | Med | Treat env vars as versioned contract; sync template with runtime and add startup validation | High |
+| FR-09 | `messages/zh.json`; `messages/zh-TW.json` | Key parity script: `zh` missing 135 keys; `zh-TW` has 11 extras | Med | Add i18n parity check in CI and normalize catalogs against `en.json` | High |
+| FR-10 | `app/api/**` | `validateRequest(...)` used only in 3 public routes | Med | Apply shared request validation pattern to private/protected API routes | High |
+| FR-11 | `lib/api/errorResponse.ts`; `app/api/insights/route.ts`; most other routes | Central error helper used primarily in insights route; others ad-hoc `NextResponse.json({error...})` | Med | Standardize API error schema and helper across all routes | High |
+| FR-12 | `app/(protected)/sanctuary/library/page.tsx` (2129 lines); `app/(protected)/settings/page.tsx` (1759); `app/(protected)/sanctuary/connections/page.tsx` (1293); `app/api/insights/route.ts` (770) | `wc -l` indicates high concentration/complexity in single files | Med | Decompose by feature boundaries and isolate side effects/business logic | High |
+| FR-13 | `local_migrations.txt`; `remote_migrations.txt`; `supabase/migrations/_placeholders/*`; `supabase/migrations/20260126030132_remote_schema.sql` | Local migration list very short vs 48 migration files + 20 placeholders | High | Re-baseline schema, formalize migration ordering and drift checks, reduce placeholder reliance | High |
+| FR-14 | `supabase/migrations/20260216142511_recreate_numerology_library.sql:126-136`; `20260125000000_library_book_model.sql:202-224`; `20260217000000_fix_numerology_library_schema.sql:207-216`; `20260114170000_ai_usage_cost_micros.sql:488-551` | SECURITY DEFINER functions without explicit `SET search_path` in several recent migrations | High | Enforce explicit `search_path` for all SECURITY DEFINER functions and lint for this pattern | High |
+| FR-15 | Multiple migration files (`create function` duplicates) | `public.update_numerology_access` appears 3x; several others repeated | Med | Consolidate duplicate function definitions with idempotent canonical migration strategy | High |
+| FR-16 | `supabase/migrations/20260125000000_library_book_model.sql`; `20260209000000_unified_library_system.sql`; `20260126030132_remote_schema.sql`; `lib/library/charts.ts` | Rename/drop/recreate churn around `charts` vs `astrology_library` | Med | Freeze canonical naming, verify backward compatibility via explicit migration assertions/tests | Med |
+| FR-17 | External route surfaces: `/api/cron/*`, `/api/health`, `/api/stripe/webhook`, OAuth/meta callbacks | Internal-ref scan shows zero callers for multiple endpoints | Med | Maintain explicit external invocation registry + monitors for all externally-triggered routes | Med |
+| FR-18 | `package-lock 2.json`; `coverage/app 2`; `coverage/lib 3`; `app/api/birth-chart/` | Artifact scans found duplicate/noisy files and empty API folder | Low | Remove stale artifacts and enforce `.gitignore`/cleanup discipline | High |
+| FR-19 | Test output (`vitest`) | 104 passed, 242 todo/skipped across 10 skipped test files | Med | Convert highest-risk skipped suites into active gating tests | High |
+| FR-20 | `npm ls --depth=0` | `@emnapi/runtime@1.8.1` flagged as extraneous | Low | Perform clean install/prune in controlled environment and verify lockfile/install parity | High |
+
+## Appendix: Command Status Summary
+- Requested read-only diagnostics were executed where safe.
+- Build executed in isolated `/tmp` mirror to avoid repo mutation.
+- Network-blocked commands were captured with exact failure evidence and documented.

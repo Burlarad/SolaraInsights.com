@@ -61,10 +61,6 @@ export async function POST(req: NextRequest) {
         plan,
         userId: user?.id || "",
       },
-      subscription_data: {
-        // 7-day trial is configured on the Stripe Price, but we can also set it here
-        trial_period_days: 7,
-      },
       success_url: `${appUrl}/welcome?status=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/`,
     });

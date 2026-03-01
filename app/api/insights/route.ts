@@ -23,6 +23,8 @@ import { loadStoredBirthChart } from "@/lib/birthChart/storage";
 import { AYREN_MODE_SOULPRINT_LONG } from "@/lib/ai/voice";
 import { resolveLocaleAuth, getCriticalLanguageBlock } from "@/lib/i18n/resolveLocale";
 import { localeNames, isValidLocale } from "@/i18n";
+import { canAccessFeature, buildAccessDeniedPayload, isPremium } from "@/lib/entitlements/canAccessFeature";
+import { hasFreeInsightBeenUsedToday, markFreeInsightUsed } from "@/lib/entitlements/freeUsage";
 
 // Bump to v6 to invalidate cache (gender inference from name for personalized quotes)
 const PROMPT_VERSION = 6;
@@ -145,6 +147,19 @@ export async function POST(req: NextRequest) {
         },
         { status: 400 }
       );
+    }
+
+    // ========================================
+    // MEMBERSHIP GATE: year insight = premium only
+    // ========================================
+    if (timeframe === "year") {
+      const accessResult = canAccessFeature(profile, "year_insight");
+      if (!accessResult.allowed) {
+        return NextResponse.json(
+          buildAccessDeniedPayload(accessResult),
+          { status: accessResult.errorCode === "UNAUTHORIZED" ? 401 : 403 }
+        );
+      }
     }
 
     // PR2 Guardrail: Reject UTC timezone (likely from fallback poisoning)
@@ -279,6 +294,26 @@ export async function POST(req: NextRequest) {
     // Only generation attempts count toward limits
     // ========================================
     console.log(`[Insights] ✗ Cache miss for ${cacheKey}`);
+
+    // ========================================
+    // FREE TIER DAILY LIMIT (today only)
+    // Free users get 1 daily insight per calendar day.
+    // Premium users are exempt. Cache hits already bypass this.
+    // ========================================
+    if (timeframe === "today" && !isPremium(profile)) {
+      const alreadyUsed = await hasFreeInsightBeenUsedToday(userId);
+      if (alreadyUsed) {
+        return NextResponse.json(
+          {
+            error: "daily_limit_reached",
+            errorCode: "DAILY_LIMIT_REACHED",
+            message: "You've received your daily insight. Upgrade to Premium for unlimited insights.",
+            upgradeUrl: "/join",
+          },
+          { status: 403 }
+        );
+      }
+    }
 
     // Burst check first (bot defense - 20 requests in 10 seconds)
     const burstResult = await checkBurstLimit(`insights:${user.id}`, BURST_LIMIT, BURST_WINDOW);
@@ -681,6 +716,11 @@ LUCKY COMPASS RULES:
     // Cache the normalized insight (TTL varies by timeframe)
     const ttlSeconds = getTtlSeconds(timeframe);
     await setCache(cacheKey, normalizedInsight, ttlSeconds);
+
+    // Mark free daily insight as used (best-effort, fire-and-forget)
+    if (timeframe === "today" && !isPremium(profile)) {
+      void markFreeInsightUsed(userId);
+    }
 
     // Release lock after successful generation
     if (lockAcquired) {

@@ -49,6 +49,7 @@ import { resolveLocaleAuth } from "@/lib/i18n/resolveLocale";
 import { checkBurstLimit, checkRateLimit, createRateLimitResponse } from "@/lib/cache/rateLimit";
 import { getCache, setCache, isRedisAvailable, REDIS_UNAVAILABLE_RESPONSE } from "@/lib/cache/redis";
 import { checkBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai/costControl";
+import { canAccessFeature, buildAccessDeniedPayload } from "@/lib/entitlements/canAccessFeature";
 
 // Rate limits (match astrology)
 const BURST_LIMIT = 10;
@@ -225,6 +226,30 @@ export async function POST(req: NextRequest) {
     };
 
     const system = requestedSystem || "pythagorean";
+
+    // ========================================
+    // MEMBERSHIP GATE (all POST modes)
+    // generate = official + checkout (requires active premium)
+    // load = read-only, allowed for premium + post-cancellation retention
+    // ========================================
+    const { data: memberProfile } = await supabase
+      .from("profiles")
+      .select("membership_plan, subscription_status, role, is_comped")
+      .eq("id", user.id)
+      .single();
+
+    const gatedFeature =
+      !mode || mode === "official" || mode === "checkout"
+        ? "library_generate"
+        : "library_load";
+
+    const accessResult = canAccessFeature(memberProfile ?? null, gatedFeature);
+    if (!accessResult.allowed) {
+      return NextResponse.json(
+        buildAccessDeniedPayload(accessResult),
+        { status: accessResult.errorCode === "UNAUTHORIZED" ? 401 : 403 }
+      );
+    }
 
     // ========================================
     // MODE 1: OFFICIAL

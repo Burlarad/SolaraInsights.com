@@ -36,6 +36,7 @@ import { checkBurstLimit, checkRateLimit, createRateLimitResponse } from "@/lib/
 import { acquireLockFailClosed, releaseLock, getCache, setCache, isRedisAvailable, REDIS_UNAVAILABLE_RESPONSE } from "@/lib/cache/redis";
 import { checkBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai/costControl";
 import { NARRATIVE_PROMPT_VERSION } from "@/lib/ai/prompts/soulPath";
+import { canAccessFeature, buildAccessDeniedPayload } from "@/lib/entitlements/canAccessFeature";
 
 // Rate limits matching old /api/birth-chart endpoint
 const BURST_LIMIT = 10;
@@ -149,6 +150,30 @@ export async function POST(req: NextRequest) {
       language?: string;
       birth_city?: string;
     };
+
+    // ========================================
+    // MEMBERSHIP GATE (all POST modes)
+    // generate = official + checkout (requires active premium)
+    // load = read-only, allowed for premium + post-cancellation retention
+    // ========================================
+    const { data: memberProfile } = await supabase
+      .from("profiles")
+      .select("membership_plan, subscription_status, role, is_comped")
+      .eq("id", user.id)
+      .single();
+
+    const gatedFeature =
+      !mode || mode === "official" || mode === "checkout"
+        ? "library_generate"
+        : "library_load";
+
+    const accessResult = canAccessFeature(memberProfile ?? null, gatedFeature);
+    if (!accessResult.allowed) {
+      return NextResponse.json(
+        buildAccessDeniedPayload(accessResult),
+        { status: accessResult.errorCode === "UNAUTHORIZED" ? 401 : 403 }
+      );
+    }
 
     // ========================================
     // MODE 1: OFFICIAL CHART (from Settings)

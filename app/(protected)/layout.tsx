@@ -72,21 +72,12 @@ export default async function ProtectedLayout({
   // Check if dev bypass is active
   const devBypass = isDevPaywallBypassed();
 
-  // Check if user has paid access (membership_plan + subscription_status)
-  const isPaid =
-    devBypass || // DEV BYPASS
-    typedProfile.role === "admin" ||
-    typedProfile.is_comped === true ||
-    (typedProfile.membership_plan !== "none" &&
-      (typedProfile.subscription_status === "trialing" ||
-       typedProfile.subscription_status === "active"));
+  // PHASE 2: Payment is NO LONGER a layout-level gate.
+  // Access to protected routes is open to all authenticated + onboarded users.
+  // Premium features are enforced at the API level (canAccessFeature) and
+  // via per-feature lock screens in the UI (Phase 3).
 
-  // If not paid, redirect to join
-  if (!isPaid) {
-    redirect("/join");
-  }
-
-  // If paid but not onboarded, redirect to welcome or onboarding
+  // If authenticated but not onboarded, redirect to welcome or onboarding
   // DEV BYPASS: Skip onboarding check too
   const isReady = devBypass || typedProfile.is_onboarded === true;
 

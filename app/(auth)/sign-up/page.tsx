@@ -55,8 +55,8 @@ export default function SignUpPage() {
       }
 
       if (data.user) {
-        // On success, redirect to join to select a plan
-        router.push("/join");
+        // Free-first: go straight to onboarding. Payment is optional.
+        router.push("/onboarding");
         router.refresh();
       }
     } catch (err) {
@@ -70,7 +70,7 @@ export default function SignUpPage() {
   const handleFacebookSignUp = async () => {
     try {
       // Set up OAuth session state using shared helper
-      setupOauthSession("/join", "auto_connect:facebook");
+      setupOauthSession("/onboarding", "auto_connect:facebook");
 
       // Get callback URL using shared helper
       const redirectTo = getOauthCallbackUrl();
@@ -188,7 +188,7 @@ export default function SignUpPage() {
             variant="outline"
             className="w-full"
             onClick={() => {
-              window.location.href = "/api/auth/login/tiktok?return_to=/join";
+              window.location.href = "/api/auth/login/tiktok?return_to=/onboarding";
             }}
           >
             {t("continueWithTikTok")}

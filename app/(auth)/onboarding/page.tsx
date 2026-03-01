@@ -8,9 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useSettings } from "@/providers/SettingsProvider";
 import { PlacePicker, PlaceSelection } from "@/components/shared/PlacePicker";
-import { hasActiveMembership } from "@/lib/membership/status";
 import {
-  hasCheckoutSessionCookie,
   getCheckoutSessionId,
   clearCheckoutSessionCookie,
 } from "@/lib/auth/socialConsent";
@@ -37,9 +35,7 @@ export default function OnboardingPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Payment waiting state (for webhook race condition)
-  const [isWaitingForPayment, setIsWaitingForPayment] = useState(false);
-  const [paymentTimedOut, setPaymentTimedOut] = useState(false);
+  // Session claim state (compat shim for users arriving via Stripe checkout)
   const [claimAttempted, setClaimAttempted] = useState(false);
 
   // Try claiming checkout session immediately on mount (fallback if callback claim failed)
@@ -112,64 +108,16 @@ export default function OnboardingPage() {
     }
   }, [profile, saveProfile]);
 
-  // Check membership and onboarding status
+  // Redirect already-onboarded users straight to the sanctuary
   useEffect(() => {
-    if (!profileLoading && profile) {
-      // Already onboarded - redirect to sanctuary
-      if (profile.is_onboarded) {
-        router.push("/sanctuary");
-        return;
-      }
-
-      // Check if user has active membership
-      if (hasActiveMembership(profile)) {
-        // Clear checkout cookie since membership is now active
-        clearCheckoutSessionCookie();
-        setIsWaitingForPayment(false);
-        return; // Proceed with onboarding form
-      }
-
-      // No active membership - check if we should wait for webhook
-      if (hasCheckoutSessionCookie()) {
-        // User just came from checkout - wait for webhook to process
-        setIsWaitingForPayment(true);
-      } else if (!isWaitingForPayment) {
-        // No checkout session and not already waiting - redirect to join
-        router.push("/join");
-      }
+    if (!profileLoading && profile?.is_onboarded) {
+      router.push("/sanctuary");
     }
-  }, [profile, profileLoading, router, isWaitingForPayment]);
+  }, [profile, profileLoading, router]);
 
-  // Poll for membership activation while waiting for payment
-  useEffect(() => {
-    if (!isWaitingForPayment || paymentTimedOut) return;
-
-    const startTime = Date.now();
-    const maxWaitTime = 30000; // 30 seconds
-    const pollInterval = 2000; // 2 seconds
-
-    const pollForMembership = async () => {
-      const elapsed = Date.now() - startTime;
-
-      if (elapsed >= maxWaitTime) {
-        // Timeout - redirect to join with message
-        setPaymentTimedOut(true);
-        setIsWaitingForPayment(false);
-        clearCheckoutSessionCookie();
-        router.push("/join?error=payment_pending");
-        return;
-      }
-
-      // Refresh profile to check for membership
-      if (refreshProfile) {
-        await refreshProfile();
-      }
-    };
-
-    const timer = setInterval(pollForMembership, pollInterval);
-
-    return () => clearInterval(timer);
-  }, [isWaitingForPayment, paymentTimedOut, refreshProfile, router]);
+  // Phase 2: Payment gate removed. All authenticated users proceed through
+  // onboarding regardless of membership status. Paid users arriving via
+  // /welcome already have their membership set before reaching this page.
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -228,29 +176,6 @@ export default function OnboardingPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <p className="text-accent-ink/60">{tCommon("loading")}</p>
-      </div>
-    );
-  }
-
-  // Show waiting UI while polling for membership activation
-  if (isWaitingForPayment) {
-    return (
-      <div className="max-w-md mx-auto">
-        <Card className="border-border-subtle">
-          <CardHeader>
-            <CardTitle className="text-2xl text-center">
-              {t("confirmingPayment")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="flex flex-col items-center gap-4">
-              <div className="w-12 h-12 rounded-full border-4 border-accent-gold/30 border-t-accent-gold animate-spin" />
-              <p className="text-center text-accent-ink/60">
-                {t("confirmingPaymentMessage")}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     );
   }

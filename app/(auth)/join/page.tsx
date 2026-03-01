@@ -41,7 +41,7 @@ export default function JoinPage() {
       <div className="text-center space-y-4">
         <h1 className="text-3xl font-serif text-accent-ink">Choose your plan</h1>
         <p className="text-accent-ink/70">
-          All plans include a 7-day free trial. Cancel anytime.
+          Unlock the full Solara experience. Cancel anytime.
         </p>
       </div>
 
@@ -82,6 +82,14 @@ export default function JoinPage() {
         <p>
           A portion of your subscription supports families through the Solara Foundation
         </p>
+      </div>
+
+      {/* Free user link */}
+      <div className="text-center text-sm">
+        <span className="text-accent-ink/60">Already using Solara? </span>
+        <Link href="/sanctuary" className="text-accent-gold hover:underline">
+          Go to your Sanctuary
+        </Link>
       </div>
 
       {/* Sign in link */}

@@ -61,6 +61,13 @@ export interface Profile {
   is_hibernated: boolean;
   hibernated_at: string | null;
   reactivated_at: string | null;
+
+  // Library — official output keys (retained read-only after cancellation)
+  official_astrology_key: string | null;
+  official_numerology_key: string | null;
+
+  // Free tier tracking
+  tarot_free_used: boolean;
 }
 
 export interface ProfileUpdate {

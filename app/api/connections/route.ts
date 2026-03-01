@@ -5,6 +5,7 @@ import { touchLastSeen } from "@/lib/activity/touchLastSeen";
 import { getDayKey } from "@/lib/cache/redis";
 import { resolveProfileFromConnection } from "@/lib/connections/profileMatch";
 import { checkRateLimit, createRateLimitResponse } from "@/lib/cache/rateLimit";
+import { isPremium } from "@/lib/entitlements/canAccessFeature";
 import tzLookup from "tz-lookup";
 
 // Rate limiting configuration
@@ -167,6 +168,33 @@ export async function POST(req: NextRequest) {
     // Track user activity (non-blocking)
     const admin = createAdminSupabaseClient();
     void touchLastSeen(admin, user.id, 30);
+
+    // Load profile for membership check
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("membership_plan, subscription_status, role, is_comped")
+      .eq("id", user.id)
+      .single();
+
+    // Free users: max 5 connections
+    if (!profile || !isPremium(profile as any)) {
+      const { count } = await supabase
+        .from("connections")
+        .select("id", { count: "exact", head: true })
+        .eq("owner_user_id", user.id);
+
+      if ((count ?? 0) >= 5) {
+        return NextResponse.json(
+          {
+            error: "connection_limit_reached",
+            errorCode: "CONNECTION_LIMIT_REACHED",
+            message: "Free accounts support up to 5 connections. Upgrade to Premium for unlimited connections.",
+            upgradeUrl: "/join",
+          },
+          { status: 403 }
+        );
+      }
+    }
 
     // Parse request body
     const body = await req.json();

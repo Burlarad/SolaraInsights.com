@@ -11,6 +11,7 @@ import { AYREN_MODE_SOULPRINT_LONG } from "@/lib/ai/voice";
 import { logTokenAudit } from "@/lib/ai/tokenAudit";
 import { parseMetadataFromSummary, getSummaryTextOnly } from "@/lib/social/summarize";
 import { resolveLocaleAuth } from "@/lib/i18n/resolveLocale";
+import { canAccessFeature, buildAccessDeniedPayload } from "@/lib/entitlements/canAccessFeature";
 
 /**
  * Get the current quarter key (e.g., "2025Q1")
@@ -131,6 +132,17 @@ export async function POST(req: NextRequest) {
           message: "Please complete your birth signature in Settings to view Space Between.",
         },
         { status: 400 }
+      );
+    }
+
+    // ========================================
+    // MEMBERSHIP GATE: space between = premium only
+    // ========================================
+    const accessResult = canAccessFeature(profile, "space_between");
+    if (!accessResult.allowed) {
+      return NextResponse.json(
+        buildAccessDeniedPayload(accessResult),
+        { status: accessResult.errorCode === "UNAUTHORIZED" ? 401 : 403 }
       );
     }
 

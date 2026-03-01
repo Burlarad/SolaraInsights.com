@@ -21,7 +21,7 @@ describe("Public Home Page - Tarot Guard", () => {
     expect(content).not.toContain("Ask the Cards");
   });
 
-  it("should NOT reference /api/public-tarot", () => {
-    expect(content).not.toContain("public-tarot");
+  it("should NOT reference /api/tarot", () => {
+    expect(content).not.toContain("/api/tarot");
   });
 });
