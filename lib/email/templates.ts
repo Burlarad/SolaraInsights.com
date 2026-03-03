@@ -186,7 +186,7 @@ export function welcomeEmail(plan: "individual" | "family", appUrl: string): Ema
   Your ${planName} membership is now active.
 </p>
 <p style="margin: 0 0 20px; font-size: 16px; line-height: 1.6; color: #4a4a4a;">
-  Your 7-day free trial has begun. During this time, you'll have full access to:
+  You now have full access to:
 </p>
 <ul style="margin: 0 0 20px; padding-left: 20px; font-size: 16px; line-height: 1.8; color: #4a4a4a;">
   <li>Daily, weekly, monthly, and yearly insights</li>
@@ -205,7 +205,7 @@ ${ctaButton(`${appUrl}/welcome`, "Finish Setting Up Your Sanctuary")}
 
 Your ${planName} membership is now active.
 
-Your 7-day free trial has begun. During this time, you'll have full access to:
+You now have full access to:
 - Daily, weekly, monthly, and yearly insights
 - Complete birth chart analysis
 - Relationship insights
@@ -217,6 +217,79 @@ A portion of your subscription supports families through the Solara Foundation.
 
 Stay luminous,
 The Solara Team
+
+© ${new Date().getFullYear()} ${BRAND.name}. All rights reserved.`;
+
+  return { html, text };
+}
+
+/**
+ * Dunning email sent when invoice.payment_failed fires
+ */
+export function paymentFailedEmail(appUrl: string): EmailTemplate {
+  const html = wrapHtml(
+    "Payment failed — action required",
+    `<h2 style="margin: 0 0 20px; font-size: 22px; font-weight: 600; color: #1a1a1a;">Payment failed</h2>
+<p style="margin: 0 0 20px; font-size: 16px; line-height: 1.6; color: #4a4a4a;">
+  We weren't able to process your Solara payment. Your access to premium features has been paused until your billing is updated.
+</p>
+<p style="margin: 0 0 20px; font-size: 16px; line-height: 1.6; color: #4a4a4a;">
+  Please update your payment method to restore access. Your data and history are safe and waiting for you.
+</p>
+${ctaButton(`${appUrl}/settings`, "Update payment method")}
+<p style="margin: 20px 0 0; font-size: 14px; color: #666;">
+  If you have questions, reply to this email or contact us at ${BRAND.support}.
+</p>`
+  );
+
+  const text = `${BRAND.name} - Payment failed
+
+We weren't able to process your Solara payment. Your access to premium features has been paused until your billing is updated.
+
+Please update your payment method to restore access:
+${appUrl}/settings
+
+Your data and history are safe and waiting for you.
+
+Questions? Contact us at ${BRAND.support}
+
+© ${new Date().getFullYear()} ${BRAND.name}. All rights reserved.`;
+
+  return { html, text };
+}
+
+/**
+ * Seat invite email sent when an owner invites a member to their team plan
+ */
+export function seatInviteEmail(inviterName: string, acceptUrl: string): EmailTemplate {
+  const html = wrapHtml(
+    "You've been invited to Solara",
+    `<h2 style="margin: 0 0 20px; font-size: 22px; font-weight: 600; color: #1a1a1a;">You're invited to Solara</h2>
+<p style="margin: 0 0 20px; font-size: 16px; line-height: 1.6; color: #4a4a4a;">
+  <strong>${inviterName}</strong> has invited you to join their Solara team plan.
+</p>
+<p style="margin: 0 0 20px; font-size: 16px; line-height: 1.6; color: #4a4a4a;">
+  As a team member you'll get full access to all Solara premium features — daily insights, birth chart analysis, relationship reports, and more.
+</p>
+${ctaButton(acceptUrl, "Accept Invitation")}
+<p style="margin: 20px 0 0; font-size: 14px; color: #666;">
+  This invitation expires in 7 days. You'll need to sign in (or create a free account) with the email address this was sent to.
+</p>
+<p style="margin: 10px 0 0; font-size: 12px; color: #999; word-break: break-all;">
+  Or copy and paste this link: ${acceptUrl}
+</p>`
+  );
+
+  const text = `${BRAND.name} - You've been invited
+
+${inviterName} has invited you to join their Solara team plan.
+
+As a team member you'll get full access to all Solara premium features — daily insights, birth chart analysis, relationship reports, and more.
+
+Accept your invitation:
+${acceptUrl}
+
+This invitation expires in 7 days. You'll need to sign in (or create a free account) with the email address this was sent to.
 
 © ${new Date().getFullYear()} ${BRAND.name}. All rights reserved.`;
 

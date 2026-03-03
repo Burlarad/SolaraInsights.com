@@ -8,9 +8,9 @@ export async function POST(req: NextRequest) {
     const { plan, email: providedEmail } = body;
 
     // Validate plan
-    if (!plan || (plan !== "individual" && plan !== "family")) {
+    if (!plan || !["individual", "family", "seats_3", "seats_5"].includes(plan)) {
       return NextResponse.json(
-        { error: "Invalid plan", message: "Plan must be 'individual' or 'family'" },
+        { error: "Invalid plan", message: "Plan must be 'individual', 'family', 'seats_3', or 'seats_5'" },
         { status: 400 }
       );
     }
@@ -29,9 +29,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Choose price ID based on plan
-    const priceId = plan === "individual"
-      ? STRIPE_CONFIG.priceIds.sanctuary
-      : STRIPE_CONFIG.priceIds.family;
+    const priceId =
+      plan === "individual" ? STRIPE_CONFIG.priceIds.sanctuary
+      : plan === "family" ? STRIPE_CONFIG.priceIds.family
+      : plan === "seats_3" ? STRIPE_CONFIG.priceIds.seats_3
+      : STRIPE_CONFIG.priceIds.seats_5;
 
     if (!priceId) {
       return NextResponse.json(

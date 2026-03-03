@@ -24,6 +24,8 @@ export const STRIPE_CONFIG = {
   priceIds: {
     sanctuary: process.env.STRIPE_PRICE_ID || "",
     family: process.env.STRIPE_FAMILY_PRICE_ID || "",
+    seats_3: process.env.STRIPE_SEATS_3_PRICE_ID || "",
+    seats_5: process.env.STRIPE_SEATS_5_PRICE_ID || "",
   },
   pricingTableId: process.env.STRIPE_PRICING_TABLE_ID || "",
 } as const;

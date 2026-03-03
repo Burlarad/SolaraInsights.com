@@ -11,7 +11,7 @@ import { AYREN_MODE_SOULPRINT_LONG } from "@/lib/ai/voice";
 import { logTokenAudit } from "@/lib/ai/tokenAudit";
 import { parseMetadataFromSummary, getSummaryTextOnly } from "@/lib/social/summarize";
 import { resolveLocaleAuth } from "@/lib/i18n/resolveLocale";
-import { canAccessFeature, buildAccessDeniedPayload } from "@/lib/entitlements/canAccessFeature";
+import { canAccessFeature, buildAccessDeniedPayload, checkSeatMemberAccess } from "@/lib/entitlements/canAccessFeature";
 
 /**
  * Get the current quarter key (e.g., "2025Q1")
@@ -140,10 +140,13 @@ export async function POST(req: NextRequest) {
     // ========================================
     const accessResult = canAccessFeature(profile, "space_between");
     if (!accessResult.allowed) {
-      return NextResponse.json(
-        buildAccessDeniedPayload(accessResult),
-        { status: accessResult.errorCode === "UNAUTHORIZED" ? 401 : 403 }
-      );
+      const seatAccess = await checkSeatMemberAccess(user.id, supabase);
+      if (!seatAccess) {
+        return NextResponse.json(
+          buildAccessDeniedPayload(accessResult),
+          { status: accessResult.errorCode === "UNAUTHORIZED" ? 401 : 403 }
+        );
+      }
     }
 
     // Load connection

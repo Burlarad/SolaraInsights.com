@@ -602,6 +602,37 @@ export interface SocialStatusResponse {
 }
 
 // ============================================================================
+// SEAT SYSTEM TYPES
+// ============================================================================
+
+export interface SeatAccount {
+  id: string;
+  owner_user_id: string;
+  stripe_subscription_id: string;
+  stripe_customer_id: string;
+  seat_limit: number;
+  status: "active" | "trialing" | "past_due" | "canceled";
+  current_period_end: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SeatMember {
+  id: string;
+  seat_account_id: string;
+  invite_email: string;
+  status: "invited" | "active" | "revoked" | "expired";
+  invite_token: string;
+  invited_at: string;
+  expires_at: string;
+  accepted_user_id: string | null;
+  accepted_at: string | null;
+  revoked_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// ============================================================================
 // ERROR RESPONSE
 // ============================================================================
 

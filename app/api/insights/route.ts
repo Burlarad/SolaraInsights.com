@@ -23,7 +23,7 @@ import { loadStoredBirthChart } from "@/lib/birthChart/storage";
 import { AYREN_MODE_SOULPRINT_LONG } from "@/lib/ai/voice";
 import { resolveLocaleAuth, getCriticalLanguageBlock } from "@/lib/i18n/resolveLocale";
 import { localeNames, isValidLocale } from "@/i18n";
-import { canAccessFeature, buildAccessDeniedPayload, isPremium } from "@/lib/entitlements/canAccessFeature";
+import { canAccessFeature, buildAccessDeniedPayload, isPremium, checkSeatMemberAccess } from "@/lib/entitlements/canAccessFeature";
 import { hasFreeInsightBeenUsedToday, markFreeInsightUsed } from "@/lib/entitlements/freeUsage";
 
 // Bump to v6 to invalidate cache (gender inference from name for personalized quotes)
@@ -155,10 +155,13 @@ export async function POST(req: NextRequest) {
     if (timeframe === "year") {
       const accessResult = canAccessFeature(profile, "year_insight");
       if (!accessResult.allowed) {
-        return NextResponse.json(
-          buildAccessDeniedPayload(accessResult),
-          { status: accessResult.errorCode === "UNAUTHORIZED" ? 401 : 403 }
-        );
+        const seatAccess = await checkSeatMemberAccess(userId, supabase);
+        if (!seatAccess) {
+          return NextResponse.json(
+            buildAccessDeniedPayload(accessResult),
+            { status: accessResult.errorCode === "UNAUTHORIZED" ? 401 : 403 }
+          );
+        }
       }
     }
 

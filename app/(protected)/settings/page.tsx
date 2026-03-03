@@ -59,6 +59,9 @@ export default function SettingsPage() {
   const tCommon = useTranslations("common");
   const tZodiac = useTranslations("zodiacSigns");
 
+  // Billing portal
+  const [billingPortalLoading, setBillingPortalLoading] = useState(false);
+
   // Reactivation state (for hibernated accounts)
   const [reactivatePassword, setReactivatePassword] = useState("");
   const [isReactivating, setIsReactivating] = useState(false);
@@ -138,8 +141,19 @@ export default function SettingsPage() {
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   // Section navigation state
-  type SettingsSection = "natal" | "signin" | "social" | "account";
+  type SettingsSection = "natal" | "signin" | "social" | "account" | "seats";
   const [activeSection, setActiveSection] = useState<SettingsSection>("natal");
+
+  // Seats state
+  type SeatsStatus =
+    | { role: "none" }
+    | { role: "owner"; seat_account: { id: string; seat_limit: number; status: string }; members: Array<{ id: string; invite_email: string; status: string; accepted_at: string | null; revoked_at: string | null }> }
+    | { role: "member"; seat_account: { id: string; seat_limit: number; status: string } | null };
+  const [seatsData, setSeatsData] = useState<SeatsStatus | null>(null);
+  const [seatsLoading, setSeatsLoading] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteLoading, setInviteLoading] = useState(false);
+  const [inviteMessage, setInviteMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // Detect auth type on mount
   useEffect(() => {
@@ -266,7 +280,7 @@ export default function SettingsPage() {
     // Check query param first
     const sectionParam = searchParams.get("section");
     if (sectionParam) {
-      const validSections: SettingsSection[] = ["natal", "signin", "social", "account"];
+      const validSections: SettingsSection[] = ["natal", "signin", "social", "account", "seats"];
       if (validSections.includes(sectionParam as SettingsSection)) {
         setActiveSection(sectionParam as SettingsSection);
       }
@@ -274,7 +288,7 @@ export default function SettingsPage() {
     // Check URL hash second (overrides query param)
     const hash = window.location.hash.slice(1); // Remove #
     if (hash) {
-      const validSections: SettingsSection[] = ["natal", "signin", "social", "account"];
+      const validSections: SettingsSection[] = ["natal", "signin", "social", "account", "seats"];
       if (validSections.includes(hash as SettingsSection)) {
         setActiveSection(hash as SettingsSection);
       }
@@ -341,6 +355,25 @@ export default function SettingsPage() {
     loadSocialStatus();
   }, []);
 
+  // Load seat status from /api/seats/status
+  useEffect(() => {
+    const loadSeatsStatus = async () => {
+      setSeatsLoading(true);
+      try {
+        const response = await fetch("/api/seats/status");
+        if (response.ok) {
+          const data = await response.json();
+          setSeatsData(data);
+        }
+      } catch (err) {
+        console.error("Failed to load seat status:", err);
+      } finally {
+        setSeatsLoading(false);
+      }
+    };
+    loadSeatsStatus();
+  }, []);
+
   // Helper to get status for a specific provider
   const getSocialStatus = (provider: SocialProvider): SocialConnectionStatus | undefined => {
     return socialStatuses.find((s) => s.provider === provider);
@@ -349,6 +382,67 @@ export default function SettingsPage() {
   // Connect handler - uses custom OAuth flow with return_to for post-OAuth redirect
   const handleSocialConnect = (provider: SocialProvider) => {
     window.location.href = `/api/social/oauth/${provider}/connect?return_to=/settings`;
+  };
+
+  // Open Stripe billing portal
+  const openBillingPortal = async () => {
+    setBillingPortalLoading(true);
+    try {
+      const res = await fetch("/api/stripe/portal", { method: "POST" });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (err) {
+      console.error("Failed to open billing portal:", err);
+    } finally {
+      setBillingPortalLoading(false);
+    }
+  };
+
+  // Send seat invite
+  const handleSeatInvite = async () => {
+    if (!inviteEmail.trim()) return;
+    setInviteLoading(true);
+    setInviteMessage(null);
+    try {
+      const res = await fetch("/api/seats/invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: inviteEmail.trim() }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setInviteMessage({ type: "success", text: `Invitation sent to ${inviteEmail.trim()}.` });
+        setInviteEmail("");
+        // Refresh seat status to update member list
+        const statusRes = await fetch("/api/seats/status");
+        if (statusRes.ok) setSeatsData(await statusRes.json());
+      } else {
+        setInviteMessage({ type: "error", text: data.message || "Failed to send invitation." });
+      }
+    } catch {
+      setInviteMessage({ type: "error", text: "Something went wrong. Please try again." });
+    } finally {
+      setInviteLoading(false);
+    }
+  };
+
+  // Revoke seat member
+  const handleSeatRevoke = async (memberId: string) => {
+    try {
+      const res = await fetch("/api/seats/revoke", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ member_id: memberId }),
+      });
+      if (res.ok) {
+        const statusRes = await fetch("/api/seats/status");
+        if (statusRes.ok) setSeatsData(await statusRes.json());
+      }
+    } catch {
+      console.error("Failed to revoke seat member");
+    }
   };
 
   // Reauth handler for OAuth-only users
@@ -426,6 +520,7 @@ export default function SettingsPage() {
     { id: "signin", label: "Sign-in Information" },
     { id: "social", label: "Social Insights" },
     { id: "account", label: "Account" },
+    ...(seatsData && seatsData.role !== "none" ? [{ id: "seats" as SettingsSection, label: "Team Members" }] : []),
   ];
 
   // Disconnect handler - called after confirmation
@@ -1425,7 +1520,16 @@ export default function SettingsPage() {
                             : "—"}
                   </p>
                 </div>
-                {profile.membership_plan === "none" && (
+                {profile.stripe_customer_id ? (
+                  <Button
+                    variant="outline"
+                    onClick={openBillingPortal}
+                    disabled={billingPortalLoading}
+                    className="min-h-[44px]"
+                  >
+                    {billingPortalLoading ? "Opening..." : "Manage billing"}
+                  </Button>
+                ) : profile.membership_plan === "none" ? (
                   <Button
                     variant="gold"
                     onClick={() => router.push("/join")}
@@ -1433,7 +1537,7 @@ export default function SettingsPage() {
                   >
                     Upgrade
                   </Button>
-                )}
+                ) : null}
               </div>
             </div>
 
@@ -1519,6 +1623,106 @@ export default function SettingsPage() {
                 Delete account
               </Button>
             </div>
+          </section>
+          )}
+
+          {/* ======================================================= */}
+          {/* SEATS SECTION                                             */}
+          {/* ======================================================= */}
+          {activeSection === "seats" && (
+          <section className="space-y-8">
+            <h2 className="text-lg md:text-xl font-semibold text-accent-gold">
+              Team Members
+            </h2>
+
+            {seatsLoading && (
+              <p className="text-sm text-accent-ink/60">Loading team info…</p>
+            )}
+
+            {!seatsLoading && seatsData?.role === "owner" && (
+              <>
+                <div className="space-y-2">
+                  <p className="text-sm text-accent-ink/60">
+                    {seatsData.seat_account.seat_limit}-seat plan &mdash;{" "}
+                    {seatsData.members.filter((m) => m.status === "active" || m.status === "invited").length} of{" "}
+                    {seatsData.seat_account.seat_limit - 1} member slots used
+                  </p>
+                  {seatsData.seat_account.status !== "active" && seatsData.seat_account.status !== "trialing" && (
+                    <p className="text-sm text-amber-600">
+                      Your plan is {seatsData.seat_account.status}. Update billing to manage team members.
+                    </p>
+                  )}
+                </div>
+
+                {/* Member list */}
+                {seatsData.members.length > 0 && (
+                  <div className="space-y-2">
+                    {seatsData.members.map((member) => (
+                      <div
+                        key={member.id}
+                        className="flex items-center justify-between p-3 rounded-lg bg-shell border border-border-subtle"
+                      >
+                        <div>
+                          <p className="text-sm font-medium">{member.invite_email}</p>
+                          <p className="text-xs text-accent-ink/60 capitalize">{member.status}</p>
+                        </div>
+                        {(member.status === "invited" || member.status === "active") && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="min-h-[36px] text-xs"
+                            onClick={() => handleSeatRevoke(member.id)}
+                          >
+                            Revoke
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Invite form */}
+                {(seatsData.seat_account.status === "active" || seatsData.seat_account.status === "trialing") && (
+                  <div className="space-y-3">
+                    <h3 className="text-base font-medium">Invite a member</h3>
+                    <div className="flex gap-2">
+                      <input
+                        type="email"
+                        placeholder="Email address"
+                        value={inviteEmail}
+                        onChange={(e) => setInviteEmail(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleSeatInvite()}
+                        className="flex-1 rounded-md border border-border-subtle bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent-gold min-h-[44px]"
+                      />
+                      <Button
+                        variant="gold"
+                        onClick={handleSeatInvite}
+                        disabled={inviteLoading || !inviteEmail.trim()}
+                        className="min-h-[44px]"
+                      >
+                        {inviteLoading ? "Sending…" : "Invite"}
+                      </Button>
+                    </div>
+                    {inviteMessage && (
+                      <p className={`text-sm ${inviteMessage.type === "success" ? "text-green-600" : "text-red-500"}`}>
+                        {inviteMessage.text}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+
+            {!seatsLoading && seatsData?.role === "member" && (
+              <div className="p-4 rounded-lg bg-shell border border-border-subtle">
+                <p className="text-sm font-medium">You&apos;re part of a team plan.</p>
+                {seatsData.seat_account && (
+                  <p className="text-xs text-accent-ink/60 mt-1 capitalize">
+                    Plan status: {seatsData.seat_account.status}
+                  </p>
+                )}
+              </div>
+            )}
           </section>
           )}
         </CardContent>

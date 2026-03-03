@@ -4,9 +4,9 @@ import Stripe from "stripe";
 import { stripe, STRIPE_CONFIG } from "@/lib/stripe/client";
 import { createAdminSupabaseClient } from "@/lib/supabase/server";
 import { resend, RESEND_CONFIG } from "@/lib/resend/client";
-import { welcomeEmail } from "@/lib/email/templates";
+import { welcomeEmail, paymentFailedEmail } from "@/lib/email/templates";
 
-type MembershipPlan = "individual" | "family";
+type MembershipPlan = "individual" | "family" | "seats_3" | "seats_5";
 
 /**
  * Foundation Ledger entry for tracking payments
@@ -36,9 +36,10 @@ async function resolvePlanFromSession(
 ): Promise<{ plan: MembershipPlan; priceId: string; source: "metadata" | "price_id" } | null> {
   // 1) Check metadata first
   const metadataPlan = session.metadata?.plan;
-  if (metadataPlan === "individual" || metadataPlan === "family") {
-    console.log(`[Webhook] Plan resolved from metadata: ${metadataPlan}`);
-    return { plan: metadataPlan, priceId: "(from metadata)", source: "metadata" };
+  if (["individual", "family", "seats_3", "seats_5"].includes(metadataPlan ?? "")) {
+    const typedPlan = metadataPlan as MembershipPlan;
+    console.log(`[Webhook] Plan resolved from metadata: ${typedPlan}`);
+    return { plan: typedPlan, priceId: "(from metadata)", source: "metadata" };
   }
 
   // 2) Retrieve session with expanded line_items to get price ID
@@ -84,10 +85,22 @@ async function resolvePlanFromSession(
     return { plan: "family", priceId, source: "price_id" };
   }
 
+  if (STRIPE_CONFIG.priceIds.seats_3 && priceId === STRIPE_CONFIG.priceIds.seats_3) {
+    console.log(`[Webhook] Price ID matches configured seats_3 price → seats_3 plan`);
+    return { plan: "seats_3", priceId, source: "price_id" };
+  }
+
+  if (STRIPE_CONFIG.priceIds.seats_5 && priceId === STRIPE_CONFIG.priceIds.seats_5) {
+    console.log(`[Webhook] Price ID matches configured seats_5 price → seats_5 plan`);
+    return { plan: "seats_5", priceId, source: "price_id" };
+  }
+
   // 4) No match found
   console.error(`[Webhook] Unknown price ID: ${priceId}`);
   console.error(`[Webhook] Expected individual: ${individualPriceId || "(not set)"}`);
   console.error(`[Webhook] Expected family: ${familyPriceId || "(not set)"}`);
+  console.error(`[Webhook] Expected seats_3: ${STRIPE_CONFIG.priceIds.seats_3 || "(not set)"}`);
+  console.error(`[Webhook] Expected seats_5: ${STRIPE_CONFIG.priceIds.seats_5 || "(not set)"}`);
   return null;
 }
 
@@ -139,6 +152,10 @@ export async function POST(req: NextRequest) {
 
       case "invoice.payment_succeeded":
         await handleInvoicePaymentSucceeded(event.data.object as Stripe.Invoice, event.id);
+        break;
+
+      case "invoice.payment_failed":
+        await handleInvoicePaymentFailed(event.data.object as Stripe.Invoice);
         break;
 
       default:
@@ -257,8 +274,14 @@ async function handleCheckoutCompleted(
     }
   }
 
+  // Seat plans write "individual" to profiles; seat_accounts tracks capacity separately
+  const profilePlan: "individual" | "family" =
+    plan === "seats_3" || plan === "seats_5" ? "individual" : plan;
+  const seatLimit: 3 | 5 | null =
+    plan === "seats_3" ? 3 : plan === "seats_5" ? 5 : null;
+
   const updateData = {
-    membership_plan: plan,
+    membership_plan: profilePlan,
     stripe_customer_id: customerId,
     stripe_subscription_id: subscriptionId,
     subscription_status: subscriptionStatus,
@@ -280,9 +303,33 @@ async function handleCheckoutCompleted(
   }
 
   console.log(`[Webhook] Profile updated successfully (rows affected: ${updatedRows?.length ?? 0})`);
+
+  // Upsert seat_accounts for seat plans (non-fatal)
+  if (seatLimit && subscriptionId && customerId) {
+    const { error: seatError } = await supabase
+      .from("seat_accounts")
+      .upsert(
+        {
+          owner_user_id: profileUserId,
+          stripe_subscription_id: subscriptionId,
+          stripe_customer_id: customerId,
+          seat_limit: seatLimit,
+          status: subscriptionStatus || "active",
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "stripe_subscription_id" }
+      );
+
+    if (seatError) {
+      console.error(`[Webhook] Failed to upsert seat_accounts: ${seatError.message}`);
+    } else {
+      console.log(`[Webhook] seat_accounts upserted for user ${profileUserId} (limit: ${seatLimit})`);
+    }
+  }
+
   console.log("[Webhook] ========== CHECKOUT COMPLETE ==========");
 
-  await sendWelcomeEmail(email, plan);
+  await sendWelcomeEmail(email, profilePlan);
 
   return { success: true };
 }
@@ -334,6 +381,14 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   }
 
   console.log(`[Webhook] Updated subscription status to ${subscriptionStatus} for customer ${customerId}`);
+
+  // Sync seat_accounts.status — non-fatal no-op if not a seat subscription
+  if (subscriptionStatus) {
+    await supabase
+      .from("seat_accounts")
+      .update({ status: subscriptionStatus, updated_at: new Date().toISOString() })
+      .eq("stripe_subscription_id", subscription.id);
+  }
 }
 
 /**
@@ -361,12 +416,18 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   }
 
   console.log(`[Webhook] Marked subscription as canceled for customer ${customerId}`);
+
+  // Sync seat_accounts.status — non-fatal no-op if not a seat subscription
+  await supabase
+    .from("seat_accounts")
+    .update({ status: "canceled", updated_at: new Date().toISOString() })
+    .eq("stripe_subscription_id", subscription.id);
 }
 
 /**
  * Send welcome email after successful payment
  */
-async function sendWelcomeEmail(email: string, plan: MembershipPlan) {
+async function sendWelcomeEmail(email: string, plan: "individual" | "family") {
   try {
     const appUrl =
       process.env.NEXT_PUBLIC_SITE_URL ||
@@ -561,4 +622,59 @@ async function extractBillingLocation(
 
   console.log("[Webhook] No billing location available");
   return { countryCode: null, regionCode: null, city: null };
+}
+
+/**
+ * Handle invoice.payment_failed
+ *
+ * The DB write (subscription_status → past_due) is handled by
+ * customer.subscription.updated which Stripe fires alongside this event.
+ * This handler's sole job is sending the dunning email.
+ */
+async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
+  console.log("[Webhook] Processing invoice.payment_failed");
+
+  const customerId =
+    typeof invoice.customer === "string"
+      ? invoice.customer
+      : invoice.customer?.id;
+
+  if (!customerId) {
+    console.warn("[Webhook] invoice.payment_failed: no customer ID, skipping");
+    return;
+  }
+
+  const supabase = createAdminSupabaseClient();
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id, email")
+    .eq("stripe_customer_id", customerId)
+    .single();
+
+  if (!profile?.email) {
+    console.warn(
+      `[Webhook] invoice.payment_failed: no profile for customer ${customerId}, skipping`
+    );
+    return;
+  }
+
+  const appUrl =
+    process.env.APP_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    "http://localhost:3000";
+
+  try {
+    const emailTemplate = paymentFailedEmail(appUrl);
+    await resend.emails.send({
+      from: RESEND_CONFIG.fromEmail,
+      to: profile.email,
+      subject: "Action required: Update your Solara payment method",
+      html: emailTemplate.html,
+      text: emailTemplate.text,
+    });
+    console.log(`[Webhook] Dunning email sent to ${profile.email}`);
+  } catch (emailError) {
+    console.error("[Webhook] Failed to send dunning email:", emailError);
+  }
 }

@@ -36,7 +36,9 @@ type MembershipProfile = Pick<
  *   - Admin role
  *   - Comped accounts
  *   - Active/trialing subscriptions (individual or family plan)
- *   - Past-due subscriptions within a 7-day grace period
+ *
+ * Past-due subscriptions are NOT granted access. Users must update their
+ * payment method via the Stripe billing portal (/settings → Manage billing).
  *
  * Hard safety: DEV_PAYWALL_BYPASS is NEVER active in production.
  */
@@ -61,11 +63,7 @@ export function isPremium(profile: MembershipProfile): boolean {
     profile.subscription_status === "active" ||
     profile.subscription_status === "trialing";
 
-  // 7-day grace period for past_due
-  const inGracePeriod =
-    hasPlan && profile.subscription_status === "past_due";
-
-  return hasPlan && (hasActiveStatus || inGracePeriod);
+  return hasPlan && hasActiveStatus;
 }
 
 /**
@@ -75,6 +73,43 @@ export function isPremium(profile: MembershipProfile): boolean {
  */
 function hasEverPaid(profile: MembershipProfile): boolean {
   return profile.membership_plan !== "none";
+}
+
+/**
+ * Async check: returns true if userId is an active member of an active/trialing
+ * seat account owned by someone else.
+ *
+ * Used as a fallback in gated API routes when canAccessFeature() returns false
+ * (the user lacks their own premium subscription). Two-query pattern:
+ *   1. Find an active seat_members row for this user
+ *   2. Verify the corresponding seat_account is active or trialing
+ *
+ * Called after canAccessFeature — only when !accessResult.allowed.
+ *
+ * @param userId  The authenticated user's UUID
+ * @param supabase  A server Supabase client (user context or admin; either works for reads)
+ */
+export async function checkSeatMemberAccess(
+  userId: string,
+  supabase: any
+): Promise<boolean> {
+  const { data: member } = await supabase
+    .from("seat_members")
+    .select("seat_account_id")
+    .eq("accepted_user_id", userId)
+    .eq("status", "active")
+    .maybeSingle();
+
+  if (!member) return false;
+
+  const { data: account } = await supabase
+    .from("seat_accounts")
+    .select("status")
+    .eq("id", member.seat_account_id)
+    .in("status", ["active", "trialing"])
+    .maybeSingle();
+
+  return !!account;
 }
 
 /**

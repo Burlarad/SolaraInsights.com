@@ -36,7 +36,7 @@ import { checkBurstLimit, checkRateLimit, createRateLimitResponse } from "@/lib/
 import { acquireLockFailClosed, releaseLock, getCache, setCache, isRedisAvailable, REDIS_UNAVAILABLE_RESPONSE } from "@/lib/cache/redis";
 import { checkBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai/costControl";
 import { NARRATIVE_PROMPT_VERSION } from "@/lib/ai/prompts/soulPath";
-import { canAccessFeature, buildAccessDeniedPayload } from "@/lib/entitlements/canAccessFeature";
+import { canAccessFeature, buildAccessDeniedPayload, checkSeatMemberAccess } from "@/lib/entitlements/canAccessFeature";
 
 // Rate limits matching old /api/birth-chart endpoint
 const BURST_LIMIT = 10;
@@ -169,10 +169,13 @@ export async function POST(req: NextRequest) {
 
     const accessResult = canAccessFeature(memberProfile ?? null, gatedFeature);
     if (!accessResult.allowed) {
-      return NextResponse.json(
-        buildAccessDeniedPayload(accessResult),
-        { status: accessResult.errorCode === "UNAUTHORIZED" ? 401 : 403 }
-      );
+      const seatAccess = await checkSeatMemberAccess(user.id, supabase);
+      if (!seatAccess) {
+        return NextResponse.json(
+          buildAccessDeniedPayload(accessResult),
+          { status: accessResult.errorCode === "UNAUTHORIZED" ? 401 : 403 }
+        );
+      }
     }
 
     // ========================================
