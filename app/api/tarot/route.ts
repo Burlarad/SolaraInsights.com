@@ -8,7 +8,7 @@ import { checkBudget, incrementBudget, BUDGET_EXCEEDED_RESPONSE } from "@/lib/ai
 import { publicTarotSchema, validateRequest } from "@/lib/validation/schemas";
 import { logTokenAudit } from "@/lib/ai/tokenAudit";
 import { AYREN_MODE_SHORT } from "@/lib/ai/voice";
-import { isPremium } from "@/lib/entitlements/canAccessFeature";
+import { isPremium, checkSeatMemberAccess } from "@/lib/entitlements/canAccessFeature";
 import {
   VALID_CARD_IDS,
   isValidCardId,
@@ -36,7 +36,7 @@ const FULL_CARD_LIST = VALID_CARD_IDS.join('", "');
 
 export async function POST(req: NextRequest) {
   // ========================================
-  // AUTH REQUIRED — tarot is Sanctuary-only
+  // STEP 1: AUTH — tarot is Sanctuary-only
   // ========================================
   const supabase = await createServerSupabaseClient();
   const {
@@ -56,16 +56,58 @@ export async function POST(req: NextRequest) {
 
   const userId = user.id;
 
-  // Load profile for free-taste gate
-  const { data: userProfile } = await supabase
-    .from("profiles")
-    .select("membership_plan, subscription_status, role, is_comped, tarot_free_used")
-    .eq("id", userId)
-    .single();
-
   try {
     // ========================================
-    // 1. VALIDATE REQUEST (before everything)
+    // STEP 2: PROFILE — required; null = hard stop
+    // Profile must exist before any entitlement or generation logic.
+    // ========================================
+    const { data: userProfile, error: profileError } = await supabase
+      .from("profiles")
+      .select("membership_plan, subscription_status, role, is_comped, tarot_free_used")
+      .eq("id", userId)
+      .single();
+
+    if (!userProfile) {
+      console.error("[Tarot] Profile not found for user:", userId, profileError?.message);
+      return NextResponse.json(
+        {
+          error: "Profile not found",
+          errorCode: "PROFILE_NOT_FOUND",
+          message: "Your account profile could not be loaded. Please try again.",
+        },
+        { status: 500 }
+      );
+    }
+
+    // ========================================
+    // STEP 3: ENTITLEMENTS — determine paid status
+    // Premium (own active/trialing subscription) OR active seat member = paid.
+    // Seat members skip the free-taste cap entirely.
+    // ========================================
+    const isPaid =
+      isPremium(userProfile as any) ||
+      (await checkSeatMemberAccess(userId, supabase));
+
+    // ========================================
+    // STEP 4: FREE TASTE GATE
+    // Paid users draw without restriction.
+    // Free users get exactly ONE lifetime reading.
+    // Gate runs before validation / idempotency / rate-limit.
+    // ========================================
+    if (!isPaid && userProfile.tarot_free_used) {
+      return NextResponse.json(
+        {
+          error: "tarot_limit_reached",
+          errorCode: "TAROT_LIMIT_REACHED",
+          message: "You've used your free tarot reading. Upgrade to Premium for unlimited readings.",
+          upgradeUrl: "/join",
+        },
+        { status: 403 }
+      );
+    }
+
+    // ========================================
+    // STEP 5: VALIDATE REQUEST
     // ========================================
     const validation = await validateRequest(req, publicTarotSchema);
     if (!validation.success) {
@@ -83,7 +125,7 @@ export async function POST(req: NextRequest) {
     const languageName = localeNames[targetLanguage] || "English";
 
     // ========================================
-    // 2. IDEMPOTENCY CHECK (idempotency hits are FREE)
+    // STEP 6: IDEMPOTENCY CHECK (idempotency hits are FREE)
     // ========================================
     // Include language in key so readings match requested language
     const idempotencyKey = `tarot:idempotency:${requestId}:${targetLanguage}`;
@@ -110,7 +152,7 @@ export async function POST(req: NextRequest) {
     }
 
     // ========================================
-    // 3. RATE LIMITING (only on idempotency miss)
+    // STEP 7: RATE LIMITING (only on idempotency miss)
     // ========================================
     const rateLimitResult = await checkTarotRateLimits(userId);
     const rateLimitHeaders: Record<string, string> =
@@ -142,23 +184,6 @@ export async function POST(req: NextRequest) {
     console.log(
       `[PublicTarot] Generating reading for requestId: ${requestId}, spread: ${spread}`
     );
-
-    // ========================================
-    // FREE TASTE GATE
-    // Free users get exactly ONE lifetime tarot reading.
-    // Premium users draw without restriction.
-    // ========================================
-    if (userProfile && !isPremium(userProfile as any) && userProfile.tarot_free_used) {
-      return NextResponse.json(
-        {
-          error: "tarot_limit_reached",
-          errorCode: "TAROT_LIMIT_REACHED",
-          message: "You've used your free tarot reading. Upgrade to Premium for unlimited readings.",
-          upgradeUrl: "/join",
-        },
-        { status: 403, headers: rateLimitHeaders }
-      );
-    }
 
     // ========================================
     // P0: REDIS AVAILABILITY CHECK (fail closed)
@@ -384,8 +409,8 @@ CRITICAL: Use ONLY card IDs from the provided list. Any invalid ID will cause a 
     // Cache for idempotency
     await setCache(idempotencyKey, reading, IDEMPOTENCY_TTL);
 
-    // Mark free lifetime taste as used for free users
-    if (userProfile && !isPremium(userProfile as any) && !userProfile.tarot_free_used) {
+    // Mark free lifetime taste as used for non-paid users (after successful generation)
+    if (!isPaid && !userProfile.tarot_free_used) {
       try {
         await supabase
           .from("profiles")
